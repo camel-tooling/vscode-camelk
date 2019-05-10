@@ -4,8 +4,10 @@
 import * as vscode from 'vscode';
 import * as child_process from 'child_process';
 import * as path from 'path';
+import { CamelKNodeProvider, TreeNode } from './CamelKIntegrationsNodeProvider';
 
 let outputChannel: vscode.OutputChannel;
+let camelKIntegrationsProvider = new CamelKNodeProvider();
 
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
@@ -17,12 +19,32 @@ export function activate(context: vscode.ExtensionContext) {
 
 	outputChannel = vscode.window.createOutputChannel("Camel-K");
 
-	// The command has been defined in the package.json file
-	// Now provide the implementation of the command with  registerCommand
-	// The commandId parameter must match the command field in package.json
-	let run = vscode.commands.registerCommand('camelk.runfile', () => callKamelViaUIAsync(context));
+	vscode.window.registerTreeDataProvider('integrations', camelKIntegrationsProvider);
+	vscode.commands.registerCommand('integrations.refresh', () => camelKIntegrationsProvider.refresh());
+	vscode.commands.registerCommand('integrations.remove', (node: TreeNode) => {
+		if (node) {
+			let commandString = 'kamel delete "' + node.label + '"';
+			console.log('Command string: ' + commandString);
+			child_process.exec(commandString, (error, stdout, stderr) => {
+				if (error) {
+					console.error(`exec error: ${error}`);
+					return;
+				}
+				console.log(`stdout: ${stdout}`);
+				console.log(`stderr: ${stderr}`);
+			});
+			vscode.commands.executeCommand('integrations.refresh');
+		}
+	});
 
-	let stop = vscode.commands.registerCommand('camelk.stopfile', () => performStop(context));
+	let run = vscode.commands.registerCommand('camelk.runfile', () => {
+		callKamelViaUIAsync(context);
+		vscode.commands.executeCommand('integrations.refresh');
+	});
+	let stop = vscode.commands.registerCommand('camelk.stopfile', () => {
+		performStop(context);
+		vscode.commands.executeCommand('integrations.refresh');
+	});
 
 	context.subscriptions.push(run, stop);
 }
@@ -64,8 +86,10 @@ function performStop(context: vscode.ExtensionContext): Promise<void> {
 		const filename = path.normalize(selection);
 
 		const process = context.workspaceState.get(filename) as child_process.ChildProcess;
-		if (typeof(process) === 'undefined') {
-			child_process.exec(`kamel delete '${filename}'`, (error, stdout, stderr) => {
+		if (typeof(process) === 'undefined' || process === null) {
+			let commandString = 'kamel delete "' + filename + '"';
+			console.log('Command string: ' + commandString);
+			child_process.exec(commandString, (error, stdout, stderr) => {
 				if (error) {
 					console.error(`exec error: ${error}`);
 					return;
@@ -75,14 +99,13 @@ function performStop(context: vscode.ExtensionContext): Promise<void> {
 
 				resolve();
 			});
-		} else {
+		} else if (process) {
 			process.kill('SIGINT');
 			context.workspaceState.update(filename, null);
 			resolve();
 		}
 	});
 }
-
 
 function callKamel(context: vscode.ExtensionContext): Promise<boolean> {
 	console.log('Really calling Kamel');

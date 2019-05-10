@@ -11,8 +11,7 @@
 		"Other"
 	],
 	"activationEvents": [
-		"onCommand:camelk.runfile",
-		"onCommand:camelk.stopfile"
+		"*"
 	],
 	"main": "./out/extension",
 	"contributes": {
@@ -24,6 +23,14 @@
 			{
 				"command": "camelk.stopfile",
 				"title": "Stop Camel-K integration"
+			},
+			{
+				"command": "integrations.refresh",
+				"title": "Refresh"
+			},
+			{
+				"command": "integrations.remove",
+				"title": "Remove"
 			}
 		],
 		"menus": {
@@ -37,6 +44,32 @@
 					"command": "camelk.stopfile",
 					"when": "resourceExtname == .groovy",
 					"group": "navigation"
+				}
+			],
+			"view/title": [
+				{
+				  "command": "integrations.refresh",
+				  "group": "navigation",
+				  "when": "view == integrations",
+				  "icon": {
+					"dark": "resources/dark/refresh.svg",
+					"light": "resources/light/refresh.svg"
+					}  
+				}
+			],
+			"view/item/context": [
+				{
+					"command": "integrations.remove",
+					"group": "1",
+					"when": "view == integrations"
+				}
+			]
+		},
+		"views": {
+			"explorer": [
+				{
+					"id": "integrations",
+					"name": "Camel-K Integrations"
 				}
 			]
 		}

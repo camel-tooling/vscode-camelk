@@ -70,3 +70,19 @@ Command string: kamel run --dev "c:\test\my.groovy"
 [1] 2019-05-09 19:46:26.527 INFO  [main] DefaultCamelContext - Apache Camel 2.23.2 (CamelContext: camel-k) started in 0.286 seconds
 [1] 2019-05-09 19:46:27.535 INFO  [Camel (camel-k) thread #2 - timer://tick] info - Exchange[ExchangePattern: InOnly, BodyType: String, Body: Hello world from Camel K]
 ```
+
+## Possible extension to provide 'Stop' menu
+
+In addition, Zoran created a new menu to 'Stop' a running integration based on the filename.
+
+![Stop menu](images/kubernetes-view-camelk-stop-menu.jpg)
+
+This menu essentially calls `kamel delete '${filename}'` to stop the running integration.
+
+## Possible Camel-K Integrations view 
+
+![Camel-K integrations view](images/kubernetes-view-camelk-integrations-and-remove-menu.jpg)
+
+This view provides a list of the "integrations" registered with the current Camel-K context. The view has a "Refresh" button that can be used to manually trigger a refresh of the list, but when you add/remove file-based integrations in the Explorer view, it should refresh automatically.
+
+Also, you can "Remove" integrations from this view to stop a running integration in the system.
