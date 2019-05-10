@@ -11,7 +11,8 @@
 		"Other"
 	],
 	"activationEvents": [
-		"onCommand:camelk.runfile"
+		"onCommand:camelk.runfile",
+		"onCommand:camelk.stopfile"
 	],
 	"main": "./out/extension",
 	"contributes": {
@@ -19,12 +20,21 @@
 			{
 				"command": "camelk.runfile",
 				"title": "Run file with Camel-K"
+			},
+			{
+				"command": "camelk.stopfile",
+				"title": "Stop Camel-K integration"
 			}
 		],
 		"menus": {
 			"explorer/context": [
 				{
 					"command": "camelk.runfile",
+					"when": "resourceExtname == .groovy",
+					"group": "navigation"
+				},
+				{
+					"command": "camelk.stopfile",
 					"when": "resourceExtname == .groovy",
 					"group": "navigation"
 				}
