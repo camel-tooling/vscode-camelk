@@ -20,15 +20,17 @@ export function activate(context: vscode.ExtensionContext) {
 	// The command has been defined in the package.json file
 	// Now provide the implementation of the command with  registerCommand
 	// The commandId parameter must match the command field in package.json
-	let disposable = vscode.commands.registerCommand('camelk.runfile', () => callKamelViaUIAsync());
+	let run = vscode.commands.registerCommand('camelk.runfile', () => callKamelViaUIAsync(context));
 
-	context.subscriptions.push(disposable);
+	let stop = vscode.commands.registerCommand('camelk.stopfile', () => performStop(context));
+
+	context.subscriptions.push(run, stop);
 }
 
-function callKamelViaUIAsync(): Promise<string> {
+function callKamelViaUIAsync(context: vscode.ExtensionContext): Promise<string> {
 	console.log('Calling Kamel');
 	return new Promise <string> ( async (resolve, reject) => {
-			callKamel()
+			callKamel(context)
 				.then( success => {
 					if (!success) {
 						vscode.window.showErrorMessage("Unable to call Kamel.");
@@ -49,7 +51,40 @@ function callKamelViaUIAsync(): Promise<string> {
 		});
 }
 
-function callKamel(): Promise<boolean> {
+function performStop(context: vscode.ExtensionContext): Promise<void> {
+	return new Promise( async (resolve, reject) => {
+		const editor = vscode.window.activeTextEditor;
+		if (typeof(editor) === 'undefined') {
+			reject();
+			console.error('No active editor present?');
+			return;
+		}
+
+		const selection = editor.document.fileName;
+		const filename = path.normalize(selection);
+
+		const process = context.workspaceState.get(filename) as child_process.ChildProcess;
+		if (typeof(process) === 'undefined') {
+			child_process.exec(`kamel delete '${filename}'`, (error, stdout, stderr) => {
+				if (error) {
+					console.error(`exec error: ${error}`);
+					return;
+				}
+				console.log(`stdout: ${stdout}`);
+				console.log(`stderr: ${stderr}`);
+
+				resolve();
+			});
+		} else {
+			process.kill('SIGINT');
+			context.workspaceState.update(filename, null);
+			resolve();
+		}
+	});
+}
+
+
+function callKamel(context: vscode.ExtensionContext): Promise<boolean> {
 	console.log('Really calling Kamel');
 	return new Promise( (resolve, reject) => {
 		try {
@@ -63,6 +98,7 @@ function callKamel(): Promise<boolean> {
 				let commandString = 'kamel run --dev "' + filename + '"';
 				console.log('Command string: ' + commandString);
 				let runKamel = child_process.exec(commandString);
+				context.workspaceState.update(filename, runKamel);
 				runKamel.stdout.on('data', function (data) {
 					console.log("[OUT] " + data);
 					outputChannel.append(`${data} \n`);
