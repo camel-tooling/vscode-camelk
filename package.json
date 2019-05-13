@@ -2,8 +2,33 @@
 	"name": "vscode-camelk",
 	"displayName": "vscode-camelk",
 	"description": "VS Code extensions to support Camel-K functionality",
+	"license": "Apache-2.0",
 	"version": "0.0.1",
 	"publisher": "camel-tooling",
+	"icon": "icons/icon128.png",
+	"preview": true,
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/bfitzpat/vscode-camelk"
+	},
+	"bugs": {
+		"url": "https://github.com/bfitzpat/vscode-camelk/issues"
+	},
+	"author": "Brian Fitzpatrick <bfitzpat@redhat.com> (http://redhat.com)",
+	"maintainers": [
+		{
+			"name": "Brian Fitzpatrick",
+			"email": "bfitzpat@redhat.com",
+			"url": "http://redhat.com"
+		}
+	],
+	"homepage": "https://github.com/bfitzpat/vscode-camelk",
+	"keywords": [
+		"Camel",
+		"Camel-K",
+		"kamelk",
+		"Tool"
+	],
 	"engines": {
 		"vscode": "^1.33.0"
 	},
@@ -17,44 +42,62 @@
 	"contributes": {
 		"commands": [
 			{
-				"command": "camelk.runfile",
-				"title": "Run file with Camel-K"
+				"command": "camelk.rungroovyfile",
+				"title": "Start Camel-K GroovyIntegration"
 			},
 			{
-				"command": "camelk.stopfile",
-				"title": "Stop Camel-K integration"
+				"command": "camelk.runxmlfile",
+				"title": "Start Camel-K XML Integration"
+			},
+			{
+				"command": "camelk.stopgroovyfile",
+				"title": "Stop Camel-K Groovy Integration"
+			},
+			{
+				"command": "camelk.stopxmlfile",
+				"title": "Stop Camel-K XML Integration"
 			},
 			{
 				"command": "integrations.refresh",
-				"title": "Refresh"
+				"title": "Refresh Integration List",
+				"icon": {
+					"dark": "resources/dark/refresh.svg",
+					"light": "resources/light/refresh.svg"
+				}
 			},
 			{
 				"command": "integrations.remove",
-				"title": "Remove"
+				"title": "Remove Integration"
 			}
 		],
 		"menus": {
 			"explorer/context": [
 				{
-					"command": "camelk.runfile",
+					"command": "camelk.rungroovyfile",
 					"when": "resourceExtname == .groovy",
 					"group": "navigation"
 				},
 				{
-					"command": "camelk.stopfile",
+					"command": "camelk.runxmlfile",
+					"when": "resourceExtname == .xml",
+					"group": "navigation"
+				},
+				{
+					"command": "camelk.stopgroovyfile",
 					"when": "resourceExtname == .groovy",
+					"group": "navigation"
+				},
+				{
+					"command": "camelk.stopxmlfile",
+					"when": "resourceExtname == .xml",
 					"group": "navigation"
 				}
 			],
 			"view/title": [
 				{
-				  "command": "integrations.refresh",
-				  "group": "navigation",
-				  "when": "view == integrations",
-				  "icon": {
-					"dark": "resources/dark/refresh.svg",
-					"light": "resources/light/refresh.svg"
-					}  
+					"command": "integrations.refresh",
+					"group": "navigation",
+					"when": "view == integrations"
 				}
 			],
 			"view/item/context": [
@@ -90,6 +133,6 @@
 	},
 	"dependencies": {
 		"child_process": "^1.0.2",
-		"path":"^0.12.7"
+		"path": "^0.12.7"
 	}
 }

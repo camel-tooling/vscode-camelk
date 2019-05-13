@@ -1,24 +1,32 @@
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 'use strict';
-// The module 'vscode' contains the VS Code extensibility API
-// Import the module and reference it with the alias vscode in your code below
+
 import * as vscode from 'vscode';
 import * as child_process from 'child_process';
 import * as path from 'path';
-import { CamelKNodeProvider, TreeNode } from './CamelKIntegrationsNodeProvider';
+import { CamelKNodeProvider, TreeNode } from './CamelKNodeProvider';
 
 let outputChannel: vscode.OutputChannel;
 let camelKIntegrationsProvider = new CamelKNodeProvider();
 
-// this method is called when your extension is activated
-// your extension is activated the very first time the command is executed
 export function activate(context: vscode.ExtensionContext) {
 
-	// Use the console to output diagnostic information (console.log) and errors (console.error)
-	// This line of code will only be executed once when your extension is activated
-	console.log('Congratulations, your extension "vscode-camelk" is now active!');
-
 	outputChannel = vscode.window.createOutputChannel("Camel-K");
-
 	vscode.window.registerTreeDataProvider('integrations', camelKIntegrationsProvider);
 	vscode.commands.registerCommand('integrations.refresh', () => camelKIntegrationsProvider.refresh());
 	vscode.commands.registerCommand('integrations.remove', (node: TreeNode) => {
@@ -37,16 +45,22 @@ export function activate(context: vscode.ExtensionContext) {
 		}
 	});
 
-	let run = vscode.commands.registerCommand('camelk.runfile', () => {
-		callKamelViaUIAsync(context);
-		vscode.commands.executeCommand('integrations.refresh');
-	});
-	let stop = vscode.commands.registerCommand('camelk.stopfile', () => {
-		performStop(context);
-		vscode.commands.executeCommand('integrations.refresh');
-	});
+	let runGroovy = vscode.commands.registerCommand('camelk.rungroovyfile', () => { runTheFile(context);});
+	let stopGroovy = vscode.commands.registerCommand('camelk.stopgroovyfile', () => { stopTheFile(context);});
+	let runXml = vscode.commands.registerCommand('camelk.runxmlfile', () => { runTheFile(context);});
+	let stopXml = vscode.commands.registerCommand('camelk.stopxmlfile', () => { stopTheFile(context);});
 
-	context.subscriptions.push(run, stop);
+	context.subscriptions.push(runGroovy, stopGroovy, runXml, stopXml);
+}
+
+function runTheFile(context: vscode.ExtensionContext) {
+	callKamelViaUIAsync(context);
+	vscode.commands.executeCommand('integrations.refresh');
+}
+
+function stopTheFile(context: vscode.ExtensionContext) {
+	performStop(context);
+	vscode.commands.executeCommand('integrations.refresh');
 }
 
 function callKamelViaUIAsync(context: vscode.ExtensionContext): Promise<string> {
@@ -82,8 +96,14 @@ function performStop(context: vscode.ExtensionContext): Promise<void> {
 			return;
 		}
 
-		const selection = editor.document.fileName;
-		const filename = path.normalize(selection);
+		let selection = editor.document.fileName;
+		let filename = path.normalize(selection);
+
+		// if there's a file extension, get rid of it since it's 
+		// ignored when the file is deployed to Camel-K
+		if (filename.split('.').length > 0) {
+			filename = filename.split('.').slice(0, -1).join('.');
+		}
 
 		const process = context.workspaceState.get(filename) as child_process.ChildProcess;
 		if (typeof(process) === 'undefined' || process === null) {
