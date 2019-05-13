@@ -43,7 +43,7 @@
 		"commands": [
 			{
 				"command": "camelk.rungroovyfile",
-				"title": "Start Camel-K GroovyIntegration"
+				"title": "Start Camel-K Groovy Integration"
 			},
 			{
 				"command": "camelk.runxmlfile",

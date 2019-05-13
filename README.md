@@ -30,15 +30,14 @@ With [Language Support for Apache Camel](https://marketplace.visualstudio.com/it
 
 If Camel-K (Kamel) is in the system path, we can simply call the 'kamel' utility with appropriate options to run a particular file when the user wishes. For example, if I have a simple workspace with a Groovy file...
 
-![Run Menu](images/kubernetes-view-camelk-run-menu.jpg)
+![Run Menu](images/kubernetes-view-camelk-run-xml-menu.jpg)
 
-That launches my 'kamel' process (i.e. `kamel run --dev "complete/file/path"`) and I can see the output:
+That launches my 'kamel' process from an XML file (i.e. `kamel run --dev "complete/file/path"`) -- you can also launch it for Groovy files -- and I can see the output:
 
 ![Run Output](images/kubernetes-view-camelk-run-output.jpg)
 
 Current issues with this approach include:
 
-* No way I can see to stop the process once it's running. I can start it, but I can't stop it with a second call.
 * I noticed that file paths with spaces definitely do not work properly.
 
 ```bash
@@ -75,13 +74,13 @@ Command string: kamel run --dev "c:\test\my.groovy"
 
 In addition, Zoran created a new menu to 'Stop' a running integration based on the filename.
 
-![Stop menu](images/kubernetes-view-camelk-stop-menu.jpg)
+![Stop menu](images/kubernetes-view-camelk-run-xml-menu.jpg)
 
-This menu essentially calls `kamel delete '${filename}'` to stop the running integration.
+This "Stop Camel-K XML Integration" menu essentially calls `kamel delete '${filename}'` to stop the running integration. There's a corresponding "Stop Camel-K Groovy Integration" menu.
 
 ## Possible Camel-K Integrations view 
 
-![Camel-K integrations view](images/kubernetes-view-camelk-integrations-and-remove-menu.jpg)
+![Camel-K integrations view](images/kubernetes-view-camelk-view-remove-menu.jpg)
 
 This view provides a list of the "integrations" registered with the current Camel-K context. The view has a "Refresh" button that can be used to manually trigger a refresh of the list, but when you add/remove file-based integrations in the Explorer view, it should refresh automatically.
 
