@@ -27,9 +27,9 @@ let camelKIntegrationsProvider = new CamelKNodeProvider();
 export function activate(context: vscode.ExtensionContext) {
 
 	outputChannel = vscode.window.createOutputChannel("Camel-K");
-	vscode.window.registerTreeDataProvider('integrations', camelKIntegrationsProvider);
-	vscode.commands.registerCommand('integrations.refresh', () => camelKIntegrationsProvider.refresh());
-	vscode.commands.registerCommand('integrations.remove', (node: TreeNode) => {
+	vscode.window.registerTreeDataProvider('camelk.integrations', camelKIntegrationsProvider);
+	vscode.commands.registerCommand('camelk.integrations.refresh', () => camelKIntegrationsProvider.refresh());
+	vscode.commands.registerCommand('camelk.integrations.remove', (node: TreeNode) => {
 		if (node) {
 			let commandString = 'kamel delete "' + node.label + '"';
 			console.log('Command string: ' + commandString);
@@ -41,7 +41,7 @@ export function activate(context: vscode.ExtensionContext) {
 				console.log(`stdout: ${stdout}`);
 				console.log(`stderr: ${stderr}`);
 			});
-			vscode.commands.executeCommand('integrations.refresh');
+			vscode.commands.executeCommand('camelk.integrations.refresh');
 		}
 	});
 
@@ -57,12 +57,12 @@ export function activate(context: vscode.ExtensionContext) {
 
 function runTheFile(context: vscode.ExtensionContext) {
 	callKamelViaUIAsync(context);
-	vscode.commands.executeCommand('integrations.refresh');
+	vscode.commands.executeCommand('camelk.integrations.refresh');
 }
 
 function stopTheFile(context: vscode.ExtensionContext) {
 	performStop(context);
-	vscode.commands.executeCommand('integrations.refresh');
+	vscode.commands.executeCommand('camelk.integrations.refresh');
 }
 
 function callKamelViaUIAsync(context: vscode.ExtensionContext): Promise<string> {
@@ -134,12 +134,17 @@ function callKamel(context: vscode.ExtensionContext): Promise<boolean> {
 	return new Promise( (resolve, reject) => {
 		try {
 
-			// Get the active text editor
-			let editor = vscode.window.activeTextEditor;
+			const editor = vscode.window.activeTextEditor;
+			if (typeof(editor) === 'undefined') {
+				reject();
+				console.error('No active editor present?');
+				return;
+			}
+	
+			let selection = editor.document.fileName;
+			let filename = path.normalize(selection);
 
 			if (editor) {
-				let selection = editor.document.fileName;
-				let filename = path.normalize(selection);
 				let commandString = 'kamel run --dev "' + filename + '"';
 				console.log('Command string: ' + commandString);
 				let runKamel = child_process.exec(commandString);
