@@ -11,3 +11,5 @@ All notable changes to the "vscode-camelk" extension will be documented in this 
 - Added support for XML files as well as Groovy and cleaned up some code
 - Cleaned up the readme and added Minikube/Camel-K install directions
 - Added Java support, though we are unable to add Java integrations at this time - details in Readme issues section
+- Fixed issue with Java integrations and now call 'kamel' from the parent directory of the integration file
+- Starting and stopping integrations now works for .java, .groovy, and .xml files
