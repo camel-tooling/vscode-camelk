@@ -66,7 +66,7 @@
 				"title": "Stop Camel-K Java Integration"
 			},
 			{
-				"command": "integrations.refresh",
+				"command": "camelk.integrations.refresh",
 				"title": "Refresh Integration List",
 				"icon": {
 					"dark": "resources/dark/refresh.svg",
@@ -74,7 +74,7 @@
 				}
 			},
 			{
-				"command": "integrations.remove",
+				"command": "camelk.integrations.remove",
 				"title": "Remove Integration"
 			}
 		],
@@ -113,23 +113,23 @@
 			],
 			"view/title": [
 				{
-					"command": "integrations.refresh",
+					"command": "camelk.integrations.refresh",
 					"group": "navigation",
-					"when": "view == integrations"
+					"when": "view == camelk.integrations"
 				}
 			],
 			"view/item/context": [
 				{
-					"command": "integrations.remove",
+					"command": "camelk.integrations.remove",
 					"group": "1",
-					"when": "view == integrations"
+					"when": "view == camelk.integrations"
 				}
 			]
 		},
 		"views": {
 			"explorer": [
 				{
-					"id": "integrations",
+					"id": "camelk.integrations",
 					"name": "Camel-K Integrations"
 				}
 			]
