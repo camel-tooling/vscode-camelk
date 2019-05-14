@@ -49,8 +49,10 @@ export function activate(context: vscode.ExtensionContext) {
 	let stopGroovy = vscode.commands.registerCommand('camelk.stopgroovyfile', () => { stopTheFile(context);});
 	let runXml = vscode.commands.registerCommand('camelk.runxmlfile', () => { runTheFile(context);});
 	let stopXml = vscode.commands.registerCommand('camelk.stopxmlfile', () => { stopTheFile(context);});
+	let runJava = vscode.commands.registerCommand('camelk.runjavafile', () => { runTheFile(context);});
+	let stopJava = vscode.commands.registerCommand('camelk.stopjavafile', () => { stopTheFile(context);});
 
-	context.subscriptions.push(runGroovy, stopGroovy, runXml, stopXml);
+	context.subscriptions.push(runGroovy, stopGroovy, runXml, stopXml, runJava, stopJava);
 }
 
 function runTheFile(context: vscode.ExtensionContext) {

@@ -9,3 +9,5 @@ All notable changes to the "vscode-camelk" extension will be documented in this 
 - Added new "Camel-K Integrations" view with refresh (view action) and remove (context action)
 - Improved other actions so view is refreshed when integrations are started and stopped
 - Added support for XML files as well as Groovy and cleaned up some code
+- Cleaned up the readme and added Minikube/Camel-K install directions
+- Added Java support, though we are unable to add Java integrations at this time - details in Readme issues section
