@@ -99,7 +99,9 @@ function performStop(context: vscode.ExtensionContext): Promise<void> {
 		}
 
 		let selection = editor.document.fileName;
-		let filename = path.normalize(selection);
+		let filename = path.basename(selection);
+		let root = path.dirname(selection);
+		let absoluteRoot = path.resolve(root);
 
 		// if there's a file extension, get rid of it since it's 
 		// ignored when the file is deployed to Camel-K
@@ -111,7 +113,7 @@ function performStop(context: vscode.ExtensionContext): Promise<void> {
 		if (typeof(process) === 'undefined' || process === null) {
 			let commandString = 'kamel delete "' + filename + '"';
 			console.log('Command string: ' + commandString);
-			child_process.exec(commandString, (error, stdout, stderr) => {
+			child_process.exec(commandString, { cwd : absoluteRoot}, (error, stdout, stderr) => {
 				if (error) {
 					console.error(`exec error: ${error}`);
 					return;
@@ -142,12 +144,14 @@ function callKamel(context: vscode.ExtensionContext): Promise<boolean> {
 			}
 	
 			let selection = editor.document.fileName;
-			let filename = path.normalize(selection);
+			let filename = path.basename(selection);
+			let root = path.dirname(selection);
+			let absoluteRoot = path.resolve(root);
 
 			if (editor) {
 				let commandString = 'kamel run --dev "' + filename + '"';
 				console.log('Command string: ' + commandString);
-				let runKamel = child_process.exec(commandString);
+				let runKamel = child_process.exec(commandString, { cwd : absoluteRoot});
 				context.workspaceState.update(filename, runKamel);
 				runKamel.stdout.on('data', function (data) {
 					console.log("[OUT] " + data);
