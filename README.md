@@ -74,7 +74,10 @@ Also, you can "Remove" integrations from this view to stop a running integration
 
 We know about the following issues.
 
-### Java file issues
+### File name to integration name mapping
 
-Running a camel class called "CamelRoute.java", deploys an integration called "camel-route". Though we can remove this integration via the Camel-K Integrations "remove" action, we cannot remove it via the right-click "Stop Integration" menu can't duplicate the naming scheme. Need to research how the "kamel" command names each integration and see if we can duplicate or reuse the logic.
+Running a camel class called "CamelRoute.java", deploys an integration called "camel-route". Though we can remove this integration via the Camel-K Integrations "remove" action, we cannot remove it via the right-click "Stop Integration" menu because we can't duplicate the naming scheme. Need to research how the "kamel" command names each integration and see if we can duplicate or reuse the logic. This affects any integration file with mixed case.
 
+### Better icons
+
+We also need better icons - perhaps a stylized "k" for Camel-K files and the view? 

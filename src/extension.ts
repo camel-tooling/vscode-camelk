@@ -109,25 +109,22 @@ function performStop(context: vscode.ExtensionContext): Promise<void> {
 			filename = filename.split('.').slice(0, -1).join('.');
 		}
 
-		const process = context.workspaceState.get(filename) as child_process.ChildProcess;
-		if (typeof(process) === 'undefined' || process === null) {
-			let commandString = 'kamel delete "' + filename + '"';
-			console.log('Command string: ' + commandString);
-			child_process.exec(commandString, { cwd : absoluteRoot}, (error, stdout, stderr) => {
-				if (error) {
-					console.error(`exec error: ${error}`);
-					return;
-				}
-				console.log(`stdout: ${stdout}`);
-				console.log(`stderr: ${stderr}`);
+		// TODO: Make sure that we mangle the name the same way kamel does
+		// so we can get the name of the integration created when it is deployed.
+		// Otherwise we can't shut it down properly from this direction and have
+		// to use the "remove" method from the Integrations view.
 
-				resolve();
-			});
-		} else if (process) {
-			process.kill('SIGINT');
-			context.workspaceState.update(filename, null);
+		let commandString = 'kamel delete "' + filename + '"';
+		console.log('Command string: ' + commandString);
+		child_process.exec(commandString, { cwd : absoluteRoot}, (error, stdout, stderr) => {
+			if (error) {
+				console.error(`exec error: ${error}`);
+				return;
+			}
+			console.log(`stdout: ${stdout}`);
+			console.log(`stderr: ${stderr}`);
 			resolve();
-		}
+		});
 	});
 }
 
@@ -152,7 +149,6 @@ function callKamel(context: vscode.ExtensionContext): Promise<boolean> {
 				let commandString = 'kamel run --dev "' + filename + '"';
 				console.log('Command string: ' + commandString);
 				let runKamel = child_process.exec(commandString, { cwd : absoluteRoot});
-				context.workspaceState.update(filename, runKamel);
 				runKamel.stdout.on('data', function (data) {
 					console.log("[OUT] " + data);
 					outputChannel.append(`${data} \n`);
