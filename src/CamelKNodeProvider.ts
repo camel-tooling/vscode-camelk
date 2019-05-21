@@ -93,9 +93,5 @@ export class TreeNode extends vscode.TreeItem {
 			light: path.join(__filename, '..', '..', 'resources', 'round-k-transparent-16.svg'),
 			dark: path.join(__filename, '..', '..', 'resources', 'round-k-transparent-16.svg')
 		};
-		// this.iconPath = {
-		// 	light: path.join(__filename, '..', '..', 'resources', 'light', 'folder.svg'),
-		// 	dark: path.join(__filename, '..', '..', 'resources', 'dark', 'folder.svg')
-		// };
 	}
 }
