@@ -1,3 +1,8 @@
+[![GitHub tag](https://img.shields.io/github/tag/camel-tooling/vscode-camelk.svg?style=plastic)]()
+[![Build Status](https://travis-ci.org/camel-tooling/vscode-camelk.svg?branch=master)](https://travis-ci.org/camel-tooling/vscode-camelk)
+[![License](https://img.shields.io/badge/license-Apache%202-blue.svg)]()
+[![Gitter](https://img.shields.io/gitter/room/camel-tooling/Lobby.js.svg)](https://gitter.im/camel-tooling/Lobby)
+
 # Visual Studio extension to support Camel-K
 
 This extension is a work-in-progress to explore what options we can add to VS Code to support Camel-K.
