@@ -1,0 +1,38 @@
+language: node_js
+node_js: "8"
+services:
+  - xvfb
+before_install:
+  - 'export PATH=./node_modules/.bin:$PATH'
+  - 'npm install -g typescript'
+install:
+  - 'npm install --ignore-scripts'
+  - 'npm install'
+  # https://github.com/travis-ci/travis-ci/issues/8813
+  - 'rm -f ./node_modules/.bin/which'
+  - 'npm run vscode:prepublish'
+  - 'npm install -g vsce'
+  - 'vsce package'
+script:
+  - 'npm test --silent'
+after_success:
+  - if [[ $TRAVIS_PULL_REQUEST == "false" && $TRAVIS_BRANCH == "master" ]]; then
+    sonar-scanner;
+    fi
+deploy:
+- provider: script
+  script: vsce publish -p $VSCODE_TOKEN
+  skip_cleanup: true
+  on:
+    repo: camel-tooling/vscode-camelk
+    branch: master
+    tags: true
+cache:
+  directories:
+    - "node_modules"
+env: DISPLAY=:99
+addons:
+  sonarcloud:
+    organization: "camel-tooling"
+    branches:
+- master
