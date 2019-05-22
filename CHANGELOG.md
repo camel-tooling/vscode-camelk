@@ -13,3 +13,5 @@ All notable changes to the "vscode-camelk" extension will be documented in this 
 - Added Java support, though we are unable to add Java integrations at this time - details in Readme issues section
 - Fixed issue with Java integrations and now call 'kamel' from the parent directory of the integration file
 - Starting and stopping integrations now works for .java, .groovy, and .xml files
+- Updated icon used for tree elements
+- Added first test mocking adding an integration to the view

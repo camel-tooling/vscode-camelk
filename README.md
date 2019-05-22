@@ -1,5 +1,7 @@
 # Visual Studio extension to support Camel-K
 
+<img src="https://github.com/camel-tooling/vscode-camelk/blob/master/resources/round-k-transparent.png" alt="Camel-K" align="right" width="150" height="150"/>
+
 This extension is a work-in-progress to explore what options we can add to VS Code to support Camel-K.
 
 Note that it currently requires that both Camel-K and Minikube be installed and available on the system path.
