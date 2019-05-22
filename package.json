@@ -146,11 +146,17 @@
 		"typescript": "^2.6.1",
 		"vscode": "^1.1.6",
 		"tslint": "^5.8.0",
+		"@types/chai": "^4.1.7",
 		"@types/node": "^7.0.43",
-		"@types/mocha": "^2.2.42"
+		"@types/mocha": "^2.2.42",
+		"@types/sinon": "^7.0.11",
+		"@types/sinon-chai": "^3.2.2"
 	},
 	"dependencies": {
+		"chai": "^4.2.0",
 		"child_process": "^1.0.2",
-		"path": "^0.12.7"
+		"path": "^0.12.7",
+		"sinon": "^7.3.2",
+		"sinon-chai": "^3.3.0"
 	}
 }

@@ -26,6 +26,9 @@ export class CamelKNodeProvider implements vscode.TreeDataProvider<TreeNode> {
 	constructor() {}
 
 	public getChildren(task?: TreeNode): Thenable<TreeNode[]> {
+		if (task !== null && task !== undefined) {
+			return Promise.resolve(getIntegrations(task));
+		}
 		return Promise.resolve(getIntegrations());
 	}
 
@@ -38,22 +41,29 @@ export class CamelKNodeProvider implements vscode.TreeDataProvider<TreeNode> {
 	}	
 }
 
-function getIntegrations(): Promise<TreeNode[]> {
+function getIntegrations(task?: TreeNode): Promise<TreeNode[]> {
 	return new Promise( async (resolve, reject) => {
 		let treeTasks: TreeNode[] = [];
-		let output = await callGetIntegrations();
-		if (output) {
-			let lines = output.split('\n');
-			for (let entry of lines) {
-				let line = entry.split(' ');
-				if (line[0].toUpperCase().startsWith('NAME') || line[0].trim().length === 0) {
-					continue;
-				}
-				let integrationName = line[0];
-				let newNode = new TreeNode("string", integrationName, vscode.TreeItemCollapsibleState.None);
-				treeTasks.push(newNode);
-			}
+
+		if (task !== null && task !== undefined) {
+			treeTasks.push(task);
 			resolve(treeTasks);
+			return;
+		} else {
+			let output = await callGetIntegrations();
+			if (output) {
+				let lines = output.split('\n');
+				for (let entry of lines) {
+					let line = entry.split(' ');
+					if (line[0].toUpperCase().startsWith('NAME') || line[0].trim().length === 0) {
+						continue;
+					}
+					let integrationName = line[0];
+					let newNode = new TreeNode("string", integrationName, vscode.TreeItemCollapsibleState.None);
+					treeTasks.push(newNode);
+				}
+				resolve(treeTasks);
+			}
 		}
 		reject();
 	});
