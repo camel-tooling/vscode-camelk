@@ -15,3 +15,4 @@ All notable changes to the "vscode-camelk" extension will be documented in this 
 - Starting and stopping integrations now works for .java, .groovy, and .xml files
 - Updated icon used for tree elements
 - Added first test mocking adding an integration to the view
+- Added tests for the Integration view and did some code cleanup on CamelKNodeProvider

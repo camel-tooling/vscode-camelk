@@ -27,7 +27,11 @@ let camelKIntegrationsProvider = new CamelKNodeProvider();
 export function activate(context: vscode.ExtensionContext) {
 
 	outputChannel = vscode.window.createOutputChannel("Camel-K");
+
+	// create the integrations view
 	vscode.window.registerTreeDataProvider('camelk.integrations', camelKIntegrationsProvider);
+
+	// create the two integration view actions -- refresh and remove
 	vscode.commands.registerCommand('camelk.integrations.refresh', () => camelKIntegrationsProvider.refresh());
 	vscode.commands.registerCommand('camelk.integrations.remove', (node: TreeNode) => {
 		if (node) {
@@ -41,10 +45,11 @@ export function activate(context: vscode.ExtensionContext) {
 				console.log(`stdout: ${stdout}`);
 				console.log(`stderr: ${stderr}`);
 			});
-			vscode.commands.executeCommand('camelk.integrations.refresh');
+			camelKIntegrationsProvider.refresh();
 		}
 	});
 
+	// create all the commands to run the various types of files supported by Camel-K
 	let runGroovy = vscode.commands.registerCommand('camelk.rungroovyfile', () => { runTheFile(context);});
 	let stopGroovy = vscode.commands.registerCommand('camelk.stopgroovyfile', () => { stopTheFile(context);});
 	let runXml = vscode.commands.registerCommand('camelk.runxmlfile', () => { runTheFile(context);});
@@ -55,17 +60,20 @@ export function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push(runGroovy, stopGroovy, runXml, stopXml, runJava, stopJava);
 }
 
+// "run" the integration file with "kamel"
 function runTheFile(context: vscode.ExtensionContext) {
-	callKamelViaUIAsync(context);
-	vscode.commands.executeCommand('camelk.integrations.refresh');
+	startIntegration(context);
+	camelKIntegrationsProvider.refresh();
 }
 
+// "stop" a running integration in the camel-k system
 function stopTheFile(context: vscode.ExtensionContext) {
-	performStop(context);
-	vscode.commands.executeCommand('camelk.integrations.refresh');
+	stopIntegration(context);
+	camelKIntegrationsProvider.refresh();
 }
 
-function callKamelViaUIAsync(context: vscode.ExtensionContext): Promise<string> {
+// call the kamel utility to start an integration from a file
+function startIntegration(context: vscode.ExtensionContext): Promise<string> {
 	console.log('Calling Kamel');
 	return new Promise <string> ( async (resolve, reject) => {
 			callKamel(context)
@@ -89,7 +97,9 @@ function callKamelViaUIAsync(context: vscode.ExtensionContext): Promise<string> 
 		});
 }
 
-function performStop(context: vscode.ExtensionContext): Promise<void> {
+// stop a running integration using the command-line "kamel" utility
+// TODO: research using the rest API for camel-k  
+function stopIntegration(context: vscode.ExtensionContext): Promise<void> {
 	return new Promise( async (resolve, reject) => {
 		const editor = vscode.window.activeTextEditor;
 		if (typeof(editor) === 'undefined') {
@@ -128,8 +138,9 @@ function performStop(context: vscode.ExtensionContext): Promise<void> {
 	});
 }
 
+// use command-line "kamel" utility to handle various commands
+// TODO: research using the rest API for camel-k 
 function callKamel(context: vscode.ExtensionContext): Promise<boolean> {
-	console.log('Really calling Kamel');
 	return new Promise( (resolve, reject) => {
 		try {
 
