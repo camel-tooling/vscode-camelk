@@ -2,6 +2,14 @@
 
 All notable changes to the "vscode-camelk" extension will be documented in this file.
 
+## 0.0.3
+
+- TBD
+
+## 0.0.2
+
+- Fix issue with readme image and add list of current issues with github links
+
 ## 0.0.1
 
 - Initial commit of extension that provides simple menu to call `kamel run --dev "selectedfile"`
