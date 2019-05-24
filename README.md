@@ -5,8 +5,6 @@
 
 # Visual Studio extension to support Camel-K
 
-<img src="https://github.com/camel-tooling/vscode-camelk/blob/master/resources/round-k-transparent.png" alt="Camel-K" align="right" width="150" height="150"/>
-
 This extension is a work-in-progress to explore what options we can add to VS Code to support Camel-K.
 
 Note that it currently requires that both Camel-K and Minikube be installed and available on the system path.
@@ -79,9 +77,7 @@ The view has a "Refresh" button that can be used to manually trigger a refresh o
 
 ## Known Issues
 
-We know about the following issues...
+Here's the current list of issues we're working to resolve. If you find a new issue, please [create a new issue report in GitHub](https://github.com/camel-tooling/vscode-camelk/issues)!
 
-### File name to integration name mapping
-
-Running a camel class called "CamelRoute.java", deploys an integration called "camel-route". Though we can remove this integration via the Camel-K Integrations "remove" action, we cannot remove it via the right-click "Stop Integration" menu because we can't duplicate the naming scheme. Need to research how the "kamel" command names each integration and see if we can duplicate or reuse the logic. This affects any integration file with mixed case.
-
+* Do not pollute all Groovy files with Camel-K [Issue #7](https://github.com/camel-tooling/vscode-camelk/issues/7) - this is also a problem for XML and Java files at this time
+* Use Kubernetes rest api instead of kubectl calls [Issue #14](https://github.com/camel-tooling/vscode-camelk/issues/14)

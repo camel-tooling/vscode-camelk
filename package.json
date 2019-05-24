@@ -3,7 +3,7 @@
 	"displayName": "vscode-camelk",
 	"description": "VS Code extensions to support Camel-K functionality",
 	"license": "Apache-2.0",
-	"version": "0.0.1",
+	"version": "0.0.2",
 	"publisher": "camel-tooling",
 	"icon": "icons/icon128.png",
 	"preview": true,
