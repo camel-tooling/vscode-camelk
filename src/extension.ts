@@ -50,14 +50,10 @@ export function activate(context: vscode.ExtensionContext) {
 	});
 
 	// create all the commands to run the various types of files supported by Camel-K
-	let runGroovy = vscode.commands.registerCommand('camelk.rungroovyfile', () => { runTheFile(context);});
-	let stopGroovy = vscode.commands.registerCommand('camelk.stopgroovyfile', () => { stopTheFile(context);});
-	let runXml = vscode.commands.registerCommand('camelk.runxmlfile', () => { runTheFile(context);});
-	let stopXml = vscode.commands.registerCommand('camelk.stopxmlfile', () => { stopTheFile(context);});
-	let runJava = vscode.commands.registerCommand('camelk.runjavafile', () => { runTheFile(context);});
-	let stopJava = vscode.commands.registerCommand('camelk.stopjavafile', () => { stopTheFile(context);});
+	let startIntegration = vscode.commands.registerCommand('camelk.startintegration', () => { runTheFile(context);});
+	let stopIntegration = vscode.commands.registerCommand('camelk.stopintegration', () => { stopTheFile(context);});
 
-	context.subscriptions.push(runGroovy, stopGroovy, runXml, stopXml, runJava, stopJava);
+	context.subscriptions.push(startIntegration, stopIntegration);
 }
 
 // "run" the integration file with "kamel"
