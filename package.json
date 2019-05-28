@@ -42,28 +42,12 @@
 	"contributes": {
 		"commands": [
 			{
-				"command": "camelk.rungroovyfile",
-				"title": "Start Camel-K Groovy Integration"
+				"command": "camelk.startintegration",
+				"title": "Start Camel-K Integration"
 			},
 			{
-				"command": "camelk.stopgroovyfile",
-				"title": "Stop Camel-K Groovy Integration"
-			},
-			{
-				"command": "camelk.runxmlfile",
-				"title": "Start Camel-K XML Integration"
-			},
-			{
-				"command": "camelk.stopxmlfile",
-				"title": "Stop Camel-K XML Integration"
-			},
-			{
-				"command": "camelk.runjavafile",
-				"title": "Start Camel-K Java Integration"
-			},
-			{
-				"command": "camelk.stopjavafile",
-				"title": "Stop Camel-K Java Integration"
+				"command": "camelk.stopintegration",
+				"title": "Stop Camel-K Integration"
 			},
 			{
 				"command": "camelk.integrations.refresh",
@@ -81,33 +65,13 @@
 		"menus": {
 			"explorer/context": [
 				{
-					"command": "camelk.rungroovyfile",
-					"when": "resourceExtname == .groovy",
+					"command": "camelk.startintegration",
+					"when": "resourceExtname =~ /\\.(groovy|java|xml)$/",
 					"group": "navigation"
 				},
 				{
-					"command": "camelk.stopgroovyfile",
-					"when": "resourceExtname == .groovy",
-					"group": "navigation"
-				},
-				{
-					"command": "camelk.runjavafile",
-					"when": "resourceExtname == .java",
-					"group": "navigation"
-				},
-				{
-					"command": "camelk.stopjavafile",
-					"when": "resourceExtname == .java",
-					"group": "navigation"
-				},
-				{
-					"command": "camelk.runxmlfile",
-					"when": "resourceExtname == .xml",
-					"group": "navigation"
-				},
-				{
-					"command": "camelk.stopxmlfile",
-					"when": "resourceExtname == .xml",
+					"command": "camelk.stopintegration",
+					"when": "resourceExtname =~ /\\.(groovy|java|xml)$/",
 					"group": "navigation"
 				}
 			],
