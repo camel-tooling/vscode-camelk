@@ -27,13 +27,7 @@ This opens a log for that pod in a new Terminal window.
 
 ## Starting new Camel-K integrations
 
-Once your Camel-K/Minikube environment is running and the vscode-camelk extension is installed, you can easily start a new Camel-K integration from a Java (*.java), Camel XML (Spring DSL) (*.xml), or Groovy (*.groovy) file. (JavaScript and Kotlin files may be supported in the future.) To do this, right-click on the Java, XML, or Groovy file, and select "Start Camel-K (Filetype) Integration."
-
-| File Type | Menu Title |
-| --------- | ---------- |
-| XML (*.xml) | Start Camel-K XML Integration |
-| Groovy (*.groovy) | Start Camel-K Groovy Integration |
-| Java (*.java) | Start Camel-K Java Integration |
+Once your Camel-K/Minikube environment is running and the vscode-camelk extension is installed, you can easily start a new Camel-K integration from a Java (*.java), Camel XML (Spring DSL) (*.xml), or Groovy (*.groovy) file. (JavaScript and Kotlin files may be supported in the future.) To do this, right-click on the Java, XML, or Groovy file, and select "Start Camel-K Integration."
 
 With [Language Support for Apache Camel](https://marketplace.visualstudio.com/items?itemName=camel-tooling.vscode-apache-camel) installed, you also get LSP support for Camel XML and Java routes:
 
@@ -47,19 +41,15 @@ If Camel-K (Kamel) is in the system path, we can simply call the 'kamel' utility
 
 ![Run Menu](images/kubernetes-view-camelk-run-xml-menu.jpg)
 
-That launches my 'kamel' process from an XML file in the directory of the file (i.e. `kamel run --dev "filename"`) and I can see the output:
+That launches my 'kamel' process from an XML file in the directory of the file (i.e. `kamel run --dev "filename"`).
+
+If I open the Camel-K Output channel (View->Output, select "Camel-K" from the Output dropdown list) and I can see the output:
 
 ![Run Output](images/kubernetes-view-camelk-run-output.jpg)
 
 ## Stopping running Camel-K integrations
 
-In addition, there is a menu to stop a running integration. To do this, right-click on the Java, XML, or Groovy file, and select "Stop Camel-K (Filetype) Integration."
-
-| File Type | Menu Title |
-| --------- | ---------- |
-| Java (*.java) | Stop Camel-K Java Integration |
-| XML (*.xml) | Stop Camel-K XML Integration |
-| Groovy (*.groovy) | Stop Camel-K Groovy Integration |
+In addition, there is a menu to stop a running integration. To do this, right-click on the Java, XML, or Groovy file, and select "Stop Camel-K Integration."
 
 ![Stop menu](images/kubernetes-view-camelk-run-xml-menu.jpg)
 
