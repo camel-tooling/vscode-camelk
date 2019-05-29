@@ -4,7 +4,7 @@ All notable changes to the "vscode-camelk" extension will be documented in this 
 
 ## 0.0.3
 
-- TBD
+- Streamlined menus to two -- Start Camel-K Integration and Stop Camel-K Integration - to avoid duplication
 
 ## 0.0.2
 
