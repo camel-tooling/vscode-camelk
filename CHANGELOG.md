@@ -5,6 +5,8 @@ All notable changes to the "vscode-camelk" extension will be documented in this 
 ## 0.0.3
 
 - Streamlined menus to two -- Start Camel-K Integration and Stop Camel-K Integration - to avoid duplication
+- Updated readme to include details about showing the Camel-K output channel
+- Fixed refresh so that it attempts a few times before failing, which should give deploying integrations time to come up
 
 ## 0.0.2
 
