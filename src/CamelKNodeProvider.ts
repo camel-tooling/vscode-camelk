@@ -39,42 +39,53 @@ export class CamelKNodeProvider implements vscode.TreeDataProvider<TreeNode> {
 
 	// get the list of children for the node provider
 	public getChildren(element?: TreeNode): Thenable<TreeNode[]> {
-		if (this.retrieveIntegrations) {
-			return Promise.resolve(this.processIntegrationList());
-		}
 		return Promise.resolve(this.treeNodes);
 	}
 
 	// add a child to the list of nodes
-	public addChild(oldtasks: TreeNode[] = this.treeNodes, newtask: TreeNode, disableRefresh : boolean = false ): Thenable<TreeNode[]> {
-		if (oldtasks !== null && oldtasks !== undefined) {
-			oldtasks.push(newtask);
+	public addChild(oldNodes: TreeNode[] = this.treeNodes, newNode: TreeNode, disableRefresh : boolean = false ): Thenable<TreeNode[]> {
+		if (oldNodes !== null && oldNodes !== undefined) {
+			oldNodes.push(newNode);
 			if (disableRefresh !== true) {
 				this.refresh();
 			}
-			return Promise.resolve(oldtasks);
+			return Promise.resolve(oldNodes);
 		}
 		return Promise.reject();
 	}
 
 	// This method isn't used by the view currently, but is here to facilitate testing
-	public removeChild(oldtasks: TreeNode[] = this.treeNodes, oldtask: TreeNode, disableRefresh : boolean = false ): Thenable<TreeNode[]> {
-		if (oldtasks !== null && oldtasks !== undefined) {
-			const index = oldtasks.indexOf(oldtask, 0);
+	public removeChild(oldNodes: TreeNode[] = this.treeNodes, oldNode: TreeNode, disableRefresh : boolean = false ): Thenable<TreeNode[]> {
+		if (oldNodes !== null && oldNodes !== undefined) {
+			const index = oldNodes.indexOf(oldNode, 0);
 			if (index > -1) {
-				oldtasks.splice(index, 1);
+				oldNodes.splice(index, 1);
 				if (disableRefresh !== true) {
 					this.refresh();
 				}
 			}
-			return Promise.resolve(oldtasks);
+			return Promise.resolve(oldNodes);
 		}
 		return Promise.reject();
 	}
 
 	// trigger a refresh event in VSCode
-	public refresh(): void {
+	public async refresh(): Promise<void> {
+		if (this.retrieveIntegrations) {
+			let oldCount = this.treeNodes.length;
+			let retryTries = 1;
+			while (retryTries < 5) {
+				this.resetList();
+				await this.getIntegrationsFromCamelK().then((output) => this.processIntegrationList(output)).catch(() => console.log("[Refresh failed]"));
+				let newCount = this.treeNodes.length;
+				if (newCount !== oldCount) {
+					break;
+				}
+				retryTries++;
+			}
+		}
 		this._onDidChangeTreeData.fire();
+		Promise.resolve();
 	}
 
 	getTreeItem(node: TreeNode): vscode.TreeItem {
@@ -82,47 +93,41 @@ export class CamelKNodeProvider implements vscode.TreeDataProvider<TreeNode> {
 	}	
 
 	// process the text-based list we get back from the kubectl command
-	private processIntegrationList(): Promise<TreeNode[]> {
-		return new Promise( async (resolve, reject) => {
-			this.resetList();
-			let output = await this.getIntegrationsFromCamelK();
-			if (output) {
-				let lines = output.split('\n');
-				for (let entry of lines) {
-					let line = entry.split(' ');
-					if (line[0].toUpperCase().startsWith('NAME') || line[0].trim().length === 0) {
-						continue;
-					}
-					let integrationName = line[0];
-					let newNode = new TreeNode("string", integrationName, vscode.TreeItemCollapsibleState.None);
-					this.addChild(this.treeNodes, newNode, true);
+	processIntegrationList(output: string) {
+		if (output) {
+			let lines = output.split('\n');
+			for (let entry of lines) {
+				let line = entry.split(' ');
+				if (line[0].toUpperCase().startsWith('NAME') || line[0].trim().length === 0) {
+					continue;
 				}
-				resolve(this.treeNodes);
+				let integrationName = line[0];
+				let newNode = new TreeNode("string", integrationName, vscode.TreeItemCollapsibleState.None);
+				this.addChild(this.treeNodes, newNode, true);
 			}
-			reject();
-		});
-	}	
+		}
+	}
 	
 	// actually retrieve the list of integrations running in camel-k using kubectl
 	// TODO: research using a rest call to get the same information
 	getIntegrationsFromCamelK(): Promise<string> {
 		return new Promise( (resolve, reject) => {
-				let commandString = 'kubectl get integration';
-				console.log('Command string: ' + commandString);
-				let runKamel = child_process.exec(commandString);
-				var shellOutput = '';
-				runKamel.stdout.on('data', function (data) {
-					console.log("[OUT] " + data);
-					shellOutput += data;
-				});
-				runKamel.stderr.on('data', function (data) {
-					console.log("[ERROR] " + data);
-				});
-				runKamel.on("close", () => {
-					console.log("[CLOSING] " + shellOutput);
-					resolve(shellOutput);
-				});
-			});			
+			let commandString = 'kubectl get integration';
+			console.log('Command string: ' + commandString);
+			let runKamel = child_process.exec(commandString);
+			var shellOutput = '';
+			runKamel.stdout.on('data', function (data) {
+				console.log("[OUT] " + data);
+				shellOutput += data;
+			});
+			runKamel.stderr.on('data', function (data) {
+				console.log("[ERROR] " + data);
+			});
+			runKamel.on("close", () => {
+				console.log("[CLOSING] " + shellOutput);
+				resolve(shellOutput);
+			});
+		}); 
 	}
 	
 }
