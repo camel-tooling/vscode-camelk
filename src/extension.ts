@@ -54,6 +54,9 @@ export function activate(context: vscode.ExtensionContext) {
 	let stopIntegration = vscode.commands.registerCommand('camelk.stopintegration', () => { stopTheFile(context);});
 
 	context.subscriptions.push(startIntegration, stopIntegration);
+
+	// populate the initial tree
+	camelKIntegrationsProvider.refresh();
 }
 
 // "run" the integration file with "kamel"
