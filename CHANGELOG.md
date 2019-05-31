@@ -4,7 +4,13 @@ All notable changes to the "vscode-camelk" extension will be documented in this 
 
 ## 0.0.4
 
-- TBD
+- Added Camel-K Integration Settings where users can specify the proxy url and namespace to use the Kubernetes Rest APIs instead of the local 'kubectl' utility.
+- Added a 'Use Proxy' setting that currently enables the Camel-K Integrations view to use the Rest API instead of 'kubectl.' See the list of issues for current limitations with this code.
+- Added work-in-progress 'CamelKJSONUtils' to start building a library of functions that will enable us to package, start, and stop integrations via the Kubernetes Rest APIs. Also added a few tests to start testing those functions, though currently only the createCamelKRestURL is used.
+- Added ability to 'remove' an integration when Use Proxy is specified (using a DELETE rest API call through Kubernetes)
+- Added ability to 'refresh' the integrations view when Use Proxy is specified (using a GET rest API call through Kubernetes)
+- Removed "Stop Camel-K Integration" menu, since it duplicates the "Remove Integration" menu on the integrations view
+- Removed the streaming data from all integrations started in the VS Code workspace in favor of adding a "View log snapshot" menu for running integrations that opens a new Output channel and shows the Camel log up to that moment. This works for both proxied and local executable methods
 
 ## 0.0.3
 

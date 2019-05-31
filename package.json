@@ -9,10 +9,10 @@
 	"preview": true,
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/bfitzpat/vscode-camelk"
+		"url": "https://github.com/camel-tooling/vscode-camelk"
 	},
 	"bugs": {
-		"url": "https://github.com/bfitzpat/vscode-camelk/issues"
+		"url": "https://github.com/camel-tooling/vscode-camelk/issues"
 	},
 	"author": "Brian Fitzpatrick <bfitzpat@redhat.com> (http://redhat.com)",
 	"maintainers": [
@@ -22,11 +22,12 @@
 			"url": "http://redhat.com"
 		}
 	],
-	"homepage": "https://github.com/bfitzpat/vscode-camelk",
+	"homepage": "https://github.com/camel-tooling/vscode-camelk",
 	"keywords": [
 		"Camel",
 		"Camel-K",
-		"kamelk",
+		"camelk",
+		"kamel",
 		"Tool"
 	],
 	"engines": {
@@ -40,14 +41,39 @@
 	],
 	"main": "./out/extension",
 	"contributes": {
+		"configuration": [
+			{
+				"title": "Camel-K Integration Settings",
+				"properties": {
+					"camelk.integrations.proxyURL": {
+						"type": "string",
+						"default": "http://localhost:8000",
+						"description": "Proxy configuration: URL to the running Kube server with accessible port",
+						"scope": "window"
+					},
+					"camelk.integrations.proxyNamespace": {
+						"type": "string",
+						"enum": [
+							"default",
+							"syndesis"
+						],
+						"default": "default",
+						"description": "Proxy namespace: Namespace to use for accessing the Camel-K integrations",
+						"scope": "window"
+					},
+					"camelk.integrations.useProxy": {
+						"type": "boolean",
+						"default": false,
+						"description": "Always use proxy: If true, always use the proxy URL instead of Minikube",
+						"scope": "window"
+					}
+				}
+			}
+		],
 		"commands": [
 			{
 				"command": "camelk.startintegration",
 				"title": "Start Camel-K Integration"
-			},
-			{
-				"command": "camelk.stopintegration",
-				"title": "Stop Camel-K Integration"
 			},
 			{
 				"command": "camelk.integrations.refresh",
@@ -59,19 +85,22 @@
 			},
 			{
 				"command": "camelk.integrations.remove",
-				"title": "Remove Integration"
+				"title": "Remove Camel-K Integration"
+			},
+			{
+				"command": "camelk.integrations.log",
+				"title": "Follow log for Camel-K Integration"
+			},
+			{
+				"command": "camelk.integrations.startproxy",
+				"title": "Camel-K: Start the kubectl proxy server"
 			}
 		],
 		"menus": {
 			"explorer/context": [
 				{
 					"command": "camelk.startintegration",
-					"when": "resourceExtname =~ /\\.(groovy|java|xml)$/",
-					"group": "navigation"
-				},
-				{
-					"command": "camelk.stopintegration",
-					"when": "resourceExtname =~ /\\.(groovy|java|xml)$/",
+					"when": "resourceExtname =~ /\\.(groovy|java|xml|js)$/",
 					"group": "navigation"
 				}
 			],
@@ -85,6 +114,11 @@
 			"view/item/context": [
 				{
 					"command": "camelk.integrations.remove",
+					"group": "1",
+					"when": "view == camelk.integrations"
+				},
+				{
+					"command": "camelk.integrations.log",
 					"group": "1",
 					"when": "view == camelk.integrations"
 				}
@@ -108,19 +142,24 @@
 	},
 	"devDependencies": {
 		"mocha-jenkins-reporter": "^0.4.1",
+		"@types/chai": "^4.1.7",
+		"@types/mocha": "^2.2.42",
+		"@types/node": "^7.0.43",
+		"@types/sinon": "^7.0.13",
+		"@types/sinon-chai": "^3.2.2",
+		"nock": "^10.0.6",
 		"typescript": "^2.6.1",
 		"vscode": "^1.1.6",
-		"tslint": "^5.8.0",
-		"@types/chai": "^4.1.7",
-		"@types/node": "^7.0.43",
-		"@types/mocha": "^2.2.42",
-		"@types/sinon": "^7.0.11",
-		"@types/sinon-chai": "^3.2.2"
+		"tslint": "^5.8.0"
 	},
 	"dependencies": {
+		"@types/nock": "^10.0.3",
+		"@types/request-promise": "^4.1.44",
 		"chai": "^4.2.0",
 		"child_process": "^1.0.2",
 		"path": "^0.12.7",
+		"request": "^2.88.0",
+		"request-promise": "^4.2.4",
 		"sinon": "^7.3.2",
 		"sinon-chai": "^3.3.0"
 	}
