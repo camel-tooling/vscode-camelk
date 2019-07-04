@@ -20,7 +20,7 @@ import * as vscode from 'vscode';
 import * as assert from 'assert';
 
 suite("ensure camelk extension exists and is accessible", async function() {
-    const extensionId = 'camel-tooling.vscode-camelk';
+    const extensionId = 'redhat.vscode-camelk';
 
     test('vscode-camelk extension should be present', () => {
 		assert.ok(vscode.extensions.getExtension(extensionId));
