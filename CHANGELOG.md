@@ -11,6 +11,7 @@ All notable changes to the "vscode-camelk" extension will be documented in this 
 - Added ability to 'refresh' the integrations view when Use Proxy is specified (using a GET rest API call through Kubernetes)
 - Removed "Stop Camel-K Integration" menu, since it duplicates the "Remove Integration" menu on the integrations view
 - Removed the streaming data from all integrations started in the VS Code workspace in favor of adding a "View log snapshot" menu for running integrations that opens a new Output channel and shows the Camel log up to that moment. This works for both proxied and local executable methods
+- reduce size of extension by moving test dependencies to devDependencies
 
 ## 0.0.3
 
