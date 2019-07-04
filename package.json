@@ -1,10 +1,10 @@
 {
 	"name": "vscode-camelk",
-	"displayName": "vscode-camelk",
+	"displayName": "Tooling for Apache Camel-K",
 	"description": "VS Code extensions to support Camel-K functionality",
 	"license": "Apache-2.0",
 	"version": "0.0.4",
-	"publisher": "camel-tooling",
+	"publisher": "redhat",
 	"icon": "icons/icon128.png",
 	"preview": true,
 	"repository": {
