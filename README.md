@@ -48,7 +48,7 @@ That launches my 'kamel' process from an XML file in the directory of the file (
 There are two types of "output channels" providing details for the extension.
 
 * The "Camel-K" output channel (View->Output, select "Camel-K" from the drop-down in the view) offers details about events such as when the Camel-K Integrations view is refreshed, when new integrations are started, when running integrations are stopped, and when the log of a particular running integration is viewed.
-* In that last case, the "View log for Camel-K Integration" menu, when invoked on a running integration in the Camel-K Integrations view, opens a new Output channel named for the running "pod" associated with that particular integration. This gives you access to the running Camel log for the selected integration.
+* In that last case, the "Follow log for Camel-K Integration" menu, when invoked on a running integration in the Camel-K Integrations view, opens a new Output channel named for the running "pod" associated with that particular integration. This gives you access to the running Camel log for the selected integration.
 
 ## Stopping running Camel-K integrations
 
@@ -58,11 +58,17 @@ Once an integration is running, it may be stopped in the "Camel-K Integrations" 
 
 ## Camel-K Integrations view
 
-The Camel-K Integrations view offers a list of the "integrations" registered with the current Camel-K context. If you right-click on a running integration, you can "Remove" an integration to stop them in the system.
+The Camel-K Integrations view offers a list of the "integrations" registered with the current Camel-K context. If you right-click on a running integration, you can "Remove" an integration to stop them in the system or "Follow" the log to show the running log for your integration in a new Output channel.
 
 ![Camel-K integrations view Remove](images/camelk-integrations-view-remove-menu.jpg)
 
-The view has a "Refresh" button that can be used to manually trigger a refresh of the list, but when you add/remove file-based integrations in the Explorer view, it should refresh automatically.
+Following a log opens a new Output channel named for the running Kubernetes pod where the integration is running. It updates as new data is added to it:
+
+![Camel-K integrations view Log](images/camelk-integrations-view-integrations-log.jpg)
+
+In addition, the view has a "Refresh" button that can be used to manually trigger a refresh of the list, but when you add/remove file-based integrations in the Explorer view, it should refresh automatically.
+
+Note: Refreshing the view sometimes is delayed as we wait for pods to start. You may need to give it a few seconds. If nothing happens, the Refresh button is a good option.
 
 ![Camel-K integrations view Refresh](images/camelk-integrations-view-refresh-action.jpg)
 
