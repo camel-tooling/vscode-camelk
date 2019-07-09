@@ -5,9 +5,11 @@
 
 # Visual Studio extension to support Camel-K
 
-This extension is a work-in-progress to explore what options we can add to VS Code to support Camel-K.
+This extension offers basic integration with Camel-K (https://github.com/apache/camel-k) on two fronts.
 
-Note that it currently requires that both Camel-K and Minikube be installed and available on the system path.
+First, Camel-K runs with a combination of the "kamel" runtime and either Minishift, Minikube, or GKE running locally on the development system. We utilize the "kamel" and "kubectl" executables to manage a few basic tasks listed further down.
+
+Second, we also have the capability of using Restful calls to a Proxy when provided the correct URL and port combination (defaulting to http://localhost:8000). The proxy offers the same functionality as if we were using the command-line executables.
 
 To install Minikube and Camel-K, see [Installing MiniKube and Camel-K](configure-minikube-camelk.md).
 
@@ -27,7 +29,7 @@ This opens a log for that pod in a new Terminal window.
 
 ## Starting new Camel-K integrations
 
-Once your Camel-K/Minikube environment is running and the vscode-camelk extension is installed, you can easily start a new Camel-K integration from a Java (*.java), Camel XML (Spring DSL) (*.xml), or Groovy (*.groovy) file. (JavaScript and Kotlin files may be supported in the future.) To do this, right-click on the Java, XML, or Groovy file, and select "Start Camel-K Integration."
+Once your Camel-K/Minikube environment is running and the vscode-camelk extension is installed, you can easily start a new Camel-K integration from a Java (*.java), Camel XML (Spring DSL) (*.xml), JavaScript (*.js) or Groovy (*.groovy) file. (Kotlin files may be supported in the future.) To do this, right-click on the Java, XML, JavaScript, or Groovy file, and select "Start Camel-K Integration."
 
 With [Language Support for Apache Camel](https://marketplace.visualstudio.com/items?itemName=camel-tooling.vscode-apache-camel) installed, you also get LSP support for Camel XML and Java routes:
 
@@ -41,19 +43,18 @@ If Camel-K (Kamel) is in the system path, we can simply call the 'kamel' utility
 
 ![Run Menu](images/kubernetes-view-camelk-run-xml-menu.jpg)
 
-That launches my 'kamel' process from an XML file in the directory of the file (i.e. `kamel run --dev "filename"`).
+That launches my 'kamel' process from an XML file in the directory of the file (i.e. `kamel run --dev "filename"` or the equivalent Kubernetes rest call) or uses the Kubernetes Rest API to deploy the integration to the running Kubernetes system.
 
-If I open the Camel-K Output channel (View->Output, select "Camel-K" from the Output dropdown list) and I can see the output:
+There are two types of "output channels" providing details for the extension.
 
-![Run Output](images/kubernetes-view-camelk-run-output.jpg)
+* The "Camel-K" output channel (View->Output, select "Camel-K" from the drop-down in the view) offers details about events such as when the Camel-K Integrations view is refreshed, when new integrations are started, when running integrations are stopped, and when the log of a particular running integration is viewed.
+* In that last case, the "View log for Camel-K Integration" menu, when invoked on a running integration in the Camel-K Integrations view, opens a new Output channel named for the running "pod" associated with that particular integration. This gives you access to the running Camel log for the selected integration.
 
 ## Stopping running Camel-K integrations
 
-In addition, there is a menu to stop a running integration. To do this, right-click on the Java, XML, or Groovy file, and select "Stop Camel-K Integration."
+Once an integration is running, it may be stopped in the "Camel-K Integrations" view by right-clicking on the integration and selecting "Remove Camel-K Integration." Stopping an integration removes its associated output channel.
 
-![Stop menu](images/kubernetes-view-camelk-run-xml-menu.jpg)
-
-"Stop Camel-K Integration" essentially calls `kamel delete '${filename}'` to stop the running integration in the system.
+"Stop Camel-K Integration" essentially calls `kamel delete '${filename}'` (or the equivalent call in the Kubernetes Rest API) to stop the running integration in the system.
 
 ## Camel-K Integrations view
 
@@ -65,9 +66,24 @@ The view has a "Refresh" button that can be used to manually trigger a refresh o
 
 ![Camel-K integrations view Refresh](images/camelk-integrations-view-refresh-action.jpg)
 
+## Camel-K Extension Settings
+
+To access the new extension settings, go to File->Preferences->Settings, then select "Extensions" and finally "Camel-K Integration Settings."
+
+![Camel-K integrations view Settings](images/camelk-integrations-view-settings.jpg)
+
+* Proxy Namespace - Currently this drop-down has two values: default and syndesis. If we need to make this editable down the line, we can, but this was a good place to start.
+* Proxy URL - This setting corresponds to the server proxy for your Kubernetes service. It defaults to http://localhost:8000, but can be altered to any appropriate service URL. (See [Use an HTTP Proxy to Access the Kubernetes API)[https://kubernetes.io/docs/tasks/access-kubernetes-api/http-proxy-access-api/] for details on how to create the local proxy (i.e. 'kubectl proxy –port=8000') and "Starting a local Kubernetes proxy" below.)
+* Use Proxy - This setting determines whether the Camel-K Integrations view retrieves the list of running integrations via the local 'kubectl' application or via the Kubernetes Rest API and calls through the Proxy URL/Namespace combination above. The ultimate URL becomes [proxyurl]/apis/camel.apache.org/v1alpha1/namespaces/[namespace]/integrations. 
+
+## Starting a local Kubernetes proxy
+
+(Only available with the Minikube executable installed, but useful for local development.)
+
+We have created a new command available in the command palette (Ctrl+Shift+P or F1) called "Camel-K: Start the kubectl proxy server." This will start a new Kubernetes proxy using the Minikube executable ('kubectl proxy --port=8000) and refreshes the Camel-K Integrations view immediately. This command creates a local proxy at http://localhost:8000, which is the default value for Proxy URL in the extension settings.
+
 ## Known Issues
 
 Here's the current list of issues we're working to resolve. If you find a new issue, please [create a new issue report in GitHub](https://github.com/camel-tooling/vscode-camelk/issues)!
 
-* Do not pollute all Groovy files with Camel-K [Issue #7](https://github.com/camel-tooling/vscode-camelk/issues/7) - this is also a problem for XML and Java files at this time
-* Use Kubernetes rest api instead of kubectl calls [Issue #14](https://github.com/camel-tooling/vscode-camelk/issues/14)
+* Do not pollute all Groovy files with Camel-K [Issue #7](https://github.com/camel-tooling/vscode-camelk/issues/7) - this is also a problem for XML, JavaScript, and Java files at this time.

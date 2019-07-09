@@ -17,6 +17,9 @@
 import * as vscode from 'vscode';
 import * as child_process from 'child_process';
 import * as path from 'path';
+import * as utils from './CamelKJSONUtils';
+import * as rp from 'request-promise';
+import * as extension from './extension';
 
 export class CamelKNodeProvider implements vscode.TreeDataProvider<TreeNode> {
 	
@@ -26,8 +29,16 @@ export class CamelKNodeProvider implements vscode.TreeDataProvider<TreeNode> {
 	protected treeNodes: TreeNode[] = [];
 	protected retrieveIntegrations : boolean = true;
 
+	private useProxy: boolean = false;
+
 	constructor() {}
 
+	// get our list of integrations from kubectl or the rest API
+	public setUseProxy(flag: boolean) {
+		this.useProxy = flag;
+	}
+
+	// clear the tree 
 	public resetList() {
 		this.treeNodes = [];
 	}
@@ -71,12 +82,44 @@ export class CamelKNodeProvider implements vscode.TreeDataProvider<TreeNode> {
 
 	// trigger a refresh event in VSCode
 	public async refresh(): Promise<void> {
+		let oldCount = this.treeNodes.length;
+		this.resetList();
+		let inaccessible = false;
 		if (this.retrieveIntegrations) {
-			let oldCount = this.treeNodes.length;
 			let retryTries = 1;
-			while (retryTries < 5) {
+			let numRetries = 10;
+			while (retryTries < numRetries && !inaccessible) {
 				this.resetList();
-				await this.getIntegrationsFromCamelK().then((output) => this.processIntegrationList(output)).catch(() => console.log("[Refresh failed]"));
+
+				if (!this.useProxy) {
+					await this.getIntegrationsFromCamelK().then((output) => {
+						this.processIntegrationList(output);
+					}).catch(() => { 
+						utils.shareMessage(extension.mainOutputChannel, "Refreshing Camel-K Integrations view using kubectl failed.");
+						inaccessible = true;
+						Promise.reject();
+						return;
+					});
+				} else {
+					await utils.pingKubernetes().catch( (error) =>  {
+						utils.shareMessage(extension.mainOutputChannel, 'Refreshing Camel-K Integrations view using kubernetes Rest APIs failed. ' + error);
+						inaccessible = true;
+						Promise.reject();
+						return;
+					});
+		
+					await this.getIntegrationsFromCamelKRest().then((output) => {
+						this.processIntegrationListFromJSON(output);
+					}).catch(() => {
+						utils.shareMessage(extension.mainOutputChannel, 'Refreshing Camel-K Integrations view using kubernetes Rest APIs failed.');
+						inaccessible = true;
+						Promise.reject();
+						return;
+					});
+				}
+				if (inaccessible) {
+					break;
+				}
 				let newCount = this.treeNodes.length;
 				if (newCount !== oldCount) {
 					break;
@@ -86,11 +129,24 @@ export class CamelKNodeProvider implements vscode.TreeDataProvider<TreeNode> {
 		}
 		this._onDidChangeTreeData.fire();
 		Promise.resolve();
+		let newCount = this.treeNodes.length;
+		if (newCount === 0 && !inaccessible) {
+			utils.shareMessage(extension.mainOutputChannel, "Refreshing Camel-K Integrations view succeeded, no published integrations available.");
+		}
 	}
 
 	getTreeItem(node: TreeNode): vscode.TreeItem {
 		return node;
-	}	
+	}
+
+	doesNodeExist(oldNodes: TreeNode[], newNode: TreeNode): boolean {
+		for (let node of oldNodes) {
+			if (node.label === newNode.label) {
+				return true;
+			}
+		}
+		return false;
+	}
 
 	// process the text-based list we get back from the kubectl command
 	processIntegrationList(output: string) {
@@ -103,13 +159,55 @@ export class CamelKNodeProvider implements vscode.TreeDataProvider<TreeNode> {
 				}
 				let integrationName = line[0];
 				let newNode = new TreeNode("string", integrationName, vscode.TreeItemCollapsibleState.None);
-				this.addChild(this.treeNodes, newNode, true);
+				if (this.doesNodeExist(this.treeNodes, newNode) === false) {
+					this.addChild(this.treeNodes, newNode, true);
+				}
 			}
 		}
 	}
 	
+	// process the JSON we get back from the kube rest API
+	processIntegrationListFromJSON(json : Object) {
+		if (json) {
+			let temp = JSON.stringify(json);
+			let o = JSON.parse(temp);
+			for (var i=0; i<o.items.length;i++) {
+				var integrationName = o.items[i].metadata.name;
+				let newNode = new TreeNode("string", integrationName, vscode.TreeItemCollapsibleState.None);
+				if (this.doesNodeExist(this.treeNodes, newNode) === false) {
+					this.addChild(this.treeNodes, newNode, true);
+				}
+			}
+		}
+	}
+
+	// retrieve the list of integrations running in camel-k using the kube proxy and rest API
+	getIntegrationsFromCamelKRest(): Promise<Object> {
+		return new Promise( async (resolve, reject) => {
+			let proxyURL = utils.createCamelKRestURL();
+			await utils.pingKubernetes().catch( (error) =>  {
+				reject(error);
+			});
+			var options = {
+				uri: proxyURL,
+				headers: {
+					'Content-Type': 'application/json',
+					'Accept': 'application/json'
+				},
+				json: true // Automatically parses the JSON string in the response
+			};
+			await utils.delay(750);
+			rp(options)
+				.then(function (json:Object) {
+					resolve(json);
+				})
+				.catch(function () {
+					reject();
+				});
+			});
+	}
+
 	// actually retrieve the list of integrations running in camel-k using kubectl
-	// TODO: research using a rest call to get the same information
 	getIntegrationsFromCamelK(): Promise<string> {
 		return new Promise( (resolve, reject) => {
 			let commandString = 'kubectl get integration';
