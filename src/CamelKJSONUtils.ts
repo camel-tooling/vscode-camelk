@@ -17,6 +17,7 @@
 import * as fs from 'fs';
 import * as vscode from 'vscode';
 import * as http from "http";
+import * as child_process from 'child_process';
 
 export const proxyURLSetting = 'camelk.integrations.proxyURL';
 export const proxyNamespaceSetting = 'camelk.integrations.proxyNamespace';
@@ -119,10 +120,36 @@ export async function pingKubernetes() : Promise<string> {
 	});
 }
 
+export async function pingKamel() : Promise<any> {
+	return new Promise( async (resolve, reject) => {
+		const pingKamelCommand = "kamel get";
+		let runKubectl = child_process.exec(pingKamelCommand);
+		runKubectl.stdout.on('data', function (data) {
+			let output : string = data as string;
+			resolve(output);
+			return;
+		});
+		runKubectl.stderr.on('data', function (data) {
+			let error : string = data as string;
+			reject(new Error(error));
+			return;
+		});
+	}); 
+}
+
 export function shareMessage(outputChannel: vscode.OutputChannel, msg:string) {
 	if (outputChannel) {
-		outputChannel.append(msg + '\n\n');
+		outputChannel.append(msg + '\n');
 	} else {
 		console.log('[' + msg + ']');
 	}
+}
+
+export function toKebabCase (str : string) {
+	return str.replace(/([A-Z])([A-Z])/g, '$1-$2')
+		.replace(/([a-z])([A-Z])/g, '$1-$2')
+		.replace(/[\s_]+/g, '-')
+		.replace(/^[-]+/g, '')
+		.replace(/[-]$/, '')
+		.toLowerCase() ;
 }

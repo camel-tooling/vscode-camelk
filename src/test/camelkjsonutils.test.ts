@@ -112,4 +112,17 @@ suite("ensure camelk utilities work as expected", async function() {
 		nock.cleanAll();
 	});
 
+	test("test kebab case utility", async function() {
+		
+		// based loosely on https://github.com/apache/camel-k/blob/master/pkg/util/kubernetes/sanitize_test.go
+
+		assert.equal(utils.toKebabCase('MyOtherGroovyRoute'), 'my-other-groovy-route');
+		assert.equal(utils.toKebabCase('abc'), 'abc');
+		assert.equal(utils.toKebabCase('fooToBar'), 'foo-to-bar');
+		assert.equal(utils.toKebabCase('foo-to-bar'), 'foo-to-bar');
+		assert.equal(utils.toKebabCase('-foo-bar-'), 'foo-bar');
+		assert.equal(utils.toKebabCase('1foo-bar2'), '1foo-bar2');
+		assert.equal(utils.toKebabCase('foo-bar-1'), 'foo-bar-1');
+	});
+
 });

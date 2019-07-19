@@ -83,6 +83,8 @@ export class CamelKNodeProvider implements vscode.TreeDataProvider<TreeNode> {
 	// trigger a refresh event in VSCode
 	public async refresh(): Promise<void> {
 		let oldCount = this.treeNodes.length;
+		extension.myStatusBarItem.text = `Refreshing Camel-K Integrations view`;
+		extension.myStatusBarItem.show();
 		this.resetList();
 		let inaccessible = false;
 		if (this.retrieveIntegrations) {
@@ -92,26 +94,37 @@ export class CamelKNodeProvider implements vscode.TreeDataProvider<TreeNode> {
 				this.resetList();
 
 				if (!this.useProxy) {
-					await this.getIntegrationsFromCamelK().then((output) => {
-						this.processIntegrationList(output);
-					}).catch(() => { 
-						utils.shareMessage(extension.mainOutputChannel, "Refreshing Camel-K Integrations view using kubectl failed.");
+					await utils.pingKamel()
+					.then( async () => {
+						await this.getIntegrationsFromCamelK().then((output) => {
+							this.processIntegrationList(output);
+						}).catch((error) => { 
+							let errMsg : string = error;
+							if (errMsg.toLowerCase().trim().startsWith('error:')) {
+								utils.shareMessage(extension.mainOutputChannel, `Refreshing Camel-K Integrations view using kubectl failed. ${error}`);
+								inaccessible = true;
+							}
+							Promise.reject();
+							return;
+						});
+					}).catch( (error) =>  {
+						utils.shareMessage(extension.mainOutputChannel, `Refreshing Camel-K Integrations view using kubectl failed. ${error}`);
 						inaccessible = true;
 						Promise.reject();
 						return;
 					});
 				} else {
-					await utils.pingKubernetes().catch( (error) =>  {
-						utils.shareMessage(extension.mainOutputChannel, 'Refreshing Camel-K Integrations view using kubernetes Rest APIs failed. ' + error);
-						inaccessible = true;
-						Promise.reject();
-						return;
-					});
-		
-					await this.getIntegrationsFromCamelKRest().then((output) => {
-						this.processIntegrationListFromJSON(output);
-					}).catch(() => {
-						utils.shareMessage(extension.mainOutputChannel, 'Refreshing Camel-K Integrations view using kubernetes Rest APIs failed.');
+					await utils.pingKubernetes().then( async () => {
+						await this.getIntegrationsFromCamelKRest().then((output) => {
+							this.processIntegrationListFromJSON(output);
+						}).catch((error) => {
+							utils.shareMessage(extension.mainOutputChannel, `Refreshing Camel-K Integrations view using kubernetes Rest APIs failed. ${error}`);
+							inaccessible = true;
+							Promise.reject();
+							return;
+						});
+					}).catch( (error) =>  {
+						utils.shareMessage(extension.mainOutputChannel, `Refreshing Camel-K Integrations view using kubernetes Rest APIs failed. ${error}`);
 						inaccessible = true;
 						Promise.reject();
 						return;
@@ -127,6 +140,7 @@ export class CamelKNodeProvider implements vscode.TreeDataProvider<TreeNode> {
 				retryTries++;
 			}
 		}
+		extension.myStatusBarItem.hide();
 		this._onDidChangeTreeData.fire();
 		Promise.resolve();
 		let newCount = this.treeNodes.length;
@@ -220,6 +234,7 @@ export class CamelKNodeProvider implements vscode.TreeDataProvider<TreeNode> {
 			});
 			runKamel.stderr.on('data', function (data) {
 				console.log("[ERROR] " + data);
+				reject(data.toString());
 			});
 			runKamel.on("close", () => {
 				console.log("[CLOSING] " + shellOutput);

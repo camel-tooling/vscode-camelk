@@ -4,6 +4,11 @@ All notable changes to the "vscode-camelk" extension will be documented in this 
 
 ## 0.0.5
 
+- Added status bar indicator when Camel-K integrations view is refreshing
+- Added test for kebab case based on Camel-K go test
+- Added check to see if the kamel executable is available when not using proxy
+- Fixed issue with right-click menu not correctly finding selected file
+
 ## 0.0.4
 
 - Added Camel-K Integration Settings where users can specify the proxy url and namespace to use the Kubernetes Rest APIs instead of the local 'kubectl' utility.
