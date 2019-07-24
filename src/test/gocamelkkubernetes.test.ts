@@ -55,16 +55,4 @@ suite("ensure that the upstream kubernetes.go sanitize in camel-k have not chang
 
 		assert.equal(str1 === str2, true);
 	});
-
-	test.skip("see if we can call the sanitize.go functions", async function() {
-		// answer is NO -- the node-ffi component does not compile with this version of node for some reason
-		// attempted to use this approach - https://medium.com/learning-the-go-programming-language/calling-go-functions-from-other-languages-4c7d8bcc69bf
-
-		var ref = require("ref");
-		var ffi = require("ffi");
-		var stringPtr = ref.refType('string');
-		var awesome = ffi.Library(goPath, {SanitizeName: [stringPtr, [stringPtr]]});
-		assert.equal(awesome.SanitizeName("./abc.java"), "abc");
-	});
-
 });
