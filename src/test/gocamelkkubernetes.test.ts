@@ -43,7 +43,7 @@ suite("ensure that the upstream kubernetes.go sanitize in camel-k have not chang
 		var str1 = fs.readFileSync(goPath, 'utf-8');
 		var str2 = fs.readFileSync(stashedFile, 'utf-8');
 
-		assert.equal(str1 === str2, true);
+		assert.strictEqual(str1, str2);
 	});
 });
 
