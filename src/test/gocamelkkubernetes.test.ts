@@ -35,18 +35,16 @@ suite("ensure that the upstream kubernetes.go sanitize in camel-k have not chang
 
 	var dest : string = 'sanitize.go';
 	var url = 'https://raw.githubusercontent.com/apache/camel-k/master/pkg/util/kubernetes/sanitize.go';
-	var goPath = path.join(os.tmpdir(), dest);
+	var goPath = path.join(fs.realpathSync(os.tmpdir()), dest);
 
 	test("test that we can get the sanitize.go file from the camel-k git repository", async function() {
 
-		let commandString = `curl -o -L ${dest} ${url}`;
+		let commandString = `curl -o ${dest} -L ${url}`;
+		console.log(goPath);
 		console.log(commandString);
 
-		let runKamel = child_process.exec(commandString, { cwd: os.tmpdir() });
-		runKamel.stderr.on('data', function (data) {
-			assert.fail('Failed to curl file to local download ' + data);
-		});
-		assert.ok('Got file');
+		child_process.execSync(commandString, { cwd: os.tmpdir() });
+		assert.ok(fs.existsSync(goPath));
 	});
 
 	test("test to see if the sanitize.go file has changed since we stashed it", async function() {
