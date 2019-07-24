@@ -33,21 +33,11 @@ import * as child_process from 'child_process';
 
 suite("ensure that the upstream kubernetes.go sanitize in camel-k have not changed since we checked last", async function() {
 
-	var dest : string = 'sanitize.go';
+	var fileName : string = 'sanitize.go';
 	var url = 'https://raw.githubusercontent.com/apache/camel-k/master/pkg/util/kubernetes/sanitize.go';
-	var goPath = path.join(fs.realpathSync(os.tmpdir()), dest);
-
-	test("test that we can get the sanitize.go file from the camel-k git repository", async function() {
-
-		let commandString = `curl -o ${dest} -L ${url}`;
-		console.log(goPath);
-		console.log(commandString);
-
-		child_process.execSync(commandString, { cwd: os.tmpdir() });
-		assert.ok(fs.existsSync(goPath));
-	});
-
+	
 	test("test to see if the sanitize.go file has changed since we stashed it", async function() {
+		var goPath = retrieveSanitizeFileFromUpstream(fileName, url);
 		let stashedFile = path.join(__dirname, '../../src/test/sanitize.go.saved');
 
 		var str1 = fs.readFileSync(goPath, 'utf-8');
@@ -56,3 +46,14 @@ suite("ensure that the upstream kubernetes.go sanitize in camel-k have not chang
 		assert.equal(str1 === str2, true);
 	});
 });
+
+function retrieveSanitizeFileFromUpstream(fileName: string, url: string) {
+	var goPath = path.join(fs.realpathSync(os.tmpdir()), fileName);
+	let commandString = `curl -o ${fileName} -L ${url}`;
+	console.log(goPath);
+	console.log(commandString);
+	child_process.execSync(commandString, { cwd: os.tmpdir() });
+	assert.ok(fs.existsSync(goPath));
+	return goPath;
+}
+
