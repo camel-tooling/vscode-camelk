@@ -25,6 +25,7 @@ import * as rp from 'request-promise';
 import {platform} from 'os';
 
 export let mainOutputChannel: vscode.OutputChannel;
+export let myStatusBarItem: vscode.StatusBarItem;
 let camelKIntegrationsProvider = new CamelKNodeProvider();
 let useProxy : boolean = false;
 let outputChannelMap : Map<string, vscode.OutputChannel>;
@@ -64,6 +65,9 @@ export function activate(context: vscode.ExtensionContext) {
 	mainOutputChannel = vscode.window.createOutputChannel("Camel-K");
 	mainOutputChannel.show();
 
+	myStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 100);
+	context.subscriptions.push(myStatusBarItem);
+
 	// create the integrations view
 	vscode.window.registerTreeDataProvider('camelk.integrations', camelKIntegrationsProvider);
 
@@ -94,13 +98,7 @@ export function activate(context: vscode.ExtensionContext) {
 						console.log(`stderr: ${stderr}`);
 					}
 				});
-				await getIntegrationsFromKubectl(integrationName)
-					.then( (output) => {
-						let podName = processIntegrationList(output);
-						if (podName) {
-							removeOutputChannel(podName);
-						}
-					});
+				await removeOutputChannelForIntegrationViaKubectl(integrationName);
 			}
 			camelKIntegrationsProvider.refresh();
 		}
@@ -122,7 +120,7 @@ export function activate(context: vscode.ExtensionContext) {
 								});
 							})
 							.catch( (error) => {
-								utils.shareMessage(mainOutputChannel, `No pod found for integration: ${error}`);
+								utils.shareMessage(mainOutputChannel, `No pod found for integration: ${output}`);
 							});
 						})
 					.catch( (error) => {
@@ -147,6 +145,8 @@ export function activate(context: vscode.ExtensionContext) {
 							kubectl.on("close", (code, signal) => {
 								console.log("[CLOSING] " + `${code} / ${signal} \n`);
 							});
+						} else {
+							utils.shareMessage(mainOutputChannel, `No deployed integration found for: ${output} \n`);
 						}
 					}).catch( (error) => {
 						utils.shareMessage(mainOutputChannel, `rest error: ${error} \n`);
@@ -171,7 +171,7 @@ export function activate(context: vscode.ExtensionContext) {
 	});
 
 	// create the integration view action -- start new integration
-	let startIntegration = vscode.commands.registerCommand('camelk.startintegration', async () => { await runTheFile(context);});
+	let startIntegration = vscode.commands.registerCommand('camelk.startintegration', async (uri:vscode.Uri) => { await runTheFile(uri);});
 	context.subscriptions.push(startIntegration);
 
 	// populate the initial tree
@@ -207,8 +207,8 @@ function getOutputChannel( channelName: string) : vscode.OutputChannel {
 }
 
 // start the integration file
-async function runTheFile(context: vscode.ExtensionContext) {
-	startIntegration(context);
+async function runTheFile(context: vscode.Uri) {
+	await startIntegration(context);
 	await camelKIntegrationsProvider.refresh();
 }
 
@@ -315,11 +315,11 @@ async function stopIntegrationViaRest(integrationName: string) : Promise<any>{
 }
 
 // start an integration from a file
-function startIntegration(context: vscode.ExtensionContext): Promise<string> {
+function startIntegration(context: vscode.Uri): Promise<string> {
 	return new Promise <string> ( async (resolve, reject) => {
 		if (useProxy) {
 			utils.shareMessage(mainOutputChannel, "Starting new integration via Kubernetes rest API");
-			createNewIntegrationViaRest()
+			createNewIntegrationViaRest(context)
 				.then( success => {
 					if (!success) {
 						vscode.window.showErrorMessage("Unable to call Kubernetes rest API.");
@@ -354,79 +354,84 @@ function startIntegration(context: vscode.ExtensionContext): Promise<string> {
 }
 
 // use kubernetes rest to post new integration
-function createNewIntegrationViaRest(): Promise<boolean> {
+function createNewIntegrationViaRest(context: vscode.Uri): Promise<boolean> {
 	return new Promise<boolean> ( async (resolve, reject) => {
-		try {
-			const editor = vscode.window.activeTextEditor;
-			if (typeof(editor) === 'undefined') {
-				reject();
-				console.error('No active editor present?');
-				return;
-			}
-	
-			let selection = editor.document.fileName;
-			let filename = path.basename(selection);
-			let rootName = filename.split('.', 1)[0];
+		let filename = context.fsPath;
+		let absoluteRoot = path.parse(filename).base;
+		let rootName = absoluteRoot.split('.', 1)[0];
+		let integrationName = utils.toKebabCase(rootName);
+		utils.shareMessage(mainOutputChannel, `Deploying file ${absoluteRoot} as integration ${integrationName}`);
+		await removeOutputChannelForIntegrationViaRest(integrationName);
 
-			if (editor) {
-				utils.stringifyFileContents(selection).then( async (fileContent) => {
-					utils.createCamelKDeployJSON(rootName, fileContent, filename).then (async (json) => {
-						let proxyURL = utils.createCamelKRestURL();
-						await utils.pingKubernetes().catch( (error) =>  {
-							mainOutputChannel.append(error + ".\n\n");
-							reject(error);
-						});
-						var options = {
-							uri: proxyURL,
-							method: 'POST',
-							body: json
-						};
-						await utils.delay(1000);
-						rp(options)
-							.then(() => {
-								resolve(true);
-								return;
-							})
-							.catch((error) => {
-								reject(error);
-							});
-						});
-					});
-			}
-		} catch (error) {
-			console.error(error);
-			reject(error);
-		}
+		utils.stringifyFileContents(filename).then( async (fileContent) => {
+			utils.createCamelKDeployJSON(integrationName, fileContent, filename).then (async (json) => {
+				let proxyURL = utils.createCamelKRestURL();
+				await utils.pingKubernetes().catch( (error) =>  {
+					mainOutputChannel.append(error + ".\n\n");
+					reject(error);
+				});
+				var options = {
+					uri: proxyURL,
+					method: 'POST',
+					body: json
+				};
+				await utils.delay(1000);
+				rp(options).then(() => {
+					resolve(true);
+					return;
+				}).catch((error) => {
+					reject(error);
+				});
+			});
+		});
 	});			
 }
 
-// use command-line "kamel" utility to start a new integration
-function createNewIntegration(context: vscode.ExtensionContext): Promise<boolean> {
-	return new Promise( (resolve, reject) => {
-		try {
+// remove the output channel for a running integration via kubernetes rest call
+async function removeOutputChannelForIntegrationViaRest(integrationName:string) {
+	await getPodsViaRest().then((output) => {
+		findThePODNameForIntegrationFromJSON(output, integrationName)
+			.then( async (podName) => {
+				removeOutputChannel(podName);
+			});
+	});
+}
 
-			const editor = vscode.window.activeTextEditor;
-			if (typeof(editor) === 'undefined') {
-				reject();
-				console.error('No active editor present?');
-				return;
-			}
-	
-			let selection = editor.document.fileName;
-			let filename = path.basename(selection);
-			let root = path.dirname(selection);
-			let absoluteRoot = path.resolve(root);
-
-			if (editor) {
-				let commandString = 'kamel run --dev "' + filename + '"';
-				child_process.exec(commandString, { cwd : absoluteRoot});
-				resolve(true);
-			}
-		} catch (error) {
-			console.error(error);
-			reject(error);
+// remove the output channel for a running integration via kubectl executable
+async function removeOutputChannelForIntegrationViaKubectl(integrationName:string) {
+	await getIntegrationsFromKubectl(integrationName).then( (output) => {
+		let podName = processIntegrationList(output);
+		if (podName) {
+			removeOutputChannel(podName);
 		}
-	});			
+	});
+}
+
+// use command-line "kamel" utility to start a new integration
+function createNewIntegration(context: vscode.Uri): Promise<boolean> {
+	return new Promise( async (resolve, reject) => {
+		let filename = context.fsPath;
+		let foldername = path.dirname(filename);
+		let absoluteRoot = path.parse(filename).base;
+		let rootName = absoluteRoot.split('.', 1)[0];
+		let integrationName = utils.toKebabCase(rootName);
+		utils.shareMessage(mainOutputChannel, `Deploying file ${absoluteRoot} as integration ${integrationName}`);
+		await removeOutputChannelForIntegrationViaKubectl(integrationName)
+			.catch( (error) => { 
+				// this is not a hard stop, it just means there was no output channel to close
+				console.error(error); 
+			});
+
+		let commandString = 'kamel run --dev "' + absoluteRoot + '"';
+		let runKubectl = child_process.exec(commandString, { cwd : foldername});
+		runKubectl.stdout.on('data', function (data) {
+			resolve(true);
+		});
+		runKubectl.stderr.on('data', function (data) {
+			utils.shareMessage(mainOutputChannel, `Error deploying ${integrationName}: ${data}`);
+			reject(false);
+		});
+	});
 }
 
 // this method is called when your extension is deactivated
@@ -438,6 +443,10 @@ export function deactivate() {
 		Array.from(outputChannelMap.values()).forEach(value => value.dispose());
 	}
 	outputChannelMap.clear();
+
+	if (myStatusBarItem) {
+		myStatusBarItem.dispose();
+	}
 }
 
 // retrieve the list of integrations running in camel-k starting with the integration name
