@@ -50,18 +50,39 @@ suite("ensure camelk utilities work as expected", async function() {
 
 		// have to do some gymnastics to clear the settings for some reason
 		let proxyUrl = vscode.workspace.getConfiguration().get('camelk.integrations.proxyURL');
+		let proxyPort = vscode.workspace.getConfiguration().get('camelk.integrations.proxyPort') as number;
 		let namespace = vscode.workspace.getConfiguration().get('camelk.integrations.proxyNamespace');
 
-		await vscode.workspace.getConfiguration().update('camelk.integrations.proxyURL', 'http://localhost:8000', true);
+		await vscode.workspace.getConfiguration().update('camelk.integrations.proxyURL', 'http://localhost', true);
+		await vscode.workspace.getConfiguration().update('camelk.integrations.proxyPort', 9000, true); // use non-default value
 		await vscode.workspace.getConfiguration().update('camelk.integrations.proxyNamespace', 'default', true);
 
 		let urlstring = utils.createCamelKRestURL();
 		console.log("url output = " + urlstring);
-		assert.ok(urlstring === "http://localhost:8000/apis/camel.apache.org/v1alpha1/namespaces/default/integrations");
+		assert.ok(urlstring === "http://localhost:9000/apis/camel.apache.org/v1alpha1/namespaces/default/integrations");
 
 		// and set them back at the end
 		await vscode.workspace.getConfiguration().update('camelk.integrations.proxyURL', proxyUrl, true);
+		await vscode.workspace.getConfiguration().update('camelk.integrations.proxyPort', proxyPort, true);
 		await vscode.workspace.getConfiguration().update('camelk.integrations.proxyNamespace', namespace, true);
+	});
+
+	test("should be able to construct usable proxy URL", async function() {
+
+		// have to do some gymnastics to clear the settings for some reason
+		let proxyUrl = vscode.workspace.getConfiguration().get('camelk.integrations.proxyURL');
+		let proxyPort = vscode.workspace.getConfiguration().get('camelk.integrations.proxyPort') as number;
+
+		await vscode.workspace.getConfiguration().update('camelk.integrations.proxyURL', 'http://localhost', true);
+		await vscode.workspace.getConfiguration().update('camelk.integrations.proxyPort', 9000, true); // use non-default value
+
+		let urlstring = utils.createBaseProxyURL();
+		console.log("url output = " + urlstring);
+		assert.ok(urlstring === "http://localhost:9000");
+
+		// and set them back at the end
+		await vscode.workspace.getConfiguration().update('camelk.integrations.proxyURL', proxyUrl, true);
+		await vscode.workspace.getConfiguration().update('camelk.integrations.proxyPort', proxyPort, true);
 	});
 
 	test("should be able to ping accessible server", async function() {

@@ -21,15 +21,20 @@ import * as child_process from 'child_process';
 
 export const proxyURLSetting = 'camelk.integrations.proxyURL';
 export const proxyNamespaceSetting = 'camelk.integrations.proxyNamespace';
+export const proxyPortSetting = 'camelk.integrations.proxyPort';
 
 const camelAPIVersion = "v1alpha1";
 
-export function createCamelKRestURL() : string {
+export function createBaseProxyURL() : string {
 	let server = vscode.workspace.getConfiguration().get(proxyURLSetting);
+	let port = vscode.workspace.getConfiguration().get(proxyPortSetting) as number;
+	return `${server}:${port}`;
+}
+
+export function createCamelKRestURL() : string {
+	let base = createBaseProxyURL();
 	let namespace = vscode.workspace.getConfiguration().get(proxyNamespaceSetting);
-	let outputUrl = server + "/apis/camel.apache.org/" + camelAPIVersion + "/namespaces/" 
-		+ namespace + "/integrations";
-	return outputUrl;
+	return `${base}/apis/camel.apache.org/${camelAPIVersion}/namespaces/${namespace}/integrations`;
 }
 
 export function createCamelKDeleteRestURL(integrationName:string) : string {
@@ -39,17 +44,14 @@ export function createCamelKDeleteRestURL(integrationName:string) : string {
 }
 
 export function createCamelKPodLogURL(podName:string) : string {
-	let server = vscode.workspace.getConfiguration().get(proxyURLSetting);
-	let namespace = vscode.workspace.getConfiguration().get(proxyNamespaceSetting);
-	let outputUrl = server + "/api/v1/namespaces/" + namespace + "/pods/" + podName + "/log";
-	return outputUrl;
+	let base = createCamelKGetPodsURL();
+	return `${base}${podName}/log`;
 }
 
 export function createCamelKGetPodsURL() : string {
-	let server = vscode.workspace.getConfiguration().get(proxyURLSetting);
+	let base = createBaseProxyURL();
 	let namespace = vscode.workspace.getConfiguration().get(proxyNamespaceSetting);
-	let outputUrl = server + "/api/v1/namespaces/" + namespace + "/pods";
-	return outputUrl;
+	return `${base}/api/v1/namespaces/${namespace}/pods/`;
 }
 
 export function stringifyFileContents(absoluteFilePath:string) : Promise<string> {

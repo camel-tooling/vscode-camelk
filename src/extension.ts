@@ -27,10 +27,11 @@ import {platform} from 'os';
 export let mainOutputChannel: vscode.OutputChannel;
 export let myStatusBarItem: vscode.StatusBarItem;
 let camelKIntegrationsProvider = new CamelKNodeProvider();
-let useProxy : boolean = false;
+let useProxy : boolean;
 let outputChannelMap : Map<string, vscode.OutputChannel>;
 let curlCommand : string = '/bin/sh';
 let curlOption : string = '-c';
+let proxyPort : number;
 
 // This extension offers basic integration with Camel-K (https://github.com/apache/camel-k) on two fronts.
 
@@ -45,23 +46,28 @@ export function activate(context: vscode.ExtensionContext) {
 	}
 
 	// process the workspace setting indicating whether we should use the proxy or CLI
-	let proxySetting = vscode.workspace.getConfiguration().get('camelk.integrations.useProxy');
-	if (proxySetting) {
-		useProxy = true;
-	}
+	let proxySetting = vscode.workspace.getConfiguration().get('camelk.integrations.useProxy') as boolean;
+	useProxy = proxySetting;
 	camelKIntegrationsProvider.setUseProxy(useProxy);
 
 	vscode.workspace.onDidChangeConfiguration(() => {
-		let proxySetting = vscode.workspace.getConfiguration().get('camelk.integrations.useProxy');
-		if (proxySetting) {
-			useProxy = true;
-		} else {
-			useProxy = false;
-		}
+		let proxySetting = vscode.workspace.getConfiguration().get('camelk.integrations.useProxy') as boolean;
+		useProxy = proxySetting;
 		camelKIntegrationsProvider.setUseProxy(useProxy);
 		camelKIntegrationsProvider.refresh();
 	});	
-	
+
+	// process the workspace setting indicating the proxy port we should use
+	let proxyPortTemp = vscode.workspace.getConfiguration().get('camelk.integrations.proxyPort') as number;
+	if (proxyPortTemp) {
+		proxyPort = proxyPortTemp; 
+	}
+
+	vscode.workspace.onDidChangeConfiguration(() => {
+		let proxyPortTemp = vscode.workspace.getConfiguration().get('camelk.integrations.proxyPort') as number;
+		proxyPort = proxyPortTemp; 
+	});	
+
 	mainOutputChannel = vscode.window.createOutputChannel("Camel-K");
 	mainOutputChannel.show();
 
@@ -159,7 +165,8 @@ export function activate(context: vscode.ExtensionContext) {
 	vscode.commands.registerCommand('camelk.integrations.startproxy', async (node: TreeNode) => {
 		await startKubeProxy()
 			.then ( () => {
-				utils.shareMessage(mainOutputChannel, ("Started kubectl proxy on port 8000"));
+				let proxy = utils.createBaseProxyURL();
+				utils.shareMessage(mainOutputChannel, (`Started kubectl proxy at URL ${proxy}`));
 				if (useProxy) {
 					// populate the initial tree
 					camelKIntegrationsProvider.refresh();
@@ -422,7 +429,9 @@ function createNewIntegration(context: vscode.Uri): Promise<boolean> {
 				console.error(error); 
 			});
 
-		let commandString = 'kamel run --dev "' + absoluteRoot + '"';
+		let commandString = 'kamel run';
+		commandString += ' "' + absoluteRoot + '"';
+		console.log(`commandString = ${commandString}`);
 		let runKubectl = child_process.exec(commandString, { cwd : foldername});
 		runKubectl.stdout.on('data', function (data) {
 			resolve(true);
@@ -483,7 +492,8 @@ function processIntegrationList(output: string) : string {
 // start a new local Kubernetes proxy using kubectl
 function startKubeProxy(): Promise<string> {
 	return new Promise( (resolve, reject) => {
-		let commandString = 'kubectl proxy --port=8000';
+
+		let commandString = `kubectl proxy --port=${proxyPort}`;
 		let runKubectl = child_process.exec(commandString);
 		runKubectl.stdout.on('data', function (data) {
 			resolve(data.toString());
