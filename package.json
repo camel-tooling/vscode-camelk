@@ -45,10 +45,22 @@
 			{
 				"title": "Camel-K Integration Settings",
 				"properties": {
+					"camelk.integrations.useProxy": {
+						"type": "boolean",
+						"default": false,
+						"description": "Always use proxy: If true, always use the proxy URL instead of Minikube",
+						"scope": "window"
+					},
 					"camelk.integrations.proxyURL": {
 						"type": "string",
-						"default": "http://localhost:8000",
-						"description": "Proxy configuration: URL to the running Kube server with accessible port",
+						"default": "http://localhost",
+						"description": "Proxy configuration: URL to the running Kube server (to be combined with port)",
+						"scope": "window"
+					},
+					"camelk.integrations.proxyPort": {
+						"type": "number",
+						"default": 8000,
+						"description": "Proxy configuration: Port to the running Kube server (combined with proxy URL)",
 						"scope": "window"
 					},
 					"camelk.integrations.proxyNamespace": {
@@ -59,12 +71,6 @@
 						],
 						"default": "default",
 						"description": "Proxy namespace: Namespace to use for accessing the Camel-K integrations",
-						"scope": "window"
-					},
-					"camelk.integrations.useProxy": {
-						"type": "boolean",
-						"default": false,
-						"description": "Always use proxy: If true, always use the proxy URL instead of Minikube",
 						"scope": "window"
 					}
 				}
