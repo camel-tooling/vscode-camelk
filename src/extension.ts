@@ -32,6 +32,7 @@ let outputChannelMap : Map<string, vscode.OutputChannel>;
 let curlCommand : string = '/bin/sh';
 let curlOption : string = '-c';
 let proxyPort : number;
+let showStatusBar : boolean;
 
 // This extension offers basic integration with Camel-K (https://github.com/apache/camel-k) on two fronts.
 
@@ -44,6 +45,18 @@ export function activate(context: vscode.ExtensionContext) {
 		curlCommand = 'cmd';
 		curlOption = '/c';
 	}
+	// process the workspace setting indicating whether we should use the proxy or CLI
+	let statusBarSetting = vscode.workspace.getConfiguration().get('camelk.integrations.showStatusBarMessages') as boolean;
+	showStatusBar = statusBarSetting;
+
+	vscode.workspace.onDidChangeConfiguration(() => {
+		let statusBarSetting = vscode.workspace.getConfiguration().get('camelk.integrations.showStatusBarMessages') as boolean;
+		showStatusBar = statusBarSetting;
+		if (!showStatusBar) {
+			hideStatusLine();
+		}
+	});	
+
 
 	// process the workspace setting indicating whether we should use the proxy or CLI
 	let proxySetting = vscode.workspace.getConfiguration().get('camelk.integrations.useProxy') as boolean;
@@ -83,6 +96,7 @@ export function activate(context: vscode.ExtensionContext) {
 	// create the integration view action -- remove
 	vscode.commands.registerCommand('camelk.integrations.remove', async (node: TreeNode) => {
 		if (node && node.label) {
+			setStatusLineMessage(`Removing Camel-K Integration...`);
 			let integrationName : string = node.label;
 			if (useProxy) {
 				utils.shareMessage(mainOutputChannel, 'Removing ' + integrationName + ' via Kubernetes Rest Delete');
@@ -106,6 +120,7 @@ export function activate(context: vscode.ExtensionContext) {
 				});
 				await removeOutputChannelForIntegrationViaKubectl(integrationName);
 			}
+			hideStatusLine();
 			camelKIntegrationsProvider.refresh();
 		}
 	});
@@ -113,6 +128,7 @@ export function activate(context: vscode.ExtensionContext) {
 	// create the integration view action -- start log
 	vscode.commands.registerCommand('camelk.integrations.log', async (node: TreeNode) => {
 		if (node && node.label) {
+			setStatusLineMessage(`Retrieving Camel-K Integration log...`);
 			let integrationName : string = node.label;
 			if (useProxy) {
 				utils.shareMessage(mainOutputChannel, 'Connecting to the log for ' + integrationName + ' via Kubernetes Rest');
@@ -126,7 +142,7 @@ export function activate(context: vscode.ExtensionContext) {
 								});
 							})
 							.catch( (error) => {
-								utils.shareMessage(mainOutputChannel, `No pod found for integration: ${output}`);
+								utils.shareMessage(mainOutputChannel, `No pod found for integration: ${integrationName}`);
 							});
 						})
 					.catch( (error) => {
@@ -152,21 +168,24 @@ export function activate(context: vscode.ExtensionContext) {
 								console.log("[CLOSING] " + `${code} / ${signal} \n`);
 							});
 						} else {
-							utils.shareMessage(mainOutputChannel, `No deployed integration found for: ${output} \n`);
+							utils.shareMessage(mainOutputChannel, `No deployed integration found for: ${integrationName} \n`);
 						}
 					}).catch( (error) => {
 						utils.shareMessage(mainOutputChannel, `rest error: ${error} \n`);
 					});
 			}
+			hideStatusLine();
 		}
 	});
 
 	// create the integration view action -- start proxy
 	vscode.commands.registerCommand('camelk.integrations.startproxy', async (node: TreeNode) => {
+		setStatusLineMessage(`Starting kubectl proxy...`);
 		await startKubeProxy()
 			.then ( () => {
 				let proxy = utils.createBaseProxyURL();
 				utils.shareMessage(mainOutputChannel, (`Started kubectl proxy at URL ${proxy}`));
+				hideStatusLine();
 				if (useProxy) {
 					// populate the initial tree
 					camelKIntegrationsProvider.refresh();
@@ -175,6 +194,7 @@ export function activate(context: vscode.ExtensionContext) {
 			.catch( (error) => {
 				utils.shareMessage(mainOutputChannel, ("kubectl execution return code: " + error));
 		});
+		hideStatusLine();
 	});
 
 	// create the integration view action -- start new integration
@@ -183,6 +203,20 @@ export function activate(context: vscode.ExtensionContext) {
 
 	// populate the initial tree
 	camelKIntegrationsProvider.refresh();
+}
+
+export function setStatusLineMessage( message : string) {
+	if (myStatusBarItem && message && showStatusBar) {
+		myStatusBarItem.text = message;
+		myStatusBarItem.show();
+	}
+}
+
+export function hideStatusLine() {
+	if (myStatusBarItem) {
+		myStatusBarItem.hide();
+	}
+
 }
 
 // find an output channel by name in the map and remove it
@@ -242,6 +276,7 @@ function getPodLogViaCurl(podName : string): Promise<boolean> {
 			let podsURL = utils.createCamelKPodLogURL(podName);
 			await utils.pingTheURL(podsURL).catch( (error) =>  {
 				reject(error);
+				return false;
 			});
 			let podOutputChannel = getOutputChannel(podName);
 			podOutputChannel.show();
@@ -324,6 +359,7 @@ async function stopIntegrationViaRest(integrationName: string) : Promise<any>{
 // start an integration from a file
 function startIntegration(context: vscode.Uri): Promise<string> {
 	return new Promise <string> ( async (resolve, reject) => {
+		setStatusLineMessage(`Starting new Camel-K Integration...`);
 		if (useProxy) {
 			utils.shareMessage(mainOutputChannel, "Starting new integration via Kubernetes rest API");
 			createNewIntegrationViaRest(context)
@@ -333,11 +369,13 @@ function startIntegration(context: vscode.Uri): Promise<string> {
 						reject();
 					}
 					resolve();
+					hideStatusLine();
 					return success;
 				})
 				.catch(err => {
 					utils.shareMessage(mainOutputChannel, "Kamel execution return code: " + err);
 					reject();
+					hideStatusLine();
 					return err;
 				});
 		} else {
@@ -349,11 +387,13 @@ function startIntegration(context: vscode.Uri): Promise<string> {
 						reject();
 					}
 					resolve();
+					hideStatusLine();
 					return success;
 				})
 				.catch(err => {
 					utils.shareMessage(mainOutputChannel, ("Kamel execution return code: " + err));
 					reject();
+					hideStatusLine();
 					return err;
 				});
 			}

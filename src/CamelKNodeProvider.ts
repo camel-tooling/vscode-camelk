@@ -83,8 +83,7 @@ export class CamelKNodeProvider implements vscode.TreeDataProvider<TreeNode> {
 	// trigger a refresh event in VSCode
 	public async refresh(): Promise<void> {
 		let oldCount = this.treeNodes.length;
-		extension.myStatusBarItem.text = `Refreshing Camel-K Integrations view`;
-		extension.myStatusBarItem.show();
+		extension.setStatusLineMessage(`Refreshing Camel-K Integrations view...`);
 		this.resetList();
 		let inaccessible = false;
 		if (this.retrieveIntegrations) {
@@ -140,7 +139,7 @@ export class CamelKNodeProvider implements vscode.TreeDataProvider<TreeNode> {
 				retryTries++;
 			}
 		}
-		extension.myStatusBarItem.hide();
+		extension.hideStatusLine();
 		this._onDidChangeTreeData.fire();
 		Promise.resolve();
 		let newCount = this.treeNodes.length;
@@ -167,12 +166,22 @@ export class CamelKNodeProvider implements vscode.TreeDataProvider<TreeNode> {
 		if (output) {
 			let lines = output.split('\n');
 			for (let entry of lines) {
-				let line = entry.split(' ');
-				if (line[0].toUpperCase().startsWith('NAME') || line[0].trim().length === 0) {
+				let line = entry.split('  ');
+				let cleanLine = [];
+				for (var i=0; i < line.length; i++) {
+					if (line[i].trim().length === 0) {
+						continue;
+					}
+					cleanLine.push(line[i].trim());
+				}
+				let firstString : string = cleanLine[0];
+				if (firstString === undefined || firstString.toUpperCase().startsWith('NAME') || firstString.trim().length === 0) {
 					continue;
 				}
-				let integrationName = line[0];
-				let newNode = new TreeNode("string", integrationName, vscode.TreeItemCollapsibleState.None);
+
+				let integrationName = cleanLine[0];
+				let status = cleanLine[1];
+				let newNode = new TreeNode("string", integrationName, status, vscode.TreeItemCollapsibleState.None);
 				if (this.doesNodeExist(this.treeNodes, newNode) === false) {
 					this.addChild(this.treeNodes, newNode, true);
 				}
@@ -187,7 +196,7 @@ export class CamelKNodeProvider implements vscode.TreeDataProvider<TreeNode> {
 			let o = JSON.parse(temp);
 			for (var i=0; i<o.items.length;i++) {
 				var integrationName = o.items[i].metadata.name;
-				let newNode = new TreeNode("string", integrationName, vscode.TreeItemCollapsibleState.None);
+				let newNode = new TreeNode("string", integrationName, 'Running', vscode.TreeItemCollapsibleState.None);
 				if (this.doesNodeExist(this.treeNodes, newNode) === false) {
 					this.addChild(this.treeNodes, newNode, true);
 				}
@@ -248,17 +257,28 @@ export class CamelKNodeProvider implements vscode.TreeDataProvider<TreeNode> {
 // simple tree node for our integration view
 export class TreeNode extends vscode.TreeItem {
 	type: string;
+	status: string;
 
 	constructor(
 		type: string,
 		label: string,
+		status: string,
 		collapsibleState: vscode.TreeItemCollapsibleState
 	) {
 		super(label, collapsibleState);
 		this.type = type;
-		this.iconPath = {
-			light: path.join(__filename, '..', '..', 'resources', 'round-k-transparent-16.svg'),
-			dark: path.join(__filename, '..', '..', 'resources', 'round-k-transparent-16.svg')
-		};
+		this.status = status;
+		this.iconPath = this.getIconForPodStatus(this.status);
+		this.tooltip = `Status: ${this.status}`;
+	}
+
+	getIconForPodStatus(status: string):  object {
+		let newIcon : object;
+		if (status.toLowerCase().startsWith("running")) {
+			newIcon = vscode.Uri.file(path.join(__dirname, "../resources/round-k-transparent-16-running.svg"));
+		} else {
+			newIcon = vscode.Uri.file(path.join(__dirname, "../resources/round-k-transparent-16-error.svg"));
+		}
+		return newIcon;
 	}
 }
