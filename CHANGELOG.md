@@ -2,12 +2,18 @@
 
 All notable changes to the "vscode-camelk" extension will be documented in this file.
 
+## 0.0.6
+
+- TBD
+
 ## 0.0.5
 
-- Added status bar indicator when Camel-K integrations view is refreshing
+- Added status bar indicators when Camel-K integrations view is refreshing and during other events
 - Added test for kebab case based on Camel-K go test
 - Added check to see if the kamel executable is available when not using proxy
 - Fixed issue with right-click menu not correctly finding selected file
+- Added decorators to indicate state of published integration (Running is green, anything else is red)
+- Added new setting to turn off status bar messages
 
 ## 0.0.4
 
