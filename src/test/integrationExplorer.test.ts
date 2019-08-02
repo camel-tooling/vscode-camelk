@@ -42,7 +42,7 @@ suite('Camel-k Integrations View', () => {
 		integrationExplorer.resetList();
 		const refreshStub = sandbox.stub(integrationExplorer, 'refresh');
 		var children = await integrationExplorer.getChildren();
-		const newNode = new TreeNode("string", "mockIntegration", vscode.TreeItemCollapsibleState.None);
+		const newNode = new TreeNode("string", "mockIntegration", "running", vscode.TreeItemCollapsibleState.None);
 		integrationExplorer.addChild(children, newNode, false);
 		expect(children.length).equals(1);
 		expect(children[0].label).equals("mockIntegration");
@@ -53,7 +53,7 @@ suite('Camel-k Integrations View', () => {
 		integrationExplorer.resetList();
 		const refreshStub = sandbox.stub(integrationExplorer, 'refresh');
 		var children = await integrationExplorer.getChildren();
-		const newNode = new TreeNode("string", "mockIntegration", vscode.TreeItemCollapsibleState.None);
+		const newNode = new TreeNode("string", "mockIntegration", "running", vscode.TreeItemCollapsibleState.None);
 		integrationExplorer.addChild(children, newNode);
 		integrationExplorer.removeChild(children, newNode);
 		expect(refreshStub).calledTwice;

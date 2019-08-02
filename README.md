@@ -43,7 +43,7 @@ If Camel-K (Kamel) is in the system path, we can simply call the 'kamel' utility
 
 ![Run Menu](images/kubernetes-view-camelk-run-xml-menu.jpg)
 
-That launches my 'kamel' process from an XML file in the directory of the file (i.e. `kamel run --dev "filename"` or the equivalent Kubernetes rest call) or uses the Kubernetes Rest API to deploy the integration to the running Kubernetes system.
+That launches my 'kamel' process from an XML file in the directory of the file (i.e. `kamel run "filename"` or the equivalent Kubernetes rest call) or uses the Kubernetes Rest API to deploy the integration to the running Kubernetes system.
 
 There are two types of "output channels" providing details for the extension.
 
@@ -72,24 +72,42 @@ Note: Refreshing the view sometimes is delayed as we wait for pods to start. You
 
 ![Camel-K integrations view Refresh](images/camelk-integrations-view-refresh-action.jpg)
 
+Integrations in the list are decorated with a little dot indicating the status of the deployment. If green, the integration is in a "Running" state. If red, it is in other states such as "Building Kit" or "Error." And if you hover over the integration, the tooltip will show the status.
+
+![Camel-K integrations view Status tooltip](images/camelk-integrations-view-status-tooltip.jpg)
+
+### Camel-K Status Bar Messages
+
+While events are occurring such as the Camel-K Integrations view is being refreshed or a new Integration is being deployed, a status bar message will appear to offer an indication. This can be disabled in the extension settings.
+
+The extension shows status messages when:
+
+* Starting a new integration
+* Removing an integration
+* Refreshing the integrations view
+* Starting to follow an integration log
+* Starting a local Kubernetes proxy instance
+
+![Camel-K integrations Status Bar](images/camelk-integrations-status-bar.jpg)
+
 ## Camel-K Extension Settings
 
 To access the new extension settings, go to File->Preferences->Settings, then select "Extensions" and finally "Camel-K Integration Settings."
 
 ![Camel-K integrations view Settings](images/camelk-integrations-view-settings.jpg)
 
-* Proxy Namespace - Currently this drop-down has two values: default and syndesis. If we need to make this editable down the line, we can, but this was a good place to start.
-* Proxy URL - This setting corresponds to the server proxy for your Kubernetes service. It defaults to http://localhost:8000, but can be altered to any appropriate service URL. (See [Use an HTTP Proxy to Access the Kubernetes API)[https://kubernetes.io/docs/tasks/access-kubernetes-api/http-proxy-access-api/] for details on how to create the local proxy (i.e. 'kubectl proxy –port=8000') and "Starting a local Kubernetes proxy" below.)
+* Proxy Namespace - Currently this drop-down has two values: default and syndesis.
+* Proxy Port - Corresponds to the port of the Proxy URL to be used for accessing Kubernetes via Rest APIs. Defaults to 8000.
+* Proxy URL - This setting corresponds to the server proxy url for your Kubernetes service. It defaults to http://localhost, but can be altered to any appropriate service URL. It is combined with the port to construct URLs at runtime when starting the proxy and using proxy calls. (See [Use an HTTP Proxy to Access the Kubernetes API)[https://kubernetes.io/docs/tasks/access-kubernetes-api/http-proxy-access-api/] for details on how to create the local proxy (i.e. 'kubectl proxy –port=8000') and "Starting a local Kubernetes proxy" below.)
+* Show Status Bar Messages - Indicates whether to show messages in the status bar to indicate when the system is updating, such as when the Camel-K Integrations view is being refreshed or a new Integration is being deployed.
 * Use Proxy - This setting determines whether the Camel-K Integrations view retrieves the list of running integrations via the local 'kubectl' application or via the Kubernetes Rest API and calls through the Proxy URL/Namespace combination above. The ultimate URL becomes [proxyurl]/apis/camel.apache.org/v1alpha1/namespaces/[namespace]/integrations. 
 
 ## Starting a local Kubernetes proxy
 
 (Only available with the Minikube executable installed, but useful for local development.)
 
-We have created a new command available in the command palette (Ctrl+Shift+P or F1) called "Camel-K: Start the kubectl proxy server." This will start a new Kubernetes proxy using the Minikube executable ('kubectl proxy --port=8000) and refreshes the Camel-K Integrations view immediately. This command creates a local proxy at http://localhost:8000, which is the default value for Proxy URL in the extension settings.
+We have created a new command available in the command palette (Ctrl+Shift+P or F1) called "Camel-K: Start the kubectl proxy server." This will start a new Kubernetes proxy using the Minikube executable ('kubectl proxy --port=8000) and refreshes the Camel-K Integrations view immediately. This command creates a local proxy at the URL composed of the Proxy URL and Proxy Port set in the settings. For example, with the defaults the proxy URL becomes http://localhost:8000.
 
 ## Known Issues
 
 Here's the current list of issues we're working to resolve. If you find a new issue, please [create a new issue report in GitHub](https://github.com/camel-tooling/vscode-camelk/issues)!
-
-* Do not pollute all Groovy files with Camel-K [Issue #7](https://github.com/camel-tooling/vscode-camelk/issues/7) - this is also a problem for XML, JavaScript, and Java files at this time.

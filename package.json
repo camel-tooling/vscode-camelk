@@ -72,6 +72,12 @@
 						"default": "default",
 						"description": "Proxy namespace: Namespace to use for accessing the Camel-K integrations",
 						"scope": "window"
+					},
+					"camelk.integrations.showStatusBarMessages": {
+						"type": "boolean",
+						"default": true,
+						"description": "Show Status Bar messages",
+						"scope": "window"
 					}
 				}
 			}
