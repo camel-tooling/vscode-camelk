@@ -192,11 +192,13 @@ export class CamelKNodeProvider implements vscode.TreeDataProvider<TreeNode> {
 	// process the JSON we get back from the kube rest API
 	processIntegrationListFromJSON(json : Object) {
 		if (json) {
-			let temp = JSON.stringify(json);
-			let o = JSON.parse(temp);
-			for (var i=0; i<o.items.length;i++) {
-				var integrationName = o.items[i].metadata.name;
-				let newNode = new TreeNode("string", integrationName, 'Running', vscode.TreeItemCollapsibleState.None);
+			let jsonStringify = JSON.stringify(json);
+			let jsonObject = JSON.parse(jsonStringify);
+			for (var i=0; i<jsonObject.items.length;i++) {
+				var integration = jsonObject.items[i];
+				var integrationName = integration.metadata.name;
+				var integrationPhase = integration.status.phase;
+				let newNode = new TreeNode("string", integrationName, integrationPhase, vscode.TreeItemCollapsibleState.None);
 				if (this.doesNodeExist(this.treeNodes, newNode) === false) {
 					this.addChild(this.treeNodes, newNode, true);
 				}
