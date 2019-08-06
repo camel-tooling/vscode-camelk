@@ -19,18 +19,20 @@
 import * as vscode from 'vscode';
 import * as assert from 'assert';
 
-suite("ensure camelk extension exists and is accessible", async function() {
+suite("ensure camelk extension exists and is accessible", function() {
 	const extensionId = 'redhat.vscode-camelk';
 
-	test('vscode-camelk extension should be present', () => {
+	test('vscode-camelk extension should be present', function(done) {
 		assert.ok(vscode.extensions.getExtension(extensionId));
+		done();
 	});
 
-	test('vscode-camelk extension should activate', async function () {
+	test('vscode-camelk extension should activate', function (done) {
 		let extension = vscode.extensions.getExtension(extensionId);
 		if (extension !== null && extension !== undefined) {
-			return extension.activate().then((api) => {
+			extension.activate().then((api) => {
 				assert.ok(true);
+				done();
 			});
 		}
 	});	

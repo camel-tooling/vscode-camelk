@@ -23,6 +23,8 @@ import { CamelKNodeProvider, TreeNode } from './CamelKNodeProvider';
 import * as utils from './CamelKJSONUtils';
 import * as rp from 'request-promise';
 import {platform} from 'os';
+import * as configmapsandsecrets from './ConfigMapAndSecrets';
+import * as integrationutils from './IntegrationUtils';
 
 export let mainOutputChannel: vscode.OutputChannel;
 export let myStatusBarItem: vscode.StatusBarItem;
@@ -34,7 +36,7 @@ let curlOption : string = '-c';
 let proxyPort : number;
 let showStatusBar : boolean;
 
-// This extension offers basic integration with Camel-K (https://github.com/apache/camel-k) on two fronts.
+// This extension offers basic integration with Camel K (https://github.com/apache/camel-k) on two fronts.
 
 export function activate(context: vscode.ExtensionContext) {
 
@@ -81,7 +83,7 @@ export function activate(context: vscode.ExtensionContext) {
 		proxyPort = proxyPortTemp; 
 	});	
 
-	mainOutputChannel = vscode.window.createOutputChannel("Camel-K");
+	mainOutputChannel = vscode.window.createOutputChannel("Apache Camel K");
 	mainOutputChannel.show();
 
 	myStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 100);
@@ -96,7 +98,7 @@ export function activate(context: vscode.ExtensionContext) {
 	// create the integration view action -- remove
 	vscode.commands.registerCommand('camelk.integrations.remove', async (node: TreeNode) => {
 		if (node && node.label) {
-			setStatusLineMessage(`Removing Camel-K Integration...`);
+			setStatusLineMessage(`Removing Apache Camel K Integration...`);
 			let integrationName : string = node.label;
 			if (useProxy) {
 				utils.shareMessage(mainOutputChannel, 'Removing ' + integrationName + ' via Kubernetes Rest Delete');
@@ -128,7 +130,7 @@ export function activate(context: vscode.ExtensionContext) {
 	// create the integration view action -- start log
 	vscode.commands.registerCommand('camelk.integrations.log', async (node: TreeNode) => {
 		if (node && node.label) {
-			setStatusLineMessage(`Retrieving Camel-K Integration log...`);
+			setStatusLineMessage(`Retrieving log for running Apache Camel K Integration...`);
 			let integrationName : string = node.label;
 			if (useProxy) {
 				utils.shareMessage(mainOutputChannel, 'Connecting to the log for ' + integrationName + ' via Kubernetes Rest');
@@ -201,6 +203,9 @@ export function activate(context: vscode.ExtensionContext) {
 	let startIntegration = vscode.commands.registerCommand('camelk.startintegration', async (uri:vscode.Uri) => { await runTheFile(uri);});
 	context.subscriptions.push(startIntegration);
 
+	// add commands to create config-map and secret objects from .properties files
+	configmapsandsecrets.registerCommands();
+
 	// populate the initial tree
 	camelKIntegrationsProvider.refresh();
 }
@@ -216,7 +221,6 @@ export function hideStatusLine() {
 	if (myStatusBarItem) {
 		myStatusBarItem.hide();
 	}
-
 }
 
 // find an output channel by name in the map and remove it
@@ -266,6 +270,8 @@ function findThePODNameForIntegrationFromJSON(json : Object, integrationName : s
 				}
 			}
 			reject(new Error());
+		} else {
+			reject("JSON not returned from Kubernetes Rest call");
 		}
 	});
 }
@@ -359,7 +365,7 @@ async function stopIntegrationViaRest(integrationName: string) : Promise<any>{
 // start an integration from a file
 function startIntegration(context: vscode.Uri): Promise<string> {
 	return new Promise <string> ( async (resolve, reject) => {
-		setStatusLineMessage(`Starting new Camel-K Integration...`);
+		setStatusLineMessage(`Starting new Apache Camel K Integration...`);
 		if (useProxy) {
 			utils.shareMessage(mainOutputChannel, "Starting new integration via Kubernetes rest API");
 			createNewIntegrationViaRest(context)
@@ -380,7 +386,7 @@ function startIntegration(context: vscode.Uri): Promise<string> {
 				});
 		} else {
 			utils.shareMessage(mainOutputChannel, "Starting new integration via Kamel executable.");
-			createNewIntegration(context)
+			await integrationutils.startIntegration(context)
 				.then( success => {
 					if (!success) {
 						vscode.window.showErrorMessage("Unable to call Kamel.");
@@ -445,41 +451,12 @@ async function removeOutputChannelForIntegrationViaRest(integrationName:string) 
 }
 
 // remove the output channel for a running integration via kubectl executable
-async function removeOutputChannelForIntegrationViaKubectl(integrationName:string) {
+export async function removeOutputChannelForIntegrationViaKubectl(integrationName:string) {
 	await getIntegrationsFromKubectl(integrationName).then( (output) => {
 		let podName = processIntegrationList(output);
 		if (podName) {
 			removeOutputChannel(podName);
 		}
-	});
-}
-
-// use command-line "kamel" utility to start a new integration
-function createNewIntegration(context: vscode.Uri): Promise<boolean> {
-	return new Promise( async (resolve, reject) => {
-		let filename = context.fsPath;
-		let foldername = path.dirname(filename);
-		let absoluteRoot = path.parse(filename).base;
-		let rootName = absoluteRoot.split('.', 1)[0];
-		let integrationName = utils.toKebabCase(rootName);
-		utils.shareMessage(mainOutputChannel, `Deploying file ${absoluteRoot} as integration ${integrationName}`);
-		await removeOutputChannelForIntegrationViaKubectl(integrationName)
-			.catch( (error) => { 
-				// this is not a hard stop, it just means there was no output channel to close
-				console.error(error); 
-			});
-
-		let commandString = 'kamel run';
-		commandString += ' "' + absoluteRoot + '"';
-		console.log(`commandString = ${commandString}`);
-		let runKubectl = child_process.exec(commandString, { cwd : foldername});
-		runKubectl.stdout.on('data', function (data) {
-			resolve(true);
-		});
-		runKubectl.stderr.on('data', function (data) {
-			utils.shareMessage(mainOutputChannel, `Error deploying ${integrationName}: ${data}`);
-			reject(false);
-		});
 	});
 }
 
@@ -498,7 +475,7 @@ export function deactivate() {
 	}
 }
 
-// retrieve the list of integrations running in camel-k starting with the integration name
+// retrieve the list of integrations running in camel k starting with the integration name
 function getIntegrationsFromKubectl(integrationName : string): Promise<string> {
 	return new Promise( (resolve, reject) => {
 		let commandString = 'kubectl get pods | grep ' + integrationName;

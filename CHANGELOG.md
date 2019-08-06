@@ -4,7 +4,13 @@ All notable changes to the "vscode-camelk" extension will be documented in this 
 
 ## 0.0.6
 
-- TBD
+- Added ability to deploy integrations with associated Kubernetes ConfigMaps or Secrets
+- Added ability to create Kubernetes ConfigMaps or Secrets
+- Began migrating away from direct Kubectl calls in favor of using the Kubernetes API component
+- Changed 'Camel-K' to 'Apache Camel K' across the board for consistency
+- Added tests for ConfigMap and Secret utilities
+- Added Kotlin
+- Moved menus to separate group to avoid cluttering up the Explorer context menu as much
 
 ## 0.0.5
 

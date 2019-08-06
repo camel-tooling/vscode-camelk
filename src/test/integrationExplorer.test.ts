@@ -38,24 +38,28 @@ suite('Camel-k Integrations View', () => {
 		sandbox.restore();
 	});
 
-	test('adding a single child should trigger a refresh', async () => {
+	test('adding a single child should trigger a refresh', function(done) {
 		integrationExplorer.resetList();
 		const refreshStub = sandbox.stub(integrationExplorer, 'refresh');
-		var children = await integrationExplorer.getChildren();
-		const newNode = new TreeNode("string", "mockIntegration", "running", vscode.TreeItemCollapsibleState.None);
-		integrationExplorer.addChild(children, newNode, false);
-		expect(children.length).equals(1);
-		expect(children[0].label).equals("mockIntegration");
-		expect(refreshStub).calledOnce;
+		integrationExplorer.getChildren().then( (children) => {
+			const newNode = new TreeNode("string", "mockIntegration", "running", vscode.TreeItemCollapsibleState.None);
+			integrationExplorer.addChild(children, newNode, false);
+			expect(children.length).equals(1);
+			expect(children[0].label).equals("mockIntegration");
+			expect(refreshStub).calledOnce;
+			done();
+		});
 	});
 
-	test('adding and removing a child should trigger refresh twice', async () => {
+	test('adding and removing a child should trigger refresh twice', function(done) {
 		integrationExplorer.resetList();
 		const refreshStub = sandbox.stub(integrationExplorer, 'refresh');
-		var children = await integrationExplorer.getChildren();
-		const newNode = new TreeNode("string", "mockIntegration", "running", vscode.TreeItemCollapsibleState.None);
-		integrationExplorer.addChild(children, newNode);
-		integrationExplorer.removeChild(children, newNode);
-		expect(refreshStub).calledTwice;
+		integrationExplorer.getChildren().then( (children) => {
+			const newNode = new TreeNode("string", "mockIntegration", "running", vscode.TreeItemCollapsibleState.None);
+			integrationExplorer.addChild(children, newNode);
+			integrationExplorer.removeChild(children, newNode);
+			expect(refreshStub).calledTwice;
+			done();
+		});
 	});
 });
