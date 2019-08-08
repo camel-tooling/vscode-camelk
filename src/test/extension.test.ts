@@ -30,10 +30,17 @@ suite("ensure camelk extension exists and is accessible", function() {
 	test('vscode-camelk extension should activate', function (done) {
 		let extension = vscode.extensions.getExtension(extensionId);
 		if (extension !== null && extension !== undefined) {
-			extension.activate().then((api) => {
-				assert.ok(true);
-				done();
-			});
+			try {
+				extension.activate().then(() => {
+					if (extension !== null && extension !== undefined) {
+						const camelKIsActive = extension.isActive;
+						assert.deepEqual(camelKIsActive, true);
+					}
+				});
+			} catch { (err:any) => {
+				done(err);
+			}}; 
 		}
+		done();
 	});	
 });

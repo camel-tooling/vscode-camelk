@@ -22,13 +22,13 @@ import * as assert from 'assert';
 import * as vscode from 'vscode';
 import * as nock from 'nock';
 
-suite("ensure camelk utilities work as expected", function() {
+suite('ensure camelk utilities work as expected', function() {
 	
-	test("should be able to stringify existing file", function(done) {
+	test('should be able to stringify existing file', function(done) {
 		let testFilePath = path.join(__dirname, '../../src/test/helloworld.groovy');
 		utils.stringifyFileContents(testFilePath)
 			.then((text) => {
-				console.log("file results = " + text);
+				console.log('file results = ' + text);
 				assert.ok(text.length > 0);
 				done();
 			}).catch((err) => {
@@ -37,21 +37,21 @@ suite("ensure camelk utilities work as expected", function() {
 			});
 	});
 
-	test("should be able to create deploy descriptor for incoming camel file", function(done) {
+	test('should be able to create deploy descriptor for incoming camel file', function(done) {
 		let testFilePath = path.join(__dirname, '../../src/test/helloworld.groovy');
 		let fileContents:string;
 		utils.stringifyFileContents(testFilePath).then((text) => {
 			fileContents = text;
-			utils.createCamelKDeployJSON("helloworld", fileContents, "helloworld.groovy")
+			utils.createCamelKDeployJSON('helloworld', fileContents, 'helloworld.groovy')
 				.then((output) => {
-					console.log("deployment output = " + output);
+					console.log('deployment output = ' + output);
 					assert.ok(output.length > 0);
 					done();
 				});
 		});
 	});
 
-	test("should be able to construct usable rest URL", function(done) {
+	test('should be able to construct usable rest URL', function(done) {
 		// have to do some gymnastics to clear the settings for some reason
 		let proxyUrl = vscode.workspace.getConfiguration().get('camelk.integrations.proxyURL');
 		let proxyPort = vscode.workspace.getConfiguration().get('camelk.integrations.proxyPort') as number;
@@ -63,8 +63,8 @@ suite("ensure camelk utilities work as expected", function() {
 			.then( () => vscode.workspace.getConfiguration().update('camelk.integrations.proxyNamespace', 'default', true)
 				.then ( () => {
 					let urlstring = utils.createCamelKRestURL();
-					console.log("url output = " + urlstring);
-					assert.strictEqual(urlstring, "http://localhost:9000/apis/camel.apache.org/v1alpha1/namespaces/default/integrations");
+					console.log('url output = ' + urlstring);
+					assert.strictEqual(urlstring, 'http://localhost:9000/apis/camel.apache.org/v1alpha1/namespaces/default/integrations');
 				})
 			)
 		)
@@ -76,8 +76,52 @@ suite("ensure camelk utilities work as expected", function() {
 		done();
 	});
 
-	test("should be able to construct usable proxy URL", function(done) {
+	test('should be able to construct usable proxy URL', function(done) {
 
+		// have to do some gymnastics to clear the settings for some reason
+		let proxyUrl = vscode.workspace.getConfiguration().get('camelk.integrations.proxyURL');
+		let proxyPort = vscode.workspace.getConfiguration().get('camelk.integrations.proxyPort') as number;
+
+		vscode.workspace.getConfiguration().update('camelk.integrations.proxyURL', 'http://localhost')
+			.then( () => vscode.workspace.getConfiguration().update('camelk.integrations.proxyPort', 9000)
+			.then( () => {
+				let urlstring = utils.createBaseProxyURL();
+				console.log('url output = ' + urlstring);
+				assert.equal(urlstring, 'http://localhost:9000');
+			})
+		);
+
+		// and set them back at the end
+		vscode.workspace.getConfiguration().update('camelk.integrations.proxyURL', proxyUrl);
+		vscode.workspace.getConfiguration().update('camelk.integrations.proxyPort', proxyPort);
+
+		done();
+	});
+
+	test('should be able to ping accessible server', function(done) {
+		utils.pingTheURL('http://www.google.com').then( 
+			(result) => {
+				console.log('ping output = ' + result);
+				assert.equal(result, true);
+				done();
+			}
+		);
+	});
+
+	test('should be able to fail ping of inaccessible server', function(done) {
+		utils.pingTheURL('http://www.googleinaccesible.invalidurl').then( 
+			(result) => {
+				assert.fail('Should not have made it here');
+				done(result);
+			}
+		).catch( (error) => {
+			console.log('ping output = ' + error);
+			assert.ok(error);
+			done();
+		});
+	});
+
+	test('should be able to ping kubernetes', function(done) {
 		// have to do some gymnastics to clear the settings for some reason
 		let proxyUrl = vscode.workspace.getConfiguration().get('camelk.integrations.proxyURL');
 		let proxyPort = vscode.workspace.getConfiguration().get('camelk.integrations.proxyPort') as number;
@@ -85,9 +129,16 @@ suite("ensure camelk utilities work as expected", function() {
 		vscode.workspace.getConfiguration().update('camelk.integrations.proxyURL', 'http://localhost', true)
 			.then( () => vscode.workspace.getConfiguration().update('camelk.integrations.proxyPort', 9000, true)
 			.then( () => {
-				let urlstring = utils.createBaseProxyURL();
-				console.log("url output = " + urlstring);
-				assert.strictEqual(urlstring, "http://localhost:9000");
+				let proxyURL = utils.createCamelKRestURL();
+
+				// use nock to mock the http request
+				nock(proxyURL).get('').reply(200, {});
+		
+				utils.pingKubernetes().then( (rtn) => {
+					assert.equal(rtn, proxyURL);
+				}).catch ( (err) => {done(err)});
+		
+				nock.cleanAll();
 			})
 		);
 
@@ -98,61 +149,24 @@ suite("ensure camelk utilities work as expected", function() {
 		done();
 	});
 
-	test("should be able to ping accessible server", function(done) {
-		utils.pingTheURL("http://www.google.com").then( 
-			(result) => {
-				console.log("ping output = " + result);
-				assert.equal(result, true);
-				done();
-			}
-		);
-	});
-
-	test("should be able to fail ping of inaccessible server", function(done) {
-		utils.pingTheURL("http://www.googleinaccesible.invalidurl").then( 
-			(result) => {
-				assert.fail("Should not have made it here");
-				done(result);
-			}
-		).catch( (error) => {
-			console.log("ping output = " + error);
-			assert.ok(error);
-			done();
-		});
-	});
-
-	test("should be able to ping kubernetes", function(done) {
-		let proxyURL = utils.createCamelKRestURL();
-
-		// use nock to mock the http request
-		nock(proxyURL).get('').reply(200, {});
-
-		utils.pingKubernetes().then( (rtn) => {
-			assert.equal(rtn, proxyURL);
-			done();
-		});
-
-		nock.cleanAll();
-	});
-
-	test("should be able to mock when kubernetes is not available", function(done) {
+	test('should be able to mock when kubernetes is not available', function(done) {
 		let proxyURL = utils.createCamelKRestURL();
 
 		// use nock to mock the http request
 		nock(proxyURL).get('').reply(404, {});
 
 		utils.pingKubernetes().then( (rtn) => {
-			assert.fail("should not have been accessible");
+			assert.fail('should not have been accessible');
 			done(rtn);
 		}).catch( (error) =>  {
-			assert.ok(error, "valid failure here");
+			assert.ok(error, 'valid failure here');
 			done();
 		});
 		
 		nock.cleanAll();
 	});
 
-	test("test kebab case utility", function(done) {
+	test('test kebab case utility', function(done) {
 		
 		// based loosely on https://github.com/apache/camel-k/blob/master/pkg/util/kubernetes/sanitize_test.go
 

@@ -16,7 +16,7 @@
  */
 import * as vscode from 'vscode';
 import * as chai from 'chai';
-import { CamelKNodeProvider, TreeNode } from '../CamelKNodeProvider';
+import * as CamelKNodeProvider from '../CamelKNodeProvider';
 import * as sinon from 'sinon';
 import * as sinonChai from 'sinon-chai';
 
@@ -26,11 +26,11 @@ chai.use(sinonChai);
 suite('Camel-k Integrations View', () => {
 
 	let sandbox: sinon.SinonSandbox;
-	let integrationExplorer: CamelKNodeProvider;
+	let integrationExplorer: CamelKNodeProvider.CamelKNodeProvider;
 
 	setup(() => {
 		sandbox = sinon.createSandbox();
-		integrationExplorer = new CamelKNodeProvider();
+		integrationExplorer = new CamelKNodeProvider.CamelKNodeProvider();
 		integrationExplorer.setRetrieveIntegrations(false);
 	});
 
@@ -42,7 +42,7 @@ suite('Camel-k Integrations View', () => {
 		integrationExplorer.resetList();
 		const refreshStub = sandbox.stub(integrationExplorer, 'refresh');
 		integrationExplorer.getChildren().then( (children) => {
-			const newNode = new TreeNode("string", "mockIntegration", "running", vscode.TreeItemCollapsibleState.None);
+			const newNode = new CamelKNodeProvider.TreeNode("string", "mockIntegration", "running", vscode.TreeItemCollapsibleState.None);
 			integrationExplorer.addChild(children, newNode, false);
 			expect(children.length).equals(1);
 			expect(children[0].label).equals("mockIntegration");
@@ -55,7 +55,7 @@ suite('Camel-k Integrations View', () => {
 		integrationExplorer.resetList();
 		const refreshStub = sandbox.stub(integrationExplorer, 'refresh');
 		integrationExplorer.getChildren().then( (children) => {
-			const newNode = new TreeNode("string", "mockIntegration", "running", vscode.TreeItemCollapsibleState.None);
+			const newNode = new CamelKNodeProvider.TreeNode("string", "mockIntegration", "running", vscode.TreeItemCollapsibleState.None);
 			integrationExplorer.addChild(children, newNode);
 			integrationExplorer.removeChild(children, newNode);
 			expect(refreshStub).calledTwice;

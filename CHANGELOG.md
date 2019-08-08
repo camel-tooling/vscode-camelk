@@ -4,6 +4,8 @@ All notable changes to the "vscode-camelk" extension will be documented in this 
 
 ## 0.0.9
 
+- Added the Microsoft Kubernetes Tools extension as an extension dependency
+
 ## 0.0.8
 
 - Fix regression preventing to use Commands to deploy integration
