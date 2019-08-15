@@ -1,7 +1,7 @@
 {
 	"name": "vscode-camelk",
-	"displayName": "Tooling for Apache Camel-K",
-	"description": "VS Code extensions to support Camel-K functionality",
+	"displayName": "Tooling for Apache Camel K",
+	"description": "VS Code support for Apache Camel K functionality",
 	"license": "Apache-2.0",
 	"version": "0.0.6",
 	"publisher": "redhat",
@@ -25,6 +25,7 @@
 	"homepage": "https://github.com/camel-tooling/vscode-camelk",
 	"keywords": [
 		"Camel",
+		"Camel K",
 		"Camel-K",
 		"camelk",
 		"kamel",
@@ -43,24 +44,24 @@
 	"contributes": {
 		"configuration": [
 			{
-				"title": "Camel-K Integration Settings",
+				"title": "Apache Camel K Tooling Extension Settings",
 				"properties": {
 					"camelk.integrations.useProxy": {
 						"type": "boolean",
 						"default": false,
-						"description": "Always use proxy: If true, always use the proxy URL instead of Minikube",
+						"description": "Always use proxy: If true, always use the proxy URL instead of kubectl",
 						"scope": "window"
 					},
 					"camelk.integrations.proxyURL": {
 						"type": "string",
 						"default": "http://localhost",
-						"description": "Proxy configuration: URL to the running Kube server (to be combined with port)",
+						"description": "Proxy configuration: URL to the running Kubernetes server (to be combined with port)",
 						"scope": "window"
 					},
 					"camelk.integrations.proxyPort": {
 						"type": "number",
 						"default": 8000,
-						"description": "Proxy configuration: Port to the running Kube server (combined with proxy URL)",
+						"description": "Proxy configuration: Port to the running Kubernetes server (combined with proxy URL)",
 						"scope": "window"
 					},
 					"camelk.integrations.proxyNamespace": {
@@ -70,7 +71,7 @@
 							"syndesis"
 						],
 						"default": "default",
-						"description": "Proxy namespace: Namespace to use for accessing the Camel-K integrations",
+						"description": "Proxy namespace: Namespace to use for accessing Apache Camel K integrations",
 						"scope": "window"
 					},
 					"camelk.integrations.showStatusBarMessages": {
@@ -85,11 +86,11 @@
 		"commands": [
 			{
 				"command": "camelk.startintegration",
-				"title": "Start Camel-K Integration"
+				"title": "Start Apache Camel K Integration"
 			},
 			{
 				"command": "camelk.integrations.refresh",
-				"title": "Refresh Integration List",
+				"title": "Refresh Apache Camel K Integration List",
 				"icon": {
 					"dark": "resources/dark/refresh.svg",
 					"light": "resources/light/refresh.svg"
@@ -97,23 +98,59 @@
 			},
 			{
 				"command": "camelk.integrations.remove",
-				"title": "Remove Camel-K Integration"
+				"title": "Remove Apache Camel K Integration"
 			},
 			{
 				"command": "camelk.integrations.log",
-				"title": "Follow log for Camel-K Integration"
+				"title": "Follow log for running Apache Camel K Integration"
 			},
 			{
 				"command": "camelk.integrations.startproxy",
-				"title": "Camel-K: Start the kubectl proxy server"
+				"title": "Apache Camel K: Start the Kubernetes proxy server"
+			},
+			{
+				"command": "camelk.integrations.createconfigmapfromfile",
+				"title": "Create Kubernetes Config Map From File"
+			},
+			{
+				"command": "camelk.integrations.createconfigmapfromfolder",
+				"title": "Create Kubernetes Config Map From all Files in Folder"
+			},
+			{
+				"command": "camelk.integrations.createsecretfromfile",
+				"title": "Create Kubernetes Secret From File"
+			},
+			{
+				"command": "camelk.integrations.createsecretfromfolder",
+				"title": "Create Kubernetes Secret From all Files in Folder"
 			}
 		],
 		"menus": {
 			"explorer/context": [
 				{
 					"command": "camelk.startintegration",
-					"when": "resourceExtname =~ /\\.(groovy|java|xml|js)$/",
-					"group": "navigation"
+					"when": "resourceExtname =~ /\\.(groovy|java|xml|js|kts)$/",
+					"group": "camelk.group"
+				},
+				{
+					"command": "camelk.integrations.createconfigmapfromfile",
+					"when": "resourceExtname =~ /\\.(properties)$/",
+					"group": "camelk.group"
+				},
+				{
+					"command": "camelk.integrations.createconfigmapfromfolder",
+					"when": "explorerResourceIsFolder",
+					"group": "camelk.group"
+				},
+				{
+					"command": "camelk.integrations.createsecretfromfile",
+					"when": "resourceExtname =~ /\\.(properties)$/",
+					"group": "camelk.group"
+				},
+				{
+					"command": "camelk.integrations.createsecretfromfolder",
+					"when": "explorerResourceIsFolder",
+					"group": "camelk.group"
 				}
 			],
 			"view/title": [
@@ -140,7 +177,7 @@
 			"explorer": [
 				{
 					"id": "camelk.integrations",
-					"name": "Camel-K Integrations"
+					"name": "Apache Camel K Integrations"
 				}
 			]
 		}
@@ -174,6 +211,7 @@
 		"child_process": "^1.0.2",
 		"path": "^0.12.7",
 		"request": "^2.88.0",
-		"request-promise": "^4.2.4"
+		"request-promise": "^4.2.4",
+		"vscode-kubernetes-tools-api": "^1.0.0"
 	}
 }

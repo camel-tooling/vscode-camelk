@@ -31,12 +31,12 @@ import * as child_process from 'child_process';
 
 // this is not the best solution, but it offers a way to ensure that if things change upstream at least we know when the tests fail
 
-suite("ensure that the upstream kubernetes.go sanitize in camel-k have not changed since we checked last", async function() {
+suite("ensure that the upstream kubernetes.go sanitize in camel-k have not changed since we checked last", function() {
 
 	var fileName : string = 'sanitize.go';
 	var url = 'https://raw.githubusercontent.com/apache/camel-k/master/pkg/util/kubernetes/sanitize.go';
 	
-	test("test to see if the sanitize.go file has changed since we stashed it", async function() {
+	test("test to see if the sanitize.go file has changed since we stashed it", function(done) {
 		var goPath = retrieveSanitizeFileFromUpstream(fileName, url);
 		let stashedFile = path.join(__dirname, '../../src/test/sanitize.go.saved');
 
@@ -44,7 +44,9 @@ suite("ensure that the upstream kubernetes.go sanitize in camel-k have not chang
 		var str2 = fs.readFileSync(stashedFile, 'utf-8');
 		str2 = replaceCarriageReturns(str1);
 
+		assert.equal(fs.existsSync(goPath), true);
 		assert.strictEqual(str1, str2);
+		done();
 	});
 });
 
@@ -60,7 +62,6 @@ function retrieveSanitizeFileFromUpstream(fileName: string, url: string) {
 	console.log(goPath);
 	console.log(commandString);
 	child_process.execSync(commandString, { cwd: os.tmpdir() });
-	assert.ok(fs.existsSync(goPath));
 	return goPath;
 }
 
