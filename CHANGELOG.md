@@ -2,6 +2,10 @@
 
 All notable changes to the "vscode-camelk" extension will be documented in this file.
 
+## 0.0.7
+
+- TBD
+
 ## 0.0.6
 
 - Added ability to deploy integrations with associated Kubernetes ConfigMaps or Secrets
