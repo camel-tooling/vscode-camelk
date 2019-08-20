@@ -1,6 +1,6 @@
 {
 	"name": "vscode-camelk",
-	"displayName": "Tooling for Apache Camel K",
+	"displayName": "Tooling for Apache Camel K by Red Hat",
 	"description": "VS Code support for Apache Camel K functionality",
 	"license": "Apache-2.0",
 	"version": "0.0.7",
