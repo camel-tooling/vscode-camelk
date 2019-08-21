@@ -204,7 +204,7 @@
 		"sinon-chai": "^3.3.0",
 		"typescript": "^2.6.1",
 		"vscode": "^1.1.6",
-		"tslint": "^5.8.0"
+		"tslint": "^5.19.0"
 	},
 	"dependencies": {
 		"@types/request-promise": "^4.1.44",
