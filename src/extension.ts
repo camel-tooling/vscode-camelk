@@ -35,6 +35,7 @@ let curlCommand : string = '/bin/sh';
 let curlOption : string = '-c';
 let proxyPort : number;
 let showStatusBar : boolean;
+let camelKIntegrationsTreeView : vscode.TreeView<TreeNode>;
 
 // This extension offers basic integration with Camel K (https://github.com/apache/camel-k) on two fronts.
 
@@ -47,6 +48,7 @@ export function activate(context: vscode.ExtensionContext) {
 		curlCommand = 'cmd';
 		curlOption = '/c';
 	}
+
 	// process the workspace setting indicating whether we should use the proxy or CLI
 	let statusBarSetting = vscode.workspace.getConfiguration().get('camelk.integrations.showStatusBarMessages') as boolean;
 	showStatusBar = statusBarSetting;
@@ -84,13 +86,19 @@ export function activate(context: vscode.ExtensionContext) {
 	});	
 
 	mainOutputChannel = vscode.window.createOutputChannel("Apache Camel K");
-	mainOutputChannel.show();
 
 	myStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 100);
 	context.subscriptions.push(myStatusBarItem);
 
 	// create the integrations view
-	vscode.window.registerTreeDataProvider('camelk.integrations', camelKIntegrationsProvider);
+	camelKIntegrationsTreeView = vscode.window.createTreeView('camelk.integrations', {
+		treeDataProvider: camelKIntegrationsProvider
+	});
+	camelKIntegrationsTreeView.onDidChangeVisibility(() => {
+		if (camelKIntegrationsTreeView.visible === true) {
+			camelKIntegrationsProvider.refresh();
+		}
+	});
 
 	// create the integration view action -- refresh
 	vscode.commands.registerCommand('camelk.integrations.refresh', () => camelKIntegrationsProvider.refresh());
@@ -209,9 +217,6 @@ export function activate(context: vscode.ExtensionContext) {
 
 	// add commands to create config-map and secret objects from .properties files
 	configmapsandsecrets.registerCommands();
-
-	// populate the initial tree
-	camelKIntegrationsProvider.refresh();
 }
 
 export function setStatusLineMessage( message : string) {
