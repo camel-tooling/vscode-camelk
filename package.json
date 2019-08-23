@@ -193,7 +193,7 @@
 	"devDependencies": {
 		"chai": "^4.2.0",
 		"mocha-jenkins-reporter": "^0.4.2",
-		"@types/chai": "^4.1.7",
+		"@types/chai": "^4.2.0",
 		"@types/mocha": "^5.2.7",
 		"@types/nock": "^10.0.3",
 		"@types/node": "^7.0.43",
