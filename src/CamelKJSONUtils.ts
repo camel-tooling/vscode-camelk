@@ -126,16 +126,20 @@ export async function pingKamel() : Promise<any> {
 	return new Promise( async (resolve, reject) => {
 		const pingKamelCommand = "kamel get";
 		let runKubectl = child_process.exec(pingKamelCommand);
-		runKubectl.stdout.on('data', function (data) {
-			let output : string = data as string;
-			resolve(output);
-			return;
-		});
-		runKubectl.stderr.on('data', function (data) {
-			let error : string = data as string;
-			reject(new Error(error));
-			return;
-		});
+		if (runKubectl.stdout) {
+			runKubectl.stdout.on('data', function (data) {
+				let output : string = data as string;
+				resolve(output);
+				return;
+			});
+		}
+		if (runKubectl.stderr) {
+			runKubectl.stderr.on('data', function (data) {
+				let error : string = data as string;
+				reject(new Error(error));
+				return;
+			});
+		}
 	}); 
 }
 

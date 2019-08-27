@@ -101,15 +101,19 @@ function createNewIntegration(integrationFileUri: vscode.Uri, configmap? : strin
 		commandString += ' "' + absoluteRoot + '"';
 		console.log(`commandString = ${commandString}`);
 		let runKubectl = child_process.exec(commandString, { cwd : foldername});
-		runKubectl.stdout.on('data', function (data) {
-			resolve(true);
-			return;
-		});
-		runKubectl.stderr.on('data', function (data) {
-			utils.shareMessage(extension.mainOutputChannel, `Error deploying ${integrationName}: ${data}`);
-			reject(false);
-			return;
-		});
+		if (runKubectl.stdout) {
+			runKubectl.stdout.on('data', function (data) {
+				resolve(true);
+				return;
+			});
+		}
+		if (runKubectl.stderr) {
+			runKubectl.stderr.on('data', function (data) {
+				utils.shareMessage(extension.mainOutputChannel, `Error deploying ${integrationName}: ${data}`);
+				reject(false);
+				return;
+			});
+		}
 	});
 }		
 

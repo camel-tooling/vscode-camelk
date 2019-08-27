@@ -160,12 +160,16 @@ export function activate(context: vscode.ExtensionContext) {
 							let podOutputChannel = getOutputChannel(podName);
 							podOutputChannel.show();
 							let kubectl = child_process.exec(commandString);
-							kubectl.stdout.on('data', function (data) {
-								podOutputChannel.append(`${data}`);
-							});
-							kubectl.stderr.on('data', function (data) {
-								mainOutputChannel.append("[ERROR] " + `${data} \n`);
-							});
+							if (kubectl.stdout) {
+								kubectl.stdout.on('data', function (data) {
+									podOutputChannel.append(`${data}`);
+								});
+							}
+							if (kubectl.stderr) {
+								kubectl.stderr.on('data', function (data) {
+									mainOutputChannel.append("[ERROR] " + `${data} \n`);
+								});
+							}
 							kubectl.on("close", (code, signal) => {
 								console.log("[CLOSING] " + `${code} / ${signal} \n`);
 							});
@@ -481,12 +485,16 @@ function getIntegrationsFromKubectl(integrationName : string): Promise<string> {
 		let commandString = 'kubectl get pods | grep ' + integrationName;
 		let runKubectl = child_process.exec(commandString);
 		var shellOutput = '';
-		runKubectl.stdout.on('data', function (data) {
-			shellOutput += data;
-		});
-		runKubectl.stderr.on('data', function (data) {
-			console.log("[ERROR] " + data);
-		});
+		if (runKubectl.stdout) {
+			runKubectl.stdout.on('data', function (data) {
+				shellOutput += data;
+			});
+		}
+		if (runKubectl.stderr) {
+			runKubectl.stderr.on('data', function (data) {
+				console.log("[ERROR] " + data);
+			});
+		}
 		runKubectl.on("close", () => {
 			resolve(shellOutput);
 		});
@@ -512,11 +520,15 @@ function startKubeProxy(): Promise<string> {
 
 		let commandString = `kubectl proxy --port=${proxyPort}`;
 		let runKubectl = child_process.exec(commandString);
-		runKubectl.stdout.on('data', function (data) {
-			resolve(data.toString());
-		});
-		runKubectl.stderr.on('data', function (data) {
-			reject(new Error(data.toString()));
-		});
+		if (runKubectl.stdout) {
+			runKubectl.stdout.on('data', function (data) {
+				resolve(data.toString());
+			});
+		}
+		if (runKubectl.stderr) {
+			runKubectl.stderr.on('data', function (data) {
+				reject(new Error(data.toString()));
+			});
+		}
 	}); 
 }

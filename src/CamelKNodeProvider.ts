@@ -241,14 +241,18 @@ export class CamelKNodeProvider implements vscode.TreeDataProvider<TreeNode> {
 			console.log('Command string: ' + commandString);
 			let runKamel = child_process.exec(commandString);
 			var shellOutput = '';
-			runKamel.stdout.on('data', function (data) {
-				console.log("[OUT] " + data);
-				shellOutput += data;
-			});
-			runKamel.stderr.on('data', function (data) {
-				console.log("[ERROR] " + data);
-				reject(data.toString());
-			});
+			if (runKamel.stdout) {
+				runKamel.stdout.on('data', function (data) {
+					console.log("[OUT] " + data);
+					shellOutput += data;
+				});
+			}
+			if (runKamel.stderr) {
+				runKamel.stderr.on('data', function (data) {
+					console.log("[ERROR] " + data);
+					reject(data.toString());
+				});
+			}
 			runKamel.on("close", () => {
 				console.log("[CLOSING] " + shellOutput);
 				resolve(shellOutput);
