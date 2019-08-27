@@ -100,9 +100,12 @@ export class CamelKNodeProvider implements vscode.TreeDataProvider<TreeNode> {
 								this.processIntegrationList(output);
 							}).catch((error) => { 
 								let errMsg : string = error;
-								if (errMsg.toLowerCase().trim().startsWith('error:')) {
-									utils.shareMessage(extension.mainOutputChannel, `Refreshing Apache Camel K Integrations view using kubectl failed. ${error}`);
-									inaccessible = true;
+								if (errMsg) {
+									var errLower =  errMsg.toLowerCase();
+									if (errLower.trimLeft().startsWith('error:')) {
+										utils.shareMessage(extension.mainOutputChannel, `Refreshing Apache Camel K Integrations view using kubectl failed. ${error}`);
+										inaccessible = true;
+									}
 								}
 								reject();
 								return;
