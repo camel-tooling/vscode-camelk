@@ -145,8 +145,11 @@ export async function pingKamel() : Promise<any> {
 
 export function shareMessage(outputChannel: vscode.OutputChannel, msg:string) {
 	if (outputChannel) {
+		if (!msg.endsWith('\n')) {
+			msg = `${msg} \n`;
+		}
 		outputChannel.show();
-		outputChannel.append(msg + '\n');
+		outputChannel.append(msg);
 	} else {
 		console.log('[' + msg + ']');
 	}

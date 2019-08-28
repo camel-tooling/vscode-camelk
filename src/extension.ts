@@ -166,16 +166,22 @@ export function activate(context: vscode.ExtensionContext) {
 						if (podName) {
 							let commandString = 'kubectl logs -f ' + podName;
 							let podOutputChannel = getOutputChannel(podName);
-							podOutputChannel.show();
+							if (podOutputChannel) {
+								podOutputChannel.show();
+							}
 							let kubectl = child_process.exec(commandString);
 							if (kubectl.stdout) {
 								kubectl.stdout.on('data', function (data) {
-									podOutputChannel.append(`${data}`);
+									if (podOutputChannel) {
+										utils.shareMessage(podOutputChannel, `${data}`);
+									}
 								});
 							}
 							if (kubectl.stderr) {
 								kubectl.stderr.on('data', function (data) {
-									mainOutputChannel.append("[ERROR] " + `${data} \n`);
+									if (podOutputChannel) {
+										utils.shareMessage(mainOutputChannel, `[ERROR] ${data} \n`);
+									}
 								});
 							}
 							kubectl.on("close", (code, signal) => {
@@ -235,11 +241,13 @@ export function hideStatusLine() {
 // find an output channel by name in the map and remove it
 function removeOutputChannel( channelName: string) {
 	let podOutputChannel;
-	if (outputChannelMap.has(channelName)) {
+	if (outputChannelMap !== undefined) {
 		podOutputChannel = outputChannelMap.get(channelName);
 		if (podOutputChannel !== undefined) {
-			podOutputChannel.dispose();
 			outputChannelMap.delete(channelName);
+			// concerned that this doesn't actually delete the resources associated with the output channel, 
+			// but dispose causes other problems
+			podOutputChannel.hide();
 			utils.shareMessage(mainOutputChannel, `Removed Output channel for integration: ${channelName}`);
 			mainOutputChannel.show();
 		}
@@ -249,7 +257,7 @@ function removeOutputChannel( channelName: string) {
 // retrieve the actual output channel for the name we stashed in the map
 function getOutputChannel( channelName: string) : vscode.OutputChannel {
 	let podOutputChannel;
-	if (outputChannelMap.has(channelName)) {
+	if (outputChannelMap) {
 		podOutputChannel = outputChannelMap.get(channelName);
 		if (podOutputChannel !== undefined) {
 			return podOutputChannel;
@@ -257,6 +265,7 @@ function getOutputChannel( channelName: string) : vscode.OutputChannel {
 	}
 	podOutputChannel = vscode.window.createOutputChannel(channelName);
 	outputChannelMap.set(channelName, podOutputChannel);
+	utils.shareMessage(mainOutputChannel, `Created Output channel for integration: ${channelName}`);
 	return podOutputChannel;
 }
 
@@ -294,12 +303,16 @@ function getPodLogViaCurl(podName : string): Promise<boolean> {
 				return false;
 			});
 			let podOutputChannel = getOutputChannel(podName);
-			podOutputChannel.show();
+			if (podOutputChannel) {
+				podOutputChannel.show();
+			}
 			let commandString = `curl -v -H "Accept: application/json, */*" ${podsURL}?follow=true --insecure -N`;
 			await utils.delay(1000);
 			let runKamel = child_process.spawn(curlCommand, [curlOption, commandString]);
 			runKamel.stdout.on('data', function (data) {
-				podOutputChannel.append(`${data}`);
+				if (podOutputChannel) {
+					utils.shareMessage(podOutputChannel, `${data}`);
+				}
 				resolve(true);
 			});
 			runKamel.on("close", (code, signal) => {
@@ -429,7 +442,7 @@ function createNewIntegrationViaRest(context: vscode.Uri): Promise<boolean> {
 			utils.createCamelKDeployJSON(integrationName, fileContent, filename).then (async (json) => {
 				let proxyURL = utils.createCamelKRestURL();
 				await utils.pingKubernetes().catch( (error) =>  {
-					mainOutputChannel.append(error + ".\n\n");
+					utils.shareMessage(mainOutputChannel, `[ERROR] ${error} \n`);
 					reject(error);
 				});
 				var options = {
