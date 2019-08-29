@@ -203,7 +203,7 @@
 		"sinon": "^7.4.1",
 		"sinon-chai": "^3.3.0",
 		"tslint": "^5.19.0",
-		"typescript": "^3.5.3",
+		"typescript": "^3.6.2",
 		"vscode": "^1.1.36"
 	},
 	"dependencies": {
