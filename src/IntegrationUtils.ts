@@ -32,6 +32,7 @@ const configMapIntegration : string = 'ConfigMap - Apache Camel K Integration wi
 const secretIntegration : string = 'Secret - Apache Camel K Integration with Kubernetes Secret';
 const resourceIntegration : string = 'Resource - Apache Camel K Integration with Resource file';
 const propertyIntegration : string = 'Property - Apache Camel K Integration with Property';
+const dependencyIntegration : string = 'Dependencies - Apache Camel K Integration with Explicit Dependencies';
 
 const ResourceOptions: vscode.OpenDialogOptions = {
 	canSelectMany: true,
@@ -48,7 +49,8 @@ const choiceList = [
 	configMapIntegration, 
 	secretIntegration,
 	resourceIntegration,
-	propertyIntegration
+	propertyIntegration,
+	dependencyIntegration
  ];
 
  export async function startIntegration(context: vscode.Uri): Promise<boolean> {
@@ -64,7 +66,8 @@ const choiceList = [
 			let selectedResource : any = undefined;
 			let errorEncountered : boolean = false;
 			let selectedProperty : any = undefined;
-
+			let selectedDependency : any = undefined;
+			
 			switch (choice) {
 				case devModeIntegration:
 					devMode = true;
@@ -125,13 +128,27 @@ const choiceList = [
 						return false;
 					});
 					break;
+				case dependencyIntegration:
+					await getSelectedDependencies().then ( (selection) => {
+						selectedDependency = selection;
+						if (selectedDependency === undefined) {
+							reject (new Error('No Dependencies defined.'));
+							errorEncountered = true;
+							return;
+						}
+					}).catch ( (error) => {
+						reject(error);
+						errorEncountered = true;
+						return;
+					});
+					break;
 				case basicIntegration:
 					// do nothing with config-map or secret
 					break;
 			}
 				
 			if (!errorEncountered) {
-				await createNewIntegration(context, devMode, selectedConfigMap, selectedSecret, selectedResource, selectedProperty)
+				await createNewIntegration(context, devMode, selectedConfigMap, selectedSecret, selectedResource, selectedProperty, selectedDependency)
 					.then( success => {
 						if (!success) {
 							reject(false);
@@ -254,8 +271,44 @@ function getSelectedProperties() {
 	});
 }
 
+function getSelectedDependencies() {
+	return new Promise <any> ( async (resolve, reject) => {
+		let hasMoreDependencies: boolean = true;
+		let returnedDependencies : string[] = [];
+		while (hasMoreDependencies) {
+			await vscode.window.showInputBox({
+				placeHolder: 'Specify the dependency. Use Apache Camel component Artifact Id or Maven dependency format with group:artifact:version',
+				validateInput: validateDependency,
+			}).then ( async (dependency) => {
+				if (dependency) {
+					await vscode.window.showQuickPick( ['No', 'Yes'], {
+						placeHolder: 'Are there more dependencies?',
+						canPickMany : false	}).then ( (answer) => {
+							if (!answer) {
+								hasMoreDependencies = false;
+								reject(new Error(`No Dependency answer given`));
+								return undefined;
+							}
+							returnedDependencies.push(dependency);
+							if (answer && answer.toLowerCase() === 'no') {
+								hasMoreDependencies = false;
+								resolve(returnedDependencies);
+								return;
+							}
+						});
+				} else {
+					hasMoreDependencies = false;
+					reject(new Error(`No Dependency provided`));
+					return undefined;
+				}
+			});
+		}		
+	});
+}
+
 // use command-line "kamel" utility to start a new integration
-function createNewIntegration(integrationFileUri: vscode.Uri, devMode? : boolean, configmap? : string, secret? : string, resource? : string, propertyArray? : string[]): Promise<boolean> {
+function createNewIntegration(integrationFileUri: vscode.Uri, devMode? : boolean, configmap? : string, secret? : string, resource? : string, propertyArray? : string[], dependencyArray? : string[]): Promise<boolean> {
+
 	return new Promise( async (resolve, reject) => {
 		let filename = integrationFileUri.fsPath;
 		let foldername = path.dirname(filename);
@@ -285,7 +338,12 @@ function createNewIntegration(integrationFileUri: vscode.Uri, devMode? : boolean
 				resourceArray.forEach(res => {
 					commandString += ` --resource="${res}"`;
 				});
-			}			
+			}		
+		}	
+		if (dependencyArray && dependencyArray.length > 0) {
+			dependencyArray.forEach(dependency => {
+				commandString += ` --dependency=${dependency}`;
+			});
 		}
 		if (propertyArray && propertyArray.length > 0) {
 			propertyArray.forEach(prop => {
@@ -336,4 +394,20 @@ export async function isCamelKAvailable(): Promise<boolean> {
 
 function validateName(text : string) {
 	return !validNameRegex.test(text) ? 'Name must be at least two characters long, start with a letter, and only include a-z, A-Z, periods and hyphens' : null;	
+}
+
+function validateDependency(text : string) {
+	let inputEmpty : boolean = (text === undefined || text.trim().length === 0);
+	if (inputEmpty) {
+		return 'Dependency must be specified in the form of an Apache Camel component Artifact Id or a Maven dependency in the form of group:artifact:version';
+	}
+	if (!inputEmpty && text.indexOf(':') > -1) {
+		let trifold : string[] = text.split(':');
+		// make sure we have three colon-delimited strings
+		return !(trifold && trifold.length === 3) ? 'Dependency must be specified in the form of a Maven dependency as group:artifact:version' : null;
+	} else if (!(!inputEmpty && text.indexOf('-') > -1)) {
+		// assume we're a camel component for now
+		return 'Dependency must be specified in the form of an Apache Camel component Artifact Id or a Maven dependency in the form of group:artifact:version';
+	}
+	return null;
 }
