@@ -5,6 +5,8 @@ All notable changes to the "vscode-camelk" extension will be documented in this 
 ## 0.0.7
 
 - Update to naming approved by Red Hat legal
+- Adjusted Apache Camel K Integrations view to only refresh when visible
+- Adjusted Apache Camel K output channel to only become shown when updates are made
 
 ## 0.0.6
 
