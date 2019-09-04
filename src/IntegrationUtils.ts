@@ -24,11 +24,14 @@ import * as child_process from 'child_process';
 import { getConfigMaps, getSecrets } from './ConfigMapAndSecrets';
 import * as k8s from 'vscode-kubernetes-tools-api';
 
+const devModeIntegration : string = 'Dev Mode - Apache Camel K Integration in Dev Mode'
 const basicIntegration : string = 'Basic - Apache Camel K Integration (no ConfigMap or Secret)';
 const configMapIntegration : string = 'ConfigMap - Apache Camel K Integration with Kubernetes ConfigMap';
 const secretIntegration : string = 'Secret - Apache Camel K Integration with Kubernetes Secret';
 
-const choiceList = [ basicIntegration, 
+const choiceList = [ 
+	devModeIntegration,
+	basicIntegration, 
 	configMapIntegration, 
 	secretIntegration ];
 
@@ -41,8 +44,12 @@ export async function startIntegration(context: vscode.Uri): Promise<any> {
 		if (choice) {
 			let selectedConfigMap : any = undefined;
 			let selectedSecret : any = undefined;
-
+			let devMode : boolean = false;
+			
 			switch (choice) {
+				case devModeIntegration:
+					devMode = true;
+					break;
 				case configMapIntegration:
 					await getSelectedConfigMap().then( (selection) => {
 						selectedConfigMap = selection;
@@ -73,7 +80,7 @@ export async function startIntegration(context: vscode.Uri): Promise<any> {
 			}
 				
 			if (selectedConfigMap !== null || selectedSecret !== null) {
-				await createNewIntegration(context, selectedConfigMap, selectedSecret)
+				await createNewIntegration(context, devMode, selectedConfigMap, selectedSecret)
 					.then( success => {
 						if (!success) {
 							reject(false);
@@ -123,7 +130,7 @@ function getSelectedSecret() {
 }
 
 // use command-line "kamel" utility to start a new integration
-function createNewIntegration(integrationFileUri: vscode.Uri, configmap? : string, secret? : string): Promise<boolean> {
+function createNewIntegration(integrationFileUri: vscode.Uri, devMode? : boolean, configmap? : string, secret? : string): Promise<boolean> {
 	return new Promise( async (resolve, reject) => {
 		let filename = integrationFileUri.fsPath;
 		let foldername = path.dirname(filename);
@@ -138,6 +145,9 @@ function createNewIntegration(integrationFileUri: vscode.Uri, configmap? : strin
 			});
 
 		let commandString = 'kamel run';
+		if (devMode && devMode === true) {
+			commandString += ` --dev`;
+		}
 		if (configmap && configmap.trim().length > 0) {
 			commandString += ` --configmap=${configmap}`;
 		}
@@ -146,9 +156,17 @@ function createNewIntegration(integrationFileUri: vscode.Uri, configmap? : strin
 		}
 		commandString += ' "' + absoluteRoot + '"';
 		console.log(`commandString = ${commandString}`);
+		if (devMode && devMode === true) {
+			if (extension.mainOutputChannel) {
+				extension.mainOutputChannel.show();
+			}
+		}
 		let runKubectl = child_process.exec(commandString, { cwd : foldername});
 		if (runKubectl.stdout) {
 			runKubectl.stdout.on('data', function (data) {
+				if (devMode && devMode === true) {
+					utils.shareMessage(extension.mainOutputChannel, `Dev Mode -- ${integrationName}: ${data}`);					
+				}
 				resolve(true);
 				return;
 			});
