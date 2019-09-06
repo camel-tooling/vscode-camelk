@@ -195,7 +195,7 @@ async function getNamedListFromKubernetes( itemType : string): Promise<any> {
 				resolve(itemList);
 			}
 		} else {
-			reject('Kubernetes not available');
+			reject(new Error('Kubernetes not available'));
 		}
 	});
 }

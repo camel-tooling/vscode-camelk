@@ -28,54 +28,100 @@ const basicIntegration : string = 'Basic - Apache Camel K Integration (no Config
 const configMapIntegration : string = 'ConfigMap - Apache Camel K Integration with Kubernetes ConfigMap';
 const secretIntegration : string = 'Secret - Apache Camel K Integration with Kubernetes Secret';
 
+const choiceList = [ basicIntegration, 
+	configMapIntegration, 
+	secretIntegration ];
+
 export async function startIntegration(context: vscode.Uri): Promise<any> {
 	return new Promise <any> ( async (resolve, reject) => {
-		await vscode.window.showQuickPick([ basicIntegration, configMapIntegration, secretIntegration ],
-		{
+		const choice : string | undefined = await vscode.window.showQuickPick(choiceList, {
 			placeHolder: 'Select the type of Apache Camel K Integration'
-		}).then( async (choice) => {
-			let selectedConfigMap = undefined;
-			let selectedSecret = undefined;
+		});
+
+		if (choice) {
+			let selectedConfigMap : any = undefined;
+			let selectedSecret : any = undefined;
 
 			switch (choice) {
 				case configMapIntegration:
-					await getConfigMaps().then( async (configMaps) => {
-						selectedConfigMap = await vscode.window.showQuickPick(configMaps, {
-							placeHolder: 'Select an available Kubernetes ConfigMap or ESC to cancel'
-						});
+					await getSelectedConfigMap().then( (selection) => {
+						selectedConfigMap = selection;
+						if (selectedConfigMap === undefined) {
+							reject (new Error('No ConfigMap selected.'));
+							return;
+						}
+					}).catch ( (error) => {
+						reject(error);
+						return;
 					});
 					break;
 				case secretIntegration:
-					await getSecrets().then( async (secrets) => {
-						selectedSecret = await vscode.window.showQuickPick(secrets, {
-							placeHolder: 'Select an available Kubernetes Secret or ESC to cancel'
-						});
+					await getSelectedSecret().then( (selection) => {
+						selectedSecret = selection;
+						if (selectedSecret === undefined) {
+							reject (new Error('No Secret selected.'));
+							return;
+						}
+					}).catch ( (error) => {
+						reject(error);
+						return;
 					});
 					break;
 				case basicIntegration:
 					// do nothing with config-map or secret
 					break;
 			}
-
-			if (!choice) {
-				reject(new Error('No integration selection made.'));
-				return;
+				
+			if (selectedConfigMap !== null || selectedSecret !== null) {
+				await createNewIntegration(context, selectedConfigMap, selectedSecret)
+					.then( success => {
+						if (!success) {
+							reject(false);
+							return;
+						}
+						resolve(true);
+					})
+					.catch(err => {
+						reject(err);
+					});
 			}
-	
-			await createNewIntegration(context, selectedConfigMap, selectedSecret)
-				.then( success => {
-					if (!success) {
-						reject(false);
-					}
-					resolve(true);
-				})
-				.catch(err => {
-					reject(err);
+		} else {
+			reject(new Error('No integration selection made.'));
+			return;
+		}
+	});
+}
+
+function getSelectedConfigMap() {
+	return new Promise <any> ( async (resolve, reject) => {
+		await getConfigMaps()
+			.then( (configMaps) => {
+				vscode.window.showQuickPick(configMaps, {
+					placeHolder: 'Select an available Kubernetes ConfigMap or ESC to cancel'
+				}).then ( (selectedConfigMap) => {
+					resolve(selectedConfigMap);
 				});
+			}).catch ( (error) => {
+				reject(new Error(`No ConfigMaps available: ${error}`));
 			});
 		});
 }
-		
+
+function getSelectedSecret() {
+	return new Promise <any> ( async (resolve, reject) => {
+		await getSecrets()
+			.then( (secrets) => {
+				vscode.window.showQuickPick(secrets, {
+					placeHolder: 'Select an available Kubernetes Secret or ESC to cancel'
+				}).then ( (selectedSecret) => {
+					resolve(selectedSecret);
+				});
+			}).catch ( (error) => {
+				reject(new Error(`No Secrets available: ${error}`));
+			});
+		});
+}
+
 // use command-line "kamel" utility to start a new integration
 function createNewIntegration(integrationFileUri: vscode.Uri, configmap? : string, secret? : string): Promise<boolean> {
 	return new Promise( async (resolve, reject) => {
