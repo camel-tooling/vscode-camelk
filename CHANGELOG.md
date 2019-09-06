@@ -4,6 +4,8 @@ All notable changes to the "vscode-camelk" extension will be documented in this 
 
 ## 0.0.8
 
+- Fix regression preventing to use Commands to deploy integration
+
 ## 0.0.7
 
 - Update to naming approved by Red Hat legal
