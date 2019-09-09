@@ -5,6 +5,7 @@ All notable changes to the "vscode-camelk" extension will be documented in this 
 ## 0.0.9
 
 - Added the Microsoft Kubernetes Tools extension as an extension dependency
+- Update to add Dev Mode option for quick deployment and instant feedback in the Apache Camel K Output Channel
 
 ## 0.0.8
 
