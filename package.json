@@ -206,6 +206,9 @@
 		"typescript": "^3.6.2",
 		"vscode": "^1.1.36"
 	},
+	"extensionDependencies": [
+		"ms-kubernetes-tools.vscode-kubernetes-tools"
+	],
 	"dependencies": {
 		"@types/request-promise": "^4.1.44",
 		"child_process": "^1.0.2",

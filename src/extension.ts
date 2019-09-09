@@ -298,10 +298,12 @@ function getPodLogViaCurl(podName : string): Promise<boolean> {
 			let commandString = `curl -v -H "Accept: application/json, */*" ${podsURL}?follow=true --insecure -N`;
 			await utils.delay(1000);
 			let runKamel = child_process.spawn(curlCommand, [curlOption, commandString]);
-			runKamel.stdout.on('data', function (data) {
-				podOutputChannel.append(`${data}`);
-				resolve(true);
-			});
+			if (runKamel.stdout) {
+				runKamel.stdout.on('data', function (data) {
+					podOutputChannel.append(`${data}`);
+					resolve(true);
+				});
+			}
 			runKamel.on("close", (code, signal) => {
 				console.log("[CLOSING] " + `${code} / ${signal} \n`);
 				resolve(true);
