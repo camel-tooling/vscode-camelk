@@ -28,12 +28,23 @@ const devModeIntegration : string = 'Dev Mode - Apache Camel K Integration in De
 const basicIntegration : string = 'Basic - Apache Camel K Integration (no ConfigMap or Secret)';
 const configMapIntegration : string = 'ConfigMap - Apache Camel K Integration with Kubernetes ConfigMap';
 const secretIntegration : string = 'Secret - Apache Camel K Integration with Kubernetes Secret';
+const resourceIntegration : string = 'Resource - Apache Camel K Integration with Resource file';
+
+const ResourceOptions: vscode.OpenDialogOptions = {
+	canSelectMany: true,
+	openLabel: 'Open Resource File(s)',
+	filters: {
+		'Text files': ['txt'],
+		'All files': ['*']
+	}
+};
 
 const choiceList = [ 
 	devModeIntegration,
 	basicIntegration, 
 	configMapIntegration, 
-	secretIntegration ];
+	secretIntegration,
+	resourceIntegration ];
 
 export async function startIntegration(context: vscode.Uri): Promise<any> {
 	return new Promise <any> ( async (resolve, reject) => {
@@ -45,7 +56,9 @@ export async function startIntegration(context: vscode.Uri): Promise<any> {
 			let selectedConfigMap : any = undefined;
 			let selectedSecret : any = undefined;
 			let devMode : boolean = false;
-			
+			let selectedResource : any = undefined;
+			let errorEncountered : boolean = false;
+
 			switch (choice) {
 				case devModeIntegration:
 					devMode = true;
@@ -55,10 +68,12 @@ export async function startIntegration(context: vscode.Uri): Promise<any> {
 						selectedConfigMap = selection;
 						if (selectedConfigMap === undefined) {
 							reject (new Error('No ConfigMap selected.'));
+							errorEncountered = true;
 							return;
 						}
 					}).catch ( (error) => {
 						reject(error);
+						errorEncountered = true;
 						return;
 					});
 					break;
@@ -67,10 +82,26 @@ export async function startIntegration(context: vscode.Uri): Promise<any> {
 						selectedSecret = selection;
 						if (selectedSecret === undefined) {
 							reject (new Error('No Secret selected.'));
+							errorEncountered = true;
 							return;
 						}
 					}).catch ( (error) => {
 						reject(error);
+						errorEncountered = true;
+						return;
+					});
+					break;
+				case resourceIntegration:
+					await getSelectedResource().then( (selection) => {
+						selectedResource = selection;
+						if (selectedResource === undefined) {
+							reject (new Error('No Resource selected.'));
+							errorEncountered = true;
+							return;
+						}
+					}).catch ( (error) => {
+						reject(error);
+						errorEncountered = true;
 						return;
 					});
 					break;
@@ -79,8 +110,8 @@ export async function startIntegration(context: vscode.Uri): Promise<any> {
 					break;
 			}
 				
-			if (selectedConfigMap !== null || selectedSecret !== null) {
-				await createNewIntegration(context, devMode, selectedConfigMap, selectedSecret)
+			if (!errorEncountered) {
+				await createNewIntegration(context, devMode, selectedConfigMap, selectedSecret, selectedResource)
 					.then( success => {
 						if (!success) {
 							reject(false);
@@ -129,8 +160,30 @@ function getSelectedSecret() {
 		});
 }
 
+function getSelectedResource() {
+	return new Promise <any> ( async (resolve, reject) => {
+		let returnedResources = '';
+		const fileUri = await vscode.window.showOpenDialog(ResourceOptions);
+		if (fileUri === undefined || fileUri.length === 0) {
+			reject(new Error("No Resource file(s) specified."));
+			return;
+		} else {
+			fileUri.forEach(selectedFile => {
+				if (returnedResources.trim().length > 0) {
+					// add a separator
+					returnedResources += ` `;
+				}
+				const uriStr = path.normalize(selectedFile.path);
+				returnedResources += `${uriStr}`;
+			});				
+			resolve(returnedResources);
+			return;
+		}
+	});
+}
+
 // use command-line "kamel" utility to start a new integration
-function createNewIntegration(integrationFileUri: vscode.Uri, devMode? : boolean, configmap? : string, secret? : string): Promise<boolean> {
+function createNewIntegration(integrationFileUri: vscode.Uri, devMode? : boolean, configmap? : string, secret? : string, resource? : string): Promise<boolean> {
 	return new Promise( async (resolve, reject) => {
 		let filename = integrationFileUri.fsPath;
 		let foldername = path.dirname(filename);
@@ -153,6 +206,14 @@ function createNewIntegration(integrationFileUri: vscode.Uri, devMode? : boolean
 		}
 		if (secret && secret.trim().length > 0) {
 			commandString += ` --secret=${secret}`;
+		}
+		if (resource && resource.trim().length > 0) {
+			let resourceArray = resource.split(' ');
+			if (resourceArray && resourceArray.length > 0) {
+				resourceArray.forEach(res => {
+					commandString += ` --resource="${res}"`;
+				});
+			}			
 		}
 		commandString += ' "' + absoluteRoot + '"';
 		console.log(`commandString = ${commandString}`);
