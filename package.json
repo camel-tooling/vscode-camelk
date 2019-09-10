@@ -129,7 +129,7 @@
 			"explorer/context": [
 				{
 					"command": "camelk.startintegration",
-					"when": "resourceExtname =~ /\\.(groovy|java|xml|js|kts)$/",
+					"when": "resourceExtname =~ /\\.(groovy|java|xml|js|kts|yaml)$/",
 					"group": "camelk.group"
 				},
 				{
