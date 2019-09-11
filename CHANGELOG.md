@@ -9,6 +9,7 @@ All notable changes to the "vscode-camelk" extension will be documented in this 
 - Update to add Dev Mode option for quick deployment and instant feedback in the Apache Camel K Output Channel
 - Add support for --property
 - Add ability to define custom dependencies for an integration
+- Added support for starting integrations with the YAML file extension
 
 ## 0.0.8
 - Fix regression preventing to use Commands to deploy integration
