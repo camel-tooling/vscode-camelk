@@ -7,6 +7,8 @@ All notable changes to the "vscode-camelk" extension will be documented in this 
 - Add ability to deploy integrations associated with Resource files
 - Added the Microsoft Kubernetes Tools extension as an extension dependency
 - Update to add Dev Mode option for quick deployment and instant feedback in the Apache Camel K Output Channel
+- Add support for --property
+- Add ability to define custom dependencies for an integration
 - Added support for starting integrations with the YAML file extension
 
 ## 0.0.8
