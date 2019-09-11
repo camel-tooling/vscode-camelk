@@ -5,115 +5,151 @@
 
 # Visual Studio extension to support Apache Camel K
 
-This extension offers basic integration with Apache Camel K (https://github.com/apache/camel-K) on two fronts.
+First, what is Apache Camel K? According to its Github Readme, “Apache Camel K is a lightweight integration platform, born on Kubernetes, with serverless superpowers.” Essentially Camel K enables developers to run integrations on Kubernetes or OpenShift clusters which enables them to get Camel-based integration solutions up and running very quickly! 
 
-First, Apache Camel K runs with a combination of the "kamel" runtime and either Minishift, Minikube, or GKE running locally on the development system. We utilize the "kamel" and "kubectl" executables to manage a few basic tasks listed further down.
+Our goal for the **Tooling for Apache Camel K** extension for Microsoft Visual Studio Code (VS Code) is to make that process even more seamless. 
 
-Second, we also have the capability of using Restful calls to a Proxy when provided the correct URL and port combination (defaulting to http://localhost:8000). The proxy offers the same functionality as if we were using the command-line executables.
+For more information about Camel K, be sure to check out its [documentation](https://camel.apache.org/staging/camel-k/latest/index.html) and [github](https://github.com/apache/camel-K) pages.
 
-To install Minikube and Apache Camel K, see [Installing MiniKube and Camel K](configure-minikube-camelk.md).
+## Before you begin
 
-## Kubernetes tools in VS Code
+In order to use our **Tooling for Apache Camel K** extension for VS Code, you must have the following software in place:
 
-The [Kubernetes Tools extension from Microsoft](https://marketplace.visualstudio.com/items?itemName=ms-kubernetes-tools.vscode-kubernetes-tools) offers a number of tools we can use with Minikube and Apache Camel K. With a local Minikube instance running, you can see your local clusters appear in the Kubernetes Activity view.
+* An instance of Apache Camel K running on a Kubernetes or an OpenShift cluster that is  accessible from your system on your network. You must also have Minikube (or the Kubernetes CLI) installed. See the Apache Camel K installation page for details: (https://camel.apache.org/staging/camel-k/latest/installation/installation.html). 
+* Microsoft VS Code installed. You can get the most recent version from (https://code.visualstudio.com/) for your chosen operating system. 
 
-![Kubernetes Activity with Camel K](images/kubernetes-view-camelk.jpg)
+## Installing the extension
 
-With any node appearing in a Minikube cluster, you can easily follow the logs by right-clicking and selecting "Follow Logs" in the context menu.
+The **Tooling for Apache Camel K** extension is available in the VS Code Extension Marketplace (https://marketplace.visualstudio.com/items?itemName=redhat.vscode-camelk). 
 
-![Kubernetes View pop-up menu](images/kubernetes-view-camelk-popup.jpg)
+### Steps
 
-This opens a log for the selected pod in a new Terminal window.
+1. Open your VS Code Integrated Development Environment (IDE).
+2. In the VS Code Activity Bar, select Extensions. (Alternately, press Ctrl+Shift+X).
+3. In the search bar, type **Apache Camel K** 
 
-![Kubernetes View operator log](images/kubernetes-view-camelk-operator-log.jpg)
+![Extension Marketplace - Tooling for Apache Camel K](images/install-camelk-extension.jpg)
 
-## Starting new Apache Camel K integrations
+4. In the **Tooling for Apache Camel K** box, click **Install**.
+5. In addition, we encourage you to also install these VS Code extensions:
 
-Once your Apache Camel K/Minikube environment is running and the vscode-camelk extension is installed, you can easily start a new Apache Camel K integration from a Java (*.java), Camel XML (Spring DSL) (*.xml), JavaScript (*.js), Groovy (*.groovy), or Kotlin (*.kts) file. To do this, right-click on the integration file, and select "Start Apache Camel K Integration".
+    * Kubernetes Tools extension from Microsoft - This extension offers a number of supplemental tools you can use with Minikube and Apache Camel K to check pod status and more. It is available here (https://marketplace.visualstudio.com/items?itemName=ms-kubernetes-tools.vscode-kubernetes-tools).
+    * Language Support for Apache Camel (https://marketplace.visualstudio.com/items?itemName=camel-tooling.vscode-apache-camel) - This extension provides auto-completion for Camel components, attributes, and the list of attribute values in the Camel URI for integrations written in XML, Java, Groovy, JavaScript, and Kotlin.
 
-With [Language Support for Apache Camel](https://marketplace.visualstudio.com/items?itemName=camel-tooling.vscode-apache-camel) installed, you also get LSP support for URIs and more in Camel XML, Java, Groovy, and other routes:
+    You can install them by following the same steps except search for Kubernetes or Apache Camel in the list of extensions.
 
-![Hello XML](images/kubernetes-view-camelk-hello-xml.jpg)
+## Starting a new Camel K Integration
 
-## 'Start Apache Camel K Integration' menu results
+After your Apache Camel K/Minikube environment is running and you have installed the **Tooling for Apache Camel K** (vscode-camelk) extension, you can start a new Apache Camel K integration.
 
-If the Apache Camel K executable (kamel.exe) is in the system path, we can simply call the utility with appropriate options to run a particular file when the user wishes. For example, if I have a simple workspace with a Groovy file...
+You can start a new Camel K integration with or without additional options such as ConfigMaps or Secrets. (For information about how to publish a ConfigMap or Secret, see [Publishing new Kubernetes ConfigMaps or Secrets](#publishing-new-kubernetes-configmaps-or-secrets)).
 
-![Run Menu](images/kubernetes-view-camelk-run-xml-menu.jpg)
+1. In the VS Code Explorer, right-click on an integration file that is one of the following file types:
 
-Once you click the Start Apache Camel-K Integration menu, a drop-down appears in the command palette with three choices:
+* Java (*.java)
+* Camel plain XML DSL (not Spring XML or Blueprint) (*.xml)
+* JavaScript (*.js)
+* Groovy (*.groovy)
+* Kotlin (*.kts)
+* Yaml (*.yaml) (Experimental)
 
-![Start types](images/camelk-start-integration-dropdown.jpg)
+    For more information about supported languages, see [Languages](https://camel.apache.org/camel-k/latest/languages/languages.html) in the Apache Camel-K documentation.
 
-You have three choices:
+2. In the popup menu, select **Start Apache Camel K Integration**. 
 
-* Basic - Apache Camel K Integration (no ConfigMap or Secret)
-* ConfigMap - Apache Camel-K Integration with Kubernetes ConfigMap
-* Secret - Apache Camel-K Integration with Kubernetes Secret
+    ![Start Apache Camel K Integration - ConfigMap list](images/camelk-start-integration-popup-menu.jpg)
 
-We'll cover the Basic case here. When you select the "Basic" option, it runs my Apache Camel-K Groovy file as a new integration in the directory of the file (i.e. `kamel run "filename"` or the equivalent Kubernetes rest call) or uses the Kubernetes Rest API to deploy the integration to the running Kubernetes system.
+    A drop-down appears in the command palette with several choices:
 
-Once the integration is in a "running" state, it's ready to go!
+    ![Start Apache Camel K Integration - Dropdown options](images/camelk-start-integration-dropdown.jpg)
 
-Note that the first time a new integration is published, it may take a few seconds to propagate through the system to a running state. Use the "Refresh" button when you hover over the Apache Camel K Integrations view to update the state of your currently deployed integrations.
+* **Dev Mode - Apache Camel K Integration in Dev Mode**
+
+    In “Dev Mode,” all output is directed to the Apache Camel K output channel, including startup tasks. In addition, when you update the integration file, the integration is re-deployed automatically for easier development and debugging. For more information about Dev Mode, see [Running in Dev Mode](https://camel.apache.org/camel-k/latest/running/dev-mode.html) in the Apache Camel-K documentation.
+
+* **Basic - Apache Camel K Integration (no ConfigMap or Secret)**
+
+    The "Basic" option starts the file as a new integration to deploy the integration to the running Kubernetes system.
+
+* **ConfigMap - Apache Camel K Integration with Kubernetes ConfigMap**
+
+    Select a ConfigMap from a list of the published ConfigMaps in your current Kubernetes system. For example:
+
+    ![Start Apache Camel K Integration - ConfigMap list](images/kubernetes-configmap-list.jpg)
+
+* **Secret - Apache Camel K Integration with Kubernetes Secret**
+
+    Select a Secret from a list of the published Secrets in your current Kubernetes system. For more information about configuration with ConfigMaps or Secrets, see [Configuration via ConfigMap or Secret](https://camel.apache.org/camel-k/latest/configuration/configmap-secret.html) in the Apache Camel K documentation.
+
+* **Resource - Apache Camel K Integration with Resource file**
+
+    Select one or more resource files from the file selection dialog.
+
+* **Property - Apache Camel K Integration with Property**
+
+    Specify property name/property value pairs, with the option to specify more than one. For more information about configuration with properties, see [Configure Integrations](https://camel.apache.org/camel-k/latest/configuration/configuration.html) in the Apache Camel-K documentation.
+
+* **Dependencies - Apache Camel K Integration with Explicit Dependencies**
+
+    Specify dependency details either by their camel-component artifact Id or by their Maven coordinates (group:artifact:version), with the option to specify more than one. For more information about configuration with Dependencies, see [Dependencies and Component Resolution](https://camel.apache.org/camel-k/latest/configuration/dependencies.html) in the Apache Camel-K documentation.
+
+When you start a new integration, the extension starts the deployment process with the *kamel run [filename]* command and any options after that.
+
+**Note:** The first time that you publish a new integration, the extension  might take a few moments to propagate through the system to a running state. 
+
+To update the state of your currently deployed integrations, hover over the **Apache Camel K Integrations** view and click the **Refresh** button.
+
+![Apache Camel K Integrations view - Refresh](images/camelk-integrations-view-refresh-action.jpg)
 
 ## Publishing new Kubernetes ConfigMaps or Secrets
 
-We have added two new menus when you right-click on a *.properties file in the Explorer view:
+You can use the **Tooling for Apache Camel K** extension to create ConfigMaps and Secrets and publish them to the running Kubernetes system.
 
-* Create Kubernetes Config Map from File
-* Create Kubernetes Secret from File
+###Before you begin
 
-In both cases, you are asked for the name of your new ConfigMap or Secret. The name must start with a letter and contain no spaces, but can use numbers or hyphens (i.e. "my-confg-map" is valid but "my config map" is not). Once given a valid name, the action will create your new ConfigMap or Secret that you can reference in your Apache Camel-K route. 
+You must have a *.properties file that you want to use as the basis for the ConfigMap or Secret. Properties files consist of name/value pairs. Each property can then be referenced in a route by the property name to use the value by reference.
+
+For example, you might have an *application.properties* file that has two entries:
+
+    my.message=Hello World
+    logging.level.org.apache.camel=DEBUG
+
+In your route, you can then refer to *my.message* by providing as **{{my.message}}**. 
+
+In a Groovy route, that might look like **from('timer:props?period=1s').log('{{my.message}}')**.
+
+### Steps
+
+1. In the VS Code Explorer view, right-click on the *.properties file.
+2. Select one of the following options:
+    * Create Kubernetes Config Map from File
+    * Create Kubernetes Secret from File
+
+3. Type the name of your new ConfigMap or Secret. The name must start with a letter and contain no spaces. You can use numbers or hyphens. For example, **my-config-map** is a valid name but **my config map** is not. 
 
 ![Kubernetes ConfigMap List](images/kubernetes-secret-name-command.jpg)
 
-See [Configuration via ConfigMap or Secret](https://camel.apache.org/staging/camel-k/latest/configuration/configmap-secret.html) in the Apache Camel-K documentation for more details.
+4. Press **Enter**. The extension creates a new ConfigMap or Secret that you can reference in your Apache Camel K route.
 
-## Running with Kubernetes ConfigMaps or Secrets
+For more information about configuration with ConfigMaps or Secrets, see [Configuration via ConfigMap or Secret](https://camel.apache.org/camel-k/latest/configuration/configmap-secret.html) in the Apache Camel-K documentation for more details.
 
-If you select the "ConfigMap - Apache Camel-K Integration with Kubernetes ConfigMap" or "Secret - Apache Camel-K Integration with Kubernetes Secret" you will be presented with a list of the published ConfigMaps or Secrets in your current Kubernetes system. Select the one you want to use with your integration and it will run accordingly.
+## Viewing the status of published integrations
 
-![Kubernetes ConfigMap List](images/kubernetes-configmap-list.jpg)
+After you publish a new integration, it appears in the **Apache Camel K Integrations** view in the Side Bar of the Explorer activity:
 
-## Output Channels
+![Apache Camel K Integrations view](images/camelk-integration-view.jpg)
 
-There are two types of "output channels" providing details for the extension.
+When you add or remove file-based integrations in the Explorer view, it automatically refreshes the list.
 
-* The "Apache Camel K" output channel (View->Output, select "Apache Camel K" from the drop-down in the view) offers details about events such as when the Apache Camel K Integrations view is refreshed, when new integrations are started, when running integrations are stopped, and when the log of a particular running integration is viewed.
-* In that last case, the "Follow log for Apache Camel K Integration" menu, when invoked on a running integration in the Apache Camel K Integrations view, opens a new Output channel named for the running "pod" associated with that particular integration. This gives you access to the running Camel log for the selected integration.
+**Note:** Refreshing the view sometimes is delayed as pods start. You might need to wait a few seconds. Optionally, to manually refresh the list, click the **Refresh** button.
 
-## Stopping running Apache Camel K integrations
+![Apache Camel K Integrations view - Refresh](images/camelk-integrations-view-refresh-action.jpg)
 
-Once an integration is running, it may be stopped in the "Apache Camel K Integrations" view by right-clicking on the integration and selecting "Remove Apache Camel K Integration." Stopping an integration removes its associated output channel.
+The status of deployment for Integrations is indicated by the color of the dot in the K icon for the integration. If green, the integration is in a "Running" state. If red, it is in another state, such as "Building Kit" or "Error". Hover over the integration to view a tooltip that shows the status:
 
-"Remove Apache Camel K Integration" essentially calls `kamel delete '${filename}'` (or the equivalent call in the Kubernetes Rest API) to stop the running integration in the system.
+![Apache Camel K Integrations view - Tooltips](images/camelk-integration-view-tooltip.jpg)
 
-## Apache Camel K Integrations view
-
-The Apache Camel K Integrations view offers a list of the "integrations" registered with the current Apache Camel K context. If you right-click on a running integration, you can "Remove" an integration to stop them in the system or "Follow" the log to show the running log for your integration in a new Output channel.
-
-![Apache Camel K integrations view Remove](images/camelk-integrations-view-remove-menu.jpg)
-
-Following a log opens a new Output channel named for the running Kubernetes pod where the integration is running. It updates as new data is added:
-
-![Apache Camel K integrations view Log](images/camelk-integrations-view-integrations-log.jpg)
-
-In addition, the view has a "Refresh" button that can be used to manually trigger a refresh of the list, but when you add/remove file-based integrations in the Explorer view, it should refresh automatically.
-
-Note: Refreshing the view sometimes is delayed as we wait for pods to start. You may need to give it a few seconds. If nothing happens, the Refresh button is a good option.
-
-![Apache Camel K integrations view Refresh](images/camelk-integrations-view-refresh-action.jpg)
-
-Integrations in the list are decorated with a little dot indicating the status of the deployment. If green, the integration is in a "Running" state. If red, it is in other states such as "Building Kit" or "Error." And if you hover over the integration, the tooltip will show the status.
-
-![Apache Camel K integrations view Status tooltip](images/camelk-integrations-view-status-tooltip.jpg)
-
-### Apache Camel K Status Bar Messages
-
-While events are occurring such as the Apache Camel K Integrations view is being refreshed or a new Integration is being deployed, a status bar message will appear to offer an indication. This can be disabled in the extension settings.
-
-The extension shows status messages when:
+The **Tooling for Apache Camel K** extension shows a status bar message for the following events:
 
 * Starting a new integration
 * Removing an integration
@@ -121,25 +157,72 @@ The extension shows status messages when:
 * Starting to follow an integration log
 * Starting a local Kubernetes proxy instance
 
-![Apache Camel K integrations Status Bar](images/camelk-integrations-status-bar.jpg)
+Optionally, to disable status bar messages:
+
+1. From the VS Code IDE, select **File->Preferences->Settings**.
+2. Select **Extensions** and then select **Apache Camel K Tooling Extension Settings**.
+3. Uncheck the **Show Status Bar Messages** option.
+
+## Viewing the running log for a published Apache Camel K Integration
+
+If you are running an integration in Dev mode, you can view the logged output for that integration in the **Apache Camel K Output channel**.
+
+If you want to explicitly view the running log for a published integration in a new Output channel, right-click on a running integration and then select the **Follow log for running Apache Camel K Integration** option.
+
+![Apache Camel K Integrations view - Follow log](images/camelk-integrations-view-remove-menu.jpg)
+
+A new Output channel opens. It is named for the running Kubernetes pod where the integration is running. This log updates as new data is added:
+
+![Apache Camel K Integrations view - Integration log](images/camelk-integrations-view-integrations-log.jpg)
+
+## Stopping an Apache Camel K integration
+
+When you stop an integration, you also remove its associated output channel.
+
+1. From the **Apache Camel K Integrations** view, right-click the integration that you want to stop.
+2. Select **Remove Apache Camel K Integration**.
 
 ## Apache Camel K Extension Settings
 
-To access the new extension settings, go to File->Preferences->Settings, then select "Extensions" and finally "Apache Camel K Tooling Extension Settings."
+To access **Tooling for Apache Camel K** extension settings:
+
+1. From the VS Code IDE, select **File->Preferences->Settings**.
+2. Select Extensions and then select **Apache Camel K Tooling Extension Settings**.
 
 ![Apache Camel K Extension Settings](images/camelk-integrations-view-settings.jpg)
 
-* Proxy Namespace - Currently this drop-down has two values: default and syndesis.
-* Proxy Port - Corresponds to the port of the Proxy URL to be used for accessing Kubernetes via Rest APIs. Defaults to 8000.
-* Proxy URL - This setting corresponds to the server proxy url for your Kubernetes service. It defaults to http://localhost, but can be altered to any appropriate service URL. It is combined with the port to construct URLs at runtime when starting the proxy and using proxy calls. (See [Use an HTTP Proxy to Access the Kubernetes API)[https://kubernetes.io/docs/tasks/access-kubernetes-api/http-proxy-access-api/] for details on how to create the local proxy (i.e. 'kubectl proxy –port=8000') and "Starting a local Kubernetes proxy" below.)
-* Show Status Bar Messages - Indicates whether to show messages in the status bar to indicate when the system is updating, such as when the Camel K Integrations view is being refreshed or a new Integration is being deployed.
-* Use Proxy - This setting determines whether the Camel K Integrations view retrieves the list of running integrations via the local 'kubectl' application or via the Kubernetes Rest API and calls through the Proxy URL/Namespace combination above. The ultimate URL becomes [proxyurl]/apis/camel.apache.org/v1alpha1/namespaces/[namespace]/integrations.
+Settings include:
+
+* **Proxy Namespace** - The namespace of the Kubernetes Proxy. You can select one of  two values: default and syndesis. The namespace is used to assemble the complete proxy URL and is part of the API definition in Kubernetes.
+* **Proxy Port** - he port of the Proxy URL to be used for accessing Kubernetes via Rest APIs. The default is **8000**.
+* **Proxy URL** - The server proxy URL for your Kubernetes service. The default is **http://localhost**. You can change it to any appropriate service URL. This value is combined with the port to construct URLs at runtime when starting the proxy and using proxy calls.  For details on how to create the local proxy (i.e. 'kubectl proxy –port=8000'), see [Use an HTTP Proxy to Access the Kubernetes API)[https://kubernetes.io/docs/tasks/access-kubernetes-api/http-proxy-access-api/] and [Starting a local Kubernetes proxy](#starting-a-local-kubernetes-proxy).)
+* **Show Status Bar Messages** - Indicates whether to show messages in the status bar to indicate when the system is updating, such as when the Camel K Integrations view is being refreshed or a new Integration is being deployed.
+* **Use Proxy** - Determines whether the Camel K Integrations view retrieves the list of running integrations by using the local 'kubectl' application or by using the Kubernetes Rest API and calls through the Proxy URL/Namespace combination above. The ultimate URL becomes [proxyurl]/apis/camel.apache.org/v1alpha1/namespaces/[namespace]/integrations.
 
 ## Starting a local Kubernetes proxy
 
-(Only available with the Minikube executable installed, but useful for local development.)
+**Note:** This option is only available if you have the Minikube executable installed.
 
-We have created a new command available in the command palette (Ctrl+Shift+P or F1) called "Apache Camel K: Start the Kubernetes proxy server." This will start a new Kubernetes proxy using the Minikube executable ('kubectl proxy --port=8000) and refreshes the Apache Camel K Integrations view immediately. This command creates a local proxy at the URL composed of the Proxy URL and Proxy Port set in the settings. For example, with the defaults the proxy URL becomes http://localhost:8000.
+1. In In the VS Code editor, open the command palette by pressing **Ctrl+Shift+P** or **F1**. 
+2. From the options, select **Apache Camel K: Start the Kubernetes proxy server**.
+
+A new Kubernetes proxy starts. It uses the Minikube executable (kubectl proxy --port=8000) and refreshes the Apache Camel K Integrations view immediately. This command creates a local proxy at the URL composed of the Proxy URL and Proxy Port set in the settings. For example, with the defaults, the proxy URL becomes **http://localhost:8000**.
+
+## Your First Integration
+
+After your Apache Camel K/Minikube environment is running and you have installed the **Tooling for Apache Camel K** (vscode-camelk) extension, you can quickly start your first integration.
+
+1. Create a directory on your development system called **integrations**. For example, */home/(User_Name)/Documents/integrations* on Linux or *C:\Users\(User_Name)\Documents\integrations* on Windows.
+2. Download the simple.groovy file (https://github.com/apache/camel-k/blob/master/examples/simple.groovy) into your new **integrations** directory.
+3. Start a new workspace in your VS Code Integrated Development Environment (IDE).
+4. Add the folder from step 1 to your new workspace with **File->Add Folder to Workspace...**
+5. Right-click on **simple.groovy** in your directory and select **Start Apache Camel K Integration**. 
+6. Select **Dev Mode - Apache Camel K Integration in Dev Mode**.
+7. Watch as messages appear in the **Apache Camel K Output channel** as your integration begins to run.
+8. Open **simple.groovy** and update the message to say ‘This is my first Camel K Integration!’. Save the file with **File->Save** or **Ctrl+S**.
+9. Watch as your integration is updated and your new message begins to appear in the output channel. 
+
+![Running Quickstart after Message Update](images/quickstart-console.jpg)
 
 ## Known Issues
 
