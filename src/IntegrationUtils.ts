@@ -24,11 +24,14 @@ import * as child_process from 'child_process';
 import { getConfigMaps, getSecrets } from './ConfigMapAndSecrets';
 import * as k8s from 'vscode-kubernetes-tools-api';
 
-const devModeIntegration : string = 'Dev Mode - Apache Camel K Integration in Dev Mode'
+const validNameRegex = /^[A-Za-z][A-Za-z0-9\-\.]*(?:[A-Za-z0-9]$){1}/;
+
+const devModeIntegration : string = 'Dev Mode - Apache Camel K Integration in Dev Mode';
 const basicIntegration : string = 'Basic - Apache Camel K Integration (no ConfigMap or Secret)';
 const configMapIntegration : string = 'ConfigMap - Apache Camel K Integration with Kubernetes ConfigMap';
 const secretIntegration : string = 'Secret - Apache Camel K Integration with Kubernetes Secret';
 const resourceIntegration : string = 'Resource - Apache Camel K Integration with Resource file';
+const propertyIntegration : string = 'Property - Apache Camel K Integration with Property';
 
 const ResourceOptions: vscode.OpenDialogOptions = {
 	canSelectMany: true,
@@ -44,10 +47,12 @@ const choiceList = [
 	basicIntegration, 
 	configMapIntegration, 
 	secretIntegration,
-	resourceIntegration ];
+	resourceIntegration,
+	propertyIntegration
+ ];
 
-export async function startIntegration(context: vscode.Uri): Promise<any> {
-	return new Promise <any> ( async (resolve, reject) => {
+ export async function startIntegration(context: vscode.Uri): Promise<boolean> {
+	return new Promise <boolean> ( async (resolve, reject) => {
 		const choice : string | undefined = await vscode.window.showQuickPick(choiceList, {
 			placeHolder: 'Select the type of Apache Camel K Integration'
 		});
@@ -58,6 +63,7 @@ export async function startIntegration(context: vscode.Uri): Promise<any> {
 			let devMode : boolean = false;
 			let selectedResource : any = undefined;
 			let errorEncountered : boolean = false;
+			let selectedProperty : any = undefined;
 
 			switch (choice) {
 				case devModeIntegration:
@@ -69,12 +75,12 @@ export async function startIntegration(context: vscode.Uri): Promise<any> {
 						if (selectedConfigMap === undefined) {
 							reject (new Error('No ConfigMap selected.'));
 							errorEncountered = true;
-							return;
+							return false;
 						}
 					}).catch ( (error) => {
 						reject(error);
 						errorEncountered = true;
-						return;
+						return false;
 					});
 					break;
 				case secretIntegration:
@@ -83,12 +89,12 @@ export async function startIntegration(context: vscode.Uri): Promise<any> {
 						if (selectedSecret === undefined) {
 							reject (new Error('No Secret selected.'));
 							errorEncountered = true;
-							return;
+							return false;
 						}
 					}).catch ( (error) => {
 						reject(error);
 						errorEncountered = true;
-						return;
+						return false;
 					});
 					break;
 				case resourceIntegration:
@@ -97,12 +103,26 @@ export async function startIntegration(context: vscode.Uri): Promise<any> {
 						if (selectedResource === undefined) {
 							reject (new Error('No Resource selected.'));
 							errorEncountered = true;
-							return;
+							return false;
 						}
 					}).catch ( (error) => {
 						reject(error);
 						errorEncountered = true;
-						return;
+						return false;
+					});
+					break;
+				case propertyIntegration:
+					await getSelectedProperties().then ( (selection) => {
+						selectedProperty = selection;
+						if (selectedProperty === undefined) {
+							reject (new Error('No Property defined.'));
+							errorEncountered = true;
+							return false;
+						}
+					}).catch ( (error) => {
+						reject(error);
+						errorEncountered = true;
+						return false;
 					});
 					break;
 				case basicIntegration:
@@ -111,21 +131,23 @@ export async function startIntegration(context: vscode.Uri): Promise<any> {
 			}
 				
 			if (!errorEncountered) {
-				await createNewIntegration(context, devMode, selectedConfigMap, selectedSecret, selectedResource)
+				await createNewIntegration(context, devMode, selectedConfigMap, selectedSecret, selectedResource, selectedProperty)
 					.then( success => {
 						if (!success) {
 							reject(false);
-							return;
+							return false;
 						}
 						resolve(true);
+						return true;
 					})
 					.catch(err => {
 						reject(err);
+						return false;
 					});
 			}
 		} else {
 			reject(new Error('No integration selection made.'));
-			return;
+			return false;
 		}
 	});
 }
@@ -181,9 +203,59 @@ function getSelectedResource() {
 		}
 	});
 }
+		
+function getSelectedProperties() {
+	return new Promise <string[]> ( async (resolve, reject) => {
+		let hasMoreProperties: boolean = true;
+		let returnedProperties : string[] = [];
+		while (hasMoreProperties) {
+			let newProperty: string;
+			await vscode.window.showInputBox({
+				placeHolder: 'Specify the property name',
+				validateInput: validateName
+			}).then ( async (propName) => {
+				if (propName) {
+					await vscode.window.showInputBox({
+						placeHolder: 'Specify the property value'
+					}).then ( async (propValue) => {
+						if (propValue) {
+							propValue = propValue.replace(/"/g, '\\"');
+							newProperty = `${propName}="${propValue}"`;
+
+							await vscode.window.showQuickPick( ['No', 'Yes'], {
+								placeHolder: 'Are there more properties?',
+								canPickMany : false	}).then( (answer) => {
+									if (!answer) {
+										hasMoreProperties = false;
+										reject(new Error(`No Property answer given`));
+										return undefined;
+									}
+									returnedProperties.push(newProperty);
+									if (answer && answer.toLowerCase() === 'no') {
+										hasMoreProperties = false;
+										resolve(returnedProperties);
+										return returnedProperties;
+									}
+								});
+										
+						} else {
+							hasMoreProperties = false;
+							reject(new Error(`No Property Value provided`));
+							return undefined;
+						}
+					});
+				} else {
+					hasMoreProperties = false;
+					reject(new Error(`No Property Name provided`));
+					return undefined;
+				}
+			});
+		}
+	});
+}
 
 // use command-line "kamel" utility to start a new integration
-function createNewIntegration(integrationFileUri: vscode.Uri, devMode? : boolean, configmap? : string, secret? : string, resource? : string): Promise<boolean> {
+function createNewIntegration(integrationFileUri: vscode.Uri, devMode? : boolean, configmap? : string, secret? : string, resource? : string, propertyArray? : string[]): Promise<boolean> {
 	return new Promise( async (resolve, reject) => {
 		let filename = integrationFileUri.fsPath;
 		let foldername = path.dirname(filename);
@@ -197,7 +269,7 @@ function createNewIntegration(integrationFileUri: vscode.Uri, devMode? : boolean
 				console.error(error); 
 			});
 
-		let commandString = 'kamel run';
+		let commandString = `kamel run "${absoluteRoot}"`;
 		if (devMode && devMode === true) {
 			commandString += ` --dev`;
 		}
@@ -215,7 +287,11 @@ function createNewIntegration(integrationFileUri: vscode.Uri, devMode? : boolean
 				});
 			}			
 		}
-		commandString += ' "' + absoluteRoot + '"';
+		if (propertyArray && propertyArray.length > 0) {
+			propertyArray.forEach(prop => {
+				commandString += ` -p ${prop}`;
+			});
+		}			
 		console.log(`commandString = ${commandString}`);
 		if (devMode && devMode === true) {
 			if (extension.mainOutputChannel) {
@@ -256,4 +332,8 @@ export async function isCamelKAvailable(): Promise<boolean> {
 		}
 		resolve(false);
 	});
+}
+
+function validateName(text : string) {
+	return !validNameRegex.test(text) ? 'Name must be at least two characters long, start with a letter, and only include a-z, A-Z, periods and hyphens' : null;	
 }

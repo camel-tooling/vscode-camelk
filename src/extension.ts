@@ -170,7 +170,13 @@ export function activate(context: vscode.ExtensionContext) {
 							let kubectl = child_process.exec(commandString);
 							if (kubectl.stdout) {
 								kubectl.stdout.on('data', function (data) {
-									podOutputChannel.append(`${data}`);
+									try {
+										if (podOutputChannel) {
+											podOutputChannel.append(`${data}`);
+										}
+									} catch (error) {
+										console.log(error);
+									}
 								});
 							}
 							if (kubectl.stderr) {
@@ -233,17 +239,27 @@ export function hideStatusLine() {
 }
 
 // find an output channel by name in the map and remove it
-function removeOutputChannel( channelName: string) {
-	let podOutputChannel;
-	if (outputChannelMap.has(channelName)) {
-		podOutputChannel = outputChannelMap.get(channelName);
-		if (podOutputChannel !== undefined) {
-			podOutputChannel.dispose();
-			outputChannelMap.delete(channelName);
-			utils.shareMessage(mainOutputChannel, `Removed Output channel for integration: ${channelName}`);
-			mainOutputChannel.show();
-		}
-	}
+function removeOutputChannel( channelName: string) : Promise<any> {
+	return new Promise <any> ( (resolve, reject) => {
+		let podOutputChannel;
+		if (outputChannelMap.has(channelName)) {
+			podOutputChannel = outputChannelMap.get(channelName);
+			if (podOutputChannel !== undefined) {
+				outputChannelMap.delete(channelName);
+				try {
+					podOutputChannel.dispose();
+				} catch (error) {
+					console.log(error);
+					reject(error);
+					return;
+				}
+				mainOutputChannel.show();
+				utils.shareMessage(mainOutputChannel, `Removed Output channel for integration: ${channelName}`);
+				resolve();
+				return;
+			}
+		}		
+	});
 }
 
 // retrieve the actual output channel for the name we stashed in the map
@@ -262,8 +278,11 @@ function getOutputChannel( channelName: string) : vscode.OutputChannel {
 
 // start the integration file
 async function runTheFile(context: vscode.Uri) {
-	await startIntegration(context);
-	await camelKIntegrationsProvider.refresh();
+	await startIntegration(context)
+		.then( async () => await camelKIntegrationsProvider.refresh())
+		.catch ( (error) => {
+			console.log(error);
+		});
 }
 
 // locate the POD name that corresponds to the Integration name
@@ -300,7 +319,9 @@ function getPodLogViaCurl(podName : string): Promise<boolean> {
 			let runKamel = child_process.spawn(curlCommand, [curlOption, commandString]);
 			if (runKamel.stdout) {
 				runKamel.stdout.on('data', function (data) {
-					podOutputChannel.append(`${data}`);
+					if (podOutputChannel) {
+						podOutputChannel.append(`${data}`);
+					}
 					resolve(true);
 				});
 			}
@@ -383,7 +404,8 @@ function startIntegration(context: vscode.Uri): Promise<string> {
 				.then( success => {
 					if (!success) {
 						vscode.window.showErrorMessage("Unable to call Kubernetes rest API.");
-						reject();
+						reject(new Error("Unable to call Kubernetes rest API."));
+						return;
 					}
 					resolve();
 					hideStatusLine();
@@ -401,9 +423,10 @@ function startIntegration(context: vscode.Uri): Promise<string> {
 				.then( success => {
 					if (!success) {
 						vscode.window.showErrorMessage("Unable to call Kamel.");
-						reject();
-					}
-					resolve();
+						reject(new Error("Unable to call Kamel."));
+					} else {
+						resolve();
+					}					
 					hideStatusLine();
 					return success;
 				})
@@ -466,7 +489,7 @@ export async function removeOutputChannelForIntegrationViaKubectl(integrationNam
 	await getIntegrationsFromKubectl(integrationName).then( (output) => {
 		let podName = processIntegrationList(output);
 		if (podName) {
-			removeOutputChannel(podName);
+			removeOutputChannel(podName).catch( (error) => console.log(error));
 		}
 	});
 }
