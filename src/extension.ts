@@ -25,6 +25,7 @@ import * as rp from 'request-promise';
 import {platform} from 'os';
 import * as configmapsandsecrets from './ConfigMapAndSecrets';
 import * as integrationutils from './IntegrationUtils';
+import * as events from 'events';
 
 export let mainOutputChannel: vscode.OutputChannel;
 export let myStatusBarItem: vscode.StatusBarItem;
@@ -36,9 +37,10 @@ let curlOption : string = '-c';
 let proxyPort : number;
 let showStatusBar : boolean;
 let camelKIntegrationsTreeView : vscode.TreeView<TreeNode>;
+let eventEmitter = new events.EventEmitter();
+const restartKubectlWatchEvent = 'restartKubectlWatch';
 
 // This extension offers basic integration with Camel K (https://github.com/apache/camel-k) on two fronts.
-
 export function activate(context: vscode.ExtensionContext) {
 
 	outputChannelMap = new Map();
@@ -99,6 +101,15 @@ export function activate(context: vscode.ExtensionContext) {
 			camelKIntegrationsProvider.refresh();
 		}
 	});
+
+	// start the watch listener for auto-updates 
+	startListeningForServerChanges();
+
+	// Listener to handle auto-refresh of view - kubectl times out, so we simply restart the watch when it does
+	var watchListener = function restartKubectlListenerOnEvent() {
+		startListeningForServerChanges();
+	};
+	eventEmitter.on(restartKubectlWatchEvent, watchListener);
 
 	// create the integration view action -- refresh
 	vscode.commands.registerCommand('camelk.integrations.refresh', () => camelKIntegrationsProvider.refresh());
@@ -561,4 +572,21 @@ function startKubeProxy(): Promise<string> {
 			});
 		}
 	}); 
+}
+
+// use kubectl to keep an eye on the server for changes and update the view
+function startListeningForServerChanges() {
+	let commandString = `kubectl get integrations -w`;
+	let runKamel = child_process.spawn(curlCommand, [curlOption, commandString]);
+	if (runKamel.stdout) {
+		runKamel.stdout.on('data', async function (data) {
+			if (camelKIntegrationsTreeView.visible === true) {
+				await camelKIntegrationsProvider.refresh();
+			}
+		});
+	}
+	runKamel.on("close", () => {
+		// stopped listening to server - likely timed out
+		eventEmitter.emit(restartKubectlWatchEvent);
+	});
 }
