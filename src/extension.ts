@@ -40,6 +40,7 @@ let showStatusBar : boolean;
 let camelKIntegrationsTreeView : vscode.TreeView<TreeNode>;
 let eventEmitter = new events.EventEmitter();
 const restartKubectlWatchEvent = 'restartKubectlWatch';
+export let devModeEnabled : boolean = false;
 
 // This extension offers basic integration with Camel K (https://github.com/apache/camel-k) on two fronts.
 export function activate(context: vscode.ExtensionContext) {
@@ -97,8 +98,12 @@ export function activate(context: vscode.ExtensionContext) {
 						console.log(`stderr: ${stderr}`);
 					}
 				});
-				await removeOutputChannelForIntegrationViaKubectl(integrationName)
-				.catch( (err) => {
+				await removeOutputChannelForIntegrationViaKubectl(integrationName).catch( (err) => {
+					console.log(err);
+				});
+				let boolResult = await integrationutils.killChildProcessForIntegration(integrationName).then( () => {
+					console.log(`Removed the child process running in the background for ${integrationName}: ${boolResult}`);
+				}).catch( (err) => {
 					console.log(err);
 				});
 			}
@@ -199,6 +204,11 @@ export function activate(context: vscode.ExtensionContext) {
 	let startIntegration = vscode.commands.registerCommand('camelk.startintegration', async (uri:vscode.Uri) => { await runTheFile(uri);});
 	context.subscriptions.push(startIntegration);
 
+	let enableDevMode = vscode.commands.registerCommand('camelk.enableDevMode', () => { startDevMode(); });
+	context.subscriptions.push(enableDevMode);
+	let disableDevMode = vscode.commands.registerCommand('camelk.disableDevMode', () => { stopDevMode(); });
+	context.subscriptions.push(disableDevMode);
+	
 	// add commands to create config-map and secret objects from .properties files
 	configmapsandsecrets.registerCommands();
 }
@@ -633,4 +643,16 @@ function createIntegrationsView(): void {
 			camelKIntegrationsProvider.refresh();
 		}
 	});
+}
+
+function startDevMode() {
+	devModeEnabled = true;
+}
+
+function stopDevMode() {
+	devModeEnabled = false;
+}
+
+export function getDevMode() : boolean {
+	return devModeEnabled;
 }

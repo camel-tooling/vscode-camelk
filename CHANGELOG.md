@@ -11,6 +11,8 @@ All notable changes to the "vscode-camelk" extension will be documented in this 
 - Add ability to define custom dependencies for an integration
 - Added support for starting integrations with the YAML file extension
 - Adding auto-refresh to update view when any integration changes are noted by kubectl
+- Add a command palette option to turn on/off --dev mode for use with other integration types
+- Changed method of executing child process from exec to spawn for easier killing of --dev process
 
 ## 0.0.8
 - Fix regression preventing to use Commands to deploy integration

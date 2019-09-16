@@ -53,6 +53,9 @@ const choiceList = [
 	dependencyIntegration
  ];
 
+ let childProcessMap : Map<string, child_process.ChildProcess>;
+
+
  export async function startIntegration(context: vscode.Uri): Promise<boolean> {
 	return new Promise <boolean> ( async (resolve, reject) => {
 		const choice : string | undefined = await vscode.window.showQuickPick(choiceList, {
@@ -322,41 +325,55 @@ function createNewIntegration(integrationFileUri: vscode.Uri, devMode? : boolean
 				console.error(error);
 			});
 
-		let commandString = `kamel run "${absoluteRoot}"`;
+		if (extension.getDevMode() === true) {
+			// it true, always override whatever the dev mode is that's passed in
+			devMode = true;
+		}
+
+		let kamelCLI = 'kamel';
+		let kamelArgs : string[] = [];
+		kamelArgs.push('run');
+		kamelArgs.push(`${absoluteRoot}`);
 		if (devMode && devMode === true) {
-			commandString += ` --dev`;
+			kamelArgs.push('--dev');
 		}
 		if (configmap && configmap.trim().length > 0) {
-			commandString += ` --configmap=${configmap}`;
+			kamelArgs.push(`--configmap=${configmap}`);
 		}
 		if (secret && secret.trim().length > 0) {
-			commandString += ` --secret=${secret}`;
+			kamelArgs.push(`--secret=${secret}`);
 		}
 		if (resource && resource.trim().length > 0) {
 			let resourceArray = resource.split(' ');
 			if (resourceArray && resourceArray.length > 0) {
 				resourceArray.forEach(res => {
-					commandString += ` --resource="${res}"`;
+					kamelArgs.push(`--resource="${res}"`);
 				});
 			}
 		}
 		if (dependencyArray && dependencyArray.length > 0) {
 			dependencyArray.forEach(dependency => {
-				commandString += ` --dependency=${dependency}`;
+				kamelArgs.push(`--dependency=${dependency}`);
 			});
 		}
 		if (propertyArray && propertyArray.length > 0) {
 			propertyArray.forEach(prop => {
-				commandString += ` -p ${prop}`;
+				kamelArgs.push(`-p ${prop}`);
 			});
-		}
-		console.log(`commandString = ${commandString}`);
+		}			
+		console.log(`commandString = ${kamelCLI} ${kamelArgs}`);
 		if (devMode && devMode === true) {
 			if (extension.mainOutputChannel) {
 				extension.mainOutputChannel.show();
 			}
 		}
-		let runKubectl = child_process.exec(commandString, { cwd : foldername});
+		let runKubectl = child_process.spawn(kamelCLI, kamelArgs, { cwd : foldername});
+
+		if (!childProcessMap) {
+			childProcessMap = new Map();
+		}
+		childProcessMap.set(integrationName, runKubectl);
+
 		if (runKubectl.stdout) {
 			runKubectl.stdout.on('data', function (data) {
 				if (devMode && devMode === true) {
@@ -416,4 +433,29 @@ function validateDependency(text : string) {
 		return 'Dependency must be specified in the form of an Apache Camel component Artifact Id or a Maven dependency in the form of group:artifact:version';
 	}
 	return null;
+}
+
+function getChildProcessForIntegration(integration:string) {
+	if (childProcessMap) {
+		if (childProcessMap.has(integration)) {
+			return childProcessMap.get(integration);
+		}
+	}
+	return null;
+}
+
+// this doesn't work, but it's on the right track I think
+export function killChildProcessForIntegration(integration:string) : Promise<boolean> {
+	return new Promise( (resolve, reject) => {
+		let childProcess : any = getChildProcessForIntegration(integration);
+		if (childProcess) {
+			try {
+				childProcess.kill("SIGKILL");
+			} catch (error) {
+				reject(error);
+			}
+			childProcessMap.delete(integration);
+		}
+		resolve(childProcess ? childProcess.killed : true);
+	});	
 }

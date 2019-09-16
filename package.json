@@ -123,6 +123,14 @@
 			{
 				"command": "camelk.integrations.createsecretfromfolder",
 				"title": "Create Kubernetes Secret From all Files in Folder"
+			},
+			{
+				"command": "camelk.enableDevMode",
+				"title": "Apache Camel K: Enable --dev mode for all future deployments"
+			},
+			{
+				"command": "camelk.disableDevMode",
+				"title": "Apache Camel K: Disable --dev mode for all future deployments"
 			}
 		],
 		"menus": {
