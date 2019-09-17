@@ -97,13 +97,13 @@ export async function delay (amount : number) {
 export async function pingTheURL(urlString: string) : Promise<any> {
 	return new Promise( (resolve, reject) => {
 		http.get(urlString, (result) => {
-			if (result && result.statusCode === 200) { 
+			if (result && result.statusCode === 200) {
 				resolve(true);
-			} else { 
-				reject(result.statusCode); 
+			} else {
+				reject(result.statusCode);
 			}
 		}).on('error', (e) => {
-			reject(e); 
+			reject(e);
 		});
 	});
 }
@@ -111,7 +111,7 @@ export async function pingTheURL(urlString: string) : Promise<any> {
 export async function pingKubernetes() : Promise<string> {
 	let proxyURL = createCamelKRestURL();
 	return new Promise<string> ( async (resolve, reject) => {
-		await pingTheURL(proxyURL).then ( (result) => { 
+		await pingTheURL(proxyURL).then ( (result) => {
 			if (result === true) {
 				resolve(proxyURL);
 			}
@@ -140,10 +140,10 @@ export async function pingKamel() : Promise<any> {
 				return;
 			});
 		}
-	}); 
+	});
 }
 
-export function shareMessage(outputChannel: vscode.OutputChannel, msg:string) {
+export function shareMessage(outputChannel: vscode.OutputChannel, msg:string): void {
 	if (outputChannel) {
 		if (!msg.endsWith('\n')) {
 			msg = `${msg} \n`;

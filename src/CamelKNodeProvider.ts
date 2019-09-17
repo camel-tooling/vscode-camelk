@@ -22,7 +22,7 @@ import * as rp from 'request-promise';
 import * as extension from './extension';
 
 export class CamelKNodeProvider implements vscode.TreeDataProvider<TreeNode> {
-	
+
 	private _onDidChangeTreeData: vscode.EventEmitter<TreeNode | undefined> = new vscode.EventEmitter<TreeNode | undefined>();
 	readonly onDidChangeTreeData: vscode.Event<TreeNode | undefined> = this._onDidChangeTreeData.event;
 
@@ -34,17 +34,17 @@ export class CamelKNodeProvider implements vscode.TreeDataProvider<TreeNode> {
 	constructor() {}
 
 	// get our list of integrations from kubectl or the rest API
-	public setUseProxy(flag: boolean) {
+	public setUseProxy(flag: boolean): void {
 		this.useProxy = flag;
 	}
 
-	// clear the tree 
-	public resetList() {
+	// clear the tree
+	public resetList(): void {
 		this.treeNodes = [];
 	}
 
 	// set up so we don't pollute test runs with camel k integrations
-	public setRetrieveIntegrations(flag:boolean) {
+	public setRetrieveIntegrations(flag:boolean): void {
 		this.retrieveIntegrations = flag;
 	}
 
@@ -58,11 +58,13 @@ export class CamelKNodeProvider implements vscode.TreeDataProvider<TreeNode> {
 		if (oldNodes !== null && oldNodes !== undefined) {
 			oldNodes.push(newNode);
 			if (disableRefresh !== true) {
-				this.refresh();
+				this.refresh().catch(err => {
+					Promise.reject(undefined);
+				});
 			}
 			return Promise.resolve(oldNodes);
 		}
-		return Promise.reject();
+		return Promise.reject(undefined);
 	}
 
 	// This method isn't used by the view currently, but is here to facilitate testing
@@ -72,12 +74,15 @@ export class CamelKNodeProvider implements vscode.TreeDataProvider<TreeNode> {
 			if (index > -1) {
 				oldNodes.splice(index, 1);
 				if (disableRefresh !== true) {
-					this.refresh();
+					this.refresh()
+					.catch(err => {
+						Promise.reject(undefined);
+					});
 				}
 			}
 			return Promise.resolve(oldNodes);
 		}
-		return Promise.reject();
+		return Promise.reject(undefined);
 	}
 
 	// trigger a refresh event in VSCode
@@ -92,7 +97,7 @@ export class CamelKNodeProvider implements vscode.TreeDataProvider<TreeNode> {
 					.then( async () => {
 						await this.getIntegrationsFromCamelK().then((output) => {
 							this.processIntegrationList(output);
-						}).catch((error) => { 
+						}).catch((error) => {
 							let errMsg : string = error;
 							if (errMsg) {
 								var errLower =  errMsg.toLowerCase();
@@ -178,7 +183,7 @@ export class CamelKNodeProvider implements vscode.TreeDataProvider<TreeNode> {
 			}
 		}
 	}
-	
+
 	// process the JSON we get back from the kube rest API
 	processIntegrationListFromJSON(json : Object) {
 		if (json) {
@@ -245,9 +250,9 @@ export class CamelKNodeProvider implements vscode.TreeDataProvider<TreeNode> {
 				console.log("[CLOSING] " + shellOutput);
 				resolve(shellOutput);
 			});
-		}); 
+		});
 	}
-	
+
 }
 
 // simple tree node for our integration view

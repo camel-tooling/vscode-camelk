@@ -23,7 +23,7 @@ import * as vscode from 'vscode';
 import * as nock from 'nock';
 
 suite('ensure camelk utilities work as expected', function() {
-	
+
 	test('should be able to stringify existing file', function(done) {
 		let testFilePath = path.join(__dirname, '../../src/test/helloworld.groovy');
 		utils.stringifyFileContents(testFilePath)
@@ -48,7 +48,11 @@ suite('ensure camelk utilities work as expected', function() {
 					assert.ok(output.length > 0);
 					done();
 				});
-		});
+		})
+		.catch((err) => {
+			assert.fail();
+			done(err);
+		});;
 	});
 
 	test('should be able to construct usable rest URL', function(done) {
@@ -68,7 +72,7 @@ suite('ensure camelk utilities work as expected', function() {
 				})
 			)
 		)
-		
+
 		// and set them back at the end
 		vscode.workspace.getConfiguration().update('camelk.integrations.proxyURL', proxyUrl, true);
 		vscode.workspace.getConfiguration().update('camelk.integrations.proxyPort', proxyPort, true);
@@ -99,7 +103,7 @@ suite('ensure camelk utilities work as expected', function() {
 	});
 
 	test('should be able to ping accessible server', function(done) {
-		utils.pingTheURL('http://www.google.com').then( 
+		utils.pingTheURL('http://www.google.com').then(
 			(result) => {
 				console.log('ping output = ' + result);
 				assert.equal(result, true);
@@ -109,7 +113,7 @@ suite('ensure camelk utilities work as expected', function() {
 	});
 
 	test('should be able to fail ping of inaccessible server', function(done) {
-		utils.pingTheURL('http://www.googleinaccesible.invalidurl').then( 
+		utils.pingTheURL('http://www.googleinaccesible.invalidurl').then(
 			(result) => {
 				assert.fail('Should not have made it here');
 				done(result);
@@ -133,11 +137,11 @@ suite('ensure camelk utilities work as expected', function() {
 
 				// use nock to mock the http request
 				nock(proxyURL).get('').reply(200, {});
-		
+
 				utils.pingKubernetes().then( (rtn) => {
 					assert.equal(rtn, proxyURL);
 				}).catch ( (err) => {done(err)});
-		
+
 				nock.cleanAll();
 			})
 		);
@@ -162,12 +166,12 @@ suite('ensure camelk utilities work as expected', function() {
 			assert.ok(error, 'valid failure here');
 			done();
 		});
-		
+
 		nock.cleanAll();
 	});
 
 	test('test kebab case utility', function(done) {
-		
+
 		// based loosely on https://github.com/apache/camel-k/blob/master/pkg/util/kubernetes/sanitize_test.go
 
 		assert.equal(utils.toKebabCase('MyOtherGroovyRoute'), 'my-other-groovy-route');
@@ -177,7 +181,7 @@ suite('ensure camelk utilities work as expected', function() {
 		assert.equal(utils.toKebabCase('-foo-bar-'), 'foo-bar');
 		assert.equal(utils.toKebabCase('1foo-bar2'), '1foo-bar2');
 		assert.equal(utils.toKebabCase('foo-bar-1'), 'foo-bar-1');
-		
+
 		done();
 	});
 

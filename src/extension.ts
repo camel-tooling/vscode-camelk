@@ -72,7 +72,12 @@ export function activate(context: vscode.ExtensionContext) {
 >>>>>>> extracting logic from activate into separate functions
 
 	// create the integration view action -- refresh
-	vscode.commands.registerCommand('camelk.integrations.refresh', () => camelKIntegrationsProvider.refresh());
+	vscode.commands.registerCommand('camelk.integrations.refresh', () => {
+		camelKIntegrationsProvider.refresh()
+		.catch( (err) => {
+			console.log(err);
+		});
+	});
 
 	// create the integration view action -- remove
 	vscode.commands.registerCommand('camelk.integrations.remove', async (node: TreeNode) => {
@@ -99,10 +104,16 @@ export function activate(context: vscode.ExtensionContext) {
 						console.log(`stderr: ${stderr}`);
 					}
 				});
-				await removeOutputChannelForIntegrationViaKubectl(integrationName);
+				await removeOutputChannelForIntegrationViaKubectl(integrationName)
+				.catch( (err) => {
+					console.log(err);
+				});
 			}
 			hideStatusLine();
-			camelKIntegrationsProvider.refresh();
+			camelKIntegrationsProvider.refresh()
+			.catch( (err) => {
+				console.log(err);
+			});
 		}
 	});
 
@@ -179,7 +190,10 @@ export function activate(context: vscode.ExtensionContext) {
 				hideStatusLine();
 				if (useProxy) {
 					// populate the initial tree
-					camelKIntegrationsProvider.refresh();
+					camelKIntegrationsProvider.refresh()
+					.catch( (err) => {
+						console.log(err);
+					});
 				}
 			})
 			.catch( (error) => {
@@ -347,7 +361,10 @@ async function stopIntegrationViaRest(integrationName: string) : Promise<any>{
 					.catch( (error) => {
 							utils.shareMessage(mainOutputChannel, `No output channel found for pod: ${error}`);
 					});
-		});
+			})
+			.catch( (err) => {
+				console.log(err);
+			});
 
 		var options = {
 			uri: proxyURL,
@@ -441,7 +458,10 @@ function createNewIntegrationViaRest(context: vscode.Uri): Promise<boolean> {
 					reject(error);
 				});
 			});
-		});
+		})
+		.catch((err) => {
+			reject(err);
+		});;
 	});
 }
 
@@ -451,6 +471,9 @@ async function removeOutputChannelForIntegrationViaRest(integrationName:string) 
 		findThePODNameForIntegrationFromJSON(output, integrationName)
 			.then( async (podName) => {
 				removeOutputChannel(podName);
+			})
+			.catch( (err) => {
+				console.log(err);
 			});
 	});
 }
@@ -462,6 +485,9 @@ export async function removeOutputChannelForIntegrationViaKubectl(integrationNam
 		if (podName) {
 			removeOutputChannel(podName).catch( (error) => console.log(error));
 		}
+	})
+	.catch(err => {
+		console.log(err);
 	});
 }
 
