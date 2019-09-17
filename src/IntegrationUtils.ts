@@ -43,10 +43,10 @@ const ResourceOptions: vscode.OpenDialogOptions = {
 	}
 };
 
-const choiceList = [ 
+const choiceList = [
 	devModeIntegration,
-	basicIntegration, 
-	configMapIntegration, 
+	basicIntegration,
+	configMapIntegration,
 	secretIntegration,
 	resourceIntegration,
 	propertyIntegration,
@@ -67,7 +67,7 @@ const choiceList = [
 			let errorEncountered : boolean = false;
 			let selectedProperty : any = undefined;
 			let selectedDependency : any = undefined;
-			
+
 			switch (choice) {
 				case devModeIntegration:
 					devMode = true;
@@ -146,7 +146,7 @@ const choiceList = [
 					// do nothing with config-map or secret
 					break;
 			}
-				
+
 			if (!errorEncountered) {
 				await createNewIntegration(context, devMode, selectedConfigMap, selectedSecret, selectedResource, selectedProperty, selectedDependency)
 					.then( success => {
@@ -214,13 +214,13 @@ function getSelectedResource() {
 				}
 				const uriStr = path.normalize(selectedFile.path);
 				returnedResources += `${uriStr}`;
-			});				
+			});
 			resolve(returnedResources);
 			return;
 		}
 	});
 }
-		
+
 function getSelectedProperties() {
 	return new Promise <string[]> ( async (resolve, reject) => {
 		let hasMoreProperties: boolean = true;
@@ -254,7 +254,7 @@ function getSelectedProperties() {
 										return returnedProperties;
 									}
 								});
-										
+
 						} else {
 							hasMoreProperties = false;
 							reject(new Error(`No Property Value provided`));
@@ -302,7 +302,7 @@ function getSelectedDependencies() {
 					return undefined;
 				}
 			});
-		}		
+		}
 	});
 }
 
@@ -317,9 +317,9 @@ function createNewIntegration(integrationFileUri: vscode.Uri, devMode? : boolean
 		let integrationName = utils.toKebabCase(rootName);
 		utils.shareMessage(extension.mainOutputChannel, `Deploying file ${absoluteRoot} as integration ${integrationName}`);
 		await extension.removeOutputChannelForIntegrationViaKubectl(integrationName)
-			.catch( (error) => { 
+			.catch( (error) => {
 				// this is not a hard stop, it just means there was no output channel to close
-				console.error(error); 
+				console.error(error);
 			});
 
 		let commandString = `kamel run "${absoluteRoot}"`;
@@ -338,8 +338,8 @@ function createNewIntegration(integrationFileUri: vscode.Uri, devMode? : boolean
 				resourceArray.forEach(res => {
 					commandString += ` --resource="${res}"`;
 				});
-			}		
-		}	
+			}
+		}
 		if (dependencyArray && dependencyArray.length > 0) {
 			dependencyArray.forEach(dependency => {
 				commandString += ` --dependency=${dependency}`;
@@ -349,7 +349,7 @@ function createNewIntegration(integrationFileUri: vscode.Uri, devMode? : boolean
 			propertyArray.forEach(prop => {
 				commandString += ` -p ${prop}`;
 			});
-		}			
+		}
 		console.log(`commandString = ${commandString}`);
 		if (devMode && devMode === true) {
 			if (extension.mainOutputChannel) {
@@ -360,7 +360,7 @@ function createNewIntegration(integrationFileUri: vscode.Uri, devMode? : boolean
 		if (runKubectl.stdout) {
 			runKubectl.stdout.on('data', function (data) {
 				if (devMode && devMode === true) {
-					utils.shareMessage(extension.mainOutputChannel, `Dev Mode -- ${integrationName}: ${data}`);					
+					utils.shareMessage(extension.mainOutputChannel, `Dev Mode -- ${integrationName}: ${data}`);
 				}
 				resolve(true);
 				return;
@@ -374,26 +374,32 @@ function createNewIntegration(integrationFileUri: vscode.Uri, devMode? : boolean
 			});
 		}
 	});
-}		
+}
 
 export async function isCamelKAvailable(): Promise<boolean> {
 	return new Promise<boolean>( async (resolve) => {
-		const kubectl = await k8s.extension.kubectl.v1;
-		if (kubectl.available) {
-			const result = await kubectl.api.invokeCommand('api-versions');
-			if (!result || result.code !== 0) {
+		await k8s.extension.kubectl.v1
+			.then( async (kubectl) => {
+				if (kubectl.available) {
+					const result = await kubectl.api.invokeCommand('api-versions');
+					if (!result || result.code !== 0) {
+						resolve(false);
+					} else if (result) {
+						let foundCamel : boolean = result.stdout.includes("camel.apache.org/v1alpha1");
+						resolve(foundCamel);
+					}
+				}
 				resolve(false);
-			} else if (result) {
-				let foundCamel : boolean = result.stdout.includes("camel.apache.org/v1alpha1");
-				resolve(foundCamel);
-			}
-		}
-		resolve(false);
+			})
+			.catch(err => {
+				console.log(err);
+				resolve(false);
+			})
 	});
 }
 
 function validateName(text : string) {
-	return !validNameRegex.test(text) ? 'Name must be at least two characters long, start with a letter, and only include a-z, A-Z, periods and hyphens' : null;	
+	return !validNameRegex.test(text) ? 'Name must be at least two characters long, start with a letter, and only include a-z, A-Z, periods and hyphens' : null;
 }
 
 function validateDependency(text : string) {
