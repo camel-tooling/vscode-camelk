@@ -58,9 +58,7 @@ export class CamelKNodeProvider implements vscode.TreeDataProvider<TreeNode> {
 		if (oldNodes !== null && oldNodes !== undefined) {
 			oldNodes.push(newNode);
 			if (disableRefresh !== true) {
-				this.refresh().catch(err => {
-					Promise.reject(undefined);
-				});
+				this.refresh();
 			}
 			return Promise.resolve(oldNodes);
 		}
@@ -74,10 +72,7 @@ export class CamelKNodeProvider implements vscode.TreeDataProvider<TreeNode> {
 			if (index > -1) {
 				oldNodes.splice(index, 1);
 				if (disableRefresh !== true) {
-					this.refresh()
-					.catch(err => {
-						Promise.reject(undefined);
-					});
+					this.refresh();
 				}
 			}
 			return Promise.resolve(oldNodes);
