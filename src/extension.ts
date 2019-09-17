@@ -29,6 +29,7 @@ import * as events from 'events';
 
 export let mainOutputChannel: vscode.OutputChannel;
 export let myStatusBarItem: vscode.StatusBarItem;
+
 let camelKIntegrationsProvider = new CamelKNodeProvider();
 let useProxy : boolean;
 let outputChannelMap : Map<string, vscode.OutputChannel>;
@@ -45,64 +46,16 @@ export function activate(context: vscode.ExtensionContext) {
 
 	outputChannelMap = new Map();
 
-	const osType = platform();
-	if (osType === 'win32') {
-		curlCommand = 'cmd';
-		curlOption = '/c';
-	}
-
-	// process the workspace setting indicating whether we should use the proxy or CLI
-	let statusBarSetting = vscode.workspace.getConfiguration().get('camelk.integrations.showStatusBarMessages') as boolean;
-	showStatusBar = statusBarSetting;
-
-	vscode.workspace.onDidChangeConfiguration(() => {
-		let statusBarSetting = vscode.workspace.getConfiguration().get('camelk.integrations.showStatusBarMessages') as boolean;
-		showStatusBar = statusBarSetting;
-		if (!showStatusBar) {
-			hideStatusLine();
-		}
-	});	
-
-
-	// process the workspace setting indicating whether we should use the proxy or CLI
-	let proxySetting = vscode.workspace.getConfiguration().get('camelk.integrations.useProxy') as boolean;
-	useProxy = proxySetting;
-	camelKIntegrationsProvider.setUseProxy(useProxy);
-
-	vscode.workspace.onDidChangeConfiguration(() => {
-		let proxySetting = vscode.workspace.getConfiguration().get('camelk.integrations.useProxy') as boolean;
-		useProxy = proxySetting;
-		camelKIntegrationsProvider.setUseProxy(useProxy);
-		camelKIntegrationsProvider.refresh();
-	});	
-
-	// process the workspace setting indicating the proxy port we should use
-	let proxyPortTemp = vscode.workspace.getConfiguration().get('camelk.integrations.proxyPort') as number;
-	if (proxyPortTemp) {
-		proxyPort = proxyPortTemp; 
-	}
-
-	vscode.workspace.onDidChangeConfiguration(() => {
-		let proxyPortTemp = vscode.workspace.getConfiguration().get('camelk.integrations.proxyPort') as number;
-		proxyPort = proxyPortTemp; 
-	});	
+	determinePlatform();
+	applyUserSettings();
 
 	mainOutputChannel = vscode.window.createOutputChannel("Apache Camel K");
-
 	myStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 100);
 	context.subscriptions.push(myStatusBarItem);
 
-	// create the integrations view
-	camelKIntegrationsTreeView = vscode.window.createTreeView('camelk.integrations', {
-		treeDataProvider: camelKIntegrationsProvider
-	});
-	camelKIntegrationsTreeView.onDidChangeVisibility(() => {
-		if (camelKIntegrationsTreeView.visible === true) {
-			camelKIntegrationsProvider.refresh();
-		}
-	});
+	createIntegrationsView();
 
-	// start the watch listener for auto-updates 
+	// start the watch listener for auto-updates
 	startListeningForServerChanges();
 
 	// Listener to handle auto-refresh of view - kubectl times out, so we simply restart the watch when it does
@@ -269,7 +222,7 @@ function removeOutputChannel( channelName: string) : Promise<any> {
 				resolve();
 				return;
 			}
-		}		
+		}
 	});
 }
 
@@ -358,7 +311,7 @@ async function getPodsViaRest() : Promise<Object>{
 			},
 			json: true // Automatically parses the JSON string in the response
 		};
-		
+
 		await utils.delay(1000);
 		rp(options)
 			.then(function (json:Object) {
@@ -393,7 +346,7 @@ async function stopIntegrationViaRest(integrationName: string) : Promise<any>{
 			uri: proxyURL,
 			method: 'DELETE'
 		};
-		
+
 		await utils.delay(1000);
 		rp(options)
 			.then(function () {
@@ -437,7 +390,7 @@ function startIntegration(context: vscode.Uri): Promise<string> {
 						reject(new Error("Unable to call Kamel."));
 					} else {
 						resolve();
-					}					
+					}
 					hideStatusLine();
 					return success;
 				})
@@ -482,7 +435,7 @@ function createNewIntegrationViaRest(context: vscode.Uri): Promise<boolean> {
 				});
 			});
 		});
-	});			
+	});
 }
 
 // remove the output channel for a running integration via kubernetes rest call
@@ -539,7 +492,7 @@ function getIntegrationsFromKubectl(integrationName : string): Promise<string> {
 		runKubectl.on("close", () => {
 			resolve(shellOutput);
 		});
-	}); 
+	});
 }
 
 // process the text-based list we get back from the kubectl command
@@ -571,7 +524,7 @@ function startKubeProxy(): Promise<string> {
 				reject(new Error(data.toString()));
 			});
 		}
-	}); 
+	});
 }
 
 // use kubectl to keep an eye on the server for changes and update the view
@@ -588,5 +541,72 @@ function startListeningForServerChanges() {
 	runKamel.on("close", () => {
 		// stopped listening to server - likely timed out
 		eventEmitter.emit(restartKubectlWatchEvent);
+	});
+}
+
+function determinePlatform(): void {
+	const osType = platform();
+	if (osType === 'win32') {
+		curlCommand = 'cmd';
+		curlOption = '/c';
+	}
+}
+
+function applyStatusBarSettings(): void {
+	// process the workspace setting indicating whether we should use the proxy or CLI
+	let statusBarSetting = vscode.workspace.getConfiguration().get('camelk.integrations.showStatusBarMessages') as boolean;
+	showStatusBar = statusBarSetting;
+
+	vscode.workspace.onDidChangeConfiguration(() => {
+		let statusBarSetting = vscode.workspace.getConfiguration().get('camelk.integrations.showStatusBarMessages') as boolean;
+		showStatusBar = statusBarSetting;
+		if (!showStatusBar) {
+			hideStatusLine();
+		}
+	});
+}
+
+function applyProxySettings(): void {
+	// process the workspace setting indicating whether we should use the proxy or CLI
+	let proxySetting = vscode.workspace.getConfiguration().get('camelk.integrations.useProxy') as boolean;
+	useProxy = proxySetting;
+	camelKIntegrationsProvider.setUseProxy(useProxy);
+
+	vscode.workspace.onDidChangeConfiguration(() => {
+		let proxySetting = vscode.workspace.getConfiguration().get('camelk.integrations.useProxy') as boolean;
+		useProxy = proxySetting;
+		camelKIntegrationsProvider.setUseProxy(useProxy);
+		camelKIntegrationsProvider.refresh();
+	});
+}
+
+function applyProxyPortSettings(): void {
+	// process the workspace setting indicating the proxy port we should use
+	let proxyPortTemp = vscode.workspace.getConfiguration().get('camelk.integrations.proxyPort') as number;
+	if (proxyPortTemp) {
+		proxyPort = proxyPortTemp;
+	}
+
+	vscode.workspace.onDidChangeConfiguration(() => {
+		let proxyPortTemp = vscode.workspace.getConfiguration().get('camelk.integrations.proxyPort') as number;
+		proxyPort = proxyPortTemp;
+	});
+}
+
+function applyUserSettings(): void {
+	applyStatusBarSettings();
+	applyProxySettings();
+	applyProxyPortSettings();
+}
+
+function createIntegrationsView(): void {
+	// create the integrations view
+	camelKIntegrationsTreeView = vscode.window.createTreeView('camelk.integrations', {
+		treeDataProvider: camelKIntegrationsProvider
+	});
+	camelKIntegrationsTreeView.onDidChangeVisibility(() => {
+		if (camelKIntegrationsTreeView.visible === true) {
+			camelKIntegrationsProvider.refresh();
+		}
 	});
 }
