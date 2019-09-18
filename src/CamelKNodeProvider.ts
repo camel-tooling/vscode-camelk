@@ -83,64 +83,49 @@ export class CamelKNodeProvider implements vscode.TreeDataProvider<TreeNode> {
 	// trigger a refresh event in VSCode
 	public async refresh(): Promise<void> {
 		return new Promise<void>( async (resolve, reject) => {
-			let oldCount = this.treeNodes.length;
 			extension.setStatusLineMessage(`Refreshing Apache Camel K Integrations view...`);
 			this.resetList();
 			let inaccessible = false;
 			if (this.retrieveIntegrations) {
-				let retryTries = 1;
-				let numRetries = 10;
-				while (retryTries < numRetries && !inaccessible) {
-					this.resetList();
-
-					if (!this.useProxy) {
-						await utils.pingKamel()
-						.then( async () => {
-							await this.getIntegrationsFromCamelK().then((output) => {
-								this.processIntegrationList(output);
-							}).catch((error) => { 
-								let errMsg : string = error;
-								if (errMsg) {
-									var errLower =  errMsg.toLowerCase();
-									if (errLower.trimLeft().startsWith('error:')) {
-										utils.shareMessage(extension.mainOutputChannel, `Refreshing Apache Camel K Integrations view using kubectl failed. ${error}`);
-										inaccessible = true;
-									}
+				if (!this.useProxy) {
+					await utils.pingKamel()
+					.then( async () => {
+						await this.getIntegrationsFromCamelK().then((output) => {
+							this.processIntegrationList(output);
+						}).catch((error) => { 
+							let errMsg : string = error;
+							if (errMsg) {
+								var errLower =  errMsg.toLowerCase();
+								if (errLower.trimLeft().startsWith('error:')) {
+									utils.shareMessage(extension.mainOutputChannel, `Refreshing Apache Camel K Integrations view using kubectl failed. ${error}`);
+									inaccessible = true;
 								}
-								reject();
-								return;
-							});
-						}).catch( (error) =>  {
-							utils.shareMessage(extension.mainOutputChannel, `Refreshing Apache Camel K Integrations view using kubectl failed. ${error}`);
-							inaccessible = true;
+							}
 							reject();
 							return;
 						});
-					} else {
-						await utils.pingKubernetes().then( async () => {
-							await this.getIntegrationsFromCamelKRest().then((output) => {
-								this.processIntegrationListFromJSON(output);
-							}).catch((error) => {
-								utils.shareMessage(extension.mainOutputChannel, `Refreshing Apache Camel K Integrations view using kubernetes Rest APIs failed. ${error}`);
-								inaccessible = true;
-								reject();
-								return;
-							});
-						}).catch( (error) =>  {
+					}).catch( (error) =>  {
+						utils.shareMessage(extension.mainOutputChannel, `Refreshing Apache Camel K Integrations view using kubectl failed. ${error}`);
+						inaccessible = true;
+						reject();
+						return;
+					});
+				} else {
+					await utils.pingKubernetes().then( async () => {
+						await this.getIntegrationsFromCamelKRest().then((output) => {
+							this.processIntegrationListFromJSON(output);
+						}).catch((error) => {
 							utils.shareMessage(extension.mainOutputChannel, `Refreshing Apache Camel K Integrations view using kubernetes Rest APIs failed. ${error}`);
 							inaccessible = true;
 							reject();
 							return;
 						});
-					}
-					if (inaccessible) {
-						break;
-					}
-					let newCount = this.treeNodes.length;
-					if (newCount !== oldCount) {
-						break;
-					}
-					retryTries++;
+					}).catch( (error) =>  {
+						utils.shareMessage(extension.mainOutputChannel, `Refreshing Apache Camel K Integrations view using kubernetes Rest APIs failed. ${error}`);
+						inaccessible = true;
+						reject();
+						return;
+					});
 				}
 			}
 			extension.hideStatusLine();

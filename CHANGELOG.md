@@ -10,6 +10,7 @@ All notable changes to the "vscode-camelk" extension will be documented in this 
 - Add support for --property
 - Add ability to define custom dependencies for an integration
 - Added support for starting integrations with the YAML file extension
+- Adding auto-refresh to update view when any integration changes are noted by kubectl
 
 ## 0.0.8
 - Fix regression preventing to use Commands to deploy integration
