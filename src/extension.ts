@@ -553,7 +553,6 @@ function determineCurlCommand(): void {
 }
 
 function applyStatusBarSettings(): void {
-	// process the workspace setting indicating whether we should use the proxy or CLI
 	let statusBarSetting = vscode.workspace.getConfiguration().get('camelk.integrations.showStatusBarMessages') as boolean;
 	showStatusBar = statusBarSetting;
 
