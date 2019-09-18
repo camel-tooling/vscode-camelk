@@ -191,7 +191,7 @@
 		"test": "npm run compile && node ./node_modules/vscode/bin/test"
 	},
 	"devDependencies": {
-		"@types/chai": "^4.2.2",
+		"@types/chai": "^4.2.3",
 		"@types/mocha": "^5.2.7",
 		"@types/nock": "^11.1.0",
 		"@types/node": "^12.7.5",
