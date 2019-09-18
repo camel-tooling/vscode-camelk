@@ -57,12 +57,12 @@ export class CamelKNodeProvider implements vscode.TreeDataProvider<TreeNode> {
 	public addChild(oldNodes: TreeNode[] = this.treeNodes, newNode: TreeNode, disableRefresh : boolean = false ): Thenable<TreeNode[]> {
 		if (oldNodes !== null && oldNodes !== undefined) {
 			oldNodes.push(newNode);
-			if (disableRefresh !== true) {
+			if (!disableRefresh) {
 				this.refresh();
 			}
 			return Promise.resolve(oldNodes);
 		}
-		return Promise.reject(undefined);
+		return Promise.reject();
 	}
 
 	// This method isn't used by the view currently, but is here to facilitate testing
@@ -77,7 +77,7 @@ export class CamelKNodeProvider implements vscode.TreeDataProvider<TreeNode> {
 			}
 			return Promise.resolve(oldNodes);
 		}
-		return Promise.reject(undefined);
+		return Promise.reject();
 	}
 
 	// trigger a refresh event in VSCode
@@ -104,6 +104,7 @@ export class CamelKNodeProvider implements vscode.TreeDataProvider<TreeNode> {
 							reject();
 							return;
 						});
+<<<<<<< HEAD
 					}).catch( (error) =>  {
 						utils.shareMessage(extension.mainOutputChannel, `Refreshing Apache Camel K Integrations view using kubectl failed. ${error}`);
 						inaccessible = true;
@@ -115,6 +116,14 @@ export class CamelKNodeProvider implements vscode.TreeDataProvider<TreeNode> {
 						await this.getIntegrationsFromCamelKRest().then((output) => {
 							this.processIntegrationListFromJSON(output);
 						}).catch((error) => {
+=======
+					} else {
+						await utils.pingKubernetes().then( async () => {
+							await this.getIntegrationsFromCamelKRest().then((output) => {
+								this.processIntegrationListFromJSON(output);
+							});
+						}).catch( (error) =>  {
+>>>>>>> code cleanup - removed duplicated catch block, extra semicolon, more readable if clause and no parameter use for 2 cases of reject
 							utils.shareMessage(extension.mainOutputChannel, `Refreshing Apache Camel K Integrations view using kubernetes Rest APIs failed. ${error}`);
 							inaccessible = true;
 							reject();
