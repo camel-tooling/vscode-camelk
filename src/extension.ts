@@ -46,11 +46,7 @@ export function activate(context: vscode.ExtensionContext) {
 
 	outputChannelMap = new Map();
 
-<<<<<<< HEAD
 	determineCurlCommand();
-=======
-	determinePlatform();
->>>>>>> extracting logic from activate into separate functions
 	applyUserSettings();
 
 	mainOutputChannel = vscode.window.createOutputChannel("Apache Camel K");
@@ -58,7 +54,6 @@ export function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push(myStatusBarItem);
 
 	createIntegrationsView();
-<<<<<<< HEAD
 
 	// start the watch listener for auto-updates
 	startListeningForServerChanges();
@@ -68,8 +63,6 @@ export function activate(context: vscode.ExtensionContext) {
 		startListeningForServerChanges();
 	};
 	eventEmitter.on(restartKubectlWatchEvent, watchListener);
-=======
->>>>>>> extracting logic from activate into separate functions
 
 	// create the integration view action -- refresh
 	vscode.commands.registerCommand('camelk.integrations.refresh', () => {
