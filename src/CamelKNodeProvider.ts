@@ -104,7 +104,6 @@ export class CamelKNodeProvider implements vscode.TreeDataProvider<TreeNode> {
 							reject();
 							return;
 						});
-<<<<<<< HEAD
 					}).catch( (error) =>  {
 						utils.shareMessage(extension.mainOutputChannel, `Refreshing Apache Camel K Integrations view using kubectl failed. ${error}`);
 						inaccessible = true;
@@ -116,14 +115,6 @@ export class CamelKNodeProvider implements vscode.TreeDataProvider<TreeNode> {
 						await this.getIntegrationsFromCamelKRest().then((output) => {
 							this.processIntegrationListFromJSON(output);
 						}).catch((error) => {
-=======
-					} else {
-						await utils.pingKubernetes().then( async () => {
-							await this.getIntegrationsFromCamelKRest().then((output) => {
-								this.processIntegrationListFromJSON(output);
-							});
-						}).catch( (error) =>  {
->>>>>>> code cleanup - removed duplicated catch block, extra semicolon, more readable if clause and no parameter use for 2 cases of reject
 							utils.shareMessage(extension.mainOutputChannel, `Refreshing Apache Camel K Integrations view using kubernetes Rest APIs failed. ${error}`);
 							inaccessible = true;
 							reject();
