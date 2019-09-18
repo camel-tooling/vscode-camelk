@@ -461,7 +461,7 @@ function createNewIntegrationViaRest(context: vscode.Uri): Promise<boolean> {
 		})
 		.catch((err) => {
 			reject(err);
-		});;
+		});
 	});
 }
 
