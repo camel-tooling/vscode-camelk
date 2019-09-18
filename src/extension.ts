@@ -46,7 +46,7 @@ export function activate(context: vscode.ExtensionContext) {
 
 	outputChannelMap = new Map();
 
-	determinePlatform();
+	determineCurlCommand();
 	applyUserSettings();
 
 	mainOutputChannel = vscode.window.createOutputChannel("Apache Camel K");
@@ -544,7 +544,7 @@ function startListeningForServerChanges() {
 	});
 }
 
-function determinePlatform(): void {
+function determineCurlCommand(): void {
 	const osType = platform();
 	if (osType === 'win32') {
 		curlCommand = 'cmd';
