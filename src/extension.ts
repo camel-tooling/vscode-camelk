@@ -599,7 +599,6 @@ function applyUserSettings(): void {
 }
 
 function createIntegrationsView(): void {
-	// create the integrations view
 	camelKIntegrationsTreeView = vscode.window.createTreeView('camelk.integrations', {
 		treeDataProvider: camelKIntegrationsProvider
 	});
