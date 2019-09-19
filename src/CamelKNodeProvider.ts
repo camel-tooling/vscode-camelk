@@ -196,7 +196,7 @@ export class CamelKNodeProvider implements vscode.TreeDataProvider<TreeNode> {
 	getIntegrationsFromCamelKRest(): Promise<Object> {
 		return new Promise( (resolve, reject) => {
 			let proxyURL = utils.createCamelKRestURL();
-			const options = {
+			let options = {
 				uri: proxyURL,
 				headers: {
 					'Content-Type': 'application/json',
