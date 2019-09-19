@@ -26,31 +26,31 @@ export const proxyPortSetting = 'camelk.integrations.proxyPort';
 const camelAPIVersion = "v1alpha1";
 
 export function createBaseProxyURL() : string {
-	let server = vscode.workspace.getConfiguration().get(proxyURLSetting);
-	let port = vscode.workspace.getConfiguration().get(proxyPortSetting) as number;
+	let server:string = vscode.workspace.getConfiguration().get(proxyURLSetting) as string;
+	let port:number = vscode.workspace.getConfiguration().get(proxyPortSetting) as number;
 	return `${server}:${port}`;
 }
 
 export function createCamelKRestURL() : string {
-	let base = createBaseProxyURL();
-	let namespace = vscode.workspace.getConfiguration().get(proxyNamespaceSetting);
+	let base: string = createBaseProxyURL();
+	let namespace: string = vscode.workspace.getConfiguration().get(proxyNamespaceSetting) as string;
 	return `${base}/apis/camel.apache.org/${camelAPIVersion}/namespaces/${namespace}/integrations`;
 }
 
 export function createCamelKDeleteRestURL(integrationName:string) : string {
-	let baseUrl = createCamelKRestURL();
-	let outputUrl = baseUrl + "/" + integrationName;
+	let baseUrl: string = createCamelKRestURL();
+	let outputUrl: string = baseUrl + "/" + integrationName;
 	return outputUrl;
 }
 
 export function createCamelKPodLogURL(podName:string) : string {
-	let base = createCamelKGetPodsURL();
+	let base: string = createCamelKGetPodsURL();
 	return `${base}${podName}/log`;
 }
 
 export function createCamelKGetPodsURL() : string {
-	let base = createBaseProxyURL();
-	let namespace = vscode.workspace.getConfiguration().get(proxyNamespaceSetting);
+	let base: string = createBaseProxyURL();
+	let namespace: string = vscode.workspace.getConfiguration().get(proxyNamespaceSetting) as string;
 	return `${base}/api/v1/namespaces/${namespace}/pods/`;
 }
 
@@ -58,16 +58,15 @@ export function stringifyFileContents(absoluteFilePath:string) : Promise<string>
 	return new Promise( (resolve, reject) => {
 		var text = fs.readFileSync(absoluteFilePath);
 		if (text) {
-			let textStr = text.toString();
-			resolve(textStr);
+			resolve(text.toString());
 		} else {
-			reject();
+			reject(new Error(`Unable to read content of ${absoluteFilePath}.`));
 		}
 	});
 }
 
 export function createCamelKDeployJSON( name:string, fileContent:string, fileName:string) : Promise<string> {
-	return new Promise( (resolve) => {
+	return new Promise( (resolve, reject) => {
 		let content = {
 			"kind":"Integration",
 			"apiVersion":"camel.apache.org/" + camelAPIVersion,
@@ -83,20 +82,24 @@ export function createCamelKDeployJSON( name:string, fileContent:string, fileNam
 				]
 			}
 		};
-		let jsonText = JSON.stringify(content);
-		resolve(jsonText);
+		try {
+			let jsonText: string = JSON.stringify(content);
+			resolve(jsonText);
+		} catch ( error ) {
+			reject(error);
+		}
 	});
 }
 
-export async function delay (amount : number) {
-	return new Promise((resolve) => {
-	  setTimeout(resolve, amount);
+export function delay (amount : number) {
+	return new Promise((resolve, reject) => {
+		setTimeout(resolve, amount);
 	});
 }
 
-export async function pingTheURL(urlString: string) : Promise<any> {
-	return new Promise( (resolve, reject) => {
-		http.get(urlString, (result) => {
+export function pingTheURL(urlString: string) : Promise<boolean> {
+	return new Promise<boolean>( (resolve, reject) => {
+		http.get(urlString, ( result ) => {
 			if (result && result.statusCode === 200) {
 				resolve(true);
 			} else {
@@ -108,22 +111,25 @@ export async function pingTheURL(urlString: string) : Promise<any> {
 	});
 }
 
-export async function pingKubernetes() : Promise<string> {
-	let proxyURL = createCamelKRestURL();
-	return new Promise<string> ( async (resolve, reject) => {
-		await pingTheURL(proxyURL).then ( (result) => {
-			if (result === true) {
-				resolve(proxyURL);
-			}
-			throw new Error("Kubernetes proxy inaccessible");
-		}).catch( (error) => {
-			reject(new Error("Kubernetes proxy inaccessible: " + error));
-		});
+export function pingKubernetes() : Promise<string> {
+	return new Promise<string> ( (resolve, reject) => {
+		let proxyURL = createCamelKRestURL();
+		pingTheURL(proxyURL)
+			.then ( (result) => {
+				if (result) {
+					resolve(proxyURL);
+				} else {
+					throw new Error("Kubernetes proxy inaccessible");
+				}
+			})
+			.catch( (error) => {
+				reject(error);
+			});
 	});
 }
 
-export async function pingKamel() : Promise<any> {
-	return new Promise( async (resolve, reject) => {
+export function pingKamel() : Promise<string> {
+	return new Promise<string>( (resolve, reject) => {
 		const pingKamelCommand = "kamel get";
 		let runKubectl = child_process.exec(pingKamelCommand);
 		if (runKubectl.stdout) {
