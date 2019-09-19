@@ -114,7 +114,7 @@ export function pingTheURL(urlString: string) : Promise<boolean> {
 export function pingKubernetes() : Promise<string> {
 	return new Promise<string> ( (resolve, reject) => {
 		let proxyURL = createCamelKRestURL();
-		pingTheURL(proxyURL)
+		return pingTheURL(proxyURL)
 			.then ( (result) => {
 				if (result) {
 					resolve(proxyURL);
