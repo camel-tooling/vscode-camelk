@@ -45,7 +45,7 @@ export function registerCommands() {
 function createConfigMapFromUri(uri:vscode.Uri): void {
 	createConfigMapFromFilenameOrFolder(uri)
 		.then ( (output) => {
-			extension.setStatusLineMessage(`Received... ${output}`);
+			extension.setStatusLineMessageAndShow(`Received... ${output}`);
 		})
 		.catch( (error) => {
 			utils.shareMessage(extension.mainOutputChannel, ("Error encountered while creating Kubernetes ConfigMap: " + error));
@@ -56,7 +56,7 @@ function createConfigMapFromUri(uri:vscode.Uri): void {
 function createSecretFromUri(uri:vscode.Uri): void {
 	createSecretFromFilenameOrFolder(uri)
 		.then ( (output) => {
-			extension.setStatusLineMessage(`Received... ${output}`);
+			extension.setStatusLineMessageAndShow(`Received... ${output}`);
 		})
 		.catch( (error) => {
 			utils.shareMessage(extension.mainOutputChannel, ("Error encountered while creating Kubernetes Secret: " + error));

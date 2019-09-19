@@ -55,11 +55,11 @@ export class CamelKNodeProvider implements vscode.TreeDataProvider<TreeNode> {
 
 	// add a child to the list of nodes
 	public addChild(oldNodes: TreeNode[] = this.treeNodes, newNode: TreeNode, disableRefresh : boolean = false ): Promise<TreeNode[]> {
-		return new Promise<TreeNode[]>( (resolve, reject) => {
+		return new Promise<TreeNode[]>( async (resolve, reject) => {
 			if (oldNodes) {
 				oldNodes.push(newNode);
 				if (!disableRefresh) {
-					this.refresh();
+					await this.refresh().catch(err => reject(err));
 				}
 				resolve(oldNodes);
 			}
@@ -69,13 +69,13 @@ export class CamelKNodeProvider implements vscode.TreeDataProvider<TreeNode> {
 
 	// This method isn't used by the view currently, but is here to facilitate testing
 	public removeChild(oldNodes: TreeNode[] = this.treeNodes, oldNode: TreeNode, disableRefresh : boolean = false ): Promise<TreeNode[]> {
-		return new Promise<TreeNode[]>( (resolve, reject) => {
+		return new Promise<TreeNode[]>( async (resolve, reject) => {
 			if (oldNodes) {
 				const index = oldNodes.indexOf(oldNode);
 				if (index !== -1) {
 					oldNodes.splice(index, 1);
 					if (!disableRefresh) {
-						this.refresh();
+						await this.refresh().catch(err => reject(err));
 					}
 				}
 				resolve(oldNodes);
@@ -86,18 +86,18 @@ export class CamelKNodeProvider implements vscode.TreeDataProvider<TreeNode> {
 
 	// trigger a refresh event in VSCode
 	public refresh(): Promise<void> {
-		return new Promise<void>( (resolve, reject) => {
-			extension.setStatusLineMessage(`Refreshing Apache Camel K Integrations view...`);
+		return new Promise<void>( async (resolve, reject) => {
+			extension.setStatusLineMessageAndShow(`Refreshing Apache Camel K Integrations view...`);
 			this.resetList();
 			let inaccessible = false;
 			if (this.retrieveIntegrations) {
 				if (this.useProxy) {
-					utils.pingKubernetes()
-						.then( () => {
-							return Promise.resolve(this.getIntegrationsFromCamelKRest());
-						})
-						.then( (output) => {
-							this.processIntegrationListFromJSON(output);
+					await utils.pingKubernetes()
+						.then( async () => {
+							await this.getIntegrationsFromCamelKRest()
+								.then( (output) => {
+									this.processIntegrationListFromJSON(output);
+								});
 						})
 						.catch( (error) =>  {
 							utils.shareMessage(extension.mainOutputChannel, `Refreshing Apache Camel K Integrations view using kubernetes Rest APIs failed. ${error}`);
@@ -106,12 +106,12 @@ export class CamelKNodeProvider implements vscode.TreeDataProvider<TreeNode> {
 							return;
 						});
 				} else {
-					utils.pingKamel()
-						.then( () => {
-							return Promise.resolve(this.getIntegrationsFromCamelK());
-						})
-						.then((output) => {
-							this.processIntegrationList(output);
+					await utils.pingKamel()
+						.then( async () => {
+							await Promise.resolve(this.getIntegrationsFromCamelK())
+								.then((output) => {
+									this.processIntegrationList(output);
+								});
 						})
 						.catch( (error) =>  {
 							utils.shareMessage(extension.mainOutputChannel, `Refreshing Apache Camel K Integrations view using kubectl failed. ${error}`);
