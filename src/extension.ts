@@ -97,6 +97,11 @@ export function activate(context: vscode.ExtensionContext): void {
 						console.log(`stderr: ${stderr}`);
 					}
 				});
+				await integrationutils.killChildProcessForIntegration(integrationName).then( (boolResult) => {
+					console.log(`Removed the child process running in the background for ${integrationName}: ${boolResult}`);
+				}).catch( (err) => {
+					console.log(err);
+				});
 				await removeOutputChannelForIntegrationViaKubectl(integrationName)
 				.catch( (err) => {
 					console.log(err);
