@@ -23,6 +23,7 @@ import * as path from 'path';
 import * as child_process from 'child_process';
 import { getConfigMaps, getSecrets } from './ConfigMapAndSecrets';
 import * as k8s from 'vscode-kubernetes-tools-api';
+import * as kamel from './kamel';
 
 const validNameRegex = /^[A-Za-z][A-Za-z0-9\-\.]*(?:[A-Za-z0-9]$){1}/;
 
@@ -294,8 +295,8 @@ function createNewIntegration(integrationFileUri: vscode.Uri, devMode? : boolean
 		let integrationName = utils.toKebabCase(rootName);
 		utils.shareMessage(extension.mainOutputChannel, `Deploying file ${absoluteRoot} as integration ${integrationName}`);
 		return extension.removeOutputChannelForIntegrationViaKubectl(integrationName)
-			.then( () => {
-				let kamelCLI = 'kamel';
+			.then( async () => {
+				let kamelExe = kamel.create();
 				let kamelArgs : string[] = [];
 				kamelArgs.push('run');
 				kamelArgs.push(`${absoluteRoot}`);
@@ -326,34 +327,32 @@ function createNewIntegration(integrationFileUri: vscode.Uri, devMode? : boolean
 						kamelArgs.push(`-p ${prop}`);
 					});
 				}
-				console.log(`commandString = ${kamelCLI} ${kamelArgs}`);
+				console.log(`commandString = kamel ${kamelArgs}`);
 				if (devMode && devMode === true) {
 					if (extension.mainOutputChannel) {
 						extension.mainOutputChannel.show();
 					}
 				}
-				let runKubectl = child_process.spawn(kamelCLI, kamelArgs, { cwd : foldername});
-				if (!childProcessMap) {
-					childProcessMap = new Map();
+				if (devMode && devMode === true) {
+					kamelExe.setDevMode(devMode);
 				}
-				childProcessMap.set(integrationName, runKubectl);
-				
-				if (runKubectl.stdout) {
-					runKubectl.stdout.on('data', function (data) {
-						if (devMode && devMode === true) {
-							utils.shareMessage(extension.mainOutputChannel, `Dev Mode -- ${integrationName}: ${data}`);
-						}
-						resolve(true);
+				await kamelExe.invokeArgs(kamelArgs, foldername)
+					.then( (runKubectl) => {
+						if (runKubectl) {
+							if (!childProcessMap) {
+								childProcessMap = new Map();
+							}
+							childProcessMap.set(integrationName, runKubectl);
+							resolve(true);
+							return;
+						} else {
+							reject(false);
+							return;
+						}})
+					.catch( (error) => {
+						reject(error);
 						return;
 					});
-				}
-				if (runKubectl.stderr) {
-					runKubectl.stderr.on('data', function (data) {
-						utils.shareMessage(extension.mainOutputChannel, `Error deploying ${integrationName}: ${data}`);
-						reject(false);
-						return;
-					});
-				}				
 			})
 			.catch( (error) => {
 				// this is not a hard stop, it just means there was no output channel to close

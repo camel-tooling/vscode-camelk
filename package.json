@@ -79,6 +79,16 @@
 						"default": true,
 						"description": "Show Status Bar messages",
 						"scope": "window"
+					},
+					"vs-camelk": {
+						"type": "object",
+						"description": "Camel K configuration",
+						"properties": {
+							"vs-camelk.kamel-path": {
+								"type": "string",
+								"description": "File path to a kamel binary."
+							}
+						}
 					}
 				}
 			}
@@ -192,6 +202,7 @@
 	},
 	"devDependencies": {
 		"@types/chai": "^4.2.3",
+		"@types/mkdirp": "^0.5.2",
 		"@types/mocha": "^5.2.7",
 		"@types/nock": "^11.1.0",
 		"@types/node": "^12.7.5",
@@ -211,10 +222,16 @@
 	],
 	"dependencies": {
 		"@types/request-promise": "^4.1.44",
+		"@types/shelljs": "^0.7.8",
+		"@types/tmp": "^0.0.33",
 		"child_process": "^1.0.2",
+		"download-tarball": "^2.0.0",
 		"path": "^0.12.7",
 		"request": "^2.88.0",
 		"request-promise": "^4.2.4",
+		"shelljs": "^0.8.3",
+		"tar": "^4.4.13",
+		"tmp": "^0.1.0",
 		"vscode-kubernetes-tools-api": "^1.0.0"
 	}
 }
