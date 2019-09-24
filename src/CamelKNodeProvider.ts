@@ -225,21 +225,21 @@ export class CamelKNodeProvider implements vscode.TreeDataProvider<TreeNode> {
 		return new Promise( (resolve, reject) => {
 			let commandString = 'kubectl get integration';
 			console.log('Command string: ' + commandString);
-			let runKamel = child_process.exec(commandString);
+			let runKubectl = child_process.exec(commandString);
 			var shellOutput = '';
-			if (runKamel.stdout) {
-				runKamel.stdout.on('data', function (data) {
+			if (runKubectl.stdout) {
+				runKubectl.stdout.on('data', function (data) {
 					console.log("[OUT] " + data);
 					shellOutput += data;
 				});
 			}
-			if (runKamel.stderr) {
-				runKamel.stderr.on('data', function (data) {
+			if (runKubectl.stderr) {
+				runKubectl.stderr.on('data', function (data) {
 					console.log("[ERROR] " + data);
 					reject(data.toString());
 				});
 			}
-			runKamel.on("close", () => {
+			runKubectl.on("close", () => {
 				console.log("[CLOSING] " + shellOutput);
 				resolve(shellOutput);
 			});

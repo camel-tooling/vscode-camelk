@@ -17,7 +17,7 @@
 import * as fs from 'fs';
 import * as vscode from 'vscode';
 import * as http from "http";
-import * as child_process from 'child_process';
+import * as kamel from './kamel';
 
 export const proxyURLSetting = 'camelk.integrations.proxyURL';
 export const proxyNamespaceSetting = 'camelk.integrations.proxyNamespace';
@@ -129,23 +129,17 @@ export function pingKubernetes() : Promise<string> {
 }
 
 export function pingKamel() : Promise<string> {
-	return new Promise<string>( (resolve, reject) => {
-		const pingKamelCommand = "kamel get";
-		let runKubectl = child_process.exec(pingKamelCommand);
-		if (runKubectl.stdout) {
-			runKubectl.stdout.on('data', function (data) {
-				let output : string = data as string;
-				resolve(output);
+	return new Promise<string>( async (resolve, reject) => {
+		let kamelExe = kamel.create();
+		await kamelExe.invoke('get')
+			.then( () => {
+				resolve('found it');
+				return;
+			})
+			.catch( (error) => {
+				reject(new Error(`Apache Camel K CLI unavailable: ${error}`));
 				return;
 			});
-		}
-		if (runKubectl.stderr) {
-			runKubectl.stderr.on('data', function (data) {
-				let error : string = data as string;
-				reject(new Error(error));
-				return;
-			});
-		}
 	});
 }
 

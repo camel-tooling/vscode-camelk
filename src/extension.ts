@@ -26,6 +26,10 @@ import {platform} from 'os';
 import * as configmapsandsecrets from './ConfigMapAndSecrets';
 import * as integrationutils from './IntegrationUtils';
 import * as events from 'events';
+import { installKamel, checkKamelCLIVersion, checkKubectlCLIVersion, checkMinikubeCLIVersion } from './installer';
+import { shell, Shell } from './shell';
+import { Errorable, failed } from './errorable';
+import * as kamel from './kamel';
 
 export let mainOutputChannel: vscode.OutputChannel;
 export let myStatusBarItem: vscode.StatusBarItem;
@@ -43,6 +47,8 @@ const restartKubectlWatchEvent = 'restartKubectlWatch';
 
 // This extension offers basic integration with Camel K (https://github.com/apache/camel-k) on two fronts.
 export function activate(context: vscode.ExtensionContext): void {
+
+	installDependencies();
 
 	outputChannelMap = new Map();
 
@@ -83,19 +89,13 @@ export function activate(context: vscode.ExtensionContext): void {
 					utils.shareMessage(mainOutputChannel, `rest error: ${error}`);
 				});
 			} else {
+				let kamelExe = kamel.create();
 				utils.shareMessage(mainOutputChannel, 'Removing ' + integrationName + ' via Kamel executable Delete');
-				let commandString = 'kamel delete "' + integrationName + '"';
-				child_process.exec(commandString, (error, stdout, stderr) => {
-					if (error) {
+				let args : string[] = ['delete', `${integrationName}`];
+				await kamelExe.invokeArgs(args)
+					.then( /* empty for now but here in case we need it */ )
+					.catch( (error) => {
 						utils.shareMessage(mainOutputChannel, `exec error: ${error}`);
-						return;
-					}
-					if (stdout) {
-						// empty for now, but here in case we need it
-					}
-					if (stderr) {
-						console.log(`stderr: ${stderr}`);
-					}
 				});
 				await integrationutils.killChildProcessForIntegration(integrationName).then( (boolResult) => {
 					console.log(`Removed the child process running in the background for ${integrationName}: ${boolResult}`);
@@ -646,4 +646,47 @@ function createIntegrationsView(): void {
 			await camelKIntegrationsProvider.refresh().catch(err => console.log(err));
 		}
 	});
+}
+
+export async function installDependencies() {
+
+	let gotKamel : boolean = false;
+	await checkKamelCLIVersion().then ( (kamelCliVersion) => {
+		if (kamelCliVersion) {
+			shareMessageInMainOutputChannel(`Found Apache Camel K CLI (kamel) version ${kamelCliVersion}...`);
+			gotKamel = true;
+		}
+	}).catch ( () => { 
+		// ignore 
+	});
+	const kubectlCliVersion : string = await checkKubectlCLIVersion();
+	if (kubectlCliVersion) {
+		shareMessageInMainOutputChannel(`Found Kubernetes CLI (kubectl) version ${kubectlCliVersion}...`);
+	}
+
+	const minikubeCliVersion : string = await checkMinikubeCLIVersion();
+	if (minikubeCliVersion) {
+		shareMessageInMainOutputChannel(`Found Minikube CLI (minikube) version ${minikubeCliVersion}...`);
+	}
+
+	if (!gotKamel) {
+		const installPromise = installDependency("kamel", gotKamel, installKamel);
+		await installPromise;
+	}
+}
+
+async function installDependency(name: string, alreadyGot: boolean, installFunc: (shell: Shell) => Promise<Errorable<null>>): Promise<void> {
+    if (!alreadyGot) {
+		shareMessageInMainOutputChannel(`Installing ${name}...`);
+        const result = await installFunc(shell);
+        if (failed(result)) {
+			utils.shareMessage(mainOutputChannel, `Unable to install ${name}: ${result.error[0]}`);
+        } else {
+			shareMessageInMainOutputChannel('done');
+		}
+    }
+}
+
+export function shareMessageInMainOutputChannel(msg: string) {
+	utils.shareMessage(mainOutputChannel, msg);
 }
