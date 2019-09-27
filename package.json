@@ -46,45 +46,17 @@
 			{
 				"title": "Apache Camel K Tooling Extension Settings",
 				"properties": {
-					"camelk.integrations.useProxy": {
-						"type": "boolean",
-						"default": false,
-						"description": "Always use proxy: If true, always use the proxy URL instead of kubectl",
-						"scope": "window"
-					},
-					"camelk.integrations.proxyURL": {
-						"type": "string",
-						"default": "http://localhost",
-						"description": "Proxy configuration: URL to the running Kubernetes server (to be combined with port)",
-						"scope": "window"
-					},
-					"camelk.integrations.proxyPort": {
-						"type": "number",
-						"default": 8000,
-						"description": "Proxy configuration: Port to the running Kubernetes server (combined with proxy URL)",
-						"scope": "window"
-					},
-					"camelk.integrations.proxyNamespace": {
-						"type": "string",
-						"enum": [
-							"default",
-							"syndesis"
-						],
-						"default": "default",
-						"description": "Proxy namespace: Namespace to use for accessing Apache Camel K integrations",
-						"scope": "window"
-					},
 					"camelk.integrations.showStatusBarMessages": {
 						"type": "boolean",
 						"default": true,
 						"description": "Show Status Bar messages",
 						"scope": "window"
 					},
-					"vs-camelk": {
+					"camelk.tools": {
 						"type": "object",
-						"description": "Camel K configuration",
+						"description": "CLI location",
 						"properties": {
-							"vs-camelk.kamel-path": {
+							"camelk.tools.kamel-path": {
 								"type": "string",
 								"description": "File path to a kamel binary."
 							}
@@ -113,10 +85,6 @@
 			{
 				"command": "camelk.integrations.log",
 				"title": "Follow log for running Apache Camel K Integration"
-			},
-			{
-				"command": "camelk.integrations.startproxy",
-				"title": "Apache Camel K: Start the Kubernetes proxy server"
 			},
 			{
 				"command": "camelk.integrations.createconfigmapfromfile",

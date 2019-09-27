@@ -19,40 +19,7 @@ import * as vscode from 'vscode';
 import * as http from "http";
 import * as kamel from './kamel';
 
-export const proxyURLSetting = 'camelk.integrations.proxyURL';
-export const proxyNamespaceSetting = 'camelk.integrations.proxyNamespace';
-export const proxyPortSetting = 'camelk.integrations.proxyPort';
-
 const camelAPIVersion = "v1alpha1";
-
-export function createBaseProxyURL() : string {
-	let server:string = vscode.workspace.getConfiguration().get(proxyURLSetting) as string;
-	let port:number = vscode.workspace.getConfiguration().get(proxyPortSetting) as number;
-	return `${server}:${port}`;
-}
-
-export function createCamelKRestURL() : string {
-	let base: string = createBaseProxyURL();
-	let namespace: string = vscode.workspace.getConfiguration().get(proxyNamespaceSetting) as string;
-	return `${base}/apis/camel.apache.org/${camelAPIVersion}/namespaces/${namespace}/integrations`;
-}
-
-export function createCamelKDeleteRestURL(integrationName:string) : string {
-	let baseUrl: string = createCamelKRestURL();
-	let outputUrl: string = baseUrl + "/" + integrationName;
-	return outputUrl;
-}
-
-export function createCamelKPodLogURL(podName:string) : string {
-	let base: string = createCamelKGetPodsURL();
-	return `${base}${podName}/log`;
-}
-
-export function createCamelKGetPodsURL() : string {
-	let base: string = createBaseProxyURL();
-	let namespace: string = vscode.workspace.getConfiguration().get(proxyNamespaceSetting) as string;
-	return `${base}/api/v1/namespaces/${namespace}/pods/`;
-}
 
 export function stringifyFileContents(absoluteFilePath:string) : Promise<string> {
 	return new Promise( (resolve, reject) => {
@@ -108,23 +75,6 @@ export function pingTheURL(urlString: string) : Promise<boolean> {
 		}).on('error', (e) => {
 			reject(e);
 		});
-	});
-}
-
-export function pingKubernetes() : Promise<string> {
-	return new Promise<string> ( (resolve, reject) => {
-		let proxyURL = createCamelKRestURL();
-		return pingTheURL(proxyURL)
-			.then ( (result) => {
-				if (result) {
-					resolve(proxyURL);
-				} else {
-					throw new Error("Kubernetes proxy inaccessible");
-				}
-			})
-			.catch( (error) => {
-				reject(error);
-			});
 	});
 }
 

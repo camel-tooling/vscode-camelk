@@ -17,6 +17,7 @@
 'use strict';
 
 import * as configmapandsecrets from '../ConfigMapAndSecrets';
+import {parseShellResult} from '../kubectlutils';
 import * as assert from 'assert';
 
 suite("ensure utility methods in configmap and secrets code works as expected", function() {
@@ -58,7 +59,7 @@ suite("ensure utility methods in configmap and secrets code works as expected", 
 			"something                1      90m\n" +
 			"something-else           1      92m";
 		const expectedResult : string[] = ['', 'something','something-else'];
-		let result : string[] = configmapandsecrets.parseShellResult(data);
+		let result : string[] = parseShellResult(data);
 		assert.deepEqual(result, expectedResult, `Did not get expected list of names from console shell results`);
 		done();
 	});

@@ -21,7 +21,7 @@ import * as extension from './extension';
 import * as utils from './CamelKJSONUtils';
 import * as path from 'path';
 import * as child_process from 'child_process';
-import { getConfigMaps, getSecrets } from './ConfigMapAndSecrets';
+import { getConfigMaps, getSecrets } from './kubectlutils';
 import * as k8s from 'vscode-kubernetes-tools-api';
 import * as kamel from './kamel';
 
@@ -415,7 +415,6 @@ function getChildProcessForIntegration(integration:string) {
 	return null;
 }
 
-// this doesn't work, but it's on the right track I think
 export function killChildProcessForIntegration(integration:string) : Promise<boolean> {
 	return new Promise( (resolve, reject) => {
 		let childProcess : any = getChildProcessForIntegration(integration);

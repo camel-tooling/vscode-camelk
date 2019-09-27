@@ -3,11 +3,12 @@ import * as fs from 'fs';
 import mkdirp = require('mkdirp');
 import {platform} from 'os';
 import { Errorable } from './errorable';
-import { Shell } from './shell';
-import * as child_process from 'child_process';
 import * as extension from './extension';
 import * as config from './config';
 import * as kamelCli from './kamel';
+import * as kubectl from './kubectl';
+import * as shell from './shell';
+import * as vscode from 'vscode';
 
 const download = require('download-tarball');
 
@@ -33,8 +34,9 @@ export function checkKamelCLIVersion() : Promise<string> {
 }
 
 export function checkKubectlCLIVersion() : Promise<string> {
-	return new Promise<string>( (resolve, reject) => {
-        checkIfCLIAvailable('kubectl version')
+	return new Promise<string>( async (resolve, reject) => {
+        let kubectlLocal = kubectl.create();
+        await kubectlLocal.invoke('version')
             .then( (rtnValue) => {
                 const strArray = rtnValue.split(' ');
                 strArray.forEach(element => {
@@ -55,45 +57,7 @@ export function checkKubectlCLIVersion() : Promise<string> {
     });
 }
 
-export function checkMinikubeCLIVersion() : Promise<string> {
-	return new Promise<string>( (resolve, reject) => {
-        checkIfCLIAvailable('minikube version')
-            .then( (rtnValue) => {
-                const strArray = rtnValue.split(' ');
-                const version = strArray[strArray.length - 1].trim();
-                console.log(`Minikube CLI (minikube) version returned: ${version}`);
-                resolve(version);
-                return;
-            }).catch ( (error) => {
-                console.log(`Minikube CLI (minikube)  unavailable: ${error}`);
-				reject(new Error(error));
-				return;
-        });
-    });
-}
-
-async function checkIfCLIAvailable(command : string) : Promise<string>{
-	return new Promise<string>( (resolve, reject) => {
-		let runCommand = child_process.exec(command);
-		if (runCommand.stdout) {
-			runCommand.stdout.on('data', function (data) {
-				let output : string = data as string;
-				resolve(output);
-				return;
-			});
-		}
-		if (runCommand.stderr) {
-			runCommand.stderr.on('data', function (data) {
-				let error : string = data as string;
-				reject(new Error(error));
-				return;
-			});
-		}
-	});
-}
-
-export async function installKamel(shell: Shell): Promise<Errorable<null>> {
-
+export async function installKamel(context: vscode.ExtensionContext): Promise<Errorable<null>> {
     const version = '1.0.0-M1'; //need to retrieve this if possible, but have a default
     await checkKamelCLIVersion().then((currentVersion) => {
         const currentVersionString = currentVersion as string;
@@ -110,7 +74,8 @@ export async function installKamel(shell: Shell): Promise<Errorable<null>> {
     const isWindows = (os === 'win32');
     const binFile = (!isWindows) ? kamel : kamel_windows;
 
-    const installFolder = getInstallFolder(shell, kamel);
+    const installFolder = getInstallFolder(kamel, context);
+    console.log(`Downloading Apache Camel K CLI to ${installFolder}`);
     mkdirp.sync(installFolder);
 
     const kamelUrl = `https://github.com/apache/camel-k/releases/download/${version}/camel-k-client-${version}-${os}-64bit.tar.gz`;
@@ -139,8 +104,8 @@ export async function installKamel(shell: Shell): Promise<Errorable<null>> {
     return { succeeded: true, result: null };
 }
 
-function getInstallFolder(shell: Shell, tool: string): string {
-    return path.join(shell.home(), `.vs-camelk/tools/${tool}`);
+function getInstallFolder(tool: string, context : vscode.ExtensionContext): string {
+    return path.join(context.globalStoragePath, `camelk/tools/${tool}`);
 }
 
 async function grabTarGzAndUnGZ(fileUrl: string, directory: string) : Promise<boolean>{
