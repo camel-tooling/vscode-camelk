@@ -1,54 +1,48 @@
 import { exec, spawn} from "child_process";
 import * as child_process from "child_process";
 import * as config from './config';
+import * as shell from './shell';
 import * as utils from './CamelKJSONUtils';
 import * as extension from './extension';
 import * as path from 'path';
 import * as fs from 'fs';
-import * as shell from './shell';
 
-export interface Kamel {
-	devMode : boolean;
+export interface Kubectl {
 	namespace: string;
 	getPath() : Promise<string>;
 	invoke(command: string): Promise<string>;
 	invokeArgs(args: string[], folderName?: string): Promise<child_process.ChildProcess>;
-	setDevMode(flag: boolean): void;
 	setNamespace(value: string): void;
 }
 
-class KamelImpl implements Kamel {
-	devMode : boolean = false;
+class KubectlImpl implements Kubectl {
 	namespace: string = 'default';
 	constructor() {
 	}
 	async getPath(): Promise<string> {
-		const bin = await baseKamelPath();
+		const bin = await baseKubectlPath();
 		return bin;
 	}
 	async invoke(command: string): Promise<string> {
-		return kamelInternal(command, this.devMode);
+		return kubectlInternal(command);
 	}
 	invokeArgs(args: string[], folderName?: string): Promise<child_process.ChildProcess> {
-		return kamelInternalArgs(args, this.devMode, folderName);
-	}
-	setDevMode(flag: boolean): void {
-		this.devMode = flag;
+		return kubectllInternalArgs(args, folderName);
 	}
 	setNamespace(value: string): void {
 		this.namespace = value;
 	}
 }
 
-export function create() : Kamel {
-	return new KamelImpl();
+export function create() : Kubectl {
+	return new KubectlImpl();
 }
 
-async function kamelInternal(command: string, devMode: boolean): Promise<string> {
+async function kubectlInternal(command: string): Promise<string> {
 	return new Promise( async (resolve, reject) => {
-		const bin = await baseKamelPath();
+		const bin = await baseKubectlPath();
 		if (!fs.existsSync(bin)) {
-			reject(new Error(`Apache Camel K CLI (kamel) unavailable`));
+			reject(new Error(`Kubernetes CLI (kubectl) unavailable`));
 			return;
 		}
 		const cmd = `${bin} ${command}`;
@@ -56,27 +50,29 @@ async function kamelInternal(command: string, devMode: boolean): Promise<string>
 		if (sr) {
 			if (sr.stdout) {
 				sr.stdout.on('data', function (data) {
-					if (devMode && devMode === true) {
-						utils.shareMessage(extension.mainOutputChannel, `Dev Mode -- ${data}`);
-					}
+					console.log(data);
 					resolve(data);
 				});
 				return;
 			}        
 			if (sr.stderr) {
-				sr.stderr.on('data', function (data) {
-					utils.shareMessage(extension.mainOutputChannel, `Error ${data}`);
-					reject(new Error(data));
+				sr.stderr.on('data', function (error) {
+					utils.shareMessage(extension.mainOutputChannel, `Error ${error}`);
+					reject(new Error(error));
 				});
 				return;
-			}				
+			}
+			sr.on("close", () => {
+				resolve('close');
+				return;
+			});            
 		}
 	});
 }
 
-async function kamelInternalArgs(args: string[], devMode: boolean, foldername?: string): Promise<child_process.ChildProcess> {
+async function kubectllInternalArgs(args: string[], foldername?: string): Promise<child_process.ChildProcess> {
 	return new Promise( async (resolve, reject) => {
-		const bin : string = await baseKamelPath();
+		const bin : string = await baseKubectlPath();
 		if (bin) {
 			const binpath = bin.trim();
 			let sr : child_process.ChildProcess;
@@ -88,33 +84,33 @@ async function kamelInternalArgs(args: string[], devMode: boolean, foldername?: 
 			if (sr) {
 				if (sr.stdout) {
 					sr.stdout.on('data', function (data) {
-						if (devMode && devMode === true) {
-							utils.shareMessage(extension.mainOutputChannel, `Dev Mode -- ${data}`);
-						}
+						resolve(data);
 					});
 				}        
 				if (sr.stderr) {
 					sr.stderr.on('data', function (data) {
 						utils.shareMessage(extension.mainOutputChannel, `Error ${data}`);
+						reject(new Error(data));
 					});
 				}
+				
 				resolve(sr);
 				return sr;
 			}
-			reject(new Error('Problem retrieving Camel K CLI'));
+			reject(new Error('Problem retrieving Kubernetes CLI'));
 			return;
 		}
 	});
 }
 
-export async function baseKamelPath(): Promise<string> {
-	let result : FindBinaryResult = await findBinary('kamel');
+export async function baseKubectlPath(): Promise<string> {
+	let result : FindBinaryResult = await findBinary('kubectl');
 	if (result && result.output && result.err === null) {
-		return result.output;
+		return result.output.trim();
 	}
-	let bin = config.getActiveKamelconfig();
+	let bin = config.getActiveKubectlconfig();
 	if (!bin) {
-		bin = 'kamel';
+		bin = 'kubectl';
 		return bin;
 	}
 	let binpath = path.normalize(bin);
