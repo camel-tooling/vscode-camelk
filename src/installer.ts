@@ -1,3 +1,20 @@
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 import * as path from 'path';
 import * as fs from 'fs';
 import mkdirp = require('mkdirp');
@@ -14,6 +31,7 @@ const download = require('download-tarball');
 
 export const kamel = 'kamel';
 export const kamel_windows = 'kamel.exe';
+export const version = '1.0.0-M1'; //need to retrieve this if possible, but have a default
 
 export function checkKamelCLIVersion() : Promise<string> {
 	return new Promise<string>( async (resolve, reject) => {
@@ -58,12 +76,10 @@ export function checkKubectlCLIVersion() : Promise<string> {
 }
 
 export async function installKamel(context: vscode.ExtensionContext): Promise<Errorable<null>> {
-    const version = '1.0.0-M1'; //need to retrieve this if possible, but have a default
     await checkKamelCLIVersion().then((currentVersion) => {
-        const currentVersionString = currentVersion as string;
-        if (version.toLowerCase() === currentVersionString.toLowerCase()) {
+        if (version.toLowerCase() === currentVersion.toLowerCase()) {
             // no need to install, it's already here
-            extension.shareMessageInMainOutputChannel(`Apache Camel K CLI version ${currentVersionString} available`);
+            extension.shareMessageInMainOutputChannel(`Apache Camel K CLI version ${currentVersion} available`);
             return { succeeded: true, result: null };
         }
     }).catch ( (error) => {
