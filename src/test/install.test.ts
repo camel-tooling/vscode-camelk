@@ -40,18 +40,11 @@ suite("ensure install methods are functioning as expected", function() {
 	});
 
 	test("install Kubernetes CLI on activation", function(done) {
-		const vskubernetesextensionId = 'vscode-kubernetes-tools';
-		let extension = vscode.extensions.getExtension(vskubernetesextensionId);
-		if (extension !== null && extension !== undefined) {
-			extension.activate().then(() => {
-				if (extension !== null && extension !== undefined) {
-					let kubectlPath = config.getActiveKubectlconfig();
-					assert.equal(fs.existsSync(kubectlPath), true);
-				}
-			});
-		} else {
-			assert.fail("Kubernetes extension is undefined");
-		}
+		// instead of relying on us activating the kubernetes extension
+		// just rely on it already being installed and active in the target environment
+		let kubectlPath = config.getActiveKubectlconfig();
+		assert.notEqual(kubectlPath, undefined);
+		assert.equal(fs.existsSync(kubectlPath), true);
 		done();
 	});
 

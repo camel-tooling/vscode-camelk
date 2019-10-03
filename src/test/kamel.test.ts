@@ -38,17 +38,11 @@ suite("ensure kamel and kubectl are available after activation", function() {
 	});
 
     test("ensure can activate kubectl cli", function(done) {
-        const vskubernetesextensionId = 'vscode-kubernetes-tools';
-		let extension = vscode.extensions.getExtension(vskubernetesextensionId);
-		if (extension !== null && extension !== undefined) {
-			extension.activate().then(() => {
-				installer.checkKubectlCLIVersion().then( (version) => {				
-					assert.notEqual(version, undefined);
-				});
-			});
-		} else {
-			assert.fail("Kubernetes extension is undefined");
-		}
+		// instead of relying on us activating the kubernetes extension to install kubectl
+		// just rely on the CLI already being installed and active in the target environment
+		installer.checkKubectlCLIVersion().then( (version) => {
+			assert.notEqual(version, undefined);
+		});
 		done();
 	});
 
