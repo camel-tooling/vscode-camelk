@@ -33,6 +33,8 @@ suite("ensure install methods are functioning as expected", function() {
 					assert.equal(fs.existsSync(kamelPath), true);
 				}
 			});
+		} else {
+			assert.fail("Camel K extension is undefined");
 		}
 		done();
 	});
@@ -47,6 +49,8 @@ suite("ensure install methods are functioning as expected", function() {
 					assert.equal(fs.existsSync(kubectlPath), true);
 				}
 			});
+		} else {
+			assert.fail("Kubernetes extension is undefined");
 		}
 		done();
 	});
