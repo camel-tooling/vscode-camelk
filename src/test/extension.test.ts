@@ -36,6 +36,8 @@ suite("ensure camelk extension exists and is accessible", function() {
 					assert.deepEqual(camelKIsActive, true);
 				}
 			});
+		} else {
+			assert.fail("Camel K extension is undefined");
 		}
 		done();
 	});	

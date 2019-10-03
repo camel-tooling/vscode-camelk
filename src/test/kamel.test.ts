@@ -31,6 +31,8 @@ suite("ensure kamel and kubectl are available after activation", function() {
 					assert.deepEqual(version, installer.version);
 				});
 			});
+		} else {
+			assert.fail("Camel K extension is undefined");
 		}
 		done();
 	});
@@ -40,10 +42,12 @@ suite("ensure kamel and kubectl are available after activation", function() {
 		let extension = vscode.extensions.getExtension(vskubernetesextensionId);
 		if (extension !== null && extension !== undefined) {
 			extension.activate().then(() => {
-				installer.checkKubectlCLIVersion().then( (version) => {
+				installer.checkKubectlCLIVersion().then( (version) => {				
 					assert.notEqual(version, undefined);
 				});
 			});
+		} else {
+			assert.fail("Kubernetes extension is undefined");
 		}
 		done();
 	});
