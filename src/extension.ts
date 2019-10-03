@@ -22,7 +22,7 @@ import * as utils from './CamelKJSONUtils';
 import * as configmapsandsecrets from './ConfigMapAndSecrets';
 import * as integrationutils from './IntegrationUtils';
 import * as events from 'events';
-import { installKamel, checkKamelCLIVersion, checkKubectlCLIVersion } from './installer';
+import { installKamel, checkKamelCLIVersion } from './installer';
 import { Errorable, failed } from './errorable';
 import * as kubectl from './kubectl';
 import * as kamel from './kamel';
@@ -330,7 +330,7 @@ export async function installDependencies(context: vscode.ExtensionContext) {
 	}).catch ( () => { 
 		// ignore 
 	});
-	const kubectlCliVersion : string = await checkKubectlCLIVersion();
+	const kubectlCliVersion : any = await kubectlutils.getKubernetesVersion();
 	if (kubectlCliVersion) {
 		shareMessageInMainOutputChannel(`Found Kubernetes CLI (kubectl) version ${kubectlCliVersion}...`);
 	}

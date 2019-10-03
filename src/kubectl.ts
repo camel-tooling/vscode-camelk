@@ -15,19 +15,17 @@
  * limitations under the License.
  */
 
-import { exec, spawn} from "child_process";
+import { spawn} from "child_process";
 import * as child_process from "child_process";
 import * as config from './config';
 import * as shell from './shell';
 import * as utils from './CamelKJSONUtils';
 import * as extension from './extension';
 import * as path from 'path';
-import * as fs from 'fs';
 
 export interface Kubectl {
 	namespace: string;
 	getPath() : Promise<string>;
-	invoke(command: string): Promise<string>;
 	invokeArgs(args: string[], folderName?: string): Promise<child_process.ChildProcess>;
 	setNamespace(value: string): void;
 }
@@ -40,9 +38,6 @@ class KubectlImpl implements Kubectl {
 		const bin = await baseKubectlPath();
 		return bin;
 	}
-	async invoke(command: string): Promise<string> {
-		return kubectlInternal(command);
-	}
 	invokeArgs(args: string[], folderName?: string): Promise<child_process.ChildProcess> {
 		return kubectllInternalArgs(args, folderName);
 	}
@@ -53,39 +48,6 @@ class KubectlImpl implements Kubectl {
 
 export function create() : Kubectl {
 	return new KubectlImpl();
-}
-
-async function kubectlInternal(command: string): Promise<string> {
-	return new Promise( async (resolve, reject) => {
-		const bin = await baseKubectlPath();
-		const binpath = bin.trim();
-		if (!fs.existsSync(binpath)) {
-			reject(new Error(`Kubernetes CLI (kubectl) unavailable`));
-			return;
-		}
-		const cmd = `${binpath} ${command}`;
-		const sr = exec(cmd);
-		if (sr) {
-			if (sr.stdout) {
-				sr.stdout.on('data', function (data) {
-					console.log(data);
-					resolve(data);
-				});
-				return;
-			}        
-			if (sr.stderr) {
-				sr.stderr.on('data', function (error) {
-					utils.shareMessage(extension.mainOutputChannel, `Error ${error}`);
-					reject(new Error(error));
-				});
-				return;
-			}
-			sr.on("close", () => {
-				resolve('close');
-				return;
-			});            
-		}
-	});
 }
 
 async function kubectllInternalArgs(args: string[], foldername?: string): Promise<child_process.ChildProcess> {

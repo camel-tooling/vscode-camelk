@@ -18,6 +18,7 @@
 
 import * as assert from 'assert';
 import * as installer from '../installer';
+import * as kubectlutils from '../kubectlutils';
 
 suite("ensure kamel and kubectl are available", function() {
 
@@ -31,8 +32,11 @@ suite("ensure kamel and kubectl are available", function() {
     test("ensure can access the kubectl cli", function(done) {
 		// instead of relying on us activating the kubernetes extension to install kubectl
 		// just rely on the CLI already being installed and active in the target environment
-		installer.checkKubectlCLIVersion().then( (version) => {
-			assert.notEqual(version, undefined);
+		kubectlutils.getKubernetesVersion().then( (version: any) => {
+			if (version) {
+				console.log(`Retrieved kubernetes version ${version}`);
+			}
+			assert.notStrictEqual(version, undefined);
 			done();
 		}).catch( () => {
 			assert.fail('Kubectl unavailable');

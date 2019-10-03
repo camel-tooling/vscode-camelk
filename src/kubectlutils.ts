@@ -15,7 +15,6 @@
  * limitations under the License.
  */
 import * as k8s from 'vscode-kubernetes-tools-api';
-import * as kubectl from './kubectl';
 
 export function isKubernetesAvailable(): Promise<boolean> {
 	return new Promise<boolean>( (resolve) => {
@@ -112,33 +111,57 @@ export function getIntegrations(): Promise<string> {
 
 export function getPodsFromKubectlCli() : Promise<string> {
 	return new Promise<string>( async (resolve, reject) => {
-		let kubectlExe = kubectl.create();
-		let kubectlArgs : string[] = [];
-		kubectlArgs.push('get');
-		kubectlArgs.push(`pods`);
-
-		await kubectlExe.invokeArgs(kubectlArgs)
-			.then( (runKubectl) => {
-				var shellOutput = '';
-				if (runKubectl.stdout) {
-					runKubectl.stdout.on('data', function (data) {
-						shellOutput += data;
-					});
+		await k8s.extension.kubectl.v1
+			.then( async (kubectl) => {
+				let cmd = `get pods`;
+				if (kubectl && kubectl.available) {
+					return await kubectl.api.invokeCommand(cmd);
+				} else {
+					reject(new Error('Kubernetes not available'));
 				}
-				if (runKubectl.stderr) {
-					runKubectl.stderr.on('data', function (data) {
-						reject(data);
-						return;
-					});
-				}
-				runKubectl.on("close", () => {
-					resolve(shellOutput);
-					return;
-				});
 			})
-			.catch( (error) => {
-				reject(new Error(`Kubernetes CLI unavailable: ${error}`));
-				return;
-			});
+			.then( (result) => {
+				if (!result || result.code !== 0) {
+					let error = `Unable to invoke kubectl to retrieve pod information`;
+					if (result && result.stderr) {
+						error = result.stderr;
+					}  
+					reject(error);
+				} else if (result) {
+					const splitResults = result.stdout;
+					resolve(splitResults);
+				}
+			})
+			.catch( (err) => reject(err) );
 	});
+}
+
+export async function getKubernetesVersion(): Promise<string | undefined> {
+    const kubectl = await k8s.extension.kubectl.v1;
+    if (!kubectl.available) {
+        return '';
+    }
+
+    const kubectlPromise = await kubectl.api.invokeCommand(`version --output json`);
+    let sr : any= null;
+    if (kubectlPromise) {
+        sr = kubectlPromise as k8s.KubectlV1.ShellResult;
+    }
+    if (!sr || sr.code !== 0) {
+        return undefined;
+    }
+
+    const versionInfo = JSON.parse(sr.stdout);
+    const serverVersion = versionInfo.serverVersion;
+    if (!serverVersion) {
+        return '';
+    }
+
+    const major = serverVersion.major;
+	const minor = serverVersion.minor;
+    if (!major || !minor) {
+        return '';
+    }
+
+    return `${major}.${minor}`;
 }

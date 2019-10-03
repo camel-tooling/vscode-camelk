@@ -23,9 +23,9 @@ import { Errorable } from './errorable';
 import * as extension from './extension';
 import * as config from './config';
 import * as kamelCli from './kamel';
-import * as kubectl from './kubectl';
 import * as shell from './shell';
 import * as vscode from 'vscode';
+import * as kubectlutils from './kubectlutils';
 
 const download = require('download-tarball');
 
@@ -51,29 +51,41 @@ export function checkKamelCLIVersion() : Promise<string> {
     });
 }
 
-export function checkKubectlCLIVersion() : Promise<string> {
-	return new Promise<string>( async (resolve, reject) => {
-        let kubectlLocal = kubectl.create();
-        await kubectlLocal.invoke('version')
-            .then( (rtnValue) => {
-                const strArray = rtnValue.split(' ');
-                strArray.forEach(element => {
-                    if (element.toLowerCase().startsWith('gitversion')) {
-                        const version = element.substring(element.indexOf('\"') + 1, element.lastIndexOf('\"'));
-                        console.log(`Kubernetes CLI (kubectl) version returned: ${version}`);
-                        resolve(version);
-                        return;
-                    }
-                });
-                reject (new Error('No kubectl version found'));
-                return;
-            }).catch ( (error) => {
-                console.log(`Kubernetes CLI (kubectl)  unavailable: ${error}`);
-				reject(new Error(error));
-				return;
-        });
-    });
+export function isKubernetesAvailable(): Promise<boolean> {
+	return new Promise<boolean>( async (resolve, reject) => {
+        const version = await kubectlutils.getKubernetesVersion();
+        if (version) {
+            resolve(true);
+            return;
+        }
+        reject (new Error('No kubectl version found'));
+        return;
+	});
 }
+
+// export function checkKubectlCLIVersion() : Promise<string> {
+// 	return new Promise<string>( async (resolve, reject) => {
+//         let kubectlLocal = kubectl.create();
+//         await kubectlLocal.invoke('version')
+//             .then( (rtnValue) => {
+//                 const strArray = rtnValue.split(' ');
+//                 strArray.forEach(element => {
+//                     if (element.toLowerCase().startsWith('gitversion')) {
+//                         const version = element.substring(element.indexOf('\"') + 1, element.lastIndexOf('\"'));
+//                         console.log(`Kubernetes CLI (kubectl) version returned: ${version}`);
+//                         resolve(version);
+//                         return;
+//                     }
+//                 });
+//                 reject (new Error('No kubectl version found'));
+//                 return;
+//             }).catch ( (error) => {
+//                 console.log(`Kubernetes CLI (kubectl)  unavailable: ${error}`);
+// 				reject(new Error(error));
+// 				return;
+//         });
+//     });
+// }
 
 export async function installKamel(context: vscode.ExtensionContext): Promise<Errorable<null>> {
     await checkKamelCLIVersion().then((currentVersion) => {
