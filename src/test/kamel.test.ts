@@ -17,39 +17,27 @@
 'use strict';
 
 import * as assert from 'assert';
-import * as vscode from 'vscode';
 import * as installer from '../installer';
 
-suite("ensure kamel and kubectl are available after activation", function() {
+suite("ensure kamel and kubectl are available", function() {
 
     test("ensure can activate kamel cli", function(done) {
-        const extensionId = 'redhat.vscode-camelk';
-		let extension = vscode.extensions.getExtension(extensionId);
-		if (extension !== null && extension !== undefined) {
-			extension.activate().then(() => {
-				installer.checkKamelCLIVersion().then( (version) => {
-					assert.deepEqual(version, installer.version);
-				});
-			});
-		} else {
-			assert.fail("Camel K extension is undefined");
-		}
-		done();
+		installer.checkKamelCLIVersion().then( (version) => {
+			assert.deepEqual(version, installer.version);
+			done();
+		});
 	});
 
-    test("ensure can activate kubectl cli", function(done) {
-        const vskubernetesextensionId = 'vscode-kubernetes-tools';
-		let extension = vscode.extensions.getExtension(vskubernetesextensionId);
-		if (extension !== null && extension !== undefined) {
-			extension.activate().then(() => {
-				installer.checkKubectlCLIVersion().then( (version) => {				
-					assert.notEqual(version, undefined);
-				});
-			});
-		} else {
-			assert.fail("Kubernetes extension is undefined");
-		}
-		done();
+    test("ensure can access the kubectl cli", function(done) {
+		// instead of relying on us activating the kubernetes extension to install kubectl
+		// just rely on the CLI already being installed and active in the target environment
+		installer.checkKubectlCLIVersion().then( (version) => {
+			assert.notEqual(version, undefined);
+			done();
+		}).catch( () => {
+			assert.fail('Kubectl unavailable');
+			done();
+		});
 	});
 
 });
