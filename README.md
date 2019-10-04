@@ -9,13 +9,13 @@ First, what is Apache Camel K? According to its Github Readme, “Apache Camel K
 
 Our goal for the **Tooling for Apache Camel K** extension for Microsoft Visual Studio Code (VS Code) is to make that process even more seamless. 
 
-For more information about Camel K, be sure to check out its [documentation](https://camel.apache.org/staging/camel-k/latest/index.html) and [github](https://github.com/apache/camel-K) pages.
+For more information about Camel K, be sure to check out its [documentation](https://camel.apache.org/camel-k/latest/index.html) and [github](https://github.com/apache/camel-K) pages.
 
 ## Before you begin
 
 In order to use our **Tooling for Apache Camel K** extension for VS Code, you must have the following software in place:
 
-* An instance of Apache Camel K running on a Kubernetes or an OpenShift cluster that is  accessible from your system on your network. You must also have Minikube (or the Kubernetes CLI) installed. See the Apache Camel K installation page for details: (https://camel.apache.org/staging/camel-k/latest/installation/installation.html). 
+* An instance of Apache Camel K running on a Kubernetes or an OpenShift cluster that is  accessible from your system on your network. You must also have Minikube (or the Kubernetes CLI) installed. See the Apache Camel K installation page for details: (https://camel.apache.org/camel-k/latest/installation/installation.html). 
 * Microsoft VS Code installed. You can get the most recent version from (https://code.visualstudio.com/) for your chosen operating system. 
 
 ## Installing the extension
