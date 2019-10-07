@@ -16,7 +16,7 @@
  */
 import * as vscode from 'vscode';
 import * as chai from 'chai';
-import * as CamelKNodeProvider from '../CamelKNodeProvider';
+import * as CamelKNodeProvider from '../../CamelKNodeProvider';
 import * as sinon from 'sinon';
 import * as sinonChai from 'sinon-chai';
 

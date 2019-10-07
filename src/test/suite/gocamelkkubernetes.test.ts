@@ -38,7 +38,7 @@ suite("ensure that the upstream kubernetes.go sanitize in camel-k have not chang
 	
 	test("test to see if the sanitize.go file has changed since we stashed it", function(done) {
 		var goPath = retrieveSanitizeFileFromUpstream(fileName, url);
-		let stashedFile = path.join(__dirname, '../../src/test/sanitize.go.saved');
+		let stashedFile = path.join(__dirname, '../../../src/test/suite/sanitize.go.saved');
 
 		var str1 = fs.readFileSync(goPath, 'utf-8');
 		var str2 = fs.readFileSync(stashedFile, 'utf-8');

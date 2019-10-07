@@ -17,13 +17,13 @@
 'use strict';
 
 import * as path from 'path';
-import * as utils from '../CamelKJSONUtils';
+import * as utils from '../../CamelKJSONUtils';
 import * as assert from 'assert';
 
 suite('ensure camelk utilities work as expected', function() {
 
 	test('should be able to stringify existing file', function(done) {
-		let testFilePath = path.join(__dirname, '../../src/test/helloworld.groovy');
+		let testFilePath = path.join(__dirname, '../../../src/test/suite/helloworld.groovy');
 		utils.stringifyFileContents(testFilePath)
 			.then((text) => {
 				console.log('file results = ' + text);
@@ -36,7 +36,7 @@ suite('ensure camelk utilities work as expected', function() {
 	});
 
 	test('should be able to create deploy descriptor for incoming camel file', function(done) {
-		let testFilePath = path.join(__dirname, '../../src/test/helloworld.groovy');
+		let testFilePath = path.join(__dirname, '../../../src/test/suite/helloworld.groovy');
 		let fileContents:string;
 		utils.stringifyFileContents(testFilePath).then((text) => {
 			fileContents = text;

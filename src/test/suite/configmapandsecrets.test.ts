@@ -16,8 +16,8 @@
  */
 'use strict';
 
-import * as configmapandsecrets from '../ConfigMapAndSecrets';
-import {parseShellResult} from '../kubectlutils';
+import * as configmapandsecrets from '../../ConfigMapAndSecrets';
+import {parseShellResult} from '../../kubectlutils';
 import * as assert from 'assert';
 
 suite("ensure utility methods in configmap and secrets code works as expected", function() {
