@@ -19,19 +19,35 @@ import * as path from 'path';
 import * as fs from 'fs';
 import mkdirp = require('mkdirp');
 import {platform} from 'os';
-import { Errorable } from './errorable';
+import { Errorable, failed } from './errorable';
 import * as extension from './extension';
 import * as config from './config';
 import * as kamelCli from './kamel';
 import * as shell from './shell';
 import * as vscode from 'vscode';
 import * as kubectlutils from './kubectlutils';
+import * as downloader from './downloader';
 
-const download = require('download-tarball');
+const downloadTarball = require('download-tarball');
 
 export const kamel = 'kamel';
 export const kamel_windows = 'kamel.exe';
 export const version = '1.0.0-M1'; //need to retrieve this if possible, but have a default
+
+export function isKamelAvailable() : Promise<boolean> {
+	return new Promise<boolean>( async (resolve, reject) => {
+		let kamelLocal = kamelCli.create();
+		await kamelLocal.invoke('')
+			.then( (rtnValue) => {
+				resolve(true);
+				return;
+			}).catch ( (error) => {
+				console.log(`Apache Camel K CLI (kamel) unavailable: ${error}`);
+				reject(new Error(error));
+				return;
+		});
+	});
+}
 
 export function checkKamelCLIVersion() : Promise<string> {
 	return new Promise<string>( async (resolve, reject) => {
@@ -87,14 +103,14 @@ export async function installKamel(context: vscode.ExtensionContext): Promise<Er
 
 	extension.shareMessageInMainOutputChannel(`Downloading kamel cli tool from ${kamelUrl} to ${downloadFile}`);
 
-	grabTarGzAndUnGZ(kamelUrl, installFolder).then( (flag) => {
+	await grabTarGzAndUnGZ(kamelUrl, installFolder).then( async (flag) => {
 		console.log(`Downloaded ${downloadFile} successfully: ${flag}`);
 		try {
 			if (fs.existsSync(downloadFile)) {
 				if (shell.isUnix()) {
 					fs.chmodSync(downloadFile, '0777');
 				}
-				config.addKamelPathToConfig(downloadFile);
+				await config.addKamelPathToConfig(downloadFile);
 			}
 		  } catch(err) {
 			console.error(err);
@@ -114,7 +130,7 @@ function getInstallFolder(tool: string, context : vscode.ExtensionContext): stri
 
 async function grabTarGzAndUnGZ(fileUrl: string, directory: string) : Promise<boolean>{
 	return new Promise<boolean>( (resolve, reject) => {
-		download({
+		downloadTarball({
 			url: fileUrl,
 			dir: directory
 		  }).then(() => {
@@ -125,4 +141,61 @@ async function grabTarGzAndUnGZ(fileUrl: string, directory: string) : Promise<bo
 			  return;
 		  });
 	});
+}
+
+async function getStableKubectlVersion(): Promise<Errorable<string>> {
+    const downloadResult = await downloader.toTempFile('https://storage.googleapis.com/kubernetes-release/release/stable.txt');
+    if (failed(downloadResult)) {
+        return { succeeded: false, error: [`Failed to establish kubectl stable version: ${downloadResult.error[0]}`] };
+    }
+    const version = fs.readFileSync(downloadResult.result, 'utf-8');
+    fs.unlinkSync(downloadResult.result);
+    return { succeeded: true, result: version };
+}
+
+function concatIfBoth(s1: string | undefined, s2: string | undefined): string | undefined {
+    return s1 && s2 ? s1.concat(s2) : undefined;
+}
+
+function home(): string {
+    return process.env['HOME'] ||
+        concatIfBoth(process.env['HOMEDRIVE'], process.env['HOMEPATH']) ||
+        process.env['USERPROFILE'] ||
+        '';
+}
+
+function getKubectlInstallFolder(tool: string): string {
+    return path.join(home(), `.vs-kubernetes/tools/${tool}`);
+}
+
+export async function installKubectl(context: vscode.ExtensionContext): Promise<Errorable<null>> {
+	const tool = 'kubectl';
+	const binFile = (shell.isUnix()) ? tool : `${tool}.exe`;
+    const os = shell.getPlatform();
+
+    const version = await getStableKubectlVersion();
+    if (failed(version)) {
+        return { succeeded: false, error: version.error };
+    }
+
+    const installFolder = getKubectlInstallFolder(tool);
+	console.log(`Downloading Kubernetes CLI to ${installFolder}`);
+    mkdirp.sync(installFolder);
+
+    const kubectlUrl = `https://storage.googleapis.com/kubernetes-release/release/${version.result.trim()}/bin/${os}/amd64/${binFile}`;
+    const downloadFile = path.join(installFolder, binFile);
+
+	extension.shareMessageInMainOutputChannel(`Downloading Kubernetes cli tool from ${kubectlUrl} to ${downloadFile}`);
+
+	const downloadResult = await downloader.to(kubectlUrl, downloadFile);
+    if (failed(downloadResult)) {
+        return { succeeded: false, error: [`Failed to download kubectl: ${downloadResult.error[0]}`] };
+    }
+	await config.addKubectlPathToConfig(downloadFile);
+
+    if (shell.isUnix()) {
+        fs.chmodSync(downloadFile, '0777');
+    }
+
+    return { succeeded: true, result: null };
 }

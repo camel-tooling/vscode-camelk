@@ -22,7 +22,7 @@ import * as utils from './CamelKJSONUtils';
 import * as configmapsandsecrets from './ConfigMapAndSecrets';
 import * as integrationutils from './IntegrationUtils';
 import * as events from 'events';
-import { installKamel, checkKamelCLIVersion } from './installer';
+import { installKamel, checkKamelCLIVersion, installKubectl } from './installer';
 import { Errorable, failed } from './errorable';
 import * as kubectl from './kubectl';
 import * as kamel from './kamel';
@@ -39,9 +39,7 @@ let eventEmitter = new events.EventEmitter();
 const restartKubectlWatchEvent = 'restartKubectlWatch';
 
 // This extension offers basic integration with Camel K (https://github.com/apache/camel-k) on two fronts.
-export function activate(context: vscode.ExtensionContext): void {
-
-	installDependencies(context);
+export async function activate(context: vscode.ExtensionContext): Promise<void> {
 
 	outputChannelMap = new Map();
 
@@ -51,80 +49,85 @@ export function activate(context: vscode.ExtensionContext): void {
 	myStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 100);
 	context.subscriptions.push(myStatusBarItem);
 
-	createIntegrationsView();
+	await installDependencies(context).then ( () => {
+		createIntegrationsView();
 
-	// start the watch listener for auto-updates
-	startListeningForServerChanges();
-
-	// Listener to handle auto-refresh of view - kubectl times out, so we simply restart the watch when it does
-	var watchListener = function restartKubectlListenerOnEvent() {
+		// start the watch listener for auto-updates
 		startListeningForServerChanges();
-	};
-	eventEmitter.on(restartKubectlWatchEvent, watchListener);
-
-	// create the integration view action -- refresh
-	vscode.commands.registerCommand('camelk.integrations.refresh', () => {
-		camelKIntegrationsProvider.refresh()
-		.catch( (err) => {
-			console.log(err);
+	
+		// Listener to handle auto-refresh of view - kubectl times out, so we simply restart the watch when it does
+		var watchListener = function restartKubectlListenerOnEvent() {
+			startListeningForServerChanges();
+		};
+		eventEmitter.on(restartKubectlWatchEvent, watchListener);
+	
+		// create the integration view action -- refresh
+		vscode.commands.registerCommand('camelk.integrations.refresh', () => {
+			camelKIntegrationsProvider.refresh()
+			.catch( (err) => {
+				console.log(err);
+			});
 		});
-	});
-
-	// create the integration view action -- remove
-	vscode.commands.registerCommand('camelk.integrations.remove', async (node: TreeNode) => {
-		if (node && node.label) {
-			setStatusLineMessageAndShow(`Removing Apache Camel K Integration...`);
-			let integrationName : string = node.label;
-			let kamelExe = kamel.create();
-			utils.shareMessage(mainOutputChannel, 'Removing ' + integrationName + ' via Kamel executable Delete');
-			let args : string[] = ['delete', `${integrationName}`];
-			await kamelExe.invokeArgs(args)
-				.then( /* empty for now but here in case we need it */ )
-				.catch( (error) => {
-					utils.shareMessage(mainOutputChannel, `exec error: ${error}`);
-			});
-			await integrationutils.killChildProcessForIntegration(integrationName).then( (boolResult) => {
-				console.log(`Removed the child process running in the background for ${integrationName}: ${boolResult}`);
-			}).catch( (err) => {
-				console.log(err);
-			});
-			await removeOutputChannelForIntegrationViaKubectl(integrationName)
-			.catch( (err) => {
-				console.log(err);
-			});
-			hideStatusLine();
-			await camelKIntegrationsProvider.refresh()
-			.catch( (err) => {
-				console.log(err);
-			});
-		}
-	});
-
-	// create the integration view action -- start log
-	vscode.commands.registerCommand('camelk.integrations.log', async (node: TreeNode) => {
-		if (node && node.label) {
-			setStatusLineMessageAndShow(`Retrieving log for running Apache Camel K Integration...`);
-			let integrationName : string = node.label;
-			await getIntegrationsFromKubectl(integrationName)
-				.then( (podName) => {
-					if (podName) {
-						handleLogViaKubectlCli(podName);
-					} else {
-						utils.shareMessage(mainOutputChannel, `No deployed integration found for: ${integrationName} \n`);
-					}
-				}).catch( (error) => {
-					utils.shareMessage(mainOutputChannel, `error: ${error} \n`);
+	
+		// create the integration view action -- remove
+		vscode.commands.registerCommand('camelk.integrations.remove', async (node: TreeNode) => {
+			if (node && node.label) {
+				setStatusLineMessageAndShow(`Removing Apache Camel K Integration...`);
+				let integrationName : string = node.label;
+				let kamelExe = kamel.create();
+				utils.shareMessage(mainOutputChannel, 'Removing ' + integrationName + ' via Kamel executable Delete');
+				let args : string[] = ['delete', `${integrationName}`];
+				await kamelExe.invokeArgs(args)
+					.then( /* empty for now but here in case we need it */ )
+					.catch( (error) => {
+						utils.shareMessage(mainOutputChannel, `exec error: ${error}`);
 				});
-			hideStatusLine();
-		}
+				await integrationutils.killChildProcessForIntegration(integrationName).then( (boolResult) => {
+					console.log(`Removed the child process running in the background for ${integrationName}: ${boolResult}`);
+				}).catch( (err) => {
+					console.log(err);
+				});
+				await removeOutputChannelForIntegrationViaKubectl(integrationName)
+				.catch( (err) => {
+					console.log(err);
+				});
+				hideStatusLine();
+				await camelKIntegrationsProvider.refresh()
+				.catch( (err) => {
+					console.log(err);
+				});
+			}
+		});
+	
+		// create the integration view action -- start log
+		vscode.commands.registerCommand('camelk.integrations.log', async (node: TreeNode) => {
+			if (node && node.label) {
+				setStatusLineMessageAndShow(`Retrieving log for running Apache Camel K Integration...`);
+				let integrationName : string = node.label;
+				await getIntegrationsFromKubectl(integrationName)
+					.then( (podName) => {
+						if (podName) {
+							handleLogViaKubectlCli(podName);
+						} else {
+							utils.shareMessage(mainOutputChannel, `No deployed integration found for: ${integrationName} \n`);
+						}
+					}).catch( (error) => {
+						utils.shareMessage(mainOutputChannel, `error: ${error} \n`);
+					});
+				hideStatusLine();
+			}
+		});
+	
+		// create the integration view action -- start new integration
+		let startIntegration = vscode.commands.registerCommand('camelk.startintegration', async (uri:vscode.Uri) => { await runTheFile(uri);});
+		context.subscriptions.push(startIntegration);
+	
+		// add commands to create config-map and secret objects from .properties files
+		configmapsandsecrets.registerCommands();
+	
 	});
 
-	// create the integration view action -- start new integration
-	let startIntegration = vscode.commands.registerCommand('camelk.startintegration', async (uri:vscode.Uri) => { await runTheFile(uri);});
-	context.subscriptions.push(startIntegration);
 
-	// add commands to create config-map and secret objects from .properties files
-	configmapsandsecrets.registerCommands();
 }
 
 export function setStatusLineMessageAndShow( message: string): void {
@@ -330,13 +333,22 @@ export async function installDependencies(context: vscode.ExtensionContext) {
 	}).catch ( () => { 
 		// ignore 
 	});
-	const kubectlCliVersion : any = await kubectlutils.getKubernetesVersion();
-	if (kubectlCliVersion) {
-		shareMessageInMainOutputChannel(`Found Kubernetes CLI (kubectl) version ${kubectlCliVersion}...`);
-	}
+
+	let gotKubernetes : boolean = false;
+	await kubectlutils.getKubernetesVersion().then ( async (kubectlCliVersion) => {
+		if (kubectlCliVersion) {
+			shareMessageInMainOutputChannel(`Found Kubernetes CLI (kubectl) version ${kubectlCliVersion}...`);
+			gotKubernetes = true;
+		}
+	}).catch( () => {
+		// ignore 
+	});
 
 	if (!gotKamel) {
 		await installDependency("kamel", gotKamel, context, installKamel);
+	}
+	if (!gotKubernetes) {
+		await installDependency("kubectl", false, context, installKubectl);
 	}
 }
 

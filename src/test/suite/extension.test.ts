@@ -27,10 +27,10 @@ suite("ensure camelk extension exists and is accessible", function() {
 		done();
 	});
 
-	test('vscode-camelk extension should activate', function (done) {
+	test('vscode-camelk extension should activate', async function () {
 		let extension = vscode.extensions.getExtension(extensionId);
 		if (extension !== null && extension !== undefined) {
-			extension.activate().then(() => {
+			await extension.activate().then(() => {
 				if (extension !== null && extension !== undefined) {
 					const camelKIsActive = extension.isActive;
 					assert.deepEqual(camelKIsActive, true);
@@ -39,6 +39,5 @@ suite("ensure camelk extension exists and is accessible", function() {
 		} else {
 			assert.fail("Camel K extension is undefined");
 		}
-		done();
 	});	
 });

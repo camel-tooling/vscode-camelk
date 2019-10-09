@@ -139,7 +139,6 @@ export async function baseKamelPath(): Promise<string> {
 	return binpath;
 }
 
-
 interface FindBinaryResult {
 	err: number | null;
 	output: string;

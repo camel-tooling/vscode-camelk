@@ -86,7 +86,7 @@ async function kubectllInternalArgs(args: string[], foldername?: string): Promis
 export async function baseKubectlPath(): Promise<string> {
 	let result : FindBinaryResult = await findBinary('kubectl');
 	if (result && result.output && result.err === null) {
-		return result.output.trim();
+		return result.output;
 	}
 	let bin = config.getActiveKubectlconfig();
 	if (!bin) {
@@ -96,7 +96,6 @@ export async function baseKubectlPath(): Promise<string> {
 	let binpath = path.normalize(bin);
 	return binpath;
 }
-
 
 interface FindBinaryResult {
 	err: number | null;

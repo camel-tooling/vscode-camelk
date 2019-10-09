@@ -23,8 +23,13 @@ import * as kubectlutils from '../../kubectlutils';
 suite("ensure kamel and kubectl are available", function() {
 
     test("ensure can activate kamel cli", function(done) {
-		installer.checkKamelCLIVersion().then( (version) => {
-			assert.deepEqual(version, installer.version);
+		installer.isKamelAvailable().then( (returnedText) => {
+			if (returnedText) {
+				assert.ok('kamel is available.');
+				done();
+			}
+		}).catch ( (error) => {
+			assert.fail(`kamel is not available: ${error}`);
 			done();
 		});
 	});
@@ -32,14 +37,13 @@ suite("ensure kamel and kubectl are available", function() {
     test("ensure can access the kubectl cli", function(done) {
 		// instead of relying on us activating the kubernetes extension to install kubectl
 		// just rely on the CLI already being installed and active in the target environment
-		kubectlutils.getKubernetesVersion().then( (version: any) => {
-			if (version) {
-				console.log(`Retrieved kubernetes version ${version}`);
+		kubectlutils.isKubernetesAvailable().then( (flag) => {
+			if (flag) {
+				console.log(`Kubectl is available: ${flag}`);
+				done();
 			}
-			assert.notStrictEqual(version, undefined);
-			done();
-		}).catch( () => {
-			assert.fail('Kubectl unavailable');
+		}).catch( (error) => {
+			assert.fail(`Kubectl is not available: ${error}`);
 			done();
 		});
 	});

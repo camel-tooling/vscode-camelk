@@ -13,7 +13,7 @@ async function main() : Promise<void> {
 		console.log(`vscodeExecutablePath = ${vscodeExecutablePath}`);
 
 		const cliPath: string = resolveCliPathFromVSCodeExecutablePath(vscodeExecutablePath);
-		cp.spawnSync(cliPath, ['--install-extension', 'ms-kubernetes-tools.vscode-kubernetes-tools'],
+		cp.spawnSync(cliPath, ['--install-extension', 'ms-kubernetes-tools.vscode-kubernetes-tools', '--force'],
 		{
 			encoding: 'utf-8',
 			stdio: 'inherit'

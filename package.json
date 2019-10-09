@@ -54,11 +54,21 @@
 					},
 					"camelk.tools": {
 						"type": "object",
-						"description": "CLI location",
+						"description": "CLI locations",
 						"properties": {
 							"camelk.tools.kamel-path": {
 								"type": "string",
 								"description": "File path to a kamel binary."
+							}
+						}
+					},
+					"vs-kubernetes": {
+						"type": "object",
+						"description": "CLI locations",
+						"properties": {
+							"camelk.tools.kubectl-path": {
+								"type": "string",
+								"description": "File path to a kubectl binary."
 							}
 						}
 					}
@@ -197,6 +207,7 @@
 		"@types/shelljs": "^0.7.8",
 		"@types/tmp": "^0.0.33",
 		"child_process": "^1.0.2",
+		"download": "^7.1.0",
 		"download-tarball": "^2.0.0",
 		"path": "^0.12.7",
 		"request": "^2.88.0",

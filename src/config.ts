@@ -27,12 +27,20 @@ export async function addKamelPathToConfig(value: string) : Promise<void> {
 	await setConfigValue(KAMEL_PATH_CONFIG_KEY, value);
 }
 
+export async function addKubectlPathToConfig(value: string) : Promise<void> {
+	await setConfigValueForRoot(KUBERNETES_EXTENSION_CONFIG_KEY, KUBECTL_PATH_CONFIG_KEY, value);
+}
+
 export async function addPathToConfig(configKey: string, value: string): Promise<void> {
 	await setConfigValue(configKey, value);
 }
 
 async function setConfigValue(configKey: string, value: any): Promise<void> {
 	await atAllConfigScopes(addValueToConfigAtScope, configKey, value);
+}
+
+async function setConfigValueForRoot(rootKey : string, configKey: string, value: any): Promise<void> {
+	await atAllConfigScopesWithRoot(addValueToConfigAtScopeForRoot, rootKey, configKey, value);
 }
 
 async function addValueToConfigAtScope(configKey: string, value: any, scope: vscode.ConfigurationTarget, valueAtScope: any, createIfNotExist: boolean): Promise<void> {
@@ -50,13 +58,37 @@ async function addValueToConfigAtScope(configKey: string, value: any, scope: vsc
 	await vscode.workspace.getConfiguration().update(EXTENSION_CONFIG_KEY, newValue, scope);
 }
 
+async function addValueToConfigAtScopeForRoot(rootKey : string, configKey: string, value: any, scope: vscode.ConfigurationTarget, valueAtScope: any, createIfNotExist: boolean): Promise<void> {
+	if (!createIfNotExist) {
+		if (!valueAtScope || !(valueAtScope[configKey])) {
+			return;
+		}
+	}
+
+	let newValue: any = {};
+	if (valueAtScope) {
+		newValue = Object.assign({}, valueAtScope);
+	}
+	newValue[configKey] = value;
+	await vscode.workspace.getConfiguration().update(rootKey, newValue, scope);
+}
+
+
 type ConfigUpdater<T> = (configKey: string, value: T, scope: vscode.ConfigurationTarget, valueAtScope: any, createIfNotExist: boolean) => Promise<void>;
+type ConfigUpdaterForRoot<T> = (rootKey: string, configKey: string, value: T, scope: vscode.ConfigurationTarget, valueAtScope: any, createIfNotExist: boolean) => Promise<void>;
 
 async function atAllConfigScopes<T>(fn: ConfigUpdater<T>, configKey: string, value: T): Promise<void> {
 	const config = vscode.workspace.getConfiguration().inspect(EXTENSION_CONFIG_KEY)!;
 	await fn(configKey, value, vscode.ConfigurationTarget.Global, config.globalValue, true);
 	await fn(configKey, value, vscode.ConfigurationTarget.Workspace, config.workspaceValue, false);
 	await fn(configKey, value, vscode.ConfigurationTarget.WorkspaceFolder, config.workspaceFolderValue, false);
+}
+
+async function atAllConfigScopesWithRoot<T>(fn: ConfigUpdaterForRoot<T>, rootKey : string, configKey: string, value: T): Promise<void> {
+	const config = vscode.workspace.getConfiguration(rootKey).inspect(EXTENSION_CONFIG_KEY)!;
+	await fn(rootKey, configKey, value, vscode.ConfigurationTarget.Global, config.globalValue, true);
+	await fn(rootKey, configKey, value, vscode.ConfigurationTarget.Workspace, config.workspaceValue, false);
+	await fn(rootKey, configKey, value, vscode.ConfigurationTarget.WorkspaceFolder, config.workspaceFolderValue, false);
 }
 
 export function getConfiguration(key: string): any {
