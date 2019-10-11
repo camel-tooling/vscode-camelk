@@ -19,6 +19,7 @@ import * as path from 'path';
 import * as utils from './CamelKJSONUtils';
 import * as extension from './extension';
 import * as kubectlutils from './kubectlutils';
+import * as installer from './installer';
 
 export class CamelKNodeProvider implements vscode.TreeDataProvider<TreeNode> {
 
@@ -51,7 +52,7 @@ export class CamelKNodeProvider implements vscode.TreeDataProvider<TreeNode> {
 			if (oldNodes) {
 				oldNodes.push(newNode);
 				if (!disableRefresh) {
-					await this.refresh(); //.catch(err => reject(err));
+					await this.refresh().catch(err => reject(err));
 				}
 				resolve(oldNodes);
 			}
@@ -67,7 +68,7 @@ export class CamelKNodeProvider implements vscode.TreeDataProvider<TreeNode> {
 				if (index !== -1) {
 					oldNodes.splice(index, 1);
 					if (!disableRefresh) {
-						await this.refresh(); //.catch(err => reject(err));
+						await this.refresh().catch(err => reject(err));
 					}
 				}
 				resolve(oldNodes);
@@ -83,7 +84,7 @@ export class CamelKNodeProvider implements vscode.TreeDataProvider<TreeNode> {
 			this.resetList();
 			let inaccessible = false;
 			if (this.retrieveIntegrations) {
-				await utils.pingKamel()
+				await installer.isKamelAvailable()
 					.then( async () => {
 						await Promise.resolve(this.getIntegrationsFromKubectl())
 							.then((output) => {

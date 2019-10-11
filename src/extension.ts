@@ -330,8 +330,9 @@ export async function installDependencies(context: vscode.ExtensionContext) {
 			shareMessageInMainOutputChannel(`Found Apache Camel K CLI (kamel) version ${kamelCliVersion}...`);
 			gotKamel = true;
 		}
-	}).catch ( () => { 
-		// ignore 
+	}).catch ( (error) => { 
+		// ignore but log
+		console.log(`Error when checking for Apache Camel K CLI version: ${error}`);
 	});
 
 	let gotKubernetes : boolean = false;
@@ -340,8 +341,9 @@ export async function installDependencies(context: vscode.ExtensionContext) {
 			shareMessageInMainOutputChannel(`Found Kubernetes CLI (kubectl) version ${kubectlCliVersion}...`);
 			gotKubernetes = true;
 		}
-	}).catch( () => {
-		// ignore 
+	}).catch( (error) => {
+		// ignore but log
+		console.log(`Error when checking for Kubernetes version: ${error}`);
 	});
 
 	if (!gotKamel) {

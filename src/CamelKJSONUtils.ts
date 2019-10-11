@@ -17,7 +17,6 @@
 import * as fs from 'fs';
 import * as vscode from 'vscode';
 import * as http from "http";
-import * as kamel from './kamel';
 
 const camelAPIVersion = "v1alpha1";
 
@@ -75,21 +74,6 @@ export function pingTheURL(urlString: string) : Promise<boolean> {
 		}).on('error', (e) => {
 			reject(e);
 		});
-	});
-}
-
-export function pingKamel() : Promise<string> {
-	return new Promise<string>( async (resolve, reject) => {
-		let kamelExe = kamel.create();
-		await kamelExe.invoke('get')
-			.then( () => {
-				resolve('found it');
-				return;
-			})
-			.catch( (error) => {
-				reject(new Error(`Apache Camel K CLI unavailable: ${error}`));
-				return;
-			});
 	});
 }
 
