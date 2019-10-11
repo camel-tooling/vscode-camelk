@@ -100,8 +100,15 @@ export function getPlatform() : string | undefined {
 }
 
 export async function installKamel(context: vscode.ExtensionContext): Promise<Errorable<null>> {
+	const latestversion = await getLatestCamelKVersion();
+	if (failed(latestversion)) {
+		return { succeeded: false, error: latestversion.error };
+	}
+
+	let versionToUse = latestversion.result.trim();
+
 	await checkKamelCLIVersion().then((currentVersion) => {
-		if (version.toLowerCase() === currentVersion.toLowerCase()) {
+		if (versionToUse.toLowerCase() === currentVersion.toLowerCase()) {
 			// no need to install, it's already here
 			extension.shareMessageInMainOutputChannel(`Apache Camel K CLI version ${currentVersion} available`);
 			return { succeeded: true, result: null };
@@ -118,7 +125,7 @@ export async function installKamel(context: vscode.ExtensionContext): Promise<Er
 	console.log(`Downloading Apache Camel K CLI to ${installFolder}`);
 	mkdirp.sync(installFolder);
 
-	const kamelUrl = `https://github.com/apache/camel-k/releases/download/${version}/camel-k-client-${version}-${platformString}-64bit.tar.gz`;
+	const kamelUrl = `https://github.com/apache/camel-k/releases/download/${version}/camel-k-client-${versionToUse}-${platformString}-64bit.tar.gz`;
 	const downloadFile = path.join(installFolder, binFile);
 
 	extension.shareMessageInMainOutputChannel(`Downloading kamel cli tool from ${kamelUrl} to ${downloadFile}`);
@@ -161,6 +168,21 @@ async function grabTarGzAndUnGZ(fileUrl: string, directory: string) : Promise<bo
 			  return;
 		  });
 	});
+}
+
+async function getLatestCamelKVersion(): Promise<Errorable<string>> {
+	const latestURL = 'https://api.github.com/repos/apache/camel-k/releases/latest';
+	const downloadResult = await downloader.toTempFile(latestURL);
+	if (failed(downloadResult)) {
+		return { succeeded: false, error: [`Failed to establish kubectl stable version: ${downloadResult.error[0]}`] };
+	}
+	const rawtext = fs.readFileSync(downloadResult.result, 'utf-8');
+	let latestJSON = JSON.parse(rawtext);
+	let tagName = latestJSON.tag_name;
+	if (tagName) {
+		return { succeeded: true, result: tagName };		
+	}
+	return { succeeded: false, error: [`Failed to retrieve latest Apache Camel K version tag from : ${latestURL}`] };
 }
 
 async function getStableKubectlVersion(): Promise<Errorable<string>> {
