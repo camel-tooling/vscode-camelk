@@ -20,6 +20,7 @@ import * as vscode from 'vscode';
 import * as k8s from 'vscode-kubernetes-tools-api';
 import * as extension from './extension';
 import * as utils from './CamelKJSONUtils';
+import { isKubernetesAvailable } from './kubectlutils';
 
 export const validNameRegex = /^[A-Za-z][A-Za-z0-9\-]*(?:[A-Za-z0-9]$){1}/;
 
@@ -144,18 +145,6 @@ function createSecretFromFilenameOrFolder(uri:vscode.Uri) : Promise<string> {
 	});
 }
 
-function isKubernetesAvailable(): Promise<boolean> {
-	return new Promise<boolean>( (resolve) => {
-		k8s.extension.kubectl.v1
-			.then( (kubectl) => {
-				resolve(kubectl && kubectl.available);
-			})
-			.catch( err => {
-				resolve(false);
-			});
-	});
-}
-
 function createConfigMap(name:string, filename: vscode.Uri) : Promise<string> {
 	return new Promise<string>( (resolve, reject) => {
 		k8s.extension.kubectl.v1
@@ -210,63 +199,4 @@ function createSecret(name:string, foldername: vscode.Uri) : Promise<string> {
 				reject(err);
 			});
 	});
-}
-
-function getNamedListFromKubernetes(itemType : string): Promise<string[]> {
-	return new Promise<string[]>( (resolve, reject) => {
-		k8s.extension.kubectl.v1
-			.then( (kubectl) => {
-				if (kubectl && kubectl.available) {
-					return kubectl.api.invokeCommand(`get ${itemType}`);
-				} else {
-					reject(new Error('Kubernetes not available'));
-				}
-			})
-			.then( (result) => {
-				if (!result || result.code !== 0) {
-					const error = result ? result.stderr : `Unable to invoke kubectl to retrieve ${itemType}`;
-					reject(new Error(error));
-				} else if (result) {
-					const splitResults = result.stdout;
-					const itemList : string[] = parseShellResult(splitResults);
-					resolve(itemList);
-				}
-			})
-			.catch( err => {
-				reject(err);
-			});
-	});
-}
-
-export function getConfigMaps(): Promise<string[]> {
-	return getNamedListFromKubernetes('configmap');
-}
-
-export function getSecrets(): Promise<string[]> {
-	return getNamedListFromKubernetes('secret');
-}
-
-export function parseShellResult(output: string) : string[] {
-	let processedList : string[] = [''];
-	if (output) {
-		let lines = output.split('\n');
-		for (let entry of lines) {
-			let line = entry.split('  ');
-			let cleanLine = [];
-			for (var i=0; i < line.length; i++) {
-				if (line[i].trim().length === 0) {
-					continue;
-				}
-				cleanLine.push(line[i].trim());
-			}
-			let firstString : string = cleanLine[0];
-			if (firstString === undefined || firstString.toUpperCase().startsWith('NAME') || firstString.trim().length === 0) {
-				continue;
-			}
-
-			let itemName = cleanLine[0];
-			processedList.push(itemName);
-		}
-	}
-	return processedList;
 }

@@ -16,31 +16,36 @@
  */
 'use strict';
 
-import * as vscode from 'vscode';
 import * as assert from 'assert';
+import * as vscode from 'vscode';
+import * as config from '../../config';
+import * as fs from 'fs';
 
-suite("ensure camelk extension exists and is accessible", function() {
-	const extensionId = 'redhat.vscode-camelk';
+suite("ensure install methods are functioning as expected", function() {
 
-	test('vscode-camelk extension should be present', function(done) {
-		assert.ok(vscode.extensions.getExtension(extensionId));
+	test("install Camel K and Kubernetes CLIs on activation", async function() {
+		const extensionId = 'redhat.vscode-camelk';
+		let extension = vscode.extensions.getExtension(extensionId);
+		if (extension !== null && extension !== undefined) {
+			await extension.activate().then( () => {
+				assert.ok("Camel K extension is ready to go");
+			});
+		} else {
+			assert.fail("Camel K extension is undefined and cannot be activated");
+		}
+	});
+
+	test("ensure we have access to the kamel cli", function(done) {
+		let kamelPath = config.getActiveKamelconfig();
+		console.log(`kamelPath= ${kamelPath}`);
+		assert.equal(fs.existsSync(kamelPath), true);
 		done();
 	});
 
-	test('vscode-camelk extension should activate', function (done) {
-		let extension = vscode.extensions.getExtension(extensionId);
-		if (extension !== null && extension !== undefined) {
-			try {
-				extension.activate().then(() => {
-					if (extension !== null && extension !== undefined) {
-						const camelKIsActive = extension.isActive;
-						assert.deepEqual(camelKIsActive, true);
-					}
-				});
-			} catch { (err:any) => {
-				done(err);
-			}}; 
-		}
+	test("ensure we have access to the kubectl cli", function(done) {
+		let kubectlPath = config.getActiveKubectlconfig();
+		console.log(`kubectlPath= ${kubectlPath}`);
+		assert.equal(fs.existsSync(kubectlPath), true);
 		done();
-	});	
+	});
 });

@@ -15,11 +15,11 @@
  * limitations under the License.
  */
 import * as vscode from 'vscode';
-import * as child_process from 'child_process';
 import * as path from 'path';
 import * as utils from './CamelKJSONUtils';
-import * as rp from 'request-promise';
 import * as extension from './extension';
+import * as kubectlutils from './kubectlutils';
+import * as installer from './installer';
 
 export class CamelKNodeProvider implements vscode.TreeDataProvider<TreeNode> {
 
@@ -29,14 +29,7 @@ export class CamelKNodeProvider implements vscode.TreeDataProvider<TreeNode> {
 	protected treeNodes: TreeNode[] = [];
 	protected retrieveIntegrations : boolean = true;
 
-	private useProxy: boolean = false;
-
 	constructor() {}
-
-	// get our list of integrations from kubectl or the rest API
-	public setUseProxy(flag: boolean): void {
-		this.useProxy = flag;
-	}
 
 	// clear the tree
 	public resetList(): void {
@@ -91,35 +84,19 @@ export class CamelKNodeProvider implements vscode.TreeDataProvider<TreeNode> {
 			this.resetList();
 			let inaccessible = false;
 			if (this.retrieveIntegrations) {
-				if (this.useProxy) {
-					await utils.pingKubernetes()
-						.then( async () => {
-							await this.getIntegrationsFromCamelKRest()
-								.then( (output) => {
-									this.processIntegrationListFromJSON(output);
-								});
-						})
-						.catch( (error) =>  {
-							utils.shareMessage(extension.mainOutputChannel, `Refreshing Apache Camel K Integrations view using kubernetes Rest APIs failed. ${error}`);
-							inaccessible = true;
-							reject(error);
-							return;
-						});
-				} else {
-					await utils.pingKamel()
-						.then( async () => {
-							await Promise.resolve(this.getIntegrationsFromCamelK())
-								.then((output) => {
-									this.processIntegrationList(output);
-								});
-						})
-						.catch( (error) =>  {
-							utils.shareMessage(extension.mainOutputChannel, `Refreshing Apache Camel K Integrations view using kubectl failed. ${error}`);
-							inaccessible = true;
-							reject(error);
-							return;
-						});
-				}
+				await installer.isKamelAvailable()
+					.then( async () => {
+						await Promise.resolve(this.getIntegrationsFromKubectl())
+							.then((output) => {
+								this.processIntegrationList(output);
+							});
+					})
+					.catch( (error) =>  {
+						utils.shareMessage(extension.mainOutputChannel, `Refreshing Apache Camel K Integrations view using kubectl failed. ${error}`);
+						inaccessible = true;
+						reject(error);
+						return;
+					});
 			}
 			extension.hideStatusLine();
 			this._onDidChangeTreeData.fire();
@@ -192,58 +169,9 @@ export class CamelKNodeProvider implements vscode.TreeDataProvider<TreeNode> {
 		}
 	}
 
-	// retrieve the list of integrations running in camel k using the kube proxy and rest API
-	getIntegrationsFromCamelKRest(): Promise<Object> {
-		return new Promise( (resolve, reject) => {
-			let proxyURL = utils.createCamelKRestURL();
-			let options = {
-				uri: proxyURL,
-				headers: {
-					'Content-Type': 'application/json',
-					'Accept': 'application/json'
-				},
-				json: true // Automatically parses the JSON string in the response
-			};
-			utils.pingKubernetes()
-				.then( () => {
-					return utils.delay(750);
-				})
-				.then( () => {
-					return rp(options);
-				})
-				.then( (json) => {
-					resolve(json);
-				})
-				.catch( (error) =>  {
-					reject(error);
-				});
-		});
-	}
-
 	// actually retrieve the list of integrations running in camel k using kubectl
-	getIntegrationsFromCamelK(): Promise<string> {
-		return new Promise( (resolve, reject) => {
-			let commandString = 'kubectl get integration';
-			console.log('Command string: ' + commandString);
-			let runKamel = child_process.exec(commandString);
-			var shellOutput = '';
-			if (runKamel.stdout) {
-				runKamel.stdout.on('data', function (data) {
-					console.log("[OUT] " + data);
-					shellOutput += data;
-				});
-			}
-			if (runKamel.stderr) {
-				runKamel.stderr.on('data', function (data) {
-					console.log("[ERROR] " + data);
-					reject(data.toString());
-				});
-			}
-			runKamel.on("close", () => {
-				console.log("[CLOSING] " + shellOutput);
-				resolve(shellOutput);
-			});
-		});
+	async getIntegrationsFromKubectl(): Promise<string> {
+		return await kubectlutils.getIntegrations();
 	}
 
 }
@@ -268,7 +196,7 @@ export class TreeNode extends vscode.TreeItem {
 
 	getIconForPodStatus(status: string):  object {
 		let newIcon : object;
-		if (status.toLowerCase().startsWith("running")) {
+		if (status && status.toLowerCase().startsWith("running")) {
 			newIcon = vscode.Uri.file(path.join(__dirname, "../resources/round-k-transparent-16-running.svg"));
 		} else {
 			newIcon = vscode.Uri.file(path.join(__dirname, "../resources/round-k-transparent-16-error.svg"));

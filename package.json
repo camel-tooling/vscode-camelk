@@ -32,7 +32,7 @@
 		"Tool"
 	],
 	"engines": {
-		"vscode": "^1.33.0"
+		"vscode": "^1.36.1"
 	},
 	"categories": [
 		"Other"
@@ -46,39 +46,31 @@
 			{
 				"title": "Apache Camel K Tooling Extension Settings",
 				"properties": {
-					"camelk.integrations.useProxy": {
-						"type": "boolean",
-						"default": false,
-						"description": "Always use proxy: If true, always use the proxy URL instead of kubectl",
-						"scope": "window"
-					},
-					"camelk.integrations.proxyURL": {
-						"type": "string",
-						"default": "http://localhost",
-						"description": "Proxy configuration: URL to the running Kubernetes server (to be combined with port)",
-						"scope": "window"
-					},
-					"camelk.integrations.proxyPort": {
-						"type": "number",
-						"default": 8000,
-						"description": "Proxy configuration: Port to the running Kubernetes server (combined with proxy URL)",
-						"scope": "window"
-					},
-					"camelk.integrations.proxyNamespace": {
-						"type": "string",
-						"enum": [
-							"default",
-							"syndesis"
-						],
-						"default": "default",
-						"description": "Proxy namespace: Namespace to use for accessing Apache Camel K integrations",
-						"scope": "window"
-					},
 					"camelk.integrations.showStatusBarMessages": {
 						"type": "boolean",
 						"default": true,
 						"description": "Show Status Bar messages",
 						"scope": "window"
+					},
+					"camelk.tools": {
+						"type": "object",
+						"description": "CLI locations",
+						"properties": {
+							"camelk.tools.kamel-path": {
+								"type": "string",
+								"description": "File path to a kamel binary."
+							}
+						}
+					},
+					"vs-kubernetes": {
+						"type": "object",
+						"description": "CLI locations",
+						"properties": {
+							"camelk.tools.kubectl-path": {
+								"type": "string",
+								"description": "File path to a kubectl binary."
+							}
+						}
 					}
 				}
 			}
@@ -103,10 +95,6 @@
 			{
 				"command": "camelk.integrations.log",
 				"title": "Follow log for running Apache Camel K Integration"
-			},
-			{
-				"command": "camelk.integrations.startproxy",
-				"title": "Apache Camel K: Start the Kubernetes proxy server"
 			},
 			{
 				"command": "camelk.integrations.createconfigmapfromfile",
@@ -187,34 +175,45 @@
 		"compile": "tsc -p ./",
 		"clean": "rm -rf out || rmdir out /s /q",
 		"watch": "tsc -watch -p ./",
-		"postinstall": "node ./node_modules/vscode/bin/install",
-		"test": "npm run compile && node ./node_modules/vscode/bin/test"
+		"test": "npm run compile && node ./out/test/runTests.js"
 	},
 	"devDependencies": {
 		"@types/chai": "^4.2.3",
+		"@types/glob": "^7.1.1",
+		"@types/mkdirp": "^0.5.2",
 		"@types/mocha": "^5.2.7",
 		"@types/nock": "^11.1.0",
 		"@types/node": "^12.7.12",
 		"@types/sinon": "^7.5.0",
 		"@types/sinon-chai": "^3.2.3",
+		"@types/vscode": "^1.36.1",
 		"chai": "^4.2.0",
+		"glob": "^7.1.4",
+		"mocha": "^6.1.4",
 		"mocha-jenkins-reporter": "^0.4.2",
 		"nock": "^11.4.0",
 		"sinon": "^7.5.0",
 		"sinon-chai": "^3.3.0",
 		"tslint": "^5.20.0",
 		"typescript": "^3.6.4",
-		"vscode": "^1.1.36"
+		"vscode-test": "^1.2.0"
 	},
 	"extensionDependencies": [
 		"ms-kubernetes-tools.vscode-kubernetes-tools"
 	],
 	"dependencies": {
 		"@types/request-promise": "^4.1.44",
+		"@types/shelljs": "^0.7.8",
+		"@types/tmp": "^0.0.33",
 		"child_process": "^1.0.2",
+		"download": "^7.1.0",
+		"download-tarball": "^2.0.0",
 		"path": "^0.12.7",
 		"request": "^2.88.0",
 		"request-promise": "^4.2.4",
+		"shelljs": "^0.8.3",
+		"tar": "^4.4.13",
+		"tmp": "^0.1.0",
 		"vscode-kubernetes-tools-api": "^1.0.0"
 	}
 }
