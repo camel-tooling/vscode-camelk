@@ -36,7 +36,7 @@ export interface Kamel {
 
 class KamelImpl implements Kamel {
 	devMode : boolean = false;
-	namespace: string = 'default';
+	namespace: string = config.getNamespaceconfig() as string;
 	constructor() {
 	}
 	async getPath(): Promise<string> {
@@ -44,10 +44,10 @@ class KamelImpl implements Kamel {
 		return bin;
 	}
 	async invoke(command: string): Promise<string> {
-		return kamelInternal(command, this.devMode);
+		return kamelInternal(command, this.devMode, this.namespace);
 	}
 	invokeArgs(args: string[], folderName?: string): Promise<child_process.ChildProcess> {
-		return kamelInternalArgs(args, this.devMode, folderName);
+		return kamelInternalArgs(args, this.devMode, this.namespace, folderName);
 	}
 	setDevMode(flag: boolean): void {
 		this.devMode = flag;
@@ -61,7 +61,7 @@ export function create() : Kamel {
 	return new KamelImpl();
 }
 
-async function kamelInternal(command: string, devMode: boolean): Promise<string> {
+async function kamelInternal(command: string, devMode: boolean, namespace : string): Promise<string> {
 	return new Promise( async (resolve, reject) => {
 		const bin = await baseKamelPath();
 		const binpath = bin.trim();
@@ -69,7 +69,7 @@ async function kamelInternal(command: string, devMode: boolean): Promise<string>
 			reject(new Error(`Apache Camel K CLI (kamel) unavailable`));
 			return;
 		}
-		const cmd = `${binpath} ${command}`;
+		const cmd = `${binpath} ${command} --namespace=${namespace}`;
 		const sr = exec(cmd);
 		if (sr) {
 			if (sr.stdout) {
@@ -92,11 +92,12 @@ async function kamelInternal(command: string, devMode: boolean): Promise<string>
 	});
 }
 
-async function kamelInternalArgs(args: string[], devMode: boolean, foldername?: string): Promise<child_process.ChildProcess> {
+async function kamelInternalArgs(args: string[], devMode: boolean, namespace: string, foldername?: string): Promise<child_process.ChildProcess> {
 	return new Promise( async (resolve, reject) => {
 		const bin : string = await baseKamelPath();
 		if (bin) {
 			const binpath = bin.trim();
+			args.push(`--namespace=${namespace}`);
 			let sr : child_process.ChildProcess;
 			if (foldername) {
 				sr = spawn(binpath, args, { cwd : foldername});

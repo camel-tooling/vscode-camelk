@@ -31,7 +31,7 @@ export interface Kubectl {
 }
 
 class KubectlImpl implements Kubectl {
-	namespace: string = 'default';
+	namespace: string = config.getNamespaceconfig() as string;
 	constructor() {
 	}
 	async getPath(): Promise<string> {
@@ -39,7 +39,7 @@ class KubectlImpl implements Kubectl {
 		return bin;
 	}
 	invokeArgs(args: string[], folderName?: string): Promise<child_process.ChildProcess> {
-		return kubectllInternalArgs(args, folderName);
+		return kubectllInternalArgs(args, this.namespace, folderName);
 	}
 	setNamespace(value: string): void {
 		this.namespace = value;
@@ -50,11 +50,12 @@ export function create() : Kubectl {
 	return new KubectlImpl();
 }
 
-async function kubectllInternalArgs(args: string[], foldername?: string): Promise<child_process.ChildProcess> {
+async function kubectllInternalArgs(args: string[], namespace: string, foldername?: string): Promise<child_process.ChildProcess> {
 	return new Promise( async (resolve, reject) => {
 		const bin : string = await baseKubectlPath();
 		if (bin) {
 			const binpath = bin.trim();
+			args.push(`--namespace=${namespace}`);
 			let sr : child_process.ChildProcess;
 			if (foldername) {
 				sr = spawn(binpath, args, { cwd : foldername});
