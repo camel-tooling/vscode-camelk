@@ -27,6 +27,7 @@ import { Errorable, failed } from './errorable';
 import * as kubectl from './kubectl';
 import * as kamel from './kamel';
 import * as kubectlutils from './kubectlutils';
+import * as config from './config';
 
 export let mainOutputChannel: vscode.OutputChannel;
 export let myStatusBarItem: vscode.StatusBarItem;
@@ -295,11 +296,11 @@ async function startListeningForServerChanges(): Promise<void> {
 }
 
 function applyStatusBarSettings(): void {
-	let statusBarSetting = vscode.workspace.getConfiguration().get('camelk.integrations.showStatusBarMessages') as boolean;
+	let statusBarSetting = vscode.workspace.getConfiguration().get(config.SHOW_STATUS_BAR_KEY) as boolean;
 	showStatusBar = statusBarSetting;
 
 	vscode.workspace.onDidChangeConfiguration(() => {
-		let statusBarSetting = vscode.workspace.getConfiguration().get('camelk.integrations.showStatusBarMessages') as boolean;
+		let statusBarSetting = vscode.workspace.getConfiguration().get(config.SHOW_STATUS_BAR_KEY) as boolean;
 		showStatusBar = statusBarSetting;
 		if (!showStatusBar) {
 			hideStatusLine();
@@ -307,8 +308,18 @@ function applyStatusBarSettings(): void {
 	});
 }
 
+function refreshIfNamespaceChanges(): void {
+	vscode.workspace.onDidChangeConfiguration(async () => {
+		if (camelKIntegrationsTreeView.visible === true) {
+			await camelKIntegrationsProvider.refresh().catch(err => console.log(err));
+		}
+	});
+}
+
+
 function applyUserSettings(): void {
 	applyStatusBarSettings();
+	refreshIfNamespaceChanges();
 }
 
 function createIntegrationsView(): void {

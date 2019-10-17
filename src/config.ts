@@ -22,6 +22,8 @@ export const EXTENSION_CONFIG_KEY = "camelk.tools";
 export const KAMEL_PATH_CONFIG_KEY = "camelk.tools.kamel-path";
 export const KUBERNETES_EXTENSION_CONFIG_KEY = "vs-kubernetes";
 export const KUBECTL_PATH_CONFIG_KEY = "vs-kubernetes.kubectl-path";
+export const NAMESPACE_KEY = "camelk.namespace";
+export const SHOW_STATUS_BAR_KEY = "camelk.integrations.showStatusBarMessages";
 
 export async function addKamelPathToConfig(value: string) : Promise<void> {
 	await setConfigValue(KAMEL_PATH_CONFIG_KEY, value);
@@ -130,4 +132,8 @@ export function getActiveKamelconfig(): string {
 
 export function getActiveKubectlconfig(): string {
 	return vscode.workspace.getConfiguration(KUBERNETES_EXTENSION_CONFIG_KEY)[KUBECTL_PATH_CONFIG_KEY];
+}
+
+export function getNamespaceconfig(): string {
+	return vscode.workspace.getConfiguration().get(NAMESPACE_KEY) as string;
 }

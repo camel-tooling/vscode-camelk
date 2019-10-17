@@ -20,6 +20,7 @@ import * as utils from './CamelKJSONUtils';
 import * as extension from './extension';
 import * as kubectlutils from './kubectlutils';
 import * as installer from './installer';
+import * as config from './config';
 
 export class CamelKNodeProvider implements vscode.TreeDataProvider<TreeNode> {
 
@@ -102,7 +103,8 @@ export class CamelKNodeProvider implements vscode.TreeDataProvider<TreeNode> {
 			this._onDidChangeTreeData.fire();
 			let newCount = this.treeNodes.length;
 			if (newCount === 0 && !inaccessible) {
-				utils.shareMessage(extension.mainOutputChannel, "Refreshing Apache Camel K Integrations view succeeded, no published integrations available.");
+				let namespace: string = config.getNamespaceconfig() as string;
+				utils.shareMessage(extension.mainOutputChannel, `Refreshing Apache Camel K Integrations view succeeded, no published integrations available for namespace ${namespace}.`);
 			}
 			resolve();
 		});
@@ -191,7 +193,9 @@ export class TreeNode extends vscode.TreeItem {
 		this.type = type;
 		this.status = status;
 		this.iconPath = this.getIconForPodStatus(this.status);
-		this.tooltip = `Status: ${this.status}`;
+
+		let namespace: string = config.getNamespaceconfig() as string;
+		this.tooltip = `Status: ${this.status} \nNamespace: ${namespace}`;
 	}
 
 	getIconForPodStatus(status: string):  object {

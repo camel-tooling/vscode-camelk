@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 import * as k8s from 'vscode-kubernetes-tools-api';
+import * as config from './config';
 
 export function isKubernetesAvailable(): Promise<boolean> {
 	return new Promise<boolean>( (resolve) => {
@@ -58,9 +59,9 @@ export function getNamedListFromKubernetes(itemType : string, extra? : string): 
 	});
 }
 
-export function getNamedListFromKubernetesThenParseList(itemType : string): Promise<string[]> {
+export function getNamedListFromKubernetesThenParseList(itemType : string, extra? : string): Promise<string[]> {
 	return new Promise<string[]>( (resolve, reject) => {
-		getNamedListFromKubernetes(itemType)
+		getNamedListFromKubernetes(itemType, extra)
 			.then ((result) => {
 				const itemList : string[] = parseShellResult(result);
 				resolve(itemList);
@@ -98,15 +99,18 @@ export function parseShellResult(output: string) : string[] {
 }
 
 export function getConfigMaps(): Promise<string[]> {
-	return getNamedListFromKubernetesThenParseList('configmap');
+	let namespace: string = config.getNamespaceconfig() as string;
+	return getNamedListFromKubernetesThenParseList('configmap', `--namespace=${namespace}`);
 }
 
 export function getSecrets(): Promise<string[]> {
-	return getNamedListFromKubernetesThenParseList('secret');
+	let namespace: string = config.getNamespaceconfig() as string;
+	return getNamedListFromKubernetesThenParseList('secret', `--namespace=${namespace}`);
 }
 
 export function getIntegrations(): Promise<string> {
-	return getNamedListFromKubernetes('integration');
+	let namespace: string = config.getNamespaceconfig() as string;
+	return getNamedListFromKubernetes('integration', `--namespace=${namespace}`);
 }
 
 export function getPodsFromKubectlCli() : Promise<string> {

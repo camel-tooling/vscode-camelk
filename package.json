@@ -52,6 +52,12 @@
 						"description": "Show Status Bar messages",
 						"scope": "window"
 					},
+					"camelk.namespace": {
+						"type": "string",
+						"default": "default",
+						"description": "Default namespace to use for all Apache Camel K operations",
+						"scope": "window"
+					},
 					"camelk.tools": {
 						"type": "object",
 						"description": "CLI locations",
