@@ -194,7 +194,7 @@ To access **Tooling for Apache Camel K** extension settings:
 Settings include:
 
 * **Show Status Bar Messages** - Indicates whether to show messages in the status bar to indicate when the system is updating, such as when the Camel K Integrations view is being refreshed or a new Integration is being deployed.
-* **Namespace** - The namespace of the Kubernetes Proxy. You can select one of  two values: default and syndesis. The namespace is used to assemble the complete proxy URL and is part of the API definition in Kubernetes.
+* **Namespace** - The namespace to be used for all Apache Camel K and Kubernetes operations. This defaults to `default` but can be set to whatever your namespace has been configured to in your runtime. When it is updated, the Apache Camel K Integrations view is refreshed automatically. (See [Changing the Namespace](#changing-the-namespace) below for a bit more detail.)
 
 ## Your First Integration
 
