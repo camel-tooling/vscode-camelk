@@ -193,20 +193,8 @@ To access **Tooling for Apache Camel K** extension settings:
 
 Settings include:
 
-* **Proxy Namespace** - The namespace of the Kubernetes Proxy. You can select one of  two values: default and syndesis. The namespace is used to assemble the complete proxy URL and is part of the API definition in Kubernetes.
-* **Proxy Port** - he port of the Proxy URL to be used for accessing Kubernetes via Rest APIs. The default is **8000**.
-* **Proxy URL** - The server proxy URL for your Kubernetes service. The default is **http://localhost**. You can change it to any appropriate service URL. This value is combined with the port to construct URLs at runtime when starting the proxy and using proxy calls.  For details on how to create the local proxy (i.e. 'kubectl proxy –port=8000'), see [Use an HTTP Proxy to Access the Kubernetes API)[https://kubernetes.io/docs/tasks/access-kubernetes-api/http-proxy-access-api/] and [Starting a local Kubernetes proxy](#starting-a-local-kubernetes-proxy).)
 * **Show Status Bar Messages** - Indicates whether to show messages in the status bar to indicate when the system is updating, such as when the Camel K Integrations view is being refreshed or a new Integration is being deployed.
-* **Use Proxy** - Determines whether the Camel K Integrations view retrieves the list of running integrations by using the local 'kubectl' application or by using the Kubernetes Rest API and calls through the Proxy URL/Namespace combination above. The ultimate URL becomes [proxyurl]/apis/camel.apache.org/v1alpha1/namespaces/[namespace]/integrations.
-
-## Starting a local Kubernetes proxy
-
-**Note:** This option is only available if you have the Minikube executable installed.
-
-1. In In the VS Code editor, open the command palette by pressing **Ctrl+Shift+P** or **F1**. 
-2. From the options, select **Apache Camel K: Start the Kubernetes proxy server**.
-
-A new Kubernetes proxy starts. It uses the Minikube executable (kubectl proxy --port=8000) and refreshes the Apache Camel K Integrations view immediately. This command creates a local proxy at the URL composed of the Proxy URL and Proxy Port set in the settings. For example, with the defaults, the proxy URL becomes **http://localhost:8000**.
+* **Namespace** - The namespace of the Kubernetes Proxy. You can select one of  two values: default and syndesis. The namespace is used to assemble the complete proxy URL and is part of the API definition in Kubernetes.
 
 ## Your First Integration
 
@@ -223,6 +211,18 @@ After your Apache Camel K/Minikube environment is running and you have installed
 9. Watch as your integration is updated and your new message begins to appear in the output channel. 
 
 ![Running Quickstart after Message Update](images/quickstart-console.jpg)
+
+## Changing the Namespace
+
+Updating the Namespace setting (see [Apache Camel K Extension Settings](#apache-camel-k-extension-settings)) changes the default namespace that the Apache Camel K and Kubernetes CLIs use when referencing the running system. By default, the namespace is set to **default**, but depending on your system you may change it to **syndesis** or some other namespace. 
+
+When you hover over a published integration, you can now see what namespace is being used to populate the Apache Camel K Integrations view.
+
+![Apache Camel K Integrations view - Namespace Tooltip](images/camelk-integrations-view-status-tooltip-2.jpg)
+
+And if there are no published integrations available, you may see a message in the Apache Camel K output channel such as "`Refreshing Apache Camel K Integrations view succeeded, no published integrations available for namespace mynamespace.`" 
+
+If any change is made to the namespace setting, the view will refresh accordingly.
 
 ## Known Issues
 
