@@ -310,7 +310,7 @@ function applyStatusBarSettings(): void {
 
 function refreshIfNamespaceChanges(): void {
 	vscode.workspace.onDidChangeConfiguration(async () => {
-		if (camelKIntegrationsTreeView.visible === true) {
+		if (camelKIntegrationsTreeView && camelKIntegrationsTreeView.visible === true) {
 			await camelKIntegrationsProvider.refresh().catch(err => console.log(err));
 		}
 	});
