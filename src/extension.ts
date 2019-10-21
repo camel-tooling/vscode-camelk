@@ -406,8 +406,14 @@ function handleLogViaKubectlCli(podName: string) : Promise<string> {
 					});
 				}
 				if (runKubectl.stderr) {
-					runKubectl.stderr.on('data', function (data) {
-						mainOutputChannel.append("[ERROR] " + `${data} \n`);
+					runKubectl.stderr.on('data', async function (data) {
+						let tempData = data as string;
+						if (tempData.indexOf(`waiting to start: ContainerCreating`) > 0) {
+							podOutputChannel.append(`Waiting for container ${podName} to start...\n`);
+							await utils.delay(5000).then( async () => await handleLogViaKubectlCli(podName));
+						} else {
+							podOutputChannel.append("[ERROR] " + `${data} \n`);
+						}
 					});
 				}
 				runKubectl.on("close", (code, signal) => {
