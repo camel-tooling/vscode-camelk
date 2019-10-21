@@ -87,7 +87,7 @@ export class CamelKNodeProvider implements vscode.TreeDataProvider<TreeNode> {
 			if (this.retrieveIntegrations) {
 				await installer.isKamelAvailable()
 					.then( async () => {
-						await Promise.resolve(this.getIntegrationsFromKubectl())
+						return await Promise.resolve(this.getIntegrationsFromKubectl())
 							.then((output) => {
 								this.processIntegrationList(output);
 							});
