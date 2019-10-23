@@ -125,29 +125,26 @@ export async function installKamel(context: vscode.ExtensionContext): Promise<Er
 	console.log(`Downloading Apache Camel K CLI to ${installFolder}`);
 	mkdirp.sync(installFolder);
 
-	const kamelUrl = `https://github.com/apache/camel-k/releases/download/${version}/camel-k-client-${versionToUse}-${platformString}-64bit.tar.gz`;
+	const kamelUrl = `https://github.com/apache/camel-k/releases/download/${versionToUse}/camel-k-client-${versionToUse}-${platformString}-64bit.tar.gz`;
 	const downloadFile = path.join(installFolder, binFile);
 
 	extension.shareMessageInMainOutputChannel(`Downloading kamel cli tool from ${kamelUrl} to ${downloadFile}`);
 
-	await grabTarGzAndUnGZ(kamelUrl, installFolder).then( async (flag) => {
+	await grabTarGzAndUnGZ(kamelUrl, installFolder)
+	.then( async (flag) => {
 		console.log(`Downloaded ${downloadFile} successfully: ${flag}`);
-		try {
-			if (fs.existsSync(downloadFile)) {
-				if (shell.isUnix()) {
-					fs.chmodSync(downloadFile, '0777');
-				}
-				await config.addKamelPathToConfig(downloadFile);
+		if (fs.existsSync(downloadFile)) {
+			if (shell.isUnix()) {
+				fs.chmodSync(downloadFile, '0700');
 			}
-		  } catch(err) {
-			console.error(err);
-			return { succeeded: false, error: [`Failed to download kamel: ${err}`] };
-		  }
+			await config.addKamelPathToConfig(downloadFile);
+		}
 	})
 	.catch ( (error) => {
 		console.log(error);
 		return { succeeded: false, error: [`Failed to download kamel: ${error}`] };
 	});
+
 	return { succeeded: true, result: null };
 }
 
@@ -155,18 +152,21 @@ function getInstallFolder(tool: string, context : vscode.ExtensionContext): stri
 	return path.join(context.globalStoragePath, `camelk/tools/${tool}`);
 }
 
-async function grabTarGzAndUnGZ(fileUrl: string, directory: string) : Promise<boolean>{
+function grabTarGzAndUnGZ(fileUrl: string, directory: string) : Promise<boolean>{
 	return new Promise<boolean>( (resolve, reject) => {
-		downloadTarball({
-			url: fileUrl,
-			dir: directory
-		  }).then(() => {
-			resolve(true);
-			return;
-		  }).catch( (err: any) => {
-			  reject(err);
-			  return;
-		  });
+		try {
+			return downloadTarball({
+				url: fileUrl,
+				dir: directory
+			  }).then(() => {
+				resolve(true);
+			  }).catch( (err: any) => {
+				  reject(err);
+			  });
+		} catch (err) {
+			console.error(err);
+			reject(err);
+		}
 	});
 }
 
@@ -180,7 +180,7 @@ async function getLatestCamelKVersion(): Promise<Errorable<string>> {
 	let latestJSON = JSON.parse(rawtext);
 	let tagName = latestJSON.tag_name;
 	if (tagName) {
-		return { succeeded: true, result: tagName };		
+		return { succeeded: true, result: tagName };
 	}
 	return { succeeded: false, error: [`Failed to retrieve latest Apache Camel K version tag from : ${latestURL}`] };
 }
