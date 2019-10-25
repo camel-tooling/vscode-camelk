@@ -69,7 +69,10 @@ async function kamelInternal(command: string, devMode: boolean, namespace : stri
 			reject(new Error(`Apache Camel K CLI (kamel) unavailable`));
 			return;
 		}
-		const cmd = `${binpath} ${command} --namespace=${namespace}`;
+		let cmd = `${binpath} ${command}`;
+		if (namespace) {
+			cmd += ` --namespace=${namespace}`;
+		}
 		const sr = exec(cmd);
 		if (sr) {
 			if (sr.stdout) {

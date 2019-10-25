@@ -100,17 +100,29 @@ export function parseShellResult(output: string) : string[] {
 
 export function getConfigMaps(): Promise<string[]> {
 	let namespace: string = config.getNamespaceconfig() as string;
-	return getNamedListFromKubernetesThenParseList('configmap', `--namespace=${namespace}`);
+	if (namespace) {
+		return getNamedListFromKubernetesThenParseList('configmap', `--namespace=${namespace}`);
+	} else {
+		return getNamedListFromKubernetesThenParseList('configmap');
+	}
 }
 
 export function getSecrets(): Promise<string[]> {
 	let namespace: string = config.getNamespaceconfig() as string;
-	return getNamedListFromKubernetesThenParseList('secret', `--namespace=${namespace}`);
+	if (namespace) {
+		return getNamedListFromKubernetesThenParseList('secret', `--namespace=${namespace}`);
+	} else {
+		return getNamedListFromKubernetesThenParseList('secret');
+	}
 }
 
 export function getIntegrations(): Promise<string> {
 	let namespace: string = config.getNamespaceconfig() as string;
-	return getNamedListFromKubernetes('integration', `--namespace=${namespace}`);
+	if (namespace) {
+		return getNamedListFromKubernetes('integration', `--namespace=${namespace}`);
+	} else {
+		return getNamedListFromKubernetes('integration');
+	}
 }
 
 export function getPodsFromKubectlCli() : Promise<string> {

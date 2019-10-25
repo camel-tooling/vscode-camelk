@@ -104,7 +104,11 @@ export class CamelKNodeProvider implements vscode.TreeDataProvider<TreeNode> {
 			let newCount = this.treeNodes.length;
 			if (newCount === 0 && !inaccessible) {
 				let namespace: string = config.getNamespaceconfig() as string;
-				utils.shareMessage(extension.mainOutputChannel, `Refreshing Apache Camel K Integrations view succeeded, no published integrations available for namespace ${namespace}.`);
+				if (namespace) {
+					utils.shareMessage(extension.mainOutputChannel, `Refreshing Apache Camel K Integrations view succeeded, no published integrations available for namespace ${namespace}.`);
+				} else {
+					utils.shareMessage(extension.mainOutputChannel, `Refreshing Apache Camel K Integrations view succeeded, no published integrations available.`);
+				}
 			}
 			resolve();
 		});
@@ -195,7 +199,11 @@ export class TreeNode extends vscode.TreeItem {
 		this.iconPath = this.getIconForPodStatus(this.status);
 
 		let namespace: string = config.getNamespaceconfig() as string;
-		this.tooltip = `Status: ${this.status} \nNamespace: ${namespace}`;
+		if (namespace) {
+			this.tooltip = `Status: ${this.status} \nNamespace: ${namespace}`;
+		} else {
+			this.tooltip = `Status: ${this.status}`;
+		}
 	}
 
 	getIconForPodStatus(status: string):  object {

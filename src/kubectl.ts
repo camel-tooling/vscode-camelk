@@ -55,7 +55,9 @@ async function kubectllInternalArgs(args: string[], namespace: string, foldernam
 		const bin : string = await baseKubectlPath();
 		if (bin) {
 			const binpath = bin.trim();
-			args.push(`--namespace=${namespace}`);
+			if (namespace) {
+				args.push(`--namespace=${namespace}`);
+			}
 			let sr : child_process.ChildProcess;
 			if (foldername) {
 				sr = spawn(binpath, args, { cwd : foldername});
