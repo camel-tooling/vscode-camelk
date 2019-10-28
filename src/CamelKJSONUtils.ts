@@ -16,7 +16,6 @@
  */
 import * as fs from 'fs';
 import * as vscode from 'vscode';
-import * as http from "http";
 
 const camelAPIVersion = "v1alpha1";
 
@@ -60,20 +59,6 @@ export function createCamelKDeployJSON( name:string, fileContent:string, fileNam
 export function delay (amount : number) {
 	return new Promise((resolve, reject) => {
 		setTimeout(resolve, amount);
-	});
-}
-
-export function pingTheURL(urlString: string) : Promise<boolean> {
-	return new Promise<boolean>( (resolve, reject) => {
-		http.get(urlString, ( result ) => {
-			if (result && result.statusCode === 200) {
-				resolve(true);
-			} else {
-				reject(result.statusCode);
-			}
-		}).on('error', (e) => {
-			reject(e);
-		});
 	});
 }
 
