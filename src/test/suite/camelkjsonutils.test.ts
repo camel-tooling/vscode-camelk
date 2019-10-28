@@ -53,29 +53,6 @@ suite('ensure camelk utilities work as expected', function() {
 		});
 	});
 
-	test('should be able to ping accessible server', function(done) {
-		utils.pingTheURL('http://www.google.com').then(
-			(result) => {
-				console.log('ping output = ' + result);
-				assert.equal(result, true);
-				done();
-			}
-		);
-	});
-
-	test('should be able to fail ping of inaccessible server', function(done) {
-		utils.pingTheURL('http://www.googleinaccesible.invalidurl').then(
-			(result) => {
-				assert.fail('Should not have made it here');
-				done(result);
-			}
-		).catch( (error) => {
-			console.log('ping output = ' + error);
-			assert.ok(error);
-			done();
-		});
-	});
-
 	test('test kebab case utility', function(done) {
 
 		// based loosely on https://github.com/apache/camel-k/blob/master/pkg/util/kubernetes/sanitize_test.go
