@@ -60,7 +60,11 @@ suite('ensure camelk utilities work as expected', function() {
 				assert.equal(result, true);
 				done();
 			}
-		);
+		).catch( (error) => {
+			console.log('ping output = ' + error);
+			assert.fail(error);
+			done();
+		});
 	});
 
 	test('should be able to fail ping of inaccessible server', function(done) {
