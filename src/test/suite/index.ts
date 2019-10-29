@@ -18,9 +18,10 @@ export function run(): Promise<void> {
 	// Create the mocha test
 	const mocha = new Mocha({
 		ui: 'tdd',
-		timeout: 20000
+		timeout: 20000,
+		reporter: 'mocha-jenkins-reporter',
+		useColors: true
 	});
-	mocha.useColors(true);
 	
 	const testsRoot = path.resolve(__dirname, '..');
 	console.log(`testsRoot = ${testsRoot}`);
