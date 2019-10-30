@@ -103,8 +103,12 @@ export class CamelKNodeProvider implements vscode.TreeDataProvider<TreeNode> {
 			this._onDidChangeTreeData.fire();
 			let newCount = this.treeNodes.length;
 			if (newCount === 0 && !inaccessible) {
-				let namespace: string = config.getNamespaceconfig() as string;
-				utils.shareMessage(extension.mainOutputChannel, `Refreshing Apache Camel K Integrations view succeeded, no published integrations available for namespace ${namespace}.`);
+				let namespace : string | undefined = config.getNamespaceconfig();
+				if (namespace) {
+					utils.shareMessage(extension.mainOutputChannel, `Refreshing Apache Camel K Integrations view succeeded, no published integrations available for namespace ${namespace}.`);
+				} else {
+					utils.shareMessage(extension.mainOutputChannel, `Refreshing Apache Camel K Integrations view succeeded, no published integrations available.`);
+				}
 			}
 			resolve();
 		});

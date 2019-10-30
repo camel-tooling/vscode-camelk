@@ -54,8 +54,7 @@
 					},
 					"camelk.namespace": {
 						"type": "string",
-						"default": "default",
-						"description": "Default namespace to use for all Apache Camel K operations",
+						"description": "Default namespace to use for all Apache Camel K operations. When empty, it uses the runtime namespace",
 						"scope": "window"
 					},
 					"camelk.tools": {
@@ -64,7 +63,7 @@
 						"properties": {
 							"camelk.tools.kamel-path": {
 								"type": "string",
-								"description": "File path to a kamel binary."
+								"description": "File path to a kamel binary"
 							}
 						}
 					},

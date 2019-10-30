@@ -134,6 +134,15 @@ export function getActiveKubectlconfig(): string {
 	return vscode.workspace.getConfiguration(KUBERNETES_EXTENSION_CONFIG_KEY)[KUBECTL_PATH_CONFIG_KEY];
 }
 
-export function getNamespaceconfig(): string {
-	return vscode.workspace.getConfiguration().get(NAMESPACE_KEY) as string;
+export async function addNamespaceToConfig(value: string | undefined): Promise<void> {
+	await vscode.workspace.getConfiguration().update(NAMESPACE_KEY, value, true);
+//	return await setConfigValue(NAMESPACE_KEY, value);
+}
+
+export function getNamespaceconfig(): string | undefined {
+	const namespace : string | undefined = vscode.workspace.getConfiguration().get(NAMESPACE_KEY);
+	if (!namespace ||namespace.length === 0) {
+		return undefined;
+	}
+	return namespace as string;
 }
