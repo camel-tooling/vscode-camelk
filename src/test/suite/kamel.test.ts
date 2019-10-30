@@ -23,9 +23,12 @@ import * as kubectlutils from '../../kubectlutils';
 suite("ensure kamel and kubectl are available", function() {
 
     test("ensure can activate kamel cli", function(done) {
-		installer.isKamelAvailable().then( (returnedText) => {
-			if (returnedText) {
+		installer.isKamelAvailable().then( (flag) => {
+			if (flag) {
 				assert.ok('kamel is available.');
+				done();
+			} else {
+				assert.fail(`kamel is not available - nothing returned`);	
 				done();
 			}
 		}).catch ( (error) => {

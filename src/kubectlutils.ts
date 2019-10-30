@@ -99,7 +99,7 @@ export function parseShellResult(output: string) : string[] {
 }
 
 export function getConfigMaps(): Promise<string[]> {
-	let namespace: string = config.getNamespaceconfig() as string;
+	let namespace: string | undefined = config.getNamespaceconfig();
 	if (namespace) {
 		return getNamedListFromKubernetesThenParseList('configmap', `--namespace=${namespace}`);
 	} else {
@@ -108,7 +108,7 @@ export function getConfigMaps(): Promise<string[]> {
 }
 
 export function getSecrets(): Promise<string[]> {
-	let namespace: string = config.getNamespaceconfig() as string;
+	let namespace: string | undefined = config.getNamespaceconfig();
 	if (namespace) {
 		return getNamedListFromKubernetesThenParseList('secret', `--namespace=${namespace}`);
 	} else {
@@ -117,7 +117,7 @@ export function getSecrets(): Promise<string[]> {
 }
 
 export function getIntegrations(): Promise<string> {
-	let namespace: string = config.getNamespaceconfig() as string;
+	let namespace: string | undefined = config.getNamespaceconfig();
 	if (namespace) {
 		return getNamedListFromKubernetes('integration', `--namespace=${namespace}`);
 	} else {

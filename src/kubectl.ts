@@ -24,14 +24,14 @@ import * as extension from './extension';
 import * as path from 'path';
 
 export interface Kubectl {
-	namespace: string;
+	namespace: string | undefined;
 	getPath() : Promise<string>;
 	invokeArgs(args: string[], folderName?: string): Promise<child_process.ChildProcess>;
 	setNamespace(value: string): void;
 }
 
 class KubectlImpl implements Kubectl {
-	namespace: string = config.getNamespaceconfig() as string;
+	namespace: string | undefined = config.getNamespaceconfig();
 	constructor() {
 	}
 	async getPath(): Promise<string> {
@@ -50,7 +50,7 @@ export function create() : Kubectl {
 	return new KubectlImpl();
 }
 
-async function kubectllInternalArgs(args: string[], namespace: string, foldername?: string): Promise<child_process.ChildProcess> {
+async function kubectllInternalArgs(args: string[], namespace: string | undefined, foldername?: string): Promise<child_process.ChildProcess> {
 	return new Promise( async (resolve, reject) => {
 		const bin : string = await baseKubectlPath();
 		if (bin) {
