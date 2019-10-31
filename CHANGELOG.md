@@ -2,6 +2,10 @@
 
 All notable changes to the "vscode-camelk" extension will be documented in this file.
 
+## 0.0.11
+
+- TBD
+
 ## 0.0.10
 
 - Remove Rest Proxy functionality
