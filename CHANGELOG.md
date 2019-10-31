@@ -2,6 +2,14 @@
 
 All notable changes to the "vscode-camelk" extension will be documented in this file.
 
+## 0.0.10
+
+- Remove Rest Proxy functionality
+- Automatically download the kubectl and kamel CLI tools 
+- Clean up underlying code to consistently call kubectl and kamel for all actions
+- Add optional namespace support
+- Update several NPM versions and fix any security vulnerabilities
+
 ## 0.0.9
 
 - Add ability to deploy integrations associated with Resource files
