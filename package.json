@@ -54,8 +54,7 @@
 					},
 					"camelk.namespace": {
 						"type": "string",
-						"default": "default",
-						"description": "Default namespace to use for all Apache Camel K operations",
+						"description": "Default namespace to use for all Apache Camel K operations. If blank, uses system default",
 						"scope": "window"
 					},
 					"camelk.tools": {

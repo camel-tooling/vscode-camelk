@@ -26,7 +26,7 @@ import * as shell from './shell';
 
 export interface Kamel {
 	devMode : boolean;
-	namespace: string;
+	namespace: string | undefined;
 	getPath() : Promise<string>;
 	invoke(command: string): Promise<string>;
 	invokeArgs(args: string[], folderName?: string): Promise<child_process.ChildProcess>;
@@ -36,7 +36,7 @@ export interface Kamel {
 
 class KamelImpl implements Kamel {
 	devMode : boolean = false;
-	namespace: string = config.getNamespaceconfig() as string;
+	namespace: string | undefined = config.getNamespaceconfig();
 	constructor() {
 	}
 	async getPath(): Promise<string> {
@@ -61,7 +61,15 @@ export function create() : Kamel {
 	return new KamelImpl();
 }
 
-async function kamelInternal(command: string, devMode: boolean, namespace : string): Promise<string> {
+export function getBaseCmd(binpath: string, command: string, namespace : string | undefined) : string {
+	let cmd = `${binpath} ${command}`;
+	if (namespace) {
+		 cmd += ` --namespace=${namespace}`;
+	}
+	return cmd;
+}
+
+async function kamelInternal(command: string, devMode: boolean, namespace : string | undefined): Promise<string> {
 	return new Promise( async (resolve, reject) => {
 		const bin = await baseKamelPath();
 		const binpath = bin.trim();
@@ -69,7 +77,7 @@ async function kamelInternal(command: string, devMode: boolean, namespace : stri
 			reject(new Error(`Apache Camel K CLI (kamel) unavailable`));
 			return;
 		}
-		const cmd = `${binpath} ${command} --namespace=${namespace}`;
+		const cmd = getBaseCmd(binpath, command, namespace);
 		const sr = exec(cmd);
 		if (sr) {
 			if (sr.stdout) {
@@ -92,12 +100,14 @@ async function kamelInternal(command: string, devMode: boolean, namespace : stri
 	});
 }
 
-async function kamelInternalArgs(args: string[], devMode: boolean, namespace: string, foldername?: string): Promise<child_process.ChildProcess> {
+async function kamelInternalArgs(args: string[], devMode: boolean, namespace: string | undefined, foldername?: string): Promise<child_process.ChildProcess> {
 	return new Promise( async (resolve, reject) => {
 		const bin : string = await baseKamelPath();
 		if (bin) {
 			const binpath = bin.trim();
-			args.push(`--namespace=${namespace}`);
+			if (namespace) {
+				args.push(`--namespace=${namespace}`);
+			}
 			let sr : child_process.ChildProcess;
 			if (foldername) {
 				sr = spawn(binpath, args, { cwd : foldername});
