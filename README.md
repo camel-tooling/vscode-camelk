@@ -214,9 +214,9 @@ After your Apache Camel K/Minikube environment is running and you have installed
 
 ## Changing the Namespace
 
-Updating the Namespace setting (see [Apache Camel K Extension Settings](#apache-camel-k-extension-settings)) changes the default namespace that the Apache Camel K and Kubernetes CLIs use when referencing the running system. By default, the namespace is set to **default**, but depending on your system you may change it to **syndesis** or some other namespace. 
+Updating the Namespace setting (see [Apache Camel K Extension Settings](#apache-camel-k-extension-settings)) changes the default namespace that the Apache Camel K and Kubernetes CLIs use when referencing the running system. By default, the namespace is set to the system default when the field is blank, but depending on your system you may change it to some other namespace. 
 
-When you hover over a published integration, you can now see what namespace is being used to populate the Apache Camel K Integrations view.
+When you hover over a published integration and the namespace setting is set, you can now see what namespace is being used to populate the Apache Camel K Integrations view.
 
 ![Apache Camel K Integrations view - Namespace Tooltip](images/camelk-integrations-view-status-tooltip-2.jpg)
 
