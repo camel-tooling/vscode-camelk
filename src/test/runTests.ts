@@ -5,7 +5,7 @@ import { downloadAndUnzipVSCode, resolveCliPathFromVSCodeExecutablePath, runTest
 
 async function main() : Promise<void> {
 	try {
-		const extensionDevelopmentPath : string = path.resolve(__dirname, '../../');
+		const extensionDevelopmentPath : string = path.resolve(__dirname, '../../../');
 		console.log(`extensionDevelopmentPath = ${extensionDevelopmentPath}`);
         const extensionTestsPath : string = path.resolve(__dirname, './suite/index');
 		console.log(`extensionTestsPath = ${extensionTestsPath}`);
