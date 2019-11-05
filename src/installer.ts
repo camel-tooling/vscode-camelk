@@ -28,7 +28,6 @@ import * as vscode from 'vscode';
 import * as kubectlutils from './kubectlutils';
 import * as downloader from './downloader';
 import * as download from 'download';
-import decompress = require('decompress');
 
 export const kamel = 'kamel';
 export const kamel_windows = 'kamel.exe';
@@ -99,37 +98,41 @@ export function getPlatform() : string | undefined {
     return undefined;
 }
 
-async function downloadAndExtract(link : string, dlFilename: string, installFolder : string, extract? : boolean) : Promise<boolean> {
+async function downloadAndExtract(link : string, dlFilename: string, installFolder : string, extractFlag : boolean) : Promise<boolean> {
+	let myStatusBarItem: vscode.StatusBarItem;
+	myStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 100);
+
 	const downloadSettings = {
         filename: `${dlFilename}`,
-        extract: true,
+        extract: extractFlag,
 	  };
 	extension.mainOutputChannel.appendLine('Downloading from: ' + link);
 	await download(link, installFolder, downloadSettings)
 		.on('response', (response) => {
 			extension.mainOutputChannel.appendLine(`Bytes to transfer: ${response.headers['content-length']}`);
 		}).on('downloadProgress', (progress) => {
-			extension.mainOutputChannel.appendLine(`Bytes transferred: ${progress.transferred}`);
+			let incr = progress.total > 0 ? Math.floor(progress.transferred / progress.total * 100) : 0;
+			let percent = Math.round(incr);
+			let message = `Download progress: ${progress.transferred} / ${progress.total} (${percent}%)`;
+			updateStatusBarItem(myStatusBarItem, message);
 		}).then(async () => {
 			extension.mainOutputChannel.appendLine(`Downloaded ${dlFilename}.`);
-			if (extract) {
-				extension.mainOutputChannel.appendLine(`Decompressing ${dlFilename}.`);
-				await decompress(dlFilename, installFolder).then(() => {
-					extension.mainOutputChannel.appendLine('done extracting!');
-					return true;
-				}).catch((error) => {
-					console.log(error);
-					return false;
-				});
-			} else {
-				extension.mainOutputChannel.appendLine('done!');
-				return true;
-			}
+			myStatusBarItem.dispose();
+			return true;
 		}).catch((error) => {
 			console.log(error);
-			return false;
 		});
+	myStatusBarItem.dispose();
 	return false;
+}
+
+function updateStatusBarItem(sbItem : vscode.StatusBarItem, text: string): void {
+	if (text) {
+		sbItem.text = text;
+		sbItem.show();
+	} else {
+		sbItem.hide();
+	}
 }
 
 export async function installKamel(context: vscode.ExtensionContext): Promise<Errorable<null>> {
@@ -165,7 +168,6 @@ export async function installKamel(context: vscode.ExtensionContext): Promise<Er
 	extension.shareMessageInMainOutputChannel(`Downloading kamel cli tool from ${kamelUrl} to ${downloadFile}`);
 
 	await downloadAndExtract(kamelUrl, kamelCliFile, installFolder, true)
-	// await grabTarGzAndUnGZ(kamelUrl, installFolder)
 	.then( async (flag) => {
 	 	console.log(`Downloaded ${downloadFile} successfully: ${flag}`);
 	 	if (fs.existsSync(downloadFile)) {
@@ -260,7 +262,7 @@ export async function installKubectl(context: vscode.ExtensionContext): Promise<
 	await config.addKubectlPathToConfig(downloadFile);
 
 	if (shell.isUnix()) {
-		fs.chmodSync(downloadFile, '0777');
+		fs.chmodSync(downloadFile, '0700');
 	}
 
 	return { succeeded: true, result: null };

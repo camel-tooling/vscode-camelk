@@ -217,7 +217,6 @@
 		"@types/shelljs": "^0.8.6",
 		"@types/tmp": "^0.1.0",
 		"child_process": "^1.0.2",
-		"decompress": "^4.2.0",
 		"download": "^7.1.0",
 		"path": "^0.12.7",
 		"request": "^2.88.0",
