@@ -208,7 +208,7 @@
 	],
 	"dependencies": {
 		"@types/request-promise": "^4.1.44",
-		"@types/shelljs": "^0.8.5",
+		"@types/shelljs": "^0.8.6",
 		"@types/tmp": "^0.1.0",
 		"child_process": "^1.0.2",
 		"download": "^7.1.0",
