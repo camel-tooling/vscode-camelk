@@ -27,12 +27,12 @@ import * as shell from './shell';
 import * as vscode from 'vscode';
 import * as kubectlutils from './kubectlutils';
 import * as downloader from './downloader';
-
-const downloadTarball = require('download-tarball');
+import * as download from 'download';
+import decompress = require('decompress');
 
 export const kamel = 'kamel';
 export const kamel_windows = 'kamel.exe';
-export const version = '1.0.0-M2'; //need to retrieve this if possible, but have a default
+export const version = '1.0.0-M3'; //need to retrieve this if possible, but have a default
 export const PLATFORM_WINDOWS = 'windows';
 export const PLATFORM_MAC = 'mac';
 export const PLATFORM_LINUX = 'linux';
@@ -99,6 +99,39 @@ export function getPlatform() : string | undefined {
     return undefined;
 }
 
+async function downloadAndExtract(link : string, dlFilename: string, installFolder : string, extract? : boolean) : Promise<boolean> {
+	const downloadSettings = {
+        filename: `${dlFilename}`,
+        extract: true,
+	  };
+	extension.mainOutputChannel.appendLine('Downloading from: ' + link);
+	await download(link, installFolder, downloadSettings)
+		.on('response', (response) => {
+			extension.mainOutputChannel.appendLine(`Bytes to transfer: ${response.headers['content-length']}`);
+		}).on('downloadProgress', (progress) => {
+			extension.mainOutputChannel.appendLine(`Bytes transferred: ${progress.transferred}`);
+		}).then(async () => {
+			extension.mainOutputChannel.appendLine(`Downloaded ${dlFilename}.`);
+			if (extract) {
+				extension.mainOutputChannel.appendLine(`Decompressing ${dlFilename}.`);
+				await decompress(dlFilename, installFolder).then(() => {
+					extension.mainOutputChannel.appendLine('done extracting!');
+					return true;
+				}).catch((error) => {
+					console.log(error);
+					return false;
+				});
+			} else {
+				extension.mainOutputChannel.appendLine('done!');
+				return true;
+			}
+		}).catch((error) => {
+			console.log(error);
+			return false;
+		});
+	return false;
+}
+
 export async function installKamel(context: vscode.ExtensionContext): Promise<Errorable<null>> {
 	const latestversion = await getLatestCamelKVersion();
 	if (failed(latestversion)) {
@@ -126,19 +159,21 @@ export async function installKamel(context: vscode.ExtensionContext): Promise<Er
 	mkdirp.sync(installFolder);
 
 	const kamelUrl = `https://github.com/apache/camel-k/releases/download/${versionToUse}/camel-k-client-${versionToUse}-${platformString}-64bit.tar.gz`;
+	const kamelCliFile = `camel-k-client-${versionToUse}-${platformString}-64bit.tar.gz`;
 	const downloadFile = path.join(installFolder, binFile);
 
 	extension.shareMessageInMainOutputChannel(`Downloading kamel cli tool from ${kamelUrl} to ${downloadFile}`);
 
-	await grabTarGzAndUnGZ(kamelUrl, installFolder)
+	await downloadAndExtract(kamelUrl, kamelCliFile, installFolder, true)
+	// await grabTarGzAndUnGZ(kamelUrl, installFolder)
 	.then( async (flag) => {
-		console.log(`Downloaded ${downloadFile} successfully: ${flag}`);
-		if (fs.existsSync(downloadFile)) {
-			if (shell.isUnix()) {
-				fs.chmodSync(downloadFile, '0700');
-			}
-			await config.addKamelPathToConfig(downloadFile);
-		}
+	 	console.log(`Downloaded ${downloadFile} successfully: ${flag}`);
+	 	if (fs.existsSync(downloadFile)) {
+	 		if (shell.isUnix()) {
+	 			fs.chmodSync(downloadFile, '0700');
+	 		}
+	 		await config.addKamelPathToConfig(downloadFile);
+	 	}
 	})
 	.catch ( (error) => {
 		console.log(error);
@@ -150,24 +185,6 @@ export async function installKamel(context: vscode.ExtensionContext): Promise<Er
 
 function getInstallFolder(tool: string, context : vscode.ExtensionContext): string {
 	return path.join(context.globalStoragePath, `camelk/tools/${tool}`);
-}
-
-function grabTarGzAndUnGZ(fileUrl: string, directory: string) : Promise<boolean>{
-	return new Promise<boolean>( (resolve, reject) => {
-		try {
-			return downloadTarball({
-				url: fileUrl,
-				dir: directory
-			  }).then(() => {
-				resolve(true);
-			  }).catch( (err: any) => {
-				  reject(err);
-			  });
-		} catch (err) {
-			console.error(err);
-			reject(err);
-		}
-	});
 }
 
 async function getLatestCamelKVersion(): Promise<Errorable<string>> {
@@ -233,10 +250,13 @@ export async function installKubectl(context: vscode.ExtensionContext): Promise<
 
 	extension.shareMessageInMainOutputChannel(`Downloading Kubernetes cli tool from ${kubectlUrl} to ${downloadFile}`);
 
-	const downloadResult = await downloader.to(kubectlUrl, downloadFile);
-	if (failed(downloadResult)) {
-		return { succeeded: false, error: [`Failed to download kubectl: ${downloadResult.error[0]}`] };
-	}
+	await downloadAndExtract(kubectlUrl, binFile, installFolder, true)
+	.then( async (flag) => {
+		console.log(`Downloaded ${downloadFile} successfully: ${flag}`);
+	}).catch ( (error) => {
+		console.log(error);
+		return { succeeded: false, error: [`Failed to download kubectl: ${error}`] };
+	});
 	await config.addKubectlPathToConfig(downloadFile);
 
 	if (shell.isUnix()) {

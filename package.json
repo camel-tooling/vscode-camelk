@@ -186,6 +186,7 @@
 	},
 	"devDependencies": {
 		"@types/chai": "^4.2.4",
+		"@types/download": "^6.2.4",
 		"@types/glob": "^7.1.1",
 		"@types/mkdirp": "^0.5.2",
 		"@types/mocha": "^5.2.7",
@@ -216,8 +217,8 @@
 		"@types/shelljs": "^0.8.6",
 		"@types/tmp": "^0.1.0",
 		"child_process": "^1.0.2",
+		"decompress": "^4.2.0",
 		"download": "^7.1.0",
-		"download-tarball": "^2.0.0",
 		"path": "^0.12.7",
 		"request": "^2.88.0",
 		"request-promise": "^4.2.5",
