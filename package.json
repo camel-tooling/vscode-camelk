@@ -215,7 +215,7 @@
 		"download-tarball": "^2.0.0",
 		"path": "^0.12.7",
 		"request": "^2.88.0",
-		"request-promise": "^4.2.4",
+		"request-promise": "^4.2.5",
 		"shelljs": "^0.8.3",
 		"tar": "^5.0.5",
 		"tmp": "^0.1.0",
