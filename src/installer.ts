@@ -99,19 +99,43 @@ export function getPlatform() : string | undefined {
     return undefined;
 }
 
-async function downloadAndExtract(link : string, dlFilename: string, installFolder : string, extract? : boolean) : Promise<boolean> {
-	const downloadSettings = {
-        filename: `${dlFilename}`,
-        extract: true,
-	  };
-	extension.mainOutputChannel.appendLine('Downloading from: ' + link);
-	await download(link, installFolder, downloadSettings)
-		.on('response', (response) => {
-			extension.mainOutputChannel.appendLine(`Bytes to transfer: ${response.headers['content-length']}`);
-		}).on('downloadProgress', (progress) => {
-			extension.mainOutputChannel.appendLine(`Bytes transferred: ${progress.transferred}`);
-		}).then(async () => {
-			extension.mainOutputChannel.appendLine(`Downloaded ${dlFilename}.`);
+async function downloadFileWithProgress(link : string, dlFilename: string, installFolder : string) : Promise<boolean> {
+	return new Promise(async (resolve) => {
+		const downloadSettings = {
+			filename: `${dlFilename}`
+		  };
+		extension.mainOutputChannel.appendLine('Downloading from: ' + link);
+		let progressTitle : string = `Download (${dlFilename})`;
+		let percent = 0;
+		let transferred = 0;
+		vscode.window.withProgress({
+			location: vscode.ProgressLocation.Notification,
+			title: progressTitle,
+			cancellable: false
+		}, async (progress) => {
+			progress.report({ increment: 0 });
+			await download(link, installFolder, downloadSettings)
+				.on('response', (response) => {
+					extension.mainOutputChannel.appendLine(`Bytes to transfer: ${response.headers['content-length']}`);
+				}).on('downloadProgress', (progressamt) => {
+					if (percent < Math.floor(progressamt.percent * 100)) {
+						percent = Math.floor(progressamt.percent * 100);
+						let incr = progressamt.total > 0 ? (progressamt.transferred - transferred) / progressamt.total : 0;
+						progress.report({increment: incr * 100, message: `${progressamt.transferred}/${progressamt.total}`});
+						transferred = progressamt.transferred;
+					}
+					if (progressamt.transferred === progressamt) {
+						resolve();
+						return true;
+					}
+			});
+		});
+	});
+}
+
+async function downloadAndExtract(link : string, dlFilename: string, installFolder : string, extract : boolean) : Promise<boolean> {
+	await downloadFileWithProgress(link, dlFilename, installFolder)
+		.then(async () => {
 			if (extract) {
 				extension.mainOutputChannel.appendLine(`Decompressing ${dlFilename}.`);
 				await decompress(dlFilename, installFolder).then(() => {
@@ -125,9 +149,6 @@ async function downloadAndExtract(link : string, dlFilename: string, installFold
 				extension.mainOutputChannel.appendLine('done!');
 				return true;
 			}
-		}).catch((error) => {
-			console.log(error);
-			return false;
 		});
 	return false;
 }
@@ -250,7 +271,7 @@ export async function installKubectl(context: vscode.ExtensionContext): Promise<
 
 	extension.shareMessageInMainOutputChannel(`Downloading Kubernetes cli tool from ${kubectlUrl} to ${downloadFile}`);
 
-	await downloadAndExtract(kubectlUrl, binFile, installFolder, true)
+	await downloadAndExtract(kubectlUrl, binFile, installFolder, false)
 	.then( async (flag) => {
 		console.log(`Downloaded ${downloadFile} successfully: ${flag}`);
 	}).catch ( (error) => {
