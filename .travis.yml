@@ -16,6 +16,7 @@ install:
   - 'vsce package'
 script:
   - 'npm test --silent'
+  - 'npm run ui-test'
 after_success:
   - if [[ $TRAVIS_PULL_REQUEST == "false" && $TRAVIS_BRANCH == "master" ]]; then
     sonar-scanner;
