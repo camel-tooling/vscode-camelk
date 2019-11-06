@@ -31,7 +31,7 @@ import * as download from 'download';
 
 export const kamel = 'kamel';
 export const kamel_windows = 'kamel.exe';
-export const version = '1.0.0-M3'; //need to retrieve this if possible, but have a default
+export const version = '1.0.0-M2'; //need to retrieve this if possible, but have a default
 export const PLATFORM_WINDOWS = 'windows';
 export const PLATFORM_MAC = 'mac';
 export const PLATFORM_LINUX = 'linux';
@@ -92,10 +92,10 @@ export function getPlatform() : string | undefined {
 	const isMac = (os === 'darwin');
 	const isLinux = (os === 'linux');
 
-    if (isWindows) { return PLATFORM_WINDOWS; }
-    if (isMac) { return PLATFORM_MAC; }
-    if (isLinux) { return PLATFORM_LINUX; }
-    return undefined;
+	if (isWindows) { return PLATFORM_WINDOWS; }
+	if (isMac) { return PLATFORM_MAC; }
+	if (isLinux) { return PLATFORM_LINUX; }
+	return undefined;
 }
 
 async function downloadAndExtract(link : string, dlFilename: string, installFolder : string, extractFlag : boolean) : Promise<boolean> {
@@ -103,8 +103,8 @@ async function downloadAndExtract(link : string, dlFilename: string, installFold
 	myStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 100);
 
 	const downloadSettings = {
-        filename: `${dlFilename}`,
-        extract: extractFlag,
+		filename: `${dlFilename}`,
+		extract: extractFlag,
 	  };
 	extension.mainOutputChannel.appendLine('Downloading from: ' + link);
 	await download(link, installFolder, downloadSettings)
@@ -169,13 +169,13 @@ export async function installKamel(context: vscode.ExtensionContext): Promise<Er
 
 	await downloadAndExtract(kamelUrl, kamelCliFile, installFolder, true)
 	.then( async (flag) => {
-	 	console.log(`Downloaded ${downloadFile} successfully: ${flag}`);
-	 	if (fs.existsSync(downloadFile)) {
-	 		if (shell.isUnix()) {
-	 			fs.chmodSync(downloadFile, '0700');
-	 		}
+		console.log(`Downloaded ${downloadFile} successfully: ${flag}`);
+		if (fs.existsSync(downloadFile)) {
+			if (shell.isUnix()) {
+				fs.chmodSync(downloadFile, '0700');
+			}
 	 		await config.addKamelPathToConfig(downloadFile);
-	 	}
+		}
 	})
 	.catch ( (error) => {
 		console.log(error);
