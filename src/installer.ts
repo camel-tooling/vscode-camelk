@@ -98,41 +98,42 @@ export function getPlatform() : string | undefined {
 	return undefined;
 }
 
-async function downloadAndExtract(link : string, dlFilename: string, installFolder : string, extractFlag : boolean) : Promise<boolean> {
-	let myStatusBarItem: vscode.StatusBarItem;
-	myStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 100);
-
-	const downloadSettings = {
-		filename: `${dlFilename}`,
-		extract: extractFlag,
-	  };
-	extension.mainOutputChannel.appendLine('Downloading from: ' + link);
-	await download(link, installFolder, downloadSettings)
-		.on('response', (response) => {
-			extension.mainOutputChannel.appendLine(`Bytes to transfer: ${response.headers['content-length']}`);
-		}).on('downloadProgress', (progress) => {
-			let incr = progress.total > 0 ? Math.floor(progress.transferred / progress.total * 100) : 0;
-			let percent = Math.round(incr);
-			let message = `Download progress: ${progress.transferred} / ${progress.total} (${percent}%)`;
-			updateStatusBarItem(myStatusBarItem, message);
-		}).then(async () => {
-			extension.mainOutputChannel.appendLine(`Downloaded ${dlFilename}.`);
-			myStatusBarItem.dispose();
-			return true;
-		}).catch((error) => {
-			console.log(error);
+function downloadAndExtract(link : string, dlFilename: string, installFolder : string, extract : boolean) : Promise<boolean> {
+	return new Promise<boolean>( async (resolve, reject) => {
+		const downloadSettings = {
+			filename: `${dlFilename}`,
+			extract: extract,
+		};
+		extension.mainOutputChannel.appendLine('Downloading from: ' + link);
+		let progressTitle : string = `Download (${dlFilename})`;
+		vscode.window.withProgress({
+			location: vscode.ProgressLocation.Notification,
+			title: progressTitle,
+			cancellable: false
+		}, async (progress, token) => {
+			progress.report({ increment: 0 });
+			let lastProg:number = 0;
+			let success:boolean = false;
+			await download(link, installFolder, downloadSettings)
+				.on('response', (response) => {
+					extension.mainOutputChannel.appendLine(`Bytes to transfer: ${response.headers['content-length']}`);
+				})
+				.on('downloadProgress', (progressamt) => {
+					let incr = progressamt.total > 0 ? Math.floor((progressamt.transferred - lastProg) / progressamt.total * 100) : 0;
+					if (incr >= 1) {
+						progress.report({increment: incr, message: `${Math.floor(progressamt.transferred / progressamt.total * 100)}%`});
+						lastProg = progressamt.transferred;
+					}
+					if (progressamt.transferred >= progressamt.total) {
+						success = true;
+					}
+				});
+			resolve(success);
+		})
+		.then( () => {
+			extension.mainOutputChannel.appendLine('done!');
 		});
-	myStatusBarItem.dispose();
-	return false;
-}
-
-function updateStatusBarItem(sbItem : vscode.StatusBarItem, text: string): void {
-	if (text) {
-		sbItem.text = text;
-		sbItem.show();
-	} else {
-		sbItem.hide();
-	}
+	});
 }
 
 export async function installKamel(context: vscode.ExtensionContext): Promise<Errorable<null>> {
@@ -170,18 +171,19 @@ export async function installKamel(context: vscode.ExtensionContext): Promise<Er
 	await downloadAndExtract(kamelUrl, kamelCliFile, installFolder, true)
 	.then( async (flag) => {
 		console.log(`Downloaded ${downloadFile} successfully: ${flag}`);
-		if (fs.existsSync(downloadFile)) {
-			if (shell.isUnix()) {
-				fs.chmodSync(downloadFile, '0700');
-			}
-	 		await config.addKamelPathToConfig(downloadFile);
-		}
 	})
 	.catch ( (error) => {
 		console.log(error);
 		return { succeeded: false, error: [`Failed to download kamel: ${error}`] };
 	});
 
+	if (fs.existsSync(downloadFile)) {
+		if (shell.isUnix()) {
+			fs.chmodSync(downloadFile, '0700');
+		}
+	}
+	config.addKamelPathToConfig(downloadFile);
+	
 	return { succeeded: true, result: null };
 }
 
@@ -259,7 +261,7 @@ export async function installKubectl(context: vscode.ExtensionContext): Promise<
 		console.log(error);
 		return { succeeded: false, error: [`Failed to download kubectl: ${error}`] };
 	});
-	await config.addKubectlPathToConfig(downloadFile);
+	config.addKubectlPathToConfig(downloadFile);
 
 	if (shell.isUnix()) {
 		fs.chmodSync(downloadFile, '0700');
