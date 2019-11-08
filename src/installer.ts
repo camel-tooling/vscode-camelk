@@ -114,7 +114,8 @@ async function downloadAndExtract(link : string, dlFilename: string, installFold
 			let incr = progress.total > 0 ? Math.floor(progress.transferred / progress.total * 100) : 0;
 			let percent = Math.round(incr);
 			let message = `Download progress: ${progress.transferred} / ${progress.total} (${percent}%)`;
-			updateStatusBarItem(myStatusBarItem, message);
+			let tooltip = `Download progress for ${dlFilename}`;
+			updateStatusBarItem(myStatusBarItem, message, tooltip);
 		}).then(async () => {
 			extension.mainOutputChannel.appendLine(`Downloaded ${dlFilename}.`);
 			myStatusBarItem.dispose();
@@ -126,9 +127,10 @@ async function downloadAndExtract(link : string, dlFilename: string, installFold
 	return false;
 }
 
-function updateStatusBarItem(sbItem : vscode.StatusBarItem, text: string): void {
+function updateStatusBarItem(sbItem : vscode.StatusBarItem, text: string, tooltip : string): void {
 	if (text) {
 		sbItem.text = text;
+		sbItem.tooltip = tooltip;
 		sbItem.show();
 	} else {
 		sbItem.hide();
