@@ -27,8 +27,7 @@ import * as shell from './shell';
 import * as vscode from 'vscode';
 import * as kubectlutils from './kubectlutils';
 import * as downloader from './downloader';
-
-const downloadTarball = require('download-tarball');
+import * as download from 'download';
 
 export const kamel = 'kamel';
 export const kamel_windows = 'kamel.exe';
@@ -93,10 +92,49 @@ export function getPlatform() : string | undefined {
 	const isMac = (os === 'darwin');
 	const isLinux = (os === 'linux');
 
-    if (isWindows) { return PLATFORM_WINDOWS; }
-    if (isMac) { return PLATFORM_MAC; }
-    if (isLinux) { return PLATFORM_LINUX; }
-    return undefined;
+	if (isWindows) { return PLATFORM_WINDOWS; }
+	if (isMac) { return PLATFORM_MAC; }
+	if (isLinux) { return PLATFORM_LINUX; }
+	return undefined;
+}
+
+async function downloadAndExtract(link : string, dlFilename: string, installFolder : string, extractFlag : boolean) : Promise<boolean> {
+	let myStatusBarItem: vscode.StatusBarItem;
+	myStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 100);
+
+	const downloadSettings = {
+		filename: `${dlFilename}`,
+		extract: extractFlag,
+	  };
+	extension.mainOutputChannel.appendLine('Downloading from: ' + link);
+	await download(link, installFolder, downloadSettings)
+		.on('response', (response) => {
+			extension.mainOutputChannel.appendLine(`Bytes to transfer: ${response.headers['content-length']}`);
+		}).on('downloadProgress', (progress) => {
+			let incr = progress.total > 0 ? Math.floor(progress.transferred / progress.total * 100) : 0;
+			let percent = Math.round(incr);
+			let message = `Download progress: ${progress.transferred} / ${progress.total} (${percent}%)`;
+			let tooltip = `Download progress for ${dlFilename}`;
+			updateStatusBarItem(myStatusBarItem, message, tooltip);
+		}).then(async () => {
+			extension.mainOutputChannel.appendLine(`Downloaded ${dlFilename}.`);
+			myStatusBarItem.dispose();
+			return true;
+		}).catch((error) => {
+			console.log(error);
+		});
+	myStatusBarItem.dispose();
+	return false;
+}
+
+function updateStatusBarItem(sbItem : vscode.StatusBarItem, text: string, tooltip : string): void {
+	if (text) {
+		sbItem.text = text;
+		sbItem.tooltip = tooltip;
+		sbItem.show();
+	} else {
+		sbItem.hide();
+	}
 }
 
 export async function installKamel(context: vscode.ExtensionContext): Promise<Errorable<null>> {
@@ -126,18 +164,19 @@ export async function installKamel(context: vscode.ExtensionContext): Promise<Er
 	mkdirp.sync(installFolder);
 
 	const kamelUrl = `https://github.com/apache/camel-k/releases/download/${versionToUse}/camel-k-client-${versionToUse}-${platformString}-64bit.tar.gz`;
+	const kamelCliFile = `camel-k-client-${versionToUse}-${platformString}-64bit.tar.gz`;
 	const downloadFile = path.join(installFolder, binFile);
 
 	extension.shareMessageInMainOutputChannel(`Downloading kamel cli tool from ${kamelUrl} to ${downloadFile}`);
 
-	await grabTarGzAndUnGZ(kamelUrl, installFolder)
+	await downloadAndExtract(kamelUrl, kamelCliFile, installFolder, true)
 	.then( async (flag) => {
 		console.log(`Downloaded ${downloadFile} successfully: ${flag}`);
 		if (fs.existsSync(downloadFile)) {
 			if (shell.isUnix()) {
 				fs.chmodSync(downloadFile, '0700');
 			}
-			await config.addKamelPathToConfig(downloadFile);
+	 		await config.addKamelPathToConfig(downloadFile);
 		}
 	})
 	.catch ( (error) => {
@@ -150,24 +189,6 @@ export async function installKamel(context: vscode.ExtensionContext): Promise<Er
 
 function getInstallFolder(tool: string, context : vscode.ExtensionContext): string {
 	return path.join(context.globalStoragePath, `camelk/tools/${tool}`);
-}
-
-function grabTarGzAndUnGZ(fileUrl: string, directory: string) : Promise<boolean>{
-	return new Promise<boolean>( (resolve, reject) => {
-		try {
-			return downloadTarball({
-				url: fileUrl,
-				dir: directory
-			  }).then(() => {
-				resolve(true);
-			  }).catch( (err: any) => {
-				  reject(err);
-			  });
-		} catch (err) {
-			console.error(err);
-			reject(err);
-		}
-	});
 }
 
 async function getLatestCamelKVersion(): Promise<Errorable<string>> {
@@ -233,14 +254,17 @@ export async function installKubectl(context: vscode.ExtensionContext): Promise<
 
 	extension.shareMessageInMainOutputChannel(`Downloading Kubernetes cli tool from ${kubectlUrl} to ${downloadFile}`);
 
-	const downloadResult = await downloader.to(kubectlUrl, downloadFile);
-	if (failed(downloadResult)) {
-		return { succeeded: false, error: [`Failed to download kubectl: ${downloadResult.error[0]}`] };
-	}
+	await downloadAndExtract(kubectlUrl, binFile, installFolder, true)
+	.then( async (flag) => {
+		console.log(`Downloaded ${downloadFile} successfully: ${flag}`);
+	}).catch ( (error) => {
+		console.log(error);
+		return { succeeded: false, error: [`Failed to download kubectl: ${error}`] };
+	});
 	await config.addKubectlPathToConfig(downloadFile);
 
 	if (shell.isUnix()) {
-		fs.chmodSync(downloadFile, '0777');
+		fs.chmodSync(downloadFile, '0700');
 	}
 
 	return { succeeded: true, result: null };
