@@ -31,7 +31,7 @@ import * as download from 'download';
 
 export const kamel = 'kamel';
 export const kamel_windows = 'kamel.exe';
-export const version = '1.0.0-M2'; //need to retrieve this if possible, but have a default
+export const version = '1.0.0-M3'; //need to retrieve this if possible, but have a default
 export const PLATFORM_WINDOWS = 'windows';
 export const PLATFORM_MAC = 'mac';
 export const PLATFORM_LINUX = 'linux';
