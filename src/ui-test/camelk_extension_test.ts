@@ -39,7 +39,7 @@ describe('Tooling for Apache Camel K extension', function () {
 
 		it('Verify display name', async function () {
 			this.timeout(5000);
-			const title = item.getTitle();
+			const title = await item.getTitle();
 			assert.equal(title, `${pjson.displayName}`);
 		});
 
