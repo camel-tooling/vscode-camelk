@@ -263,7 +263,7 @@ export async function installKubectl(context: vscode.ExtensionContext): Promise<
 	});
 	await config.addKubectlPathToConfig(downloadFile);
 
-	if (shell.isUnix()) {
+	if (shell.isUnix() || shell.isMacOS()) {
 		fs.chmodSync(downloadFile, '0700');
 	}
 
