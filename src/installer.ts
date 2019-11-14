@@ -233,7 +233,7 @@ function getKubectlInstallFolder(tool: string): string {
 
 export async function installKubectl(context: vscode.ExtensionContext): Promise<Errorable<null>> {
 	const tool = 'kubectl';
-	const binFile = (shell.isUnix()) ? tool : `${tool}.exe`;
+	const binFile = (shell.isUnix() || shell.isMacOS()) ? tool : `${tool}.exe`;
 	const os = shell.getPlatform();
 	let osString = os; // user looks for strings windows, darwin, linux
 	if (osString === 'win32') {
