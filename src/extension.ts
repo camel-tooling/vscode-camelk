@@ -28,6 +28,7 @@ import * as kubectl from './kubectl';
 import * as kamel from './kamel';
 import * as kubectlutils from './kubectlutils';
 import * as config from './config';
+import * as path from 'path';
 
 export let mainOutputChannel: vscode.OutputChannel;
 export let myStatusBarItem: vscode.StatusBarItem;
@@ -51,6 +52,9 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 	camelKIntegrationsProvider = new CamelKNodeProvider(context);
 
 	applyUserSettings();
+
+	// call didact to register tutorial
+	await registerTutorialWithDidact(context);
 
 	mainOutputChannel = vscode.window.createOutputChannel("Apache Camel K");
 	myStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 100);
@@ -436,4 +440,29 @@ function handleLogViaKubectlCli(podName: string) : Promise<string> {
 // for testing purposes only
 export function getStashedContext() : vscode.ExtensionContext {
 	return stashedContext;
+}
+
+async function registerTutorialWithDidact(context: vscode.ExtensionContext) {
+	// call didact command to register tutorial
+	try {
+		// command ID: vscode.didact.register
+		const commandId = 'vscode.didact.register';
+
+		// then pass name, uri, and category
+		const tutorialName = 'Your First Integration';
+		const tutorialPath = path.join(context.extensionPath, './didact/camelk/first-integration.md');
+		const tutorialUri = vscode.Uri.parse(`file://${tutorialPath}`);
+		const tutorialCategory = 'Apache Camel K';
+
+		console.log('Tutorial URI registered: ' + tutorialUri.fsPath);
+
+		await vscode.commands.executeCommand(
+			commandId,
+			tutorialName, 
+			tutorialUri,
+			tutorialCategory);
+
+	} catch (error) {
+		console.log(error);
+	}
 }
