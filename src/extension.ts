@@ -445,23 +445,29 @@ export function getStashedContext() : vscode.ExtensionContext {
 async function registerTutorialWithDidact(context: vscode.ExtensionContext) {
 	// call didact command to register tutorial
 	try {
-		// command ID: vscode.didact.register
-		const commandId = 'vscode.didact.register';
+		// test to ensure didact is available 
+		const extensionId = 'redhat.vscode-didact';
+		const didactExt : any = vscode.extensions.getExtension(extensionId);
 
-		// then pass name, uri, and category
-		const tutorialName = 'Your First Integration';
-		const tutorialPath = path.join(context.extensionPath, './didact/camelk/first-integration.md');
-		const tutorialUri = vscode.Uri.parse(`file://${tutorialPath}`);
-		const tutorialCategory = 'Apache Camel K';
+		// if didact is available, register the new extension
+		if (didactExt) {
+			// command ID: vscode.didact.register
+			const commandId = 'vscode.didact.register';
 
-		console.log('Tutorial URI registered: ' + tutorialUri.fsPath);
+			// then pass name, uri, and category
+			const tutorialName = 'Your First Integration';
+			const tutorialPath = path.join(context.extensionPath, './didact/camelk/first-integration.md');
+			const tutorialUri = vscode.Uri.parse(`file://${tutorialPath}`);
+			const tutorialCategory = 'Apache Camel K';
 
-		await vscode.commands.executeCommand(
-			commandId,
-			tutorialName, 
-			tutorialUri,
-			tutorialCategory);
+			console.log('Tutorial URI registered: ' + tutorialUri.fsPath);
 
+			await vscode.commands.executeCommand(
+				commandId,
+				tutorialName, 
+				tutorialUri,
+				tutorialCategory);
+		}
 	} catch (error) {
 		console.log(error);
 	}
