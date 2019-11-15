@@ -24,6 +24,7 @@ import * as child_process from 'child_process';
 import { getConfigMaps, getSecrets } from './kubectlutils';
 import * as k8s from 'vscode-kubernetes-tools-api';
 import * as kamel from './kamel';
+import { isString } from 'util';
 
 const validNameRegex = /^[A-Za-z][A-Za-z0-9\-\.]*(?:[A-Za-z0-9]$){1}/;
 
@@ -56,11 +57,48 @@ const choiceList = [
 
  let childProcessMap : Map<string, child_process.ChildProcess>;
 
- export function startIntegration(context: vscode.Uri): Promise<boolean> {
+ function findChoiceFromStartsWith(inChoice: string | undefined) : string | undefined {
+	if (inChoice) {
+		if (devModeIntegration.startsWith(inChoice)) {
+			return devModeIntegration;
+		}
+		if (basicIntegration.startsWith(inChoice)) {
+			return basicIntegration;
+		}
+	}
+	// other choices not supported at present because they will require additional inputs
+	return undefined;
+ }
+
+ export function startIntegration(...args: any[]) : Promise<boolean> {
 	return new Promise <boolean> ( async (resolve, reject) => {
-		const choice : string | undefined = await vscode.window.showQuickPick(choiceList, {
-			placeHolder: 'Select the type of Apache Camel K Integration'
-		});
+		if (!args) {
+			reject('No arguments provided to start integration function call');
+			return;
+		}
+
+		console.log(args.toString());
+		let innerArgs1 : any[] = args[0];
+		let innerArgs2 : any[] = innerArgs1[0];
+		let innerArgs3 : any[] = innerArgs2[0];
+		let context : vscode.Uri = innerArgs3[0] as vscode.Uri;
+		let inChoice : string | undefined = undefined;
+
+		if (innerArgs3.length > 1) {
+			let value = innerArgs3[1];
+			if (isString(value)) {
+				inChoice = value as string;
+			}
+		}
+
+		let choice: string | undefined = undefined;
+		if (!inChoice && context) {
+			choice = await vscode.window.showQuickPick(choiceList, {
+				placeHolder: 'Select the type of Apache Camel K Integration'
+			});
+		} else {
+			choice = findChoiceFromStartsWith(inChoice);
+		}
 
 		if (choice) {
 			let selectedConfigMap : any = undefined;

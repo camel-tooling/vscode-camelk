@@ -130,7 +130,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 		});
 	
 		// create the integration view action -- start new integration
-		let startIntegration = vscode.commands.registerCommand('camelk.startintegration', async (uri:vscode.Uri) => { await runTheFile(uri);});
+		let startIntegration = vscode.commands.registerCommand('camelk.startintegration', async (...args:any[]) => { await runTheFile(args);});
 		context.subscriptions.push(startIntegration);
 	
 		// add commands to create config-map and secret objects from .properties files
@@ -192,18 +192,18 @@ function getOutputChannel( channelName: string) : vscode.OutputChannel {
 }
 
 // start the integration file
-async function runTheFile(context: vscode.Uri) {
-	await startIntegration(context)
+async function runTheFile(...args: any[]) {
+	await startIntegration(args)
 		.then( async () => await camelKIntegrationsProvider.refresh())
 		.catch ( (error) => console.log(error) );
 }
 
 // start an integration from a file
-function startIntegration(context: vscode.Uri): Promise<any> {
+function startIntegration(...args: any[]): Promise<any> {
 	return new Promise <any> ( async (resolve, reject) => {
 		setStatusLineMessageAndShow(`Starting new Apache Camel K Integration...`);
 		utils.shareMessage(mainOutputChannel, "Starting new integration via Kamel executable.");
-		await integrationutils.startIntegration(context)
+		await integrationutils.startIntegration(args)
 			.then( success => {
 				if (!success) {
 					vscode.window.showErrorMessage("Unable to call Kamel.");

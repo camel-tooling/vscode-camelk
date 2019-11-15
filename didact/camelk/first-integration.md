@@ -41,7 +41,7 @@ First, we need to set up our sample project. Camel K has many examples available
 
 You can download the file yourself from the GitHub repo and then copy it into a folder in your workspace. Or you can create a sample folder and copy in the file with the link below.
 
-- [ ] [Create a sample folder in your VS Code workspace and we will define it there.](didact://?commandId=vscode.didact.scaffoldProject&srcFilePath=example/camelk/simple-groovy-project.json&completion=Created%20simple-groovy%20project. "Creates a folder and copies in simple.groovy"){.didact}
+- [ ] [Create a sample folder in your VS Code workspace and we will define it there.](didact://?commandId=vscode.didact.scaffoldProject&extFilePath=redhat.vscode-camelk/didact/camelk/simple-groovy-project.json&completion=Created%20simple-groovy%20project. "Creates a folder and copies in simple.groovy"){.didact}
 
 <details><summary>Advanced Users!</summary>
 
@@ -76,15 +76,9 @@ The `Tooling for Camel K` extension offers several tools to get your new integra
 
 First, you can right-click the `simple.groovy` file and select `Start Apache Camel K Integration`. That will provide a drop-down in the Command palette area with a number of deployment options. In this case, select the `Dev Mode - Apache Camel K Integration in Dev Mode` option. 
 
-- [ ] [Start the simple.groovy integration in Dev Mode](didact://?commandId=camelk.startintegration&projectFilePath=first-camelk-integration/src/simple.groovy&text=Dev%20Mode%20-%20Apache%20Camel%20K%20Integration%20in%20Dev%20Mode "Deploys the simple.groovy file"){.didact}
-
-*Note: We will need to update the `camelk.startintegration` command in the Camel K extension to allow passing a particular option rather than prompting the user. At this point, it does start the process and the user must select the `Dev Mode - Apache Camel K Integration in Dev Mode` option themselves.*
+- [ ] [Start the simple.groovy integration in Dev Mode](didact://?commandId=camelk.startintegration&projectFilePath=first-camelk-integration/src/simple.groovy&text=Dev%20Mode&completion=Deployed%20the%20simple.groovy%20file%20in%20Dev%20mode. "Deploys the simple.groovy file in 'Dev mode'"){.didact}
 
 While that starts up, we can look at the `Apache Camel K` Output channel and watch as the Camel K operator starts up the necessary resources to run our integration.
-
-- [ ] Open the `Apache Camel K` Output Channel
-
-*Note: We will need to add a new command in the Camel K extension to explicitly open the `Apache Camel K` Output channel. There isn't a command we can use in VS Code at this time.*
 
 ## Step 4: Updating the Integration
 
@@ -96,9 +90,7 @@ Change the message sent to the `.simple()` command of the Camel route in quotes 
 
 We can see what integrations we currently have running in our Minikube system in the `Apache Camel K Integrations` view in the Explorer activity (Ctrl+Shift+E).
 
-- [ ] [Open the `Apache Camel K Integrations` view](didact://?commandId=workbench.action.quickOpenView&text=Apache%20Camel%20K%20Integrations&completion=Opened%20the%20integrations%20view "Opens the Integrations view"){.didact}
-
-*Note: We will also need to add a new command in the Camel K extension to explicitly open the `Apache Camel K Integrations` view. There isn't a command we can use in VS Code at this time.*
+- [ ] Open the `Apache Camel K Integrations` view
 
 ![Integrations view with context menu](https://raw.githubusercontent.com/camel-tooling/vscode-camelk/master/images/camelk-integrations-view-remove-menu.jpg){.imageRight}
 
