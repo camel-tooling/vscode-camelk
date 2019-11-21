@@ -32,7 +32,7 @@ import * as config from './config';
 export let mainOutputChannel: vscode.OutputChannel;
 export let myStatusBarItem: vscode.StatusBarItem;
 
-let camelKIntegrationsProvider = new CamelKNodeProvider();
+let camelKIntegrationsProvider : CamelKNodeProvider;
 let outputChannelMap : Map<string, vscode.OutputChannel>;
 let showStatusBar : boolean;
 let camelKIntegrationsTreeView : vscode.TreeView<TreeNode>;
@@ -43,6 +43,8 @@ const restartKubectlWatchEvent = 'restartKubectlWatch';
 export async function activate(context: vscode.ExtensionContext): Promise<void> {
 
 	outputChannelMap = new Map();
+
+	camelKIntegrationsProvider = new CamelKNodeProvider(context);
 
 	applyUserSettings();
 

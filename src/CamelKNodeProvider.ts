@@ -30,7 +30,11 @@ export class CamelKNodeProvider implements vscode.TreeDataProvider<TreeNode> {
 	protected treeNodes: TreeNode[] = [];
 	protected retrieveIntegrations : boolean = true;
 
-	constructor() {}
+	static context : vscode.ExtensionContext | undefined;
+
+	constructor(context? : vscode.ExtensionContext) {
+		CamelKNodeProvider.context = context;
+	}
 
 	// clear the tree
 	public resetList(): void {
@@ -206,12 +210,16 @@ export class TreeNode extends vscode.TreeItem {
 		}
 	}
 
-	getIconForPodStatus(status: string):  object {
-		let newIcon : object;
-		if (status && status.toLowerCase().startsWith("running")) {
-			newIcon = vscode.Uri.file(path.join(__dirname, "../resources/round-k-transparent-16-running.svg"));
-		} else {
-			newIcon = vscode.Uri.file(path.join(__dirname, "../resources/round-k-transparent-16-error.svg"));
+	getIconForPodStatus(status: string): object | undefined {
+		let newIcon : object | undefined =  undefined;
+		if (CamelKNodeProvider.context) {
+			if (status && status.toLowerCase().startsWith("running")) {
+				const iconPath = path.join(CamelKNodeProvider.context.extensionPath, "/resources/round-k-transparent-16-running.svg");
+				newIcon = vscode.Uri.file(iconPath);
+			} else {
+				const iconPath = path.join(CamelKNodeProvider.context.extensionPath, "/resources/round-k-transparent-16-error.svg");
+				newIcon = vscode.Uri.file(iconPath);
+			}
 		}
 		return newIcon;
 	}
