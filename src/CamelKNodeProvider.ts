@@ -213,8 +213,8 @@ export class TreeNode extends vscode.TreeItem {
 		}
 	}
 
-	static getIconForPodStatus(status: string, extContext : vscode.ExtensionContext): object | undefined {
-		let newIcon : object | undefined =  undefined;
+	static getIconForPodStatus(status: string, extContext : vscode.ExtensionContext): vscode.Uri | undefined {
+		let newIcon : vscode.Uri | undefined =  undefined;
 		if (extContext) {
 			if (status && status.toLowerCase().startsWith("running")) {
 				const iconPath = path.join(extContext.extensionPath, "/resources/round-k-transparent-16-running.svg");

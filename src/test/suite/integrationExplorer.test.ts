@@ -21,6 +21,8 @@ import * as sinon from 'sinon';
 import * as sinonChai from 'sinon-chai';
 import * as extension from '../../extension';
 import * as assert from 'assert';
+import * as fs from 'fs';
+import * as path from 'path';
 
 const expect = chai.expect;
 chai.use(sinonChai);
@@ -69,8 +71,19 @@ suite('Camel-k Integrations View', () => {
 		const context = extension.getSharedContext();
 		let runningIconPath = CamelKNodeProvider.TreeNode.getIconForPodStatus("running", context);
 		assert.notEqual(runningIconPath, undefined);
+
+		if (runningIconPath) {
+			let runningPath : string = path.resolve(runningIconPath.fsPath);
+			assert.equal(fs.existsSync(runningPath), true);
+		}
+
 		let notRunningIconPath = CamelKNodeProvider.TreeNode.getIconForPodStatus("not running", context);
 		assert.notEqual(notRunningIconPath, undefined);
+
+		if (notRunningIconPath) {
+			let notRunningPath : string = path.resolve(notRunningIconPath.fsPath);
+			assert.equal(fs.existsSync(notRunningPath), true);
+		}
 		done();
 	});
 });
