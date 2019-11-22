@@ -201,7 +201,9 @@ export class TreeNode extends vscode.TreeItem {
 		super(label, collapsibleState);
 		this.type = type;
 		this.status = status;
-		this.iconPath = this.getIconForPodStatus(this.status);
+		if (CamelKNodeProvider.context) {
+			this.iconPath = TreeNode.getIconForPodStatus(this.status, CamelKNodeProvider.context);
+		}
 
 		let namespace: string = config.getNamespaceconfig() as string;
 		if (namespace) {
@@ -211,14 +213,14 @@ export class TreeNode extends vscode.TreeItem {
 		}
 	}
 
-	getIconForPodStatus(status: string): object | undefined {
+	static getIconForPodStatus(status: string, extContext : vscode.ExtensionContext): object | undefined {
 		let newIcon : object | undefined =  undefined;
-		if (CamelKNodeProvider.context) {
+		if (extContext) {
 			if (status && status.toLowerCase().startsWith("running")) {
-				const iconPath = path.join(CamelKNodeProvider.context.extensionPath, "/resources/round-k-transparent-16-running.svg");
+				const iconPath = path.join(extContext.extensionPath, "/resources/round-k-transparent-16-running.svg");
 				newIcon = vscode.Uri.file(iconPath);
 			} else {
-				const iconPath = path.join(CamelKNodeProvider.context.extensionPath, "/resources/round-k-transparent-16-error.svg");
+				const iconPath = path.join(extContext.extensionPath, "/resources/round-k-transparent-16-error.svg");
 				newIcon = vscode.Uri.file(iconPath);
 			}
 		}
