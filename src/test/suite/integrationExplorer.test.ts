@@ -19,6 +19,8 @@ import * as chai from 'chai';
 import * as CamelKNodeProvider from '../../CamelKNodeProvider';
 import * as sinon from 'sinon';
 import * as sinonChai from 'sinon-chai';
+import * as extension from '../../extension';
+import * as assert from 'assert';
 
 const expect = chai.expect;
 chai.use(sinonChai);
@@ -61,5 +63,14 @@ suite('Camel-k Integrations View', () => {
 			expect(refreshStub).calledTwice;
 			done();
 		});
+	});
+
+	test('verify that we are successfully retrieving tree images', function(done) {
+		const context = extension.getSharedContext();
+		let runningIconPath = CamelKNodeProvider.TreeNode.getIconForPodStatus("running", context);
+		assert.notEqual(runningIconPath, undefined);
+		let notRunningIconPath = CamelKNodeProvider.TreeNode.getIconForPodStatus("not running", context);
+		assert.notEqual(notRunningIconPath, undefined);
+		done();
 	});
 });

@@ -39,8 +39,12 @@ let camelKIntegrationsTreeView : vscode.TreeView<TreeNode>;
 let eventEmitter = new events.EventEmitter();
 const restartKubectlWatchEvent = 'restartKubectlWatch';
 
+let stashedContext : vscode.ExtensionContext;
+
 // This extension offers basic integration with Camel K (https://github.com/apache/camel-k) on two fronts.
 export async function activate(context: vscode.ExtensionContext): Promise<void> {
+
+	stashedContext = context;
 
 	outputChannelMap = new Map();
 
@@ -427,4 +431,9 @@ function handleLogViaKubectlCli(podName: string) : Promise<string> {
 				return;
 			});
 	});
+}
+
+// for testing purposes only
+export function getSharedContext() : vscode.ExtensionContext {
+	return stashedContext;
 }
