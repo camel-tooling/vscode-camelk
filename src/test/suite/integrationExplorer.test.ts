@@ -67,23 +67,23 @@ suite('Camel-k Integrations View', () => {
 		});
 	});
 
-	test('verify that we are successfully retrieving tree images', function(done) {
-		const context = extension.getSharedContext();
-		let runningIconPath = CamelKNodeProvider.TreeNode.getIconForPodStatus("running", context);
-		assert.notEqual(runningIconPath, undefined);
+	test('verify that we are successfully retrieving tree image for running status', function(done) {
+		checkIConForPodStatus("running");
+		done();
+	});
 
-		if (runningIconPath) {
-			let runningPath : string = path.resolve(runningIconPath.fsPath);
-			assert.equal(fs.existsSync(runningPath), true);
-		}
-
-		let notRunningIconPath = CamelKNodeProvider.TreeNode.getIconForPodStatus("not running", context);
-		assert.notEqual(notRunningIconPath, undefined);
-
-		if (notRunningIconPath) {
-			let notRunningPath : string = path.resolve(notRunningIconPath.fsPath);
-			assert.equal(fs.existsSync(notRunningPath), true);
-		}
+	test('verify that we are successfully retrieving tree images for not running status', function(done) {
+		checkIConForPodStatus("not running");
 		done();
 	});
 });
+
+function checkIConForPodStatus(status: string) {
+	const context = extension.getSharedContext();
+	let iconPath = CamelKNodeProvider.TreeNode.getIconForPodStatus(status, context);
+	assert.notEqual(iconPath, undefined);
+	if (iconPath) {
+		let runningPath: string = path.resolve(iconPath.fsPath);
+		assert.equal(fs.existsSync(runningPath), true);
+	}
+}
