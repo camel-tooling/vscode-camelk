@@ -434,6 +434,6 @@ function handleLogViaKubectlCli(podName: string) : Promise<string> {
 }
 
 // for testing purposes only
-export function getSharedContext() : vscode.ExtensionContext {
+export function getStashedContext() : vscode.ExtensionContext {
 	return stashedContext;
 }
