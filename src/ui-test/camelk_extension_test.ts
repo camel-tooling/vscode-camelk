@@ -1,4 +1,5 @@
-import { EditorView, ExtensionsViewSection, ActivityBar, ExtensionsViewItem } from 'vscode-extension-tester';
+import { EditorView, ExtensionsViewItem } from 'vscode-extension-tester';
+import { Marketplace } from 'vscode-uitests-tooling';
 import { assert } from 'chai';
 import * as pjson from '../../package.json';
 
@@ -6,23 +7,22 @@ describe('Tooling for Apache Camel K extension', function () {
 
 	describe('Extensions view', function () {
 
-		let section: ExtensionsViewSection;
+		let marketplace: Marketplace;
 		let item: ExtensionsViewItem;
 
 		before(async function () {
 			this.timeout(10000);
-			const view = await new ActivityBar().getViewControl('Extensions').openView();
-			section = await view.getContent().getSection('Enabled') as ExtensionsViewSection;
+			marketplace = await Marketplace.open();
 		});
 
 		after(async function () {
-			await new ActivityBar().getViewControl('Extensions').closeView();
+			await marketplace.close();
 			await new EditorView().closeAllEditors();
 		});
 
 		it('Find extension', async function () {
 			this.timeout(10000);
-			item = await section.findItem(`@installed ${pjson.displayName}`) as ExtensionsViewItem;
+			item = await marketplace.findExtension(`@installed ${pjson.displayName}`) as ExtensionsViewItem; 
 		});
 
 		it('Extension is installed', async function () {
