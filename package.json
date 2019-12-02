@@ -207,7 +207,7 @@
 		"typescript": "^3.7.2",
 		"vscode-extension-tester": "^2.1.1",
 		"vscode-test": "^1.2.3",
-		"vscode-uitests-tooling": "^1.0.5"
+		"vscode-uitests-tooling": "^2.0.0"
 	},
 	"extensionDependencies": [
 		"ms-kubernetes-tools.vscode-kubernetes-tools"
