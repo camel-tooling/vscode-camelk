@@ -68,14 +68,12 @@ export async function once(sourceUrl: string, destinationFile: string): Promise<
         DOWNLOAD_ONCE_STATUS[destinationFile] = succeeded(result) ? DownloadOperationStatus.Completed : DownloadOperationStatus.Failed;
         return result;
     } else {
-        while (true) {
-            await sleep(100);
-            if (DOWNLOAD_ONCE_STATUS[destinationFile] === DownloadOperationStatus.Completed) {
-                return { succeeded: true, result: null };
-            }
-            else {
-                return await once(sourceUrl, destinationFile);
-            }
+        await sleep(100);
+        if (DOWNLOAD_ONCE_STATUS[destinationFile] === DownloadOperationStatus.Completed) {
+            return { succeeded: true, result: null };
+        }
+        else {
+            return await once(sourceUrl, destinationFile);
         }
     }
 }
