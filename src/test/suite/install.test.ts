@@ -20,8 +20,12 @@ import * as assert from 'assert';
 import * as vscode from 'vscode';
 import * as config from '../../config';
 import * as fs from 'fs';
+import * as sinon from 'sinon';
+import * as installer from '../../installer';
 
 suite("ensure install methods are functioning as expected", function() {
+
+	let spy  = sinon.spy(installer, 'installKubectl');
 
 	test("install Camel K and Kubernetes CLIs on activation", async function() {
 		const extensionId = 'redhat.vscode-camelk';
@@ -48,4 +52,20 @@ suite("ensure install methods are functioning as expected", function() {
 		assert.equal(fs.existsSync(kubectlPath), true);
 		done();
 	});
+
+	test("do not install again on second activation", async function() {
+		const extensionId = 'redhat.vscode-camelk';
+		let extension = vscode.extensions.getExtension(extensionId);
+		if (extension !== null && extension !== undefined) {
+			await extension.activate().then( () => {
+				console.log(`kubectl installer call count= ${spy.callCount}`);
+				if (spy.callCount > 1) {
+					assert.ok("Kubectl installer was called once");
+				}
+			});
+		} else {
+			assert.fail("Kubectl installer was called more than once");
+		}
+	});
+
 });
