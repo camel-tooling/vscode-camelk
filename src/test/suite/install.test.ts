@@ -42,14 +42,14 @@ suite("ensure install methods are functioning as expected", function() {
 			assert.fail("Camel K extension is undefined and cannot be activated");
 		}
 
-		// now try to activate again to ensure that we only install once
+		// now try to activate again to ensure that we don't install a second time
 		if (extension !== null && extension !== undefined) {
 			await extension.activate().then( () => {
 				console.log(`kubectl installer call count= ${installKubectlSpy.callCount}`);
-				if (installKubectlSpy.callCount <= 1) {
-					assert.ok("Kubectl installer was called once");
+				if (installKubectlSpy.callCount === 0) {
+					assert.ok("Kubectl installer was called once during the activation test, was not called again when we re-activated");
 				} else {
-					assert.fail("Kubectl installer was called more than once");
+					assert.fail("Kubectl installer was called more than once when we activated the extension a second time");
 				}
 			});
 		}
