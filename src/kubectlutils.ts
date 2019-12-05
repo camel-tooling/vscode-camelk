@@ -158,7 +158,7 @@ export async function getKubernetesVersion(): Promise<string | undefined> {
         return '';
     }
 
-    const kubectlPromise = await kubectl.api.invokeCommand(`version --output json`);
+    const kubectlPromise = await kubectl.api.invokeCommand(`version --client --output json`);
     let sr : any= null;
     if (kubectlPromise) {
         sr = kubectlPromise as k8s.KubectlV1.ShellResult;
@@ -168,13 +168,12 @@ export async function getKubernetesVersion(): Promise<string | undefined> {
     }
 
     const versionInfo = JSON.parse(sr.stdout);
-    const serverVersion = versionInfo.serverVersion;
-    if (!serverVersion) {
+    if (!versionInfo || !versionInfo.clientVersion) {
         return '';
     }
 
-    const major = serverVersion.major;
-	const minor = serverVersion.minor;
+    const major = versionInfo.clientVersion.major;
+	const minor = versionInfo.clientVersion.minor;
     if (!major || !minor) {
         return '';
     }

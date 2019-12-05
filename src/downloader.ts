@@ -4,29 +4,11 @@ import * as tmp from 'tmp';
 
 import { succeeded, Errorable } from './errorable';
 
-type Dictionary<T> = {
-    [key: string]: T
-};
-
-module Dictionary {
-    export function of<T>(): Dictionary<T> {
-        return {};
-    }
-}
-
 type DownloadFunc =
     (url: string, destination?: string, options?: any)
          => Promise<Buffer> & stream.Duplex; // Stream has additional events - see https://www.npmjs.com/package/download
 
 let download: DownloadFunc | undefined;
-
-const DOWNLOAD_ONCE_STATUS = Dictionary.of<DownloadOperationStatus>();
-
-enum DownloadOperationStatus {
-    Queued = 1,
-    Completed = 2,
-    Failed = 3,
-}
 
 function ensureDownloadFunc() {
     if (!download) {
@@ -58,30 +40,4 @@ export async function to(sourceUrl: string, destinationFile: string): Promise<Er
     } catch (e) {
         return { succeeded: false, error: [e.message] };
     }
-}
-
-export async function once(sourceUrl: string, destinationFile: string): Promise<Errorable<null>> {
-    const downloadStatus = DOWNLOAD_ONCE_STATUS[destinationFile];
-    if (!downloadStatus || downloadStatus === DownloadOperationStatus.Failed) {
-        DOWNLOAD_ONCE_STATUS[destinationFile] = DownloadOperationStatus.Queued;
-        const result = await to(sourceUrl, destinationFile);
-        DOWNLOAD_ONCE_STATUS[destinationFile] = succeeded(result) ? DownloadOperationStatus.Completed : DownloadOperationStatus.Failed;
-        return result;
-    } else {
-        while (true) {
-            await sleep(100);
-            if (DOWNLOAD_ONCE_STATUS[destinationFile] === DownloadOperationStatus.Completed) {
-                return { succeeded: true, result: null };
-            }
-            else {
-                return await once(sourceUrl, destinationFile);
-            }
-        }
-    }
-}
-
-function sleep(ms: number): Promise<void> {
-    return new Promise<void>((resolve) => {
-        setTimeout(resolve, ms);
-    });
 }

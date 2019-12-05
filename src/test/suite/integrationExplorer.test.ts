@@ -50,7 +50,7 @@ suite('Camel-k Integrations View', () => {
 			integrationExplorer.addChild(children, newNode, false);
 			expect(children.length).equals(1);
 			expect(children[0].label).equals("mockIntegration");
-			expect(refreshStub).calledOnce;
+			expect(refreshStub.calledOnce, 'true');
 			done();
 		});
 	});
@@ -62,7 +62,7 @@ suite('Camel-k Integrations View', () => {
 			const newNode = new CamelKNodeProvider.TreeNode("string", "mockIntegration", "running", vscode.TreeItemCollapsibleState.None);
 			integrationExplorer.addChild(children, newNode);
 			integrationExplorer.removeChild(children, newNode);
-			expect(refreshStub).calledTwice;
+			expect(refreshStub.calledTwice, 'true');
 			done();
 		});
 	});

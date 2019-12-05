@@ -20,11 +20,19 @@ import * as assert from 'assert';
 import * as vscode from 'vscode';
 import * as config from '../../config';
 import * as fs from 'fs';
+import * as sinon from 'sinon';
+import * as installer from '../../installer';
+
+const extensionId = 'redhat.vscode-camelk';
 
 suite("ensure install methods are functioning as expected", function() {
 
+	let installKubectlSpy  = sinon.spy(installer, 'installKubectl');
+
 	test("install Camel K and Kubernetes CLIs on activation", async function() {
-		const extensionId = 'redhat.vscode-camelk';
+		// reset the call count
+		installKubectlSpy.resetHistory();	
+
 		let extension = vscode.extensions.getExtension(extensionId);
 		if (extension !== null && extension !== undefined) {
 			await extension.activate().then( () => {
@@ -33,6 +41,21 @@ suite("ensure install methods are functioning as expected", function() {
 		} else {
 			assert.fail("Camel K extension is undefined and cannot be activated");
 		}
+
+		// now try to activate again to ensure that we don't install a second time
+		if (extension !== null && extension !== undefined) {
+			await extension.activate().then( () => {
+				console.log(`kubectl installer call count= ${installKubectlSpy.callCount}`);
+				if (installKubectlSpy.callCount === 0) {
+					assert.ok("Kubectl installer was called once during the activation test, was not called again when we re-activated");
+				} else {
+					assert.fail("Kubectl installer was called more than once when we activated the extension a second time");
+				}
+			});
+		}
+
+		// reset the call count to clean up after the test
+		installKubectlSpy.resetHistory();	
 	});
 
 	test("ensure we have access to the kamel cli", function(done) {
