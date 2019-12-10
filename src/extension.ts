@@ -449,7 +449,7 @@ async function registerTutorialWithDidact(context: vscode.ExtensionContext) {
 		const extensionId = 'redhat.vscode-didact';
 		const didactExt : any = vscode.extensions.getExtension(extensionId);
 
-		// if didact is available, register the new extension
+		// if didact is available, register the new didact tutorial
 		if (didactExt) {
 			// command ID: vscode.didact.register
 			const commandId = 'vscode.didact.register';
