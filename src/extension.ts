@@ -28,6 +28,7 @@ import * as kubectl from './kubectl';
 import * as kamel from './kamel';
 import * as kubectlutils from './kubectlutils';
 import * as config from './config';
+import { downloadJavaDependencies, updateReferenceLibraries } from './JavaDependenciesManager';
 
 export let mainOutputChannel: vscode.OutputChannel;
 export let myStatusBarItem: vscode.StatusBarItem;
@@ -134,8 +135,18 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 	
 	});
 
-
+	let destination = downloadJavaDependencies(context.globalStoragePath);
+	
+	vscode.window.onDidChangeActiveTextEditor((editor) => {
+		updateReferenceLibraries(editor, destination);
+	});
+	
+	if (vscode.window.activeTextEditor) {
+		updateReferenceLibraries(vscode.window.activeTextEditor, destination);
+	}
+	
 }
+
 
 export function setStatusLineMessageAndShow( message: string): void {
 	if (myStatusBarItem && message && showStatusBar) {

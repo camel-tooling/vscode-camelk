@@ -218,6 +218,7 @@
 		"@types/tmp": "^0.1.0",
 		"child_process": "^1.0.2",
 		"download": "^7.1.0",
+		"mvn-artifact-download": "4.1.0",
 		"path": "^0.12.7",
 		"request": "^2.88.0",
 		"request-promise": "^4.2.5",
