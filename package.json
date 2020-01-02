@@ -202,7 +202,7 @@
 		"mocha-jenkins-reporter": "^0.4.2",
 		"nock": "^11.7.0",
 		"sinon": "^7.5.0",
-		"sinon-chai": "^3.3.0",
+		"sinon-chai": "^3.4.0",
 		"tslint": "^5.20.1",
 		"typescript": "^3.7.4",
 		"vscode-extension-tester": "^2.2.0",
