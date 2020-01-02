@@ -14,6 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import * as fs from 'fs';
 import mvndownload from 'mvn-artifact-download';
 import * as path from 'path';
 import * as vscode from 'vscode';
@@ -23,6 +24,7 @@ const PREFERENCE_KEY_JAVA_REFERENCED_LIBRARIES = "java.project.referencedLibrari
 export function downloadJavaDependencies(extensionStorage:string): string {
     let camelVersion = "3.0.0";
     let destination = path.join(extensionStorage, `java-dependencies-${camelVersion}`);
+    fs.mkdirSync(destination, { recursive: true });
     /* These are camel-core-engine dependencies, to improve:
     * - use a dependency manager so we just need to specify camel-core-engine
     * - rely on kamel inspect to know all extra potential libraries that can be provided
@@ -46,28 +48,38 @@ export function updateReferenceLibraries(editor: vscode.TextEditor | undefined, 
     if (documentEdited?.fileName.endsWith(".java")) {
         let text = documentEdited.getText();
         const configuration = vscode.workspace.getConfiguration();
-        let refLibrariesConfig = configuration.get(PREFERENCE_KEY_JAVA_REFERENCED_LIBRARIES) as Array<string>;
-        if (text.includes("camel")) {
-            ensureReferencedLibrariesContainsCamelK(refLibrariesConfig, camelKReferencedLibrariesPattern, configuration);
-        } else if (refLibrariesConfig.includes(camelKReferencedLibrariesPattern)) {
-            removeCamelKFromReferencedlibraries(refLibrariesConfig, camelKReferencedLibrariesPattern, configuration);
+        let refLibrariesTopLevelConfig = configuration.get(PREFERENCE_KEY_JAVA_REFERENCED_LIBRARIES);
+        if(refLibrariesTopLevelConfig instanceof Array) {
+            updateReferenceLibrariesForConfigKey(text, refLibrariesTopLevelConfig, camelKReferencedLibrariesPattern, configuration, PREFERENCE_KEY_JAVA_REFERENCED_LIBRARIES);
+        } else {
+            let includepropertyKeyConfig = PREFERENCE_KEY_JAVA_REFERENCED_LIBRARIES + '.include';
+            let refLibrariesIncludeConfig = configuration.get(includepropertyKeyConfig) as Array<string>;
+            updateReferenceLibrariesForConfigKey(text, refLibrariesIncludeConfig, camelKReferencedLibrariesPattern, configuration, includepropertyKeyConfig);
         }
     }
 }
 
-function removeCamelKFromReferencedlibraries(refLibrariesConfig: string[], camelKReferencedLibrariesPattern: string, configuration: vscode.WorkspaceConfiguration) {
+function updateReferenceLibrariesForConfigKey(text: string, refLibrariesConfig: string[], camelKReferencedLibrariesPattern: string, configuration: vscode.WorkspaceConfiguration, configurationKey: string) {
+    if (text.includes("camel")) {
+        ensureReferencedLibrariesContainsCamelK(refLibrariesConfig, camelKReferencedLibrariesPattern, configuration, configurationKey);
+    } else if (refLibrariesConfig.includes(camelKReferencedLibrariesPattern)) {
+        removeCamelKFromReferencedlibraries(refLibrariesConfig, camelKReferencedLibrariesPattern, configuration, configurationKey);
+    }
+}
+
+function removeCamelKFromReferencedlibraries(refLibrariesConfig: string[], camelKReferencedLibrariesPattern: string, configuration: vscode.WorkspaceConfiguration, configurationKey: string) {
     for (var i = 0; i < refLibrariesConfig.length; i++) {
         if (refLibrariesConfig[i] === camelKReferencedLibrariesPattern) {
             refLibrariesConfig.splice(i, 1);
         }
     }
-    configuration.update(PREFERENCE_KEY_JAVA_REFERENCED_LIBRARIES, refLibrariesConfig);
+    configuration.update(configurationKey, refLibrariesConfig);
 }
 
-function ensureReferencedLibrariesContainsCamelK(refLibrariesConfig: string[], camelKReferencedLibrariesPattern: string, configuration: vscode.WorkspaceConfiguration) {
+function ensureReferencedLibrariesContainsCamelK(refLibrariesConfig: string[], camelKReferencedLibrariesPattern: string, configuration: vscode.WorkspaceConfiguration, configurationKey: string) {
     if (!refLibrariesConfig.includes(camelKReferencedLibrariesPattern)) {
         refLibrariesConfig.push(camelKReferencedLibrariesPattern);
-        configuration.update(PREFERENCE_KEY_JAVA_REFERENCED_LIBRARIES, refLibrariesConfig);
+        configuration.update(configurationKey, refLibrariesConfig);
     }
 }
 
