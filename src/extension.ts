@@ -135,7 +135,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 	
 	});
 
-	let destination = downloadJavaDependencies(context.globalStoragePath);
+	let destination = downloadJavaDependencies(context);
 	
 	vscode.window.onDidChangeActiveTextEditor((editor) => {
 		updateReferenceLibraries(editor, destination);
