@@ -21,7 +21,7 @@ import * as vscode from 'vscode';
 const PREFERENCE_KEY_JAVA_REFERENCED_LIBRARIES = "java.project.referencedLibraries";
 
 export function downloadJavaDependencies(extensionStorage:string): string {
-    let camelVersion = "3.0.0-RC3";
+    let camelVersion = "3.0.0";
     let destination = path.join(extensionStorage, `java-dependencies-${camelVersion}`);
     /* These are camel-core-engine dependencies, to improve:
     * - use a dependency manager so we just need to specify camel-core-engine

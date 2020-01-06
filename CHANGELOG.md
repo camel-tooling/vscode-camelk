@@ -5,6 +5,7 @@ All notable changes to the "vscode-camelk" extension will be documented in this 
 ## 0.0.11
 
 - Pure Java language support with standalone Camel K Java files (requires vscode-java 0.55.0 and that the file contains the word `camel`)
+- Upgrade default Kamel client to 1.0.0-RC1
 
 ## 0.0.10
 
