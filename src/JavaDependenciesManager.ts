@@ -15,30 +15,27 @@
  * limitations under the License.
  */
 import * as fs from 'fs';
-import mvndownload from 'mvn-artifact-download';
 import * as path from 'path';
 import * as vscode from 'vscode';
 
 const PREFERENCE_KEY_JAVA_REFERENCED_LIBRARIES = "java.project.referencedLibraries";
 
-export function downloadJavaDependencies(extensionStorage:string): string {
+export function downloadJavaDependencies(context:vscode.ExtensionContext): string {
+    let pomTemplate = context.asAbsolutePath(path.join('resources','pom-to-copy-java-dependencies.xml'));
+    let extensionStorage = context.globalStoragePath;
     let camelVersion = "3.0.0";
+
     let destination = path.join(extensionStorage, `java-dependencies-${camelVersion}`);
     fs.mkdirSync(destination, { recursive: true });
-    /* These are camel-core-engine dependencies, to improve:
-    * - use a dependency manager so we just need to specify camel-core-engine
+
+    /* provides only camel-core-engine dependencies for now, to improve:
     * - rely on kamel inspect to know all extra potential libraries that can be provided
     */
-    mvndownload(`org.apache.camel:camel-api:${camelVersion}`, destination);
-    mvndownload(`org.apache.camel:camel-base:${camelVersion}`, destination);
-    mvndownload(`org.apache.camel:camel-core-engine:${camelVersion}`, destination);
-    mvndownload(`org.apache.camel:camel-jaxp:${camelVersion}`, destination);
-    mvndownload(`org.apache.camel:spi-annotations:${camelVersion}`, destination);
-    mvndownload(`org.apache.camel:camel-management-api:${camelVersion}`, destination);
-    mvndownload(`org.apache.camel:camel-support:${camelVersion}`, destination);
-    mvndownload(`org.apache.camel:camel-util:${camelVersion}`, destination);
-    mvndownload(`org.apache.camel:camel-util-json:${camelVersion}`, destination);
-    mvndownload(`org.slf4j:slf4j-api:1.7.28`, destination);
+    const mvn = require('maven').create({
+        cwd: destination,
+        file: pomTemplate
+    });
+    mvn.execute(['dependency:copy-dependencies'], {'camelVersion': camelVersion, 'outputDirectory': destination});
     return destination;
 }
 
