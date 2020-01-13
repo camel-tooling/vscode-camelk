@@ -43,7 +43,7 @@ export function downloadJavaDependencies(extensionStorage:string): string {
 }
 
 export function updateReferenceLibraries(editor: vscode.TextEditor | undefined, destination:string) {
-    const camelKReferencedLibrariesPattern = destination + '/*.jar';
+    const camelKReferencedLibrariesPattern = escapeSpaces(destination) + '/*.jar';
     let documentEdited = editor?.document;
     if (documentEdited?.fileName.endsWith(".java")) {
         let text = documentEdited.getText();
@@ -57,6 +57,10 @@ export function updateReferenceLibraries(editor: vscode.TextEditor | undefined, 
             updateReferenceLibrariesForConfigKey(text, refLibrariesIncludeConfig, camelKReferencedLibrariesPattern, configuration, includepropertyKeyConfig);
         }
     }
+}
+
+export function escapeSpaces(destination: string) {
+    return destination.replace(/\s/g, '\\ ');
 }
 
 function updateReferenceLibrariesForConfigKey(text: string, refLibrariesConfig: string[], camelKReferencedLibrariesPattern: string, configuration: vscode.WorkspaceConfiguration, configurationKey: string) {
