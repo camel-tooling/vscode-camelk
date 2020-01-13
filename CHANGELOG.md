@@ -2,6 +2,8 @@
 
 All notable changes to the "vscode-camelk" extension will be documented in this file.
 
+## 0.0.12
+
 ## 0.0.11
 
 - Pure Java language support with standalone Camel K Java files (requires vscode-java 0.55.0 and that the file contains the word `camel`)
