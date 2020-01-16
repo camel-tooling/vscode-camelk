@@ -24,8 +24,6 @@
                         <configuration>
                             <artifactItems>
                                 <artifactItem>
-                                    <!-- hardcode values, or use properties, depending on what you want
-                                        to do -->
                                     <groupId>org.apache.camel</groupId>
                                     <artifactId>camel-core-engine</artifactId>
                                     <version>${camelVersion}</version>

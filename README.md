@@ -17,7 +17,7 @@ In order to use our **Tooling for Apache Camel K** extension for VS Code, you mu
 
 * An instance of Apache Camel K running on a Kubernetes or an OpenShift cluster that is  accessible from your system on your network. You must also have Minikube (or the Kubernetes CLI) installed. See the Apache Camel K installation page for details: (https://camel.apache.org/camel-k/latest/installation/installation.html). 
 * Microsoft VS Code installed. You can get the most recent version from (https://code.visualstudio.com/) for your chosen operating system.
-* To benefit from Java Language completion on standalone files, Maven needs to be available on command-line
+* To benefit from Java Language completion on standalone files, [VS Code Language support for java](https://marketplace.visualstudio.com/items?itemName=redhat.java) needs to be installed.
 
 ## Installing the extension
 
