@@ -26,6 +26,7 @@
             "args": [
                 "--extensionDevelopmentPath=${workspaceFolder}",
                 "--extensionTestsPath=${workspaceFolder}/out/src/test/suite",
+                "${workspaceRoot}/testFixture"
             ],
             "outFiles": [
                 "${workspaceFolder}/out/src/test/**/*.js"

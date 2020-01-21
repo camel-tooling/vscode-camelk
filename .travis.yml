@@ -1,9 +1,8 @@
-language: node_js
-node_js: "10"
-npm: "6.4"
+language: java
 services:
   - xvfb
 before_install:
+  - 'nvm install --lts'
   - 'export PATH=./node_modules/.bin:$PATH'
   - 'npm install -g typescript'
 install:
