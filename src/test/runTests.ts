@@ -11,21 +11,26 @@ async function main() : Promise<void> {
 		console.log(`extensionTestsPath = ${extensionTestsPath}`);
 		const vscodeExecutablePath : string = await downloadAndUnzipVSCode('stable');
 		console.log(`vscodeExecutablePath = ${vscodeExecutablePath}`);
+		const testWorkspace = path.resolve(__dirname, '../../../testFixture');
 
 		const cliPath: string = resolveCliPathFromVSCodeExecutablePath(vscodeExecutablePath);
-		cp.spawnSync(cliPath, ['--install-extension', 'ms-kubernetes-tools.vscode-kubernetes-tools', '--force'],
-		{
-			encoding: 'utf-8',
-			stdio: 'inherit'
-		});
-		console.log(`Kubernetes VS Code extension installed`);
-		
-		await runTests({ vscodeExecutablePath, extensionDevelopmentPath, extensionTestsPath });
+		installExtraExtension(cliPath, 'ms-kubernetes-tools.vscode-kubernetes-tools');
+		installExtraExtension(cliPath, 'redhat.java');
+
+		await runTests({ vscodeExecutablePath, extensionDevelopmentPath, extensionTestsPath, launchArgs: [testWorkspace] });
 
 	} catch (err) {
 		console.error('Failed to run tests' + err);
 		process.exit(1);
 	}
+}
+
+function installExtraExtension(cliPath: string, extensionId: string) {
+	cp.spawnSync(cliPath, ['--install-extension', extensionId, '--force'], {
+		encoding: 'utf-8',
+		stdio: 'inherit'
+	});
+	console.log(`VS Code extension ${extensionId} installed`);
 }
 
 main();

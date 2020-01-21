@@ -195,6 +195,7 @@
 		"@types/sinon": "^7.5.1",
 		"@types/sinon-chai": "^3.2.3",
 		"@types/vscode": "^1.41.0",
+		"async-wait-until": "^1.2.4",
 		"chai": "^4.2.0",
 		"copyfiles": "^2.1.1",
 		"glob": "^7.1.6",
