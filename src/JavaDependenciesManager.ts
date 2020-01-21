@@ -20,6 +20,8 @@ import * as vscode from 'vscode';
 
 const PREFERENCE_KEY_JAVA_REFERENCED_LIBRARIES = "java.project.referencedLibraries";
 
+export var areJavaDependenciesDownloaded = false;
+
 export function downloadJavaDependencies(context:vscode.ExtensionContext): string {
     let pomTemplate = context.asAbsolutePath(path.join('resources', 'maven-project', 'pom-to-copy-java-dependencies.xml'));
     let extensionStorage = context.globalStoragePath;
@@ -36,7 +38,9 @@ export function downloadJavaDependencies(context:vscode.ExtensionContext): strin
         file: pomTemplate,
 
     });
-    mvn.execute(['dependency:copy-dependencies'], {'camelVersion': camelVersion, 'outputDirectory': destination});
+    mvn.execute(['dependency:copy-dependencies'], {'camelVersion': camelVersion, 'outputDirectory': destination}).then(() => {
+        areJavaDependenciesDownloaded = true;
+    });
     return destination;
 }
 
