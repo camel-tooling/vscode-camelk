@@ -18,6 +18,7 @@
 
 import * as path from 'path';
 import * as vscode from 'vscode';
+import { areJavaDependenciesDownloaded } from '../../JavaDependenciesManager';
 
 const waitUntil = require('async-wait-until');
 
@@ -36,7 +37,7 @@ suite('Should do completion in Camel K standalone files', () => {
 
 	test('Completes from method for Java', async () => {
 		await testCompletion(docUriJava, new vscode.Position(5, 11), expectedCompletion);
-	}).timeout(60000);
+	}).timeout(76000);
 
 });
 
@@ -45,6 +46,10 @@ async function testCompletion(
 	position: vscode.Position,
 	expectedCompletion: vscode.CompletionItem
 ) {
+	await waitUntil(()=> {
+		return areJavaDependenciesDownloaded;
+	}, 45000);
+
 	let doc = await vscode.workspace.openTextDocument(docUri);
 	await vscode.window.showTextDocument(doc);
 	await waitUntil(() => {
