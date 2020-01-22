@@ -22,7 +22,7 @@ import * as utils from './CamelKJSONUtils';
 import * as configmapsandsecrets from './ConfigMapAndSecrets';
 import * as integrationutils from './IntegrationUtils';
 import * as events from 'events';
-import { installKamel, checkKamelCLIVersion, installKubectl } from './installer';
+import { installKamel, installKubectl, checkKamelNeedsUpdate } from './installer';
 import { Errorable, failed } from './errorable';
 import * as kubectl from './kubectl';
 import * as kamel from './kamel';
@@ -353,14 +353,13 @@ function createIntegrationsView(): void {
 export async function installDependencies(context: vscode.ExtensionContext) {
 
 	let gotKamel : boolean = false;
-	await checkKamelCLIVersion().then ( (kamelCliVersion) => {
-		if (kamelCliVersion) {
-			shareMessageInMainOutputChannel(`Found Apache Camel K CLI (kamel) version ${kamelCliVersion}...`);
-			gotKamel = true;
-		}
-	}).catch ( (error) => { 
+
+	await checkKamelNeedsUpdate()
+		.then ( (response) => { 
+			gotKamel = !response; 
+	}).catch ( (error) => {
 		// ignore but log
-		console.log(`Error when checking for Apache Camel K CLI version: ${error}`);
+		console.log(`Error when checking for kamel version: ${error}`);
 	});
 
 	let gotKubernetes : boolean = false;
