@@ -29,6 +29,7 @@ import * as kamel from './kamel';
 import * as kubectlutils from './kubectlutils';
 import * as config from './config';
 import { downloadJavaDependencies, updateReferenceLibraries } from './JavaDependenciesManager';
+import { ChildProcess } from 'child_process';
 
 export let mainOutputChannel: vscode.OutputChannel;
 export let myStatusBarItem: vscode.StatusBarItem;
@@ -39,6 +40,7 @@ let showStatusBar : boolean;
 let camelKIntegrationsTreeView : vscode.TreeView<TreeNode>;
 let eventEmitter = new events.EventEmitter();
 const restartKubectlWatchEvent = 'restartKubectlWatch';
+let runningKubectl : ChildProcess | undefined;
 
 let stashedContext : vscode.ExtensionContext;
 
@@ -288,6 +290,7 @@ export async function getIntegrationsFromKubectlCliWithWatch() : Promise<void> {
 
 		await kubectlExe.invokeArgs(kubectlArgs)
 			.then( async (runKubectl) => {
+				runningKubectl = runKubectl;
 				if (runKubectl.stdout) {
 					runKubectl.stdout.on('data', async function () {
 						if (camelKIntegrationsTreeView.visible === true) {
@@ -295,9 +298,12 @@ export async function getIntegrationsFromKubectlCliWithWatch() : Promise<void> {
 						}
 					});
 				}
-				runKubectl.on("close", () => {
-					// stopped listening to server - likely timed out
-					eventEmitter.emit(restartKubectlWatchEvent);
+				runKubectl.on("close", (close) => {
+					if (camelKIntegrationsTreeView.visible === true) {
+						// stopped listening to server - likely timed out
+						eventEmitter.emit(restartKubectlWatchEvent);
+					}
+					runningKubectl = undefined;
 				});				
 			})
 			.catch( (error) => {
@@ -345,7 +351,12 @@ function createIntegrationsView(): void {
 	});
 	camelKIntegrationsTreeView.onDidChangeVisibility(async () => {
 		if (camelKIntegrationsTreeView.visible === true) {
+			if (runningKubectl === undefined || runningKubectl.killed) {
+				eventEmitter.emit(restartKubectlWatchEvent);
+			}
 			await camelKIntegrationsProvider.refresh().catch(err => console.log(err));
+		} else {
+			runningKubectl?.kill();
 		}
 	});
 }
