@@ -58,6 +58,21 @@ suite("ensure install methods are functioning as expected", function() {
 		installKubectlSpy.resetHistory();	
 	});
 
+	test("ensure cli version checking works correctly", async function() {
+		await installer.checkKamelNeedsUpdate('bogusversion').then( (boolVal) => {
+			// should return a true since the versions don't match
+			assert.ok(typeof boolVal === "boolean" && boolVal, 'cli version checking, negative case worked');
+		});
+		await installer.getLatestCamelKVersion().then( async (latestversion) => {
+			if (latestversion && typeof latestversion === "string") {
+				await installer.checkKamelNeedsUpdate(latestversion).then( (boolVal) => {
+					// should return a false since the versions should match
+					assert.ok(typeof boolVal === "boolean" && !boolVal, 'cli version checking, positive case worked');
+				});
+			}
+		});
+	});
+
 	test("ensure we have access to the kamel cli", function(done) {
 		let kamelPath = config.getActiveKamelconfig();
 		console.log(`kamelPath= ${kamelPath}`);
