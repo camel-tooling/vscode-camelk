@@ -175,7 +175,6 @@ export async function installKamel(context: vscode.ExtensionContext): Promise<Er
 
 	await checkKamelNeedsUpdate(versionToUse).then((needsUpdate) => {
 		if (needsUpdate) {
-			// no need to install, it's already here
 			extension.shareMessageInMainOutputChannel(`Apache Camel K CLI version ${versionToUse} available`);
 			return { succeeded: true, result: null };
 		}
