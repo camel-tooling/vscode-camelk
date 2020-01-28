@@ -134,7 +134,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 	
 		// add commands to create config-map and secret objects from .properties files
 		configmapsandsecrets.registerCommands();
-	
+		
 	});
 
 	let destination = downloadJavaDependencies(context);
@@ -298,12 +298,13 @@ export async function getIntegrationsFromKubectlCliWithWatch() : Promise<void> {
 						}
 					});
 				}
-				runKubectl.on("close", (close) => {
+				runKubectl.on("close", () => {
 					if (camelKIntegrationsTreeView.visible === true) {
 						// stopped listening to server - likely timed out
 						eventEmitter.emit(restartKubectlWatchEvent);
 					}
 					runningKubectl = undefined;
+					resolve();
 				});				
 			})
 			.catch( (error) => {
@@ -314,7 +315,7 @@ export async function getIntegrationsFromKubectlCliWithWatch() : Promise<void> {
 }
 
 // use kubectl to keep an eye on the server for changes and update the view
-async function startListeningForServerChanges(): Promise<void> {
+export async function startListeningForServerChanges(): Promise<void> {
 	await getIntegrationsFromKubectlCliWithWatch();
 }
 
