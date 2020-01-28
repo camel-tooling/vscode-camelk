@@ -137,6 +137,34 @@ function updateStatusBarItem(sbItem : vscode.StatusBarItem, text: string, toolti
 	}
 }
 
+export async function checkKamelNeedsUpdate(versionToUse? : string): Promise<boolean> {
+	return new Promise<boolean>( async (resolve) => {	
+		if (!versionToUse){ 
+			const latestversion = await getLatestCamelKVersion();
+			if (failed(latestversion)) {
+				console.error(latestversion.error);
+				resolve(true);
+				return true;
+			}
+			versionToUse = latestversion.result.trim();
+		}
+		await checkKamelCLIVersion().then((currentVersion) => {
+			if (versionToUse && versionToUse.toLowerCase() === currentVersion.toLowerCase()) {
+				// no need to install, it's already here
+				resolve(false);
+				return false;
+			} else {
+				resolve(true);
+				return true;
+			}
+		}).catch ( (error) => {
+			console.error(error);
+			resolve(true);
+			return true;
+		});
+	});
+}
+
 export async function installKamel(context: vscode.ExtensionContext): Promise<Errorable<null>> {
 	const latestversion = await getLatestCamelKVersion();
 	if (failed(latestversion)) {
@@ -145,10 +173,9 @@ export async function installKamel(context: vscode.ExtensionContext): Promise<Er
 
 	let versionToUse = latestversion.result.trim();
 
-	await checkKamelCLIVersion().then((currentVersion) => {
-		if (versionToUse.toLowerCase() === currentVersion.toLowerCase()) {
-			// no need to install, it's already here
-			extension.shareMessageInMainOutputChannel(`Apache Camel K CLI version ${currentVersion} available`);
+	await checkKamelNeedsUpdate(versionToUse).then((needsUpdate) => {
+		if (needsUpdate) {
+			extension.shareMessageInMainOutputChannel(`Apache Camel K CLI version ${versionToUse} available`);
 			return { succeeded: true, result: null };
 		}
 	}).catch ( (error) => {
@@ -191,7 +218,7 @@ function getInstallFolder(tool: string, context : vscode.ExtensionContext): stri
 	return path.join(context.globalStoragePath, `camelk/tools/${tool}`);
 }
 
-async function getLatestCamelKVersion(): Promise<Errorable<string>> {
+export async function getLatestCamelKVersion(): Promise<Errorable<string>> {
 	const latestURL = 'https://api.github.com/repos/apache/camel-k/releases/latest';
 	const downloadResult = await downloader.toTempFile(latestURL);
 	if (failed(downloadResult)) {
