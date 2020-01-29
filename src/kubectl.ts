@@ -72,8 +72,9 @@ async function kubectllInternalArgs(args: string[], namespace: string | undefine
 				}        
 				if (sr.stderr) {
 					sr.stderr.on('data', function (data) {
-						utils.shareMessage(extension.mainOutputChannel, `Error ${data}`);
+						utils.shareMessage(extension.mainOutputChannel, `KU1 Error ${data}`);
 						reject(new Error(data));
+						return;
 					});
 				}
 				

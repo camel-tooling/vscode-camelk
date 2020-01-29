@@ -295,6 +295,13 @@ export async function getIntegrationsFromKubectlCliWithWatch() : Promise<void> {
 						}
 					});
 				}
+				if (runKubectl.stderr) {
+					runKubectl.stderr.on('data', function (data) {
+						runKubectl.kill();
+						reject(new Error(`Kubernetes CLI unavailable: ${data}`));
+						return;
+					});
+				}
 				runKubectl.on("close", () => {
 					// stopped listening to server - likely timed out
 					eventEmitter.emit(restartKubectlWatchEvent);
@@ -308,8 +315,13 @@ export async function getIntegrationsFromKubectlCliWithWatch() : Promise<void> {
 }
 
 // use kubectl to keep an eye on the server for changes and update the view
-async function startListeningForServerChanges(): Promise<void> {
-	await getIntegrationsFromKubectlCliWithWatch();
+export async function startListeningForServerChanges(): Promise<void> {
+	return new Promise<void>( async (reject) => {
+		await getIntegrationsFromKubectlCliWithWatch().catch((error) => {
+			reject();
+			return;
+		});
+	});
 }
 
 function applyStatusBarSettings(): void {
@@ -345,7 +357,7 @@ function createIntegrationsView(): void {
 	});
 	camelKIntegrationsTreeView.onDidChangeVisibility(async () => {
 		if (camelKIntegrationsTreeView.visible === true) {
-			await camelKIntegrationsProvider.refresh().catch(err => console.log(err));
+			await camelKIntegrationsProvider.refresh().catch(err => console.log(`IVErr ` + err));
 		}
 	});
 }
