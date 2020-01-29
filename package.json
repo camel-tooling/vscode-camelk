@@ -224,7 +224,7 @@
 		"request": "^2.88.0",
 		"request-promise": "^4.2.5",
 		"shelljs": "^0.8.3",
-		"tar": "^5.0.5",
+		"tar": "^6.0.1",
 		"tmp": "^0.1.0",
 		"vscode-kubernetes-tools-api": "^1.0.0"
 	}
