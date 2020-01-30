@@ -41,6 +41,7 @@ let camelKIntegrationsTreeView : vscode.TreeView<TreeNode>;
 let eventEmitter = new events.EventEmitter();
 const restartKubectlWatchEvent = 'restartKubectlWatch';
 let runningKubectl : ChildProcess | undefined;
+let timestampLastkubectlIntegrationStart = 0;
 
 let stashedContext : vscode.ExtensionContext;
 
@@ -287,6 +288,7 @@ export async function getIntegrationsFromKubectlCliWithWatch() : Promise<void> {
 		kubectlArgs.push('get');
 		kubectlArgs.push(`integrations`);
 		kubectlArgs.push(`-w`);
+		timestampLastkubectlIntegrationStart = Date.now();
 
 		await kubectlExe.invokeArgs(kubectlArgs)
 			.then( async (runKubectl) => {
@@ -299,7 +301,7 @@ export async function getIntegrationsFromKubectlCliWithWatch() : Promise<void> {
 					});
 				}
 				runKubectl.on("close", () => {
-					if (camelKIntegrationsTreeView.visible === true) {
+					if (camelKIntegrationsTreeView.visible === true && Date.now() - timestampLastkubectlIntegrationStart > 1000) {
 						// stopped listening to server - likely timed out
 						eventEmitter.emit(restartKubectlWatchEvent);
 					}
