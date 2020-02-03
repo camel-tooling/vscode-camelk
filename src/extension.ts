@@ -44,7 +44,6 @@ let runningKubectl : ChildProcess | undefined;
 
 let stashedContext : vscode.ExtensionContext;
 
-// This extension offers basic integration with Camel K (https://github.com/apache/camel-k) on two fronts.
 export async function activate(context: vscode.ExtensionContext): Promise<void> {
 
 	stashedContext = context;
