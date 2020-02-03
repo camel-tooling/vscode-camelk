@@ -51,6 +51,12 @@ export class CamelKNodeProvider implements vscode.TreeDataProvider<TreeNode> {
 		return Promise.resolve(this.treeNodes);
 	}
 
+	public getParent(element?: TreeNode) {
+		/* there is only root element currently.
+		   Method is required to be provided for reveal method to work, which is used in tests*/
+		return Promise.resolve(undefined);
+	}
+
 	// add a child to the list of nodes
 	public addChild(oldNodes: TreeNode[] = this.treeNodes, newNode: TreeNode, disableRefresh : boolean = false ): Promise<TreeNode[]> {
 		return new Promise<TreeNode[]>( async (resolve, reject) => {

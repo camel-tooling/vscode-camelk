@@ -16,29 +16,67 @@
  */
 'use strict';
 
+import { expect } from 'chai';
 import * as sinon from 'sinon';
+import * as vscode from 'vscode';
 import * as extension from '../../extension';
 import * as utils from '../../CamelKJSONUtils';
+import * as CamelKNodeProvider from '../../CamelKNodeProvider';
 
 suite("Kubectl integration watcher", function() {
-
+	
 	let messageSpy = sinon.spy(utils, "shareMessage");
-
+	let refreshStub: sinon.SinonStub<[], Promise<void>>;
+	let sandbox: sinon.SinonSandbox;
+	
 	this.beforeEach(() => {
+		sandbox = sinon.createSandbox();
+		refreshStub = sandbox.stub(extension.camelKIntegrationsProvider, 'refresh');
 		messageSpy.resetHistory();
 	});
-
+	
+	this.afterEach(() => {
+		sandbox.reset();
+		refreshStub.restore();
+	});
+	
 	test('Check there is no loop for closing kubectl process', async function() {
-		await sleep(1000);
+		await sleep(extension.DELAY_RETRY_KUBECTL_CONNECTION);
 		sinon.assert.notCalled(messageSpy);
 	});
-
+	
 	test('Check there is one message logged in case of connection error', async function() {
 		await extension.getIntegrationsFromKubectlCliWithWatch();
 		sinon.assert.calledOnce(messageSpy);
 	});
-
+	
+	test('Check there is no loop for closing kubectl process with View visible', async function() {
+		await openCamelKTreeView(sandbox);
+		await sleep(extension.DELAY_RETRY_KUBECTL_CONNECTION);
+		messageSpy.resetHistory();
+		await sleep(extension.DELAY_RETRY_KUBECTL_CONNECTION);
+		sinon.assert.notCalled(messageSpy);
+	});
+	
+	test('Check there is only one message logged in case of connection error with View visible', async function() {
+		await openCamelKTreeView(sandbox);
+		messageSpy.resetHistory();
+		await extension.getIntegrationsFromKubectlCliWithWatch();
+		sinon.assert.calledOnce(messageSpy);
+	});
+	
 });
+
+async function openCamelKTreeView(sandbox: sinon.SinonSandbox) {
+	/* To open Tree View, reveal must be used.
+	Consequently, it requires to have at least an element in the tree and that getParent of the TreeNodeProvider is implemented.
+	Given that, we are testing in case there is no connection and so there is no TreeNodes, we are forced to create a fake one.*/
+	const fakeNode = new CamelKNodeProvider.TreeNode("string", "mockIntegration", "running", vscode.TreeItemCollapsibleState.None);
+	let children = await extension.camelKIntegrationsProvider.getChildren();
+	await extension.camelKIntegrationsProvider.addChild(children, fakeNode, true);
+	await extension.camelKIntegrationsTreeView.reveal(fakeNode);
+	expect(extension.camelKIntegrationsTreeView.visible, 'The Tree View of Camel K integration is not visible').to.be.true;
+}
 
 function sleep(ms = 0) {
 	return new Promise(r => setTimeout(r, ms));
