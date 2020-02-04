@@ -2,6 +2,8 @@
 
 All notable changes to the "vscode-camelk" extension will be documented in this file.
 
+## 0.0.13
+
 ## 0.0.12
 
 - avoid infinite loop when connection to kamel instance is not configured
