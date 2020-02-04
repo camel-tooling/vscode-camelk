@@ -31,16 +31,19 @@ import * as config from './config';
 import { downloadJavaDependencies, updateReferenceLibraries } from './JavaDependenciesManager';
 import { ChildProcess } from 'child_process';
 
+export const DELAY_RETRY_KUBECTL_CONNECTION = 1000;
+
 export let mainOutputChannel: vscode.OutputChannel;
 export let myStatusBarItem: vscode.StatusBarItem;
+export let camelKIntegrationsProvider : CamelKNodeProvider;
+export let camelKIntegrationsTreeView : vscode.TreeView<TreeNode | undefined>;
 
-let camelKIntegrationsProvider : CamelKNodeProvider;
 let outputChannelMap : Map<string, vscode.OutputChannel>;
 let showStatusBar : boolean;
-let camelKIntegrationsTreeView : vscode.TreeView<TreeNode>;
 let eventEmitter = new events.EventEmitter();
 const restartKubectlWatchEvent = 'restartKubectlWatch';
 let runningKubectl : ChildProcess | undefined;
+let timestampLastkubectlIntegrationStart = 0;
 
 let stashedContext : vscode.ExtensionContext;
 
@@ -286,6 +289,7 @@ export async function getIntegrationsFromKubectlCliWithWatch() : Promise<void> {
 		kubectlArgs.push('get');
 		kubectlArgs.push(`integrations`);
 		kubectlArgs.push(`-w`);
+		timestampLastkubectlIntegrationStart = Date.now();
 
 		await kubectlExe.invokeArgs(kubectlArgs)
 			.then( async (runKubectl) => {
@@ -298,7 +302,7 @@ export async function getIntegrationsFromKubectlCliWithWatch() : Promise<void> {
 					});
 				}
 				runKubectl.on("close", () => {
-					if (camelKIntegrationsTreeView.visible === true) {
+					if (camelKIntegrationsTreeView.visible === true && Date.now() - timestampLastkubectlIntegrationStart > DELAY_RETRY_KUBECTL_CONNECTION) {
 						// stopped listening to server - likely timed out
 						eventEmitter.emit(restartKubectlWatchEvent);
 					}
