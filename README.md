@@ -102,6 +102,52 @@ To update the state of your currently deployed integrations, hover over the **Ap
 
 ![Apache Camel K Integrations view - Refresh](images/camelk-integrations-view-refresh-action.jpg)
 
+## Starting a new Camel K Integration with multiple parameters
+
+Using the right-click menu is the easiest way to start a new integration and works well for simple cases. When the Camel K integration requires more configuration, you can set that up using a Task.
+
+To create a new Task, you have a few options.
+
+1. From command palette, call the `Tasks: Configure Task` command. This will open the tasks.json file where you can enter new task info by hand (with some auto-completion support in the editor). If you already have a tasks.json but no Camel K tasks, you can create a new task with type `camel-k` in the tasks.json which is automatically opened.
+2. If you don't have any Tasks configured yet, you can use the `camel-k: Start in dev mode Camel K integration opened in active editor` command, which will template an initial Camel K task for you.
+
+You will end up with something like the following with a new, empty Camel K task specified:
+
+```
+{
+    // See https://go.microsoft.com/fwlink/?LinkId=733558 
+    // for the documentation about the tasks.json format
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "type": "camel-k",
+            "dev": true,
+            "file": "${file}",
+            "problemMatcher": []
+        }
+    ]
+}
+```
+
+Note: We recommend adding a `label` attribute to more easily find your task in the task list when you try to run it.
+
+Once you've created your Camel K task, you can use auto-complete to explore the various parameters available. The following example launches the integration in `--dev` mode and provides a couple of dependencies:
+
+```
+{
+    "type": "camel-k",
+    "label": "Run RestWithUndertow and Dependencies",
+    "dev": true,
+    "file": "./examples/RestWithUndertow.java",
+    "problemMatcher": [],
+    "dependencies": [ "camel-rest", "camel-undertow" ]
+}
+```
+
+When you're done, save the file and call command from palette `Tasks: Run Task`. You will see the command listed with the label that you provided previously.
+
+After running the camel-k `Task`, a terminal will open where you can see the command used and any execution result.
+
 ## Publishing new Kubernetes ConfigMaps or Secrets
 
 You can use the **Tooling for Apache Camel K** extension to create ConfigMaps and Secrets and publish them to the running Kubernetes system.

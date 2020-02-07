@@ -30,6 +30,7 @@ import * as kubectlutils from './kubectlutils';
 import * as config from './config';
 import { downloadJavaDependencies, updateReferenceLibraries } from './JavaDependenciesManager';
 import { ChildProcess } from 'child_process';
+import { CamelKTaskProvider } from './CamelKTaskDefinition';
 
 export const DELAY_RETRY_KUBECTL_CONNECTION = 1000;
 
@@ -149,6 +150,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 		updateReferenceLibraries(vscode.window.activeTextEditor, destination);
 	}
 	
+	vscode.tasks.registerTaskProvider(CamelKTaskProvider.START_CAMELK_TYPE, new CamelKTaskProvider());
 }
 
 

@@ -286,7 +286,7 @@ function getSelectedDependencies(): Promise<string[]> {
 }
 
 // use command-line "kamel" utility to start a new integration
-function createNewIntegration(integrationFileUri: vscode.Uri, devMode? : boolean, configmap? : string, secret? : string, resource? : string, propertyArray? : string[], dependencyArray? : string[]): Promise<boolean> {
+export function createNewIntegration(integrationFileUri: vscode.Uri, devMode? : boolean, configmap? : string, secret? : string, resource? : string, propertyArray? : string[], dependencyArray? : string[]): Promise<boolean> {
 	return new Promise( (resolve, reject) => {
 		let filename = integrationFileUri.fsPath;
 		let foldername = path.dirname(filename);
@@ -297,36 +297,14 @@ function createNewIntegration(integrationFileUri: vscode.Uri, devMode? : boolean
 		return extension.removeOutputChannelForIntegrationViaKubectl(integrationName)
 			.then( async () => {
 				let kamelExe = kamel.create();
-				let kamelArgs : string[] = [];
-				kamelArgs.push('run');
-				kamelArgs.push(`${absoluteRoot}`);
-				if (devMode && devMode === true) {
-					kamelArgs.push('--dev');
-				}
-				if (configmap && configmap.trim().length > 0) {
-					kamelArgs.push(`--configmap=${configmap}`);
-				}
-				if (secret && secret.trim().length > 0) {
-					kamelArgs.push(`--secret=${secret}`);
-				}
-				if (resource && resource.trim().length > 0) {
-					let resourceArray = resource.split(' ');
-					if (resourceArray && resourceArray.length > 0) {
-						resourceArray.forEach(res => {
-							kamelArgs.push(`--resource="${res}"`);
-						});
-					}
-				}
-				if (dependencyArray && dependencyArray.length > 0) {
-					dependencyArray.forEach(dependency => {
-						kamelArgs.push(`--dependency=${dependency}`);
-					});
-				}
-				if (propertyArray && propertyArray.length > 0) {
-					propertyArray.forEach(prop => {
-						kamelArgs.push(`-p ${prop}`);
-					});
-				}
+				let kamelArgs: string[] = computeKamelArgs(
+					absoluteRoot,
+					devMode,
+					configmap,
+					secret,
+					resource,
+					dependencyArray,
+					propertyArray);
 				console.log(`commandString = kamel ${kamelArgs}`);
 				if (devMode && devMode === true) {
 					if (extension.mainOutputChannel) {
@@ -359,6 +337,73 @@ function createNewIntegration(integrationFileUri: vscode.Uri, devMode? : boolean
 				console.error(error);
 			});
 	});
+}
+
+export function computeKamelArgs(absoluteRoot: string,
+		devMode: boolean | undefined,
+		configmap: string | undefined,
+		secret: string | undefined,
+		resource: string | undefined,
+		dependencyArray: string[] | undefined,
+		propertyArray: string[] | undefined,
+		traitsArray?: string[] | undefined,
+		environmentVariablesArray?: string[] | undefined,
+		integrationVolumesArray?: string[] | undefined,
+		compression?: boolean | undefined,
+		profile?: string) {
+	let kamelArgs: string[] = [];
+	kamelArgs.push('run');
+	kamelArgs.push(`${absoluteRoot}`);
+	if (devMode && devMode === true) {
+		kamelArgs.push('--dev');
+	}
+	if (compression && compression === true) {
+		kamelArgs.push('--compression');
+	}
+	if (configmap && configmap.trim().length > 0) {
+		kamelArgs.push(`--configmap=${configmap}`);
+	}
+	if (secret && secret.trim().length > 0) {
+		kamelArgs.push(`--secret=${secret}`);
+	}
+	if (profile && profile.trim().length > 0) {
+		kamelArgs.push(`--profile=${profile}`);
+	}
+	if (resource && resource.trim().length > 0) {
+		let resourceArray = resource.split(' ');
+		if (resourceArray && resourceArray.length > 0) {
+			resourceArray.forEach(res => {
+				kamelArgs.push(`--resource="${res}"`);
+			});
+		}
+	}
+	if (dependencyArray && dependencyArray.length > 0) {
+		dependencyArray.forEach(dependency => {
+			kamelArgs.push(`--dependency=${dependency}`);
+		});
+	}
+	if (propertyArray && propertyArray.length > 0) {
+		propertyArray.forEach(prop => {
+			kamelArgs.push(`-p ${prop}`);
+		});
+	}
+	if (traitsArray && traitsArray.length > 0) {
+		traitsArray.forEach(trait => {
+			kamelArgs.push(`-t ${trait}`);
+		});
+	}
+	if (environmentVariablesArray && environmentVariablesArray.length > 0) {
+		environmentVariablesArray.forEach(environmentVariable => {
+			kamelArgs.push(`-e ${environmentVariable}`);
+		});
+	}
+	if (integrationVolumesArray && integrationVolumesArray.length > 0) {
+		integrationVolumesArray.forEach(integrationVolume => {
+			kamelArgs.push(`-v ${integrationVolume}`);
+		});
+	}
+	
+	return kamelArgs;
 }
 
 export function isCamelKAvailable(): Promise<boolean> {
