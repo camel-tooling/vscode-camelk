@@ -166,6 +166,66 @@
 				}
 			]
 		},
+		"taskDefinitions": [
+			{
+				"type": "camel-k",
+				"required": [
+					"file"
+				],
+				"properties": {
+					"compression": {
+						"type": "boolean",
+						"description": "Enable store source as a compressed binary blob"
+					},
+					"configmap": {
+						"type": "string",
+						"description": "Configmap key which needs to be already deployed."
+					},
+					"dependencies": {
+						"type": "array",
+						"description": "Pass additional explicit dependencies with format such as mvn:com.google.guava:guava:26.0-jre or camel-mina2",
+						"uniqueItems": true
+					},
+					"dev": {
+						"type": "boolean",
+						"description": "If you want to iterate quickly on an integration to have fast feedback on the code you’re writing, you can use by running it in dev mode."
+					},
+					"environmentVariables": {
+						"type": "array",
+						"description": "List of environment variables in the integration container. E.g \"MY_VAR=my-value\"",
+						"uniqueItems": true
+					},
+					"file": {
+						"type": "string",
+						"description": "The file defining the integration to deploy."
+					},
+					"profile": {
+						"type": "string",
+						"description": "Trait profile used for deployment"
+					},
+					"properties": {
+						"type": "array",
+						"description": "List of integration properties.",
+						"format": "<akey>=<avalue>",
+						"uniqueItems": true
+					},
+					"resource": {
+						"type": "string",
+						"description": "Additional resource."
+					},
+					"traits": {
+						"type": "array",
+						"description": "Traits configuration, more details here https://camel.apache.org/camel-k/latest/traits/traits.html",
+						"uniqueItems": true
+					},
+					"volumes": {
+						"type": "array",
+						"description": "Mount a volume into the integration container. The format of volume flag value is similar to that of the docker CLI. But instead of specifying a host path to mount from, you reference the name of a PersistentVolumeClaim that you have already configured within the cluster. E.g \"pvcname:/container/path\"",
+						"uniqueItems": true
+					}
+				}
+			}
+		],
 		"views": {
 			"explorer": [
 				{

@@ -4,6 +4,8 @@ All notable changes to the "vscode-camelk" extension will be documented in this 
 
 ## 0.0.13
 
+- Provide tasks to support multi-arguments launch of Camel K integrations
+
 ## 0.0.12
 
 - avoid infinite loop when connection to kamel instance is not configured
