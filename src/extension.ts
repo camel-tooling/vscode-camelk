@@ -31,6 +31,7 @@ import * as config from './config';
 import { downloadJavaDependencies, updateReferenceLibraries } from './JavaDependenciesManager';
 import { ChildProcess } from 'child_process';
 import { CamelKTaskProvider } from './CamelKTaskDefinition';
+import { LogsPanel } from './logsWebview';
 
 export const DELAY_RETRY_KUBECTL_CONNECTION = 1000;
 
@@ -422,17 +423,33 @@ function handleLogViaKubectlCli(podName: string) : Promise<string> {
 		kubectlArgs.push(`-f`);
 		kubectlArgs.push(`${podName}`);
 
-		let podOutputChannel = getOutputChannel(podName);
-		podOutputChannel.show();
+		let ns = `default`;
+		const currentNs = config.getNamespaceconfig();
+		if (currentNs) {
+			ns = currentNs;
+		}
+		let resource = {
+			kindName: `pod/${podName}`,
+			namespace: ns,
+			containers: undefined,
+			containersQueryPath: `.spec`
+		};
+
+		const cresource = `${resource.namespace}/${resource.kindName}`;
+		const panel = LogsPanel.createOrShow('Loading...', cresource);
+
+		// let podOutputChannel = getOutputChannel(podName);
+		// podOutputChannel.show();
 	
 		await kubectlExe.invokeArgs(kubectlArgs)
 			.then( (runKubectl) => {
 				if (runKubectl.stdout) {
 					runKubectl.stdout.on('data', function (data) {
 						try {
-							if (podOutputChannel) {
-								podOutputChannel.append(`${data}`);
-							}
+							panel.addContent(data);
+							// if (podOutputChannel) {
+							// 	podOutputChannel.append(`${data}`);
+							// }
 						} catch (error) {
 							console.log(error);
 						}
@@ -442,10 +459,12 @@ function handleLogViaKubectlCli(podName: string) : Promise<string> {
 					runKubectl.stderr.on('data', async function (data) {
 						let tempData = data as string;
 						if (tempData.indexOf(`waiting to start: ContainerCreating`) > 0) {
-							podOutputChannel.append(`Waiting for container ${podName} to start...\n`);
+							panel.addContent(`Waiting for container ${podName} to start...\n`);
+//							podOutputChannel.append(`Waiting for container ${podName} to start...\n`);
 							await utils.delay(5000).then( async () => await handleLogViaKubectlCli(podName));
 						} else {
-							podOutputChannel.append("[ERROR] " + `${data} \n`);
+							panel.addContent(`[ERROR] + ${data} \n`);
+//							podOutputChannel.append("[ERROR] " + `${data} \n`);
 						}
 					});
 				}

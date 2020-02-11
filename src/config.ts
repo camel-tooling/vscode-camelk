@@ -143,5 +143,5 @@ export function getNamespaceconfig(): string | undefined {
 	if (!namespace ||namespace.length === 0) {
 		return undefined;
 	}
-	return namespace as string;
+	return namespace;
 }

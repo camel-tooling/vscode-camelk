@@ -1,0 +1,10 @@
+{
+    "java.project.referencedLibraries": [
+        "lib/**/*.jar",
+        "/home/bfitzpat/.config/Code/User/globalStorage/redhat.vscode-camelk/java-dependencies-3.0.0/*.jar"
+    ],
+    "didact.registered": [
+        "{\"name\":\"Didact Demo\",\"category\":\"Didact\",\"sourceUri\":\"/home/bfitzpat/.vscode/extensions/redhat.vscode-didact-0.1.5/demo/didact-demo.didact.md\"}",
+        "{\"name\":\"Create a New Didact Tutorial Extension\",\"category\":\"Didact\",\"sourceUri\":\"/home/bfitzpat/.vscode/extensions/redhat.vscode-didact-0.1.5/create_extension/create-new-tutorial-with-extension.didact.md\"}"
+    ]
+}
