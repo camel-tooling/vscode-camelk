@@ -426,7 +426,18 @@ function handleLogViaKubectlCli(podName: string) : Promise<string> {
             	proc.stdout.on('data', (data: string) => {
 					panel.addContent(data);
 				});
-            }
+			}
+			if (proc && proc.stderr) {
+				proc.stderr.on('data', async function (data) {
+					let tempData = data as string;
+					if (tempData.indexOf(`waiting to start: ContainerCreating`) > 0) {
+						panel.addContent(`Waiting for container ${podName} to start...\n`);
+						await utils.delay(5000).then( async () => await handleLogViaKubectlCli(podName));
+					} else {
+						panel.addContent("[ERROR] " + `${data} \n`);
+					}
+				});				
+			}
         });
 	});
 }
