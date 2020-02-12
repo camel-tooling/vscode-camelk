@@ -221,7 +221,7 @@
 		"download": "^7.1.0",
 		"maven": "^4.7.0",
 		"path": "^0.12.7",
-		"request": "^2.88.0",
+		"request": "^2.88.2",
 		"request-promise": "^4.2.5",
 		"shelljs": "^0.8.3",
 		"tar": "^6.0.1",
