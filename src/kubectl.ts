@@ -22,12 +22,15 @@ import * as shell from './shell';
 import * as utils from './CamelKJSONUtils';
 import * as extension from './extension';
 import * as path from 'path';
+import { ChildProcess } from "child_process";
+import * as shelljs from 'shelljs';
 
 export interface Kubectl {
 	namespace: string | undefined;
 	getPath() : Promise<string>;
 	invokeArgs(args: string[], folderName?: string): Promise<child_process.ChildProcess>;
 	setNamespace(value: string): void;
+	invokeAsync(command: string, stdin?: string, callback?: (proc: ChildProcess) => void): Promise<ShellResult | undefined>;
 }
 
 class KubectlImpl implements Kubectl {
@@ -44,6 +47,62 @@ class KubectlImpl implements Kubectl {
 	setNamespace(value: string): void {
 		this.namespace = value;
 	}
+
+	async invokeAsync(command: string, stdin?: string, callback?: (proc: ChildProcess) => void): Promise<ShellResult | undefined> {
+		return internalInvokeAsync(command, stdin, callback);
+	}
+	
+}
+
+export interface ShellResult {
+    readonly code: number;
+    readonly stdout: string;
+    readonly stderr: string;
+}
+
+async function internalInvokeAsync(command: string, stdin?: string, callback?: (proc: ChildProcess) => void): Promise<ShellResult | undefined> {
+	const bin = await baseKubectlPath();
+	if (bin) {
+		const binpath = bin.trim();
+		const cmd = `${binpath} ${command}`;
+		let sr: ShellResult | undefined;
+		if (stdin) {
+			sr = await exec(cmd, stdin);
+        } else if (callback) {
+			sr = await execStreaming(cmd, callback);
+		}
+		return sr;
+	}
+}
+
+async function execStreaming(cmd: string, callback: (proc: ChildProcess) => void): Promise<ShellResult | undefined> {
+    try {
+        return await execCore(cmd, null, callback);
+    } catch (ex) {
+        console.log(ex);
+        return undefined;
+    }
+}
+
+async function exec(cmd: string, stdin?: string): Promise<ShellResult | undefined> {
+    try {
+        return await execCore(cmd, null, null, stdin);
+    } catch (ex) {
+        console.log(ex);
+        return undefined;
+    }
+}
+
+function execCore(cmd: string, opts: any, callback?: ((proc: ChildProcess) => void) | null, stdin?: string): Promise<ShellResult> {
+    return new Promise<ShellResult>((resolve) => {
+        const proc = shelljs.exec(cmd, opts, (code, stdout, stderr) => resolve({code : code, stdout : stdout, stderr : stderr}));
+        if (stdin && proc.stdin) {
+            proc.stdin.end(stdin);
+        }
+        if (callback) {
+            callback(proc);
+        }
+    });
 }
 
 export function create() : Kubectl {

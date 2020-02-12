@@ -31,6 +31,7 @@ export class LogsPanel extends WebPanel {
     }
 
     protected update() {
+        if (this.panel.visible) {
         this.panel.title = `Logs - ${this.resource}`;
         this.panel.webview.html = `
         <!doctype html>
@@ -159,4 +160,5 @@ export class LogsPanel extends WebPanel {
             </body>
         </html>`;
     }
+}
 }
