@@ -42,7 +42,7 @@ export class LogsPanel extends WebPanel {
         </head>
         <body>
             <div style='position: fixed; top: 15px; left: 2%; width: 100%'>
-                <span style='position: absolute; left: 0%'>Show log entries</span>
+                <!-- <span style='position: absolute; left: 0%'>Show log entries</span>
                 <select id='mode' style='margin-bottom: 5px; position: absolute; left: 110px' onchange='eval()'>
                     <option value='all'>all</option>
                     <option value='include'>that match</option>
@@ -51,7 +51,10 @@ export class LogsPanel extends WebPanel {
                     <option value='before'>before match</option>
                 </select>
                 <span style='position: absolute; left: 240px'>Match expression</span>
-                <input style='left:350px; position: absolute' type='text' id='regexp' onkeyup='eval()' placeholder='Filter' size='25'/>
+                <input style='left:350px; position: absolute' type='text' id='regexp' onkeyup='eval()' placeholder='Filter' size='25'/> -->
+                <!-- positions 600px and 675px with the filter controls above -->
+                <span style='position: absolute; left: 0%'>Auto-scroll</span>
+                <input style='left: 75px; position: absolute' type='checkbox' id='autoscroll' onkeyup='eval()' checked="true"/>
             </div>
             <div style='position: absolute; top: 55px; bottom: 10px; width: 97%'>
               <div style="overflow-y: scroll; height: 100%">
@@ -82,7 +85,11 @@ export class LogsPanel extends WebPanel {
                     });
                     // TODO: need to apply filters here!
                     elt.appendChild(document.createTextNode(message.text));
-                    document.getElementById('bottom').scrollIntoView();
+
+                    var checkBox = document.getElementById("autoscroll");
+                    if (checkBox.checked == true){
+                        document.getElementById('bottom').scrollIntoView();
+                    }   
                 }
               });
 
