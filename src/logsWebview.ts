@@ -58,6 +58,7 @@ export class LogsPanel extends WebPanel {
                   <code>
                     <pre id='content'>
                     </pre>
+                    <a id='bottom' />
                   </code>
                 </div>
             </div>
@@ -81,6 +82,7 @@ export class LogsPanel extends WebPanel {
                     });
                     // TODO: need to apply filters here!
                     elt.appendChild(document.createTextNode(message.text));
+                    document.getElementById('bottom').scrollIntoView();
                 }
               });
 
