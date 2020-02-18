@@ -40,7 +40,6 @@ export let myStatusBarItem: vscode.StatusBarItem;
 export let camelKIntegrationsProvider : CamelKNodeProvider;
 export let camelKIntegrationsTreeView : vscode.TreeView<TreeNode | undefined>;
 
-let outputChannelMap : Map<string, vscode.OutputChannel>;
 let showStatusBar : boolean;
 let eventEmitter = new events.EventEmitter();
 const restartKubectlWatchEvent = 'restartKubectlWatch';
@@ -52,8 +51,6 @@ let stashedContext : vscode.ExtensionContext;
 export async function activate(context: vscode.ExtensionContext): Promise<void> {
 
 	stashedContext = context;
-
-	outputChannelMap = new Map();
 
 	camelKIntegrationsProvider = new CamelKNodeProvider(context);
 
@@ -101,10 +98,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 				}).catch( (err) => {
 					console.log(err);
 				});
-				await removeOutputChannelForIntegrationViaKubectl(integrationName)
-				.catch( (err) => {
-					console.log(err);
-				});
+				// TODO: we need to look into closing the log view when the integration is stopped
 				hideStatusLine();
 				await camelKIntegrationsProvider.refresh()
 				.catch( (err) => {
@@ -168,29 +162,6 @@ export function hideStatusLine(): void {
 	}
 }
 
-// find an output channel by name in the map and remove it
-function removeOutputChannel( channelName: string) : Promise<any> {
-	return new Promise <any> ( (resolve, reject) => {
-		let podOutputChannel;
-		if (outputChannelMap.has(channelName)) {
-			podOutputChannel = outputChannelMap.get(channelName);
-			if (podOutputChannel !== undefined) {
-				outputChannelMap.delete(channelName);
-				try {
-					podOutputChannel.dispose();
-					resolve();
-				} catch (error) {
-					console.log(error);
-					reject(error);
-				} finally {
-					mainOutputChannel.show();
-					utils.shareMessage(mainOutputChannel, `Removed Output channel for integration: ${channelName}`);
-				}
-			}
-		}
-	});
-}
-
 // start the integration file
 async function runTheFile(context: vscode.Uri) {
 	await startIntegration(context)
@@ -221,29 +192,11 @@ function startIntegration(context: vscode.Uri): Promise<any> {
 	});
 }
 
-// remove the output channel for a running integration via kubectl executable
-export async function removeOutputChannelForIntegrationViaKubectl(integrationName:string): Promise<any> {
-	await getIntegrationsFromKubectl(integrationName)
-		.then( async (podName) => {
-			if (podName) {
-				await removeOutputChannel(podName)
-					.catch( (error) => console.log(error));
-			}
-		})
-		.catch(err => {
-			console.log(err);
-		});
-}
-
 // this method is called when your extension is deactivated
 export function deactivate(): void {
 	if (mainOutputChannel) {
 		mainOutputChannel.dispose();
 	}
-	if (outputChannelMap && outputChannelMap.size > 0) {
-		Array.from(outputChannelMap.values()).forEach(value => value.dispose());
-	}
-	outputChannelMap.clear();
 
 	if (myStatusBarItem) {
 		myStatusBarItem.dispose();
@@ -421,9 +374,9 @@ function handleLogViaKubectlCli(podName: string) : Promise<string> {
 		const panel = LogsPanel.createOrShow('Loading...', cresource);
 
 		let cmd = `logs -f ${podName}`;
-        await kubectlExe.invokeAsync(cmd, undefined, (proc: ChildProcess) => {
+		await kubectlExe.invokeAsync(cmd, undefined, (proc: ChildProcess) => {
 			if (proc && proc.stdout) {
-            	proc.stdout.on('data', (data: string) => {
+				proc.stdout.on('data', (data: string) => {
 					panel.addContent(data);
 				});
 			}
@@ -438,7 +391,7 @@ function handleLogViaKubectlCli(podName: string) : Promise<string> {
 					}
 				});				
 			}
-        });
+		});
 	});
 }
 

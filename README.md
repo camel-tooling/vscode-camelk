@@ -218,13 +218,13 @@ If you want to explicitly view the running log for a published integration in a 
 
 ![Apache Camel K Integrations view - Follow log](images/camelk-integrations-view-remove-menu.jpg)
 
-A new Output channel opens. It is named for the running Kubernetes pod where the integration is running. This log updates as new data is added:
+A new view opens. It is named for the running Kubernetes pod where the integration is running. This log updates as new data is added:
 
-![Apache Camel K Integrations view - Integration log](images/camelk-integrations-view-integrations-log.jpg)
+![Apache Camel K Integrations view - Integration log](images/camelk-integrations-view-integrations-log-revised.jpg)
+
+Note: By default, `Auto-scroll` is checked and new entries in the log will automatically be scrolled to at the bottom of the window. If turned off, the scrolling stops and can be done manually.
 
 ## Stopping an Apache Camel K integration
-
-When you stop an integration, you also remove its associated output channel.
 
 1. From the **Apache Camel K Integrations** view, right-click the integration that you want to stop.
 2. Select **Remove Apache Camel K Integration**.

@@ -55,11 +55,12 @@ class KubectlImpl implements Kubectl {
 }
 
 export interface ShellResult {
-    readonly code: number;
-    readonly stdout: string;
-    readonly stderr: string;
+	readonly code: number;
+	readonly stdout: string;
+	readonly stderr: string;
 }
 
+// code added to handle streaming of log content to the logsWebView/webpanel 
 async function internalInvokeAsync(command: string, stdin?: string, callback?: (proc: ChildProcess) => void): Promise<ShellResult | undefined> {
 	const bin = await baseKubectlPath();
 	if (bin) {
@@ -68,7 +69,7 @@ async function internalInvokeAsync(command: string, stdin?: string, callback?: (
 		let sr: ShellResult | undefined;
 		if (stdin) {
 			sr = await exec(cmd, stdin);
-        } else if (callback) {
+		} else if (callback) {
 			sr = await execStreaming(cmd, callback);
 		}
 		return sr;
@@ -76,33 +77,33 @@ async function internalInvokeAsync(command: string, stdin?: string, callback?: (
 }
 
 async function execStreaming(cmd: string, callback: (proc: ChildProcess) => void): Promise<ShellResult | undefined> {
-    try {
-        return await execCore(cmd, null, callback);
-    } catch (ex) {
-        console.log(ex);
-        return undefined;
-    }
+	try {
+		return await execCore(cmd, null, callback);
+	} catch (ex) {
+		utils.shareMessage(extension.mainOutputChannel, `Error ${ex}`);
+		return undefined;
+	}
 }
 
 async function exec(cmd: string, stdin?: string): Promise<ShellResult | undefined> {
-    try {
-        return await execCore(cmd, null, null, stdin);
-    } catch (ex) {
-        console.log(ex);
-        return undefined;
-    }
+	try {
+		return await execCore(cmd, null, null, stdin);
+	} catch (ex) {
+		utils.shareMessage(extension.mainOutputChannel, `Error ${ex}`);
+		return undefined;
+	}
 }
 
 function execCore(cmd: string, opts: any, callback?: ((proc: ChildProcess) => void) | null, stdin?: string): Promise<ShellResult> {
-    return new Promise<ShellResult>((resolve) => {
-        const proc = shelljs.exec(cmd, opts, (code, stdout, stderr) => resolve({code : code, stdout : stdout, stderr : stderr}));
-        if (stdin && proc.stdin) {
-            proc.stdin.end(stdin);
-        }
-        if (callback) {
-            callback(proc);
-        }
-    });
+	return new Promise<ShellResult>((resolve) => {
+		const proc = shelljs.exec(cmd, opts, (code, stdout, stderr) => resolve({code : code, stdout : stdout, stderr : stderr}));
+		if (stdin && proc.stdin) {
+			proc.stdin.end(stdin);
+		}
+		if (callback) {
+			callback(proc);
+		}
+	});
 }
 
 export function create() : Kubectl {
