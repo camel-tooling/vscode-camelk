@@ -180,3 +180,24 @@ export async function getKubernetesVersion(): Promise<string | undefined> {
 
     return `${major}.${minor}`;
 }
+
+// retrieve the first integration running in camel k starting with the integration name
+export async function getIntegrationsFromKubectl(integrationName : string): Promise<string> {
+	return new Promise <string> ( async (resolve, reject) => {
+		await getPodsFromKubectlCli()
+		.then( (allPods) => {
+			let podArray = parseShellResult(allPods);
+			podArray.forEach(podName => {
+				if (podName.startsWith(integrationName)) {
+					resolve(podName);
+					return;
+				}
+			});
+			resolve(undefined);
+			return;
+		}).catch ( (error) => {
+			reject(error);
+			return;
+		});
+	});
+}
