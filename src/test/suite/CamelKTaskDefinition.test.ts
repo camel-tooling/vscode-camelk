@@ -16,7 +16,7 @@
  */
 'use strict';
 
-import { CamelKTaskDefinition, CamelKTaskProvider } from "../../CamelKTaskDefinition";
+import { CamelKTaskDefinition, CamelKTaskProvider } from "../../task/CamelKTaskDefinition";
 import { ShellExecution } from "vscode";
 import { assert } from "chai";
 
