@@ -29,8 +29,9 @@ import * as kamel from './kamel';
 import * as kubectlutils from './kubectlutils';
 import * as config from './config';
 import { downloadJavaDependencies, updateReferenceLibraries } from './JavaDependenciesManager';
+import { CamelKTaskCompletionItemProvider } from './task/CamelKTaskCompletionItemProvider';
+import { CamelKTaskProvider } from './task/CamelKTaskDefinition';
 import { ChildProcess } from 'child_process';
-import { CamelKTaskProvider } from './CamelKTaskDefinition';
 import { LogsPanel } from './logsWebview';
 
 export const DELAY_RETRY_KUBECTL_CONNECTION = 1000;
@@ -59,8 +60,13 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 	mainOutputChannel = vscode.window.createOutputChannel("Apache Camel K");
 	myStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 100);
 	context.subscriptions.push(myStatusBarItem);
+	
+	vscode.tasks.registerTaskProvider(CamelKTaskProvider.START_CAMELK_TYPE, new CamelKTaskProvider());
+	let tasksJson:vscode.DocumentSelector = { scheme: 'file', language: 'jsonc', pattern: '**/tasks.json' };
+	vscode.languages.registerCompletionItemProvider(tasksJson, new CamelKTaskCompletionItemProvider());
 
 	await installDependencies(context).then ( () => {
+		
 		createIntegrationsView();
 
 		// start the watch listener for auto-updates
@@ -145,7 +151,6 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 		updateReferenceLibraries(vscode.window.activeTextEditor, destination);
 	}
 	
-	vscode.tasks.registerTaskProvider(CamelKTaskProvider.START_CAMELK_TYPE, new CamelKTaskProvider());
 }
 
 

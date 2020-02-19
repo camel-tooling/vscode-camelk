@@ -17,7 +17,7 @@
 'use strict';
 
 import * as vscode from 'vscode';
-import * as IntegrationUtils from './IntegrationUtils';
+import * as IntegrationUtils from '../IntegrationUtils';
 
 export interface CamelKTaskDefinition extends vscode.TaskDefinition {
     

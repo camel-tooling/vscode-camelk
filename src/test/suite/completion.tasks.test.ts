@@ -17,24 +17,15 @@
 'use strict';
 
 import * as vscode from 'vscode';
-import { areJavaDependenciesDownloaded } from '../../JavaDependenciesManager';
 import { getDocUri, checkExpectedCompletion } from './completion.util';
 
-const os = require('os');
-const waitUntil = require('async-wait-until');
+suite('Should do completion in tasks.json', () => {
+	const docURiTasksJson = getDocUri('tasks.json');
+	const expectedCompletion = { label: 'Camel K basic development mode' };
 
-suite('Should do completion in Camel K standalone files', () => {
-
-	const docUriJava = getDocUri('MyRouteBuilder.java');
-
-	const expectedCompletion = { label: 'from(String uri) : RouteDefinition'};
-
-	var testVar = test('Completes from method for Java', async () => {
-		if(os.homedir().includes('hudson')) {
-			testVar.skip();
-		}
-		await testCompletion(docUriJava, new vscode.Position(5, 11), expectedCompletion);
-	}).timeout(76000);
+	test('Completes for Camel K template', async () => {
+		await testCompletion(docURiTasksJson, new vscode.Position(3, 7), expectedCompletion);
+	});
 
 });
 
@@ -43,16 +34,7 @@ async function testCompletion(
 	position: vscode.Position,
 	expectedCompletion: vscode.CompletionItem
 ) {
-	await waitUntil(()=> {
-		return areJavaDependenciesDownloaded;
-	}, 45000);
-
 	let doc = await vscode.workspace.openTextDocument(docUri);
 	await vscode.window.showTextDocument(doc);
-	await waitUntil(() => {
-		let javaExtension = vscode.extensions.getExtension('redhat.java');
-		return javaExtension?.isActive && javaExtension?.exports.status === "Started";
-	}, 20000);
-
 	await checkExpectedCompletion(docUri, position, expectedCompletion);
 }
