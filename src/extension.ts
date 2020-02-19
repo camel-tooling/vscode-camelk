@@ -31,6 +31,7 @@ import * as config from './config';
 import { downloadJavaDependencies, updateReferenceLibraries } from './JavaDependenciesManager';
 import { ChildProcess } from 'child_process';
 import { CamelKTaskProvider } from './CamelKTaskDefinition';
+import { LogsPanel } from './logsWebview';
 
 export const DELAY_RETRY_KUBECTL_CONNECTION = 1000;
 
@@ -39,7 +40,6 @@ export let myStatusBarItem: vscode.StatusBarItem;
 export let camelKIntegrationsProvider : CamelKNodeProvider;
 export let camelKIntegrationsTreeView : vscode.TreeView<TreeNode | undefined>;
 
-let outputChannelMap : Map<string, vscode.OutputChannel>;
 let showStatusBar : boolean;
 let eventEmitter = new events.EventEmitter();
 const restartKubectlWatchEvent = 'restartKubectlWatch';
@@ -51,8 +51,6 @@ let stashedContext : vscode.ExtensionContext;
 export async function activate(context: vscode.ExtensionContext): Promise<void> {
 
 	stashedContext = context;
-
-	outputChannelMap = new Map();
 
 	camelKIntegrationsProvider = new CamelKNodeProvider(context);
 
@@ -100,10 +98,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 				}).catch( (err) => {
 					console.log(err);
 				});
-				await removeOutputChannelForIntegrationViaKubectl(integrationName)
-				.catch( (err) => {
-					console.log(err);
-				});
+				// TODO: we need to look into closing the log view when the integration is stopped
 				hideStatusLine();
 				await camelKIntegrationsProvider.refresh()
 				.catch( (err) => {
@@ -167,43 +162,6 @@ export function hideStatusLine(): void {
 	}
 }
 
-// find an output channel by name in the map and remove it
-function removeOutputChannel( channelName: string) : Promise<any> {
-	return new Promise <any> ( (resolve, reject) => {
-		let podOutputChannel;
-		if (outputChannelMap.has(channelName)) {
-			podOutputChannel = outputChannelMap.get(channelName);
-			if (podOutputChannel !== undefined) {
-				outputChannelMap.delete(channelName);
-				try {
-					podOutputChannel.dispose();
-					resolve();
-				} catch (error) {
-					console.log(error);
-					reject(error);
-				} finally {
-					mainOutputChannel.show();
-					utils.shareMessage(mainOutputChannel, `Removed Output channel for integration: ${channelName}`);
-				}
-			}
-		}
-	});
-}
-
-// retrieve the actual output channel for the name we stashed in the map
-function getOutputChannel( channelName: string) : vscode.OutputChannel {
-	let podOutputChannel;
-	if (outputChannelMap.has(channelName)) {
-		podOutputChannel = outputChannelMap.get(channelName);
-		if (podOutputChannel) {
-			return podOutputChannel;
-		}
-	}
-	podOutputChannel = vscode.window.createOutputChannel(channelName);
-	outputChannelMap.set(channelName, podOutputChannel);
-	return podOutputChannel;
-}
-
 // start the integration file
 async function runTheFile(context: vscode.Uri) {
 	await startIntegration(context)
@@ -234,29 +192,11 @@ function startIntegration(context: vscode.Uri): Promise<any> {
 	});
 }
 
-// remove the output channel for a running integration via kubectl executable
-export async function removeOutputChannelForIntegrationViaKubectl(integrationName:string): Promise<any> {
-	await getIntegrationsFromKubectl(integrationName)
-		.then( async (podName) => {
-			if (podName) {
-				await removeOutputChannel(podName)
-					.catch( (error) => console.log(error));
-			}
-		})
-		.catch(err => {
-			console.log(err);
-		});
-}
-
 // this method is called when your extension is deactivated
 export function deactivate(): void {
 	if (mainOutputChannel) {
 		mainOutputChannel.dispose();
 	}
-	if (outputChannelMap && outputChannelMap.size > 0) {
-		Array.from(outputChannelMap.values()).forEach(value => value.dispose());
-	}
-	outputChannelMap.clear();
 
 	if (myStatusBarItem) {
 		myStatusBarItem.dispose();
@@ -417,46 +357,41 @@ export function shareMessageInMainOutputChannel(msg: string) {
 function handleLogViaKubectlCli(podName: string) : Promise<string> {
 	return new Promise<string>( async (resolve, reject) => {
 		let kubectlExe = kubectl.create();
-		let kubectlArgs : string[] = [];
-		kubectlArgs.push('logs');
-		kubectlArgs.push(`-f`);
-		kubectlArgs.push(`${podName}`);
 
-		let podOutputChannel = getOutputChannel(podName);
-		podOutputChannel.show();
-	
-		await kubectlExe.invokeArgs(kubectlArgs)
-			.then( (runKubectl) => {
-				if (runKubectl.stdout) {
-					runKubectl.stdout.on('data', function (data) {
-						try {
-							if (podOutputChannel) {
-								podOutputChannel.append(`${data}`);
-							}
-						} catch (error) {
-							console.log(error);
-						}
-					});
-				}
-				if (runKubectl.stderr) {
-					runKubectl.stderr.on('data', async function (data) {
-						let tempData = data as string;
-						if (tempData.indexOf(`waiting to start: ContainerCreating`) > 0) {
-							podOutputChannel.append(`Waiting for container ${podName} to start...\n`);
-							await utils.delay(5000).then( async () => await handleLogViaKubectlCli(podName));
-						} else {
-							podOutputChannel.append("[ERROR] " + `${data} \n`);
-						}
-					});
-				}
-				runKubectl.on("close", (code, signal) => {
-					console.log("[CLOSING] " + `${code} / ${signal} \n`);
+		let ns = `default`;
+		const currentNs = config.getNamespaceconfig();
+		if (currentNs) {
+			ns = currentNs;
+		}
+		let resource = {
+			kindName: `pod/${podName}`,
+			namespace: ns,
+			containers: undefined,
+			containersQueryPath: `.spec`
+		};
+
+		const cresource = `${resource.namespace}/${resource.kindName}`;
+		const panel = LogsPanel.createOrShow('Loading...', cresource);
+
+		let cmd = `logs -f ${podName}`;
+		await kubectlExe.invokeAsync(cmd, undefined, (proc: ChildProcess) => {
+			if (proc && proc.stdout) {
+				proc.stdout.on('data', (data: string) => {
+					panel.addContent(data);
 				});
-						})
-			.catch( (error) => {
-				reject(new Error(`Kubernetes CLI unavailable: ${error}`));
-				return;
-			});
+			}
+			if (proc && proc.stderr) {
+				proc.stderr.on('data', async function (data) {
+					let tempData = data as string;
+					if (tempData.indexOf(`waiting to start: ContainerCreating`) > 0) {
+						panel.addContent(`Waiting for container ${podName} to start...\n`);
+						await utils.delay(5000).then( async () => await handleLogViaKubectlCli(podName));
+					} else {
+						panel.addContent("[ERROR] " + `${data} \n`);
+					}
+				});				
+			}
+		});
 	});
 }
 

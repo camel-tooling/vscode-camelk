@@ -287,15 +287,13 @@ function getSelectedDependencies(): Promise<string[]> {
 
 // use command-line "kamel" utility to start a new integration
 export function createNewIntegration(integrationFileUri: vscode.Uri, devMode? : boolean, configmap? : string, secret? : string, resource? : string, propertyArray? : string[], dependencyArray? : string[]): Promise<boolean> {
-	return new Promise( (resolve, reject) => {
+	return new Promise( async (resolve, reject) => {
 		let filename = integrationFileUri.fsPath;
 		let foldername = path.dirname(filename);
 		let absoluteRoot = path.parse(filename).base;
 		let rootName = absoluteRoot.split('.', 1)[0];
 		let integrationName = utils.toKebabCase(rootName);
 		utils.shareMessage(extension.mainOutputChannel, `Deploying file ${absoluteRoot} as integration ${integrationName}`);
-		return extension.removeOutputChannelForIntegrationViaKubectl(integrationName)
-			.then( async () => {
 				let kamelExe = kamel.create();
 				let kamelArgs: string[] = computeKamelArgs(
 					absoluteRoot,
@@ -331,12 +329,7 @@ export function createNewIntegration(integrationFileUri: vscode.Uri, devMode? : 
 						reject(error);
 						return;
 					});
-			})
-			.catch( (error) => {
-				// this is not a hard stop, it just means there was no output channel to close
-				console.error(error);
-			});
-	});
+				});
 }
 
 export function computeKamelArgs(absoluteRoot: string,
