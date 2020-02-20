@@ -264,7 +264,7 @@
 		"istanbul": "^0.4.5",
 		"mocha": "^7.0.1",
 		"mocha-jenkins-reporter": "^0.4.2",
-		"nock": "^12.0.0",
+		"nock": "^12.0.1",
 		"remap-istanbul": "^0.13.0",
 		"sinon": "^8.1.1",
 		"sinon-chai": "^3.4.0",
