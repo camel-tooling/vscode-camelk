@@ -354,6 +354,11 @@ function handleLogViaKamelCli(integrationName: string) : Promise<string> {
 					proc.stdout.on('data', async (data: string) => {
 						if (data.length > 0) {
 							var buf = Buffer.from(data);
+							var text = buf.toString();
+							if (text.indexOf(`Received hang up - stopping the main instance`) > 0) {
+								var title = panel.getTitle();
+								panel.updateTitle(title + ` [Integration stopped]`);
+							}
 							panel.addContent(buf.toString());
 						}
 					});

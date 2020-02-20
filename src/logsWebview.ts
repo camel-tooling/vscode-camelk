@@ -58,6 +58,16 @@ export class LogsPanel extends WebPanel {
 		}
 	}
 
+	public getTitle() : string {
+		return this.panel.title;
+	}
+
+	public updateTitle(title: string) {
+		if (title) {
+			this.panel.title = title;
+		}
+	}
+
 	// added the autoscroll checkbox
 	// committed upstream https://github.com/Azure/vscode-kubernetes-tools/pull/704
 	protected update() {
