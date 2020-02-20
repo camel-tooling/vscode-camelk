@@ -118,16 +118,9 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 			if (node && node.label) {
 				setStatusLineMessageAndShow(`Retrieving log for running Apache Camel K Integration...`);
 				let integrationName : string = node.label;
-				await getIntegrationsFromKubectl(integrationName)
-					.then( (podName) => {
-						if (podName) {
-							handleLogViaKubectlCli(podName);
-						} else {
-							utils.shareMessage(mainOutputChannel, `No deployed integration found for: ${integrationName} \n`);
-						}
-					}).catch( (error) => {
-						utils.shareMessage(mainOutputChannel, `error: ${error} \n`);
-					});
+				await handleLogViaKamelCli(integrationName).catch((error) => {
+					utils.shareMessage(mainOutputChannel, `error: ${error} \n`);
+				});
 				hideStatusLine();
 			}
 		});
@@ -206,27 +199,6 @@ export function deactivate(): void {
 	if (myStatusBarItem) {
 		myStatusBarItem.dispose();
 	}
-}
-
-// retrieve the first integration running in camel k starting with the integration name
-async function getIntegrationsFromKubectl(integrationName : string): Promise<string> {
-	return new Promise <string> ( async (resolve, reject) => {
-		await kubectlutils.getPodsFromKubectlCli()
-		.then( (allPods) => {
-			let podArray = kubectlutils.parseShellResult(allPods);
-			podArray.forEach(podName => {
-				if (podName.startsWith(integrationName)) {
-					resolve(podName);
-					return;
-				}
-			});
-			resolve(undefined);
-			return;
-		}).catch ( (error) => {
-			reject(error);
-			return;
-		});
-	});
 }
 
 export async function getIntegrationsFromKubectlCliWithWatch() : Promise<void> {
@@ -359,44 +331,36 @@ export function shareMessageInMainOutputChannel(msg: string) {
 	utils.shareMessage(mainOutputChannel, msg);
 }
 
-function handleLogViaKubectlCli(podName: string) : Promise<string> {
-	return new Promise<string>( async (resolve, reject) => {
-		let kubectlExe = kubectl.create();
-
+function handleLogViaKamelCli(integrationName: string) : Promise<string> {
+	return new Promise<string>( async () => {
+		let kamelExe = kamel.create();
 		let ns = `default`;
 		const currentNs = config.getNamespaceconfig();
 		if (currentNs) {
 			ns = currentNs;
 		}
 		let resource = {
-			kindName: `pod/${podName}`,
+			kindName: `custom/${integrationName}`,
 			namespace: ns,
 			containers: undefined,
 			containersQueryPath: `.spec`
 		};
-
 		const cresource = `${resource.namespace}/${resource.kindName}`;
-		const panel = LogsPanel.createOrShow('Loading...', cresource);
-
-		let cmd = `logs -f ${podName}`;
-		await kubectlExe.invokeAsync(cmd, undefined, (proc: ChildProcess) => {
-			if (proc && proc.stdout) {
-				proc.stdout.on('data', (data: string) => {
-					panel.addContent(data);
+		let args : string[] = ['log', `${integrationName}`];
+		await kamelExe.invokeArgs(args)
+			.then( async (proc : ChildProcess) => {
+				const panel = LogsPanel.createOrShow(`Waiting for integration ${integrationName} to start...\n`, cresource);
+				if (proc && proc.stdout) {
+					proc.stdout.on('data', async (data: string) => {
+						if (data.length > 0) {
+							var buf = Buffer.from(data);
+							panel.addContent(buf.toString());
+						}
+					});
+				}
+				}).catch( (error) => {
+					utils.shareMessage(mainOutputChannel, `exec error: ${error}`);
 				});
-			}
-			if (proc && proc.stderr) {
-				proc.stderr.on('data', async function (data) {
-					let tempData = data as string;
-					if (tempData.indexOf(`waiting to start: ContainerCreating`) > 0) {
-						panel.addContent(`Waiting for container ${podName} to start...\n`);
-						await utils.delay(5000).then( async () => await handleLogViaKubectlCli(podName));
-					} else {
-						panel.addContent("[ERROR] " + `${data} \n`);
-					}
-				});				
-			}
-		});
 	});
 }
 

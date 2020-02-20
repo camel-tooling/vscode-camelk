@@ -106,7 +106,7 @@ export class LogsPanel extends WebPanel {
 						switch (message.command) {
 							case 'content':
 								const elt = document.getElementById('content');
-								const text = message.text.split('\\n');
+								const text = message.toString().split('\\n');
 								text.forEach((line) => {
 									if (line.trim() != "" && line.length > 0) {
 										orig.push(line);
