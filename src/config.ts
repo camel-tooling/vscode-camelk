@@ -24,6 +24,7 @@ export const KUBERNETES_EXTENSION_CONFIG_KEY = "vs-kubernetes";
 export const KUBECTL_PATH_CONFIG_KEY = "vs-kubernetes.kubectl-path";
 export const NAMESPACE_KEY = "camelk.namespace";
 export const SHOW_STATUS_BAR_KEY = "camelk.integrations.showStatusBarMessages";
+export const REMOVE_LOGVIEW_ON_SHUTDOWN_KEY = "camelk.integrations.closeLogViewWhenIntegrationRemoved";
 
 export async function addKamelPathToConfig(value: string) : Promise<void> {
 	await setConfigValue(KAMEL_PATH_CONFIG_KEY, value);

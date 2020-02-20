@@ -62,6 +62,10 @@ export class LogsPanel extends WebPanel {
 		return this.panel.title;
 	}
 
+	public disposeView() {
+		this.panel.dispose();
+	}
+
 	public updateTitle(title: string) {
 		if (title) {
 			this.panel.title = title;

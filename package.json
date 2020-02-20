@@ -67,6 +67,12 @@
 							}
 						}
 					},
+					"camelk.integrations.closeLogViewWhenIntegrationRemoved": {
+						"type": "boolean",
+						"default": true,
+						"description": "Close log view when removing its running integration",
+						"scope": "window"
+					},
 					"vs-kubernetes": {
 						"type": "object",
 						"description": "CLI locations",
