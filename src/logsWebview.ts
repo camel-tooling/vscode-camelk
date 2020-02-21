@@ -76,8 +76,11 @@ export class LogsPanel extends WebPanel {
 	// committed upstream https://github.com/Azure/vscode-kubernetes-tools/pull/704
 	protected update() {
 		if (this.panel.visible) {
-		this.panel.title = `Logs - ${this.resource}`;
-		this.panel.webview.html = `
+			// if the title is the original value, update to reflect the resource we're streaming the log for
+			if (this.panel.title.startsWith(`Camel K Logs`)) {
+				this.panel.title = `Logs - ${this.resource}`;
+			}
+			this.panel.webview.html = `
 			<!doctype html>
 			<html>
 			<head>

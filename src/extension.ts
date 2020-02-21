@@ -370,7 +370,7 @@ function handleLogViaKamelCli(integrationName: string) : Promise<string> {
 							var text = buf.toString();
 							if (text.indexOf(`Received hang up - stopping the main instance`) > 0 && !closeLogViewWhenIntegrationRemoved) {
 								var title = panel.getTitle();
-								panel.updateTitle(title + ` [Integration stopped]`);
+								updateLogViewTitleToStopped(panel, title);
 							}
 							panel.addContent(buf.toString());
 						}
@@ -396,6 +396,26 @@ function removeIntegrationLogView(integrationName: string) : Promise<string> {
 					value.disposeView();
 				}
 			});
+		} else {
+			LogsPanel.currentPanels.forEach((value : LogsPanel) => {
+				var title = value.getTitle();
+				if (title.indexOf(integrationName) > 0) {
+					updateLogViewTitleToStopped(value, title);
+				}
+			});
 		}
 	});
+}
+
+function updateLogViewTitleToStopped(panel: LogsPanel, title: string) {
+	if (panel && title) {
+		// make sure we only show the log as stopped once 
+		const stoppedString = ` [Integration stopped]`;
+		let boolHasIntegrationStopped = title.indexOf(stoppedString) > 0;
+		if (!boolHasIntegrationStopped) {
+			panel.updateTitle(title + stoppedString);
+		} else {
+			panel.updateTitle(title);
+		}
+	}
 }
