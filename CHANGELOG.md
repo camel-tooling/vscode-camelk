@@ -7,6 +7,7 @@ All notable changes to the "vscode-camelk" extension will be documented in this 
 - Provide tasks to support multi-arguments launch of Camel K integrations
 - Change log functionality from Output channels to separate log windows that can be moved and placed in the display
 - Add the ability to auto-scroll with a log window or turn it off so it remains at a particular location
+- Add an extension preference to close an open log window if the integration is removed
 
 ## 0.0.12
 
