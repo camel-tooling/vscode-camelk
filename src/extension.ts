@@ -134,6 +134,18 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 		// add commands to create config-map and secret objects from .properties files
 		configmapsandsecrets.registerCommands();
 		
+		// create the integration view action -- open operator log
+		vscode.commands.registerCommand('camelk.integrations.openOperatorLog', async () => {
+			setStatusLineMessageAndShow(`Retrieving log for Apache Camel K Operator...`);
+			await kubectlutils.getNamedPodsFromKubectl(`camel-k-operator`).then( async (podNames) => {
+				await handleLogViaKubectlCli(podNames[0]).catch((error) => {
+					utils.shareMessage(mainOutputChannel, `error: ${error} \n`);
+				});
+			}).catch( (err) => {
+				console.log(err);
+			});
+			hideStatusLine();
+		});
 	});
 
 	let destination = downloadJavaDependencies(context);
@@ -373,6 +385,40 @@ function handleLogViaKamelCli(integrationName: string) : Promise<string> {
 								updateLogViewTitleToStopped(panel, title);
 							}
 							panel.addContent(buf.toString());
+						}
+					});
+				}
+				}).catch( (error) => {
+					utils.shareMessage(mainOutputChannel, `exec error: ${error}`);
+				});
+	});
+}
+
+function handleLogViaKubectlCli(podName: string) : Promise<string> {
+	return new Promise<string>( async () => {
+		let kubectlExe = kubectl.create();
+		let ns = `default`;
+		const currentNs = config.getNamespaceconfig();
+		if (currentNs) {
+			ns = currentNs;
+		}
+		let resource = {
+			kindName: `custom/${podName}`,
+			namespace: ns,
+			containers: undefined,
+			containersQueryPath: `.spec`
+		};
+		const cresource = `${resource.namespace}/${resource.kindName}`;
+		let args : string[] = ['logs', `-f`, `${podName}`];
+		await kubectlExe.invokeArgs(args)
+			.then( async (proc : ChildProcess) => {
+				const panel = LogsPanel.createOrShow(`Waiting for ${podName} to start...\n`, cresource);
+				if (proc && proc.stdout) {
+					proc.stdout.on('data', async (data: string) => {
+						if (data.length > 0) {
+							var buf = Buffer.from(data);
+							var text = buf.toString();
+							panel.addContent(text);
 						}
 					});
 				}
