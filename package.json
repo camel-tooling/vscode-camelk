@@ -289,7 +289,7 @@
 		"@types/tmp": "^0.1.0",
 		"child_process": "^1.0.2",
 		"download": "^7.1.0",
-		"jsonc-parser": "^2.2.0",
+		"jsonc-parser": "^2.2.1",
 		"maven": "^4.7.0",
 		"path": "^0.12.7",
 		"request": "^2.88.2",
