@@ -46,6 +46,7 @@ let eventEmitter = new events.EventEmitter();
 const restartKubectlWatchEvent = 'restartKubectlWatch';
 let runningKubectl : ChildProcess | undefined;
 let timestampLastkubectlIntegrationStart = 0;
+let closeLogViewWhenIntegrationRemoved : boolean;
 
 let stashedContext : vscode.ExtensionContext;
 
@@ -104,6 +105,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 				}).catch( (err) => {
 					console.log(err);
 				});
+				await removeIntegrationLogView(integrationName);
 				// TODO: we need to look into closing the log view when the integration is stopped
 				hideStatusLine();
 				await camelKIntegrationsProvider.refresh()
@@ -254,6 +256,16 @@ function applyStatusBarSettings(): void {
 	});
 }
 
+function applyLogviewSettings(): void {
+	let logviewSetting = vscode.workspace.getConfiguration().get(config.REMOVE_LOGVIEW_ON_SHUTDOWN_KEY) as boolean;
+	closeLogViewWhenIntegrationRemoved = logviewSetting;
+
+	vscode.workspace.onDidChangeConfiguration(() => {
+		let statusBarSetting = vscode.workspace.getConfiguration().get(config.REMOVE_LOGVIEW_ON_SHUTDOWN_KEY) as boolean;
+		closeLogViewWhenIntegrationRemoved = statusBarSetting;
+	});
+}
+
 function refreshIfNamespaceChanges(): void {
 	vscode.workspace.onDidChangeConfiguration(async () => {
 		if (camelKIntegrationsTreeView && camelKIntegrationsTreeView.visible === true) {
@@ -266,6 +278,7 @@ function refreshIfNamespaceChanges(): void {
 function applyUserSettings(): void {
 	applyStatusBarSettings();
 	refreshIfNamespaceChanges();
+	applyLogviewSettings();
 }
 
 function createIntegrationsView(): void {
@@ -354,6 +367,11 @@ function handleLogViaKamelCli(integrationName: string) : Promise<string> {
 					proc.stdout.on('data', async (data: string) => {
 						if (data.length > 0) {
 							var buf = Buffer.from(data);
+							var text = buf.toString();
+							if (text.indexOf(`Received hang up - stopping the main instance`) > 0 && !closeLogViewWhenIntegrationRemoved) {
+								var title = panel.getTitle();
+								updateLogViewTitleToStopped(panel, title);
+							}
 							panel.addContent(buf.toString());
 						}
 					});
@@ -367,4 +385,37 @@ function handleLogViaKamelCli(integrationName: string) : Promise<string> {
 // for testing purposes only
 export function getStashedContext() : vscode.ExtensionContext {
 	return stashedContext;
+}
+
+function removeIntegrationLogView(integrationName: string) : Promise<string> {
+	return new Promise<string>( async () => {
+		if (closeLogViewWhenIntegrationRemoved) {
+			LogsPanel.currentPanels.forEach((value : LogsPanel) => {
+				var title = value.getTitle();
+				if (title.indexOf(integrationName) >= 0) {
+					value.disposeView();
+				}
+			});
+		} else {
+			LogsPanel.currentPanels.forEach((value : LogsPanel) => {
+				var title = value.getTitle();
+				if (title.indexOf(integrationName) >= 0) {
+					updateLogViewTitleToStopped(value, title);
+				}
+			});
+		}
+	});
+}
+
+function updateLogViewTitleToStopped(panel: LogsPanel, title: string) {
+	if (panel && title) {
+		// make sure we only show the log as stopped once 
+		const stoppedString = `[Integration stopped]`;
+		let boolHasIntegrationStopped = title.indexOf(stoppedString) > 0;
+		if (!boolHasIntegrationStopped) {
+			panel.updateTitle(title + ` ` + stoppedString);
+		} else {
+			panel.updateTitle(title);
+		}
+	}
 }
