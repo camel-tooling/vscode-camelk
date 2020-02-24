@@ -59,7 +59,10 @@ export class LogsPanel extends WebPanel {
 	}
 
 	public getTitle() : string {
-		return this.panel.title;
+		if (this.canProcessMessages) {
+			return this.panel.title;
+		}
+		return '';
 	}
 
 	public disposeView() {

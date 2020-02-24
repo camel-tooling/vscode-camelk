@@ -33,6 +33,7 @@ import { CamelKTaskCompletionItemProvider } from './task/CamelKTaskCompletionIte
 import { CamelKTaskProvider } from './task/CamelKTaskDefinition';
 import { ChildProcess } from 'child_process';
 import { LogsPanel } from './logsWebview';
+import { promise } from 'vscode-extension-tester';
 
 export const DELAY_RETRY_KUBECTL_CONNECTION = 1000;
 
@@ -146,6 +147,31 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 			});
 			hideStatusLine();
 		});
+		// create the context menu integration view action -- open kit log
+		vscode.commands.registerCommand('camelk.integrations.kitlog', async (node: TreeNode) => {
+			if (node && node.label) {
+				let integrationName : string = node.label;
+				setStatusLineMessageAndShow(`Retrieving log for Apache Camel K Integration kit...`);
+				await getIntegrationsListFromKamel(integrationName).then( async (result : string ) => {
+					if (result && result.length > 0) {
+						let lines : string[] = result.split("\n");
+						if (lines.length > 1) {
+							let secondLine = lines[1]; // "integration\tState\tkit-pod-name"
+							let columns : string[] = secondLine.split("\t");
+							if (columns.length > 2) {
+								let kitname = columns[2];
+								let fullkitname = `camel-k-${kitname}-builder`;
+								await handleLogViaKubectlCli(fullkitname).catch((error) => {
+									utils.shareMessage(mainOutputChannel, `error: ${error} \n`);
+								});
+							}
+						}
+					}
+				});
+				hideStatusLine();
+			}
+		});
+
 	});
 
 	let destination = downloadJavaDependencies(context);
@@ -354,6 +380,23 @@ async function installDependency(name: string, alreadyGot: boolean, context: vsc
 
 export function shareMessageInMainOutputChannel(msg: string) {
 	utils.shareMessage(mainOutputChannel, msg);
+}
+
+function getIntegrationsListFromKamel(integrationName? : string) : Promise<string> {
+	return new Promise<string>( async (resolve, reject) => {
+		let kamelExe = kamel.create();
+		let cmdLine = `get`;
+		if (integrationName) {
+			cmdLine = `get ${integrationName}`;
+		}
+		await kamelExe.invoke(cmdLine)
+			.then( async (result : string) => {
+					resolve(result);
+				}).catch( (error) => {
+					reject(`exec error: ${error}`);
+					utils.shareMessage(mainOutputChannel, `exec error: ${error}`);
+				});
+	});
 }
 
 function handleLogViaKamelCli(integrationName: string) : Promise<string> {
