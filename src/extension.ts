@@ -392,14 +392,14 @@ function removeIntegrationLogView(integrationName: string) : Promise<string> {
 		if (closeLogViewWhenIntegrationRemoved) {
 			LogsPanel.currentPanels.forEach((value : LogsPanel) => {
 				var title = value.getTitle();
-				if (title.indexOf(integrationName) > 0) {
+				if (title.indexOf(integrationName) >= 0) {
 					value.disposeView();
 				}
 			});
 		} else {
 			LogsPanel.currentPanels.forEach((value : LogsPanel) => {
 				var title = value.getTitle();
-				if (title.indexOf(integrationName) > 0) {
+				if (title.indexOf(integrationName) >= 0) {
 					updateLogViewTitleToStopped(value, title);
 				}
 			});
@@ -410,10 +410,10 @@ function removeIntegrationLogView(integrationName: string) : Promise<string> {
 function updateLogViewTitleToStopped(panel: LogsPanel, title: string) {
 	if (panel && title) {
 		// make sure we only show the log as stopped once 
-		const stoppedString = ` [Integration stopped]`;
+		const stoppedString = `[Integration stopped]`;
 		let boolHasIntegrationStopped = title.indexOf(stoppedString) > 0;
 		if (!boolHasIntegrationStopped) {
-			panel.updateTitle(title + stoppedString);
+			panel.updateTitle(title + ` ` + stoppedString);
 		} else {
 			panel.updateTitle(title);
 		}
