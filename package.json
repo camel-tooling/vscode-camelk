@@ -266,7 +266,7 @@
 		"mocha-jenkins-reporter": "^0.4.2",
 		"nock": "^12.0.1",
 		"remap-istanbul": "^0.13.0",
-		"sinon": "^8.1.1",
+		"sinon": "^9.0.0",
 		"sinon-chai": "^3.5.0",
 		"tslint": "^6.0.0",
 		"typescript": "^3.8.2",
