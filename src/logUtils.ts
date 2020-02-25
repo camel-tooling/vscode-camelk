@@ -97,24 +97,36 @@ export function handleLogViaKubectlCli(podName: string) : Promise<string> {
 	});
 }
 
+export function parseKamelGetResponseForKitName(incoming : string) : string | undefined {
+	if (incoming) {
+		let lines : string[] = incoming.split("\n");
+		if (lines.length > 1) {
+			let secondLine = lines[1];
+			let columns : string[] = secondLine.split("\t");
+			if (columns.length > 2) {
+				let kitname = columns[2];
+				return kitname;
+			}
+		}
+	}
+	return undefined;
+}
+
 export function handleKitLog(integrationName: string) : Promise<string> {
 	return new Promise<string>( async () => {
 		await getIntegrationsListFromKamel(integrationName).then( async (result : string ) => {
 			if (result && result.length > 0) {
-				let lines : string[] = result.split("\n");
-				if (lines.length > 1) {
-					let secondLine = lines[1];
-					let columns : string[] = secondLine.split("\t");
-					if (columns.length > 2) {
-						let kitname = columns[2];
-						let fullkitname = `camel-k-${kitname}-builder`;
-						await handleLogViaKubectlCli(fullkitname)
-						.then( () => {
-							Promise.resolve();
-						}).catch((error) => {
-							throw new Error(error);
-						});
-					}
+				let kitname = parseKamelGetResponseForKitName(result);
+				if (kitname) {
+					let fullkitname = `camel-k-${kitname}-builder`;
+					await handleLogViaKubectlCli(fullkitname)
+					.then( () => {
+						Promise.resolve();
+					}).catch((error) => {
+						throw new Error(error);
+					});
+				} else {
+					throw new Error(`Kit name for integration ${integrationName} not found`);
 				}
 			}
 		}).catch( (err) => {
@@ -138,7 +150,6 @@ export function handleOperatorLog() : Promise<string> {
 		});
 	});
 }
-
 
 export function removeIntegrationLogView(integrationName: string) : Promise<string> {
 	return new Promise<string>( async () => {
