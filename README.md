@@ -96,7 +96,7 @@ You can start a new Camel K integration with or without additional options such 
 
 When you start a new integration, the extension starts the deployment process with the *kamel run [filename]* command and any options after that.
 
-**Note:** The first time that you publish a new integration, the extension  might take a few moments to propagate through the system to a running state. 
+**Note:** The first time that you publish a new integration, the extension might take a few moments to propagate through the system to a running state. 
 
 To update the state of your currently deployed integrations, hover over the **Apache Camel K Integrations** view and click the **Refresh** button.
 
@@ -210,11 +210,19 @@ Optionally, to disable status bar messages:
 2. Select **Extensions** and then select **Apache Camel K Tooling Extension Settings**.
 3. Uncheck the **Show Status Bar Messages** option.
 
+## Viewing the log for a Apache Camel K Operator
+
+In the background of each Apache Camel K system, there is usually an Operator coordinating the various builders and integrations being spun up. This log will often contain information not found in the other logs (see Viewing the running log and Viewing the Kit Builder Log below for details on opening the other available logs).
+
+![Apache Camel K Integrations view - Follow log](images/camelk-integrations-view-operator-log-action.jpg)
+
+A new view opens. It is named for the running Kubernetes pod where the Operator is running. This log updates as new data is added.
+
 ## Viewing the running log for a published Apache Camel K Integration
 
 If you are running an integration in Dev mode, you can view the logged output for that integration in the **Apache Camel K Output channel**.
 
-If you want to explicitly view the running log for a published integration in a new Output channel, right-click on a running integration and then select the **Follow log for running Apache Camel K Integration** option.
+If you want to explicitly view the running log for a published integration in a new Log view, right-click on a running integration and then select the **Follow log for running Apache Camel K Integration** option.
 
 ![Apache Camel K Integrations view - Follow log](images/camelk-integrations-view-remove-menu.jpg)
 
@@ -228,6 +236,13 @@ Note: By default, `Auto-scroll` is checked and new entries in the log will autom
 
 1. From the **Apache Camel K Integrations** view, right-click the integration that you want to stop.
 2. Select **Remove Apache Camel K Integration**.
+
+## Viewing the Kit Builder Log for an Apache Camel K integration
+
+1. From the **Apache Camel K Integrations** view, right-click the integration that you want to stop.
+2. Select **Follow kit builder log for running Apache Camel K integration**.
+
+A new view opens. It is named for the running pod where the Kit Builder is running. This log updates as new data is added. 
 
 ## Apache Camel K Extension Settings
 

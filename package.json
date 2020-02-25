@@ -125,7 +125,7 @@
 			},
 			{
 				"command": "camelk.integrations.openOperatorLog",
-				"title": "Open Camel K Operator Log",
+				"title": "Open Apache Camel K Operator Log",
 				"icon": {
 					"dark": "resources/dark/note.svg",
 					"light": "resources/light/note.svg"

@@ -8,6 +8,8 @@ All notable changes to the "vscode-camelk" extension will be documented in this 
 - Change log functionality from Output channels to separate log windows that can be moved and placed in the display
 - Add the ability to auto-scroll with a log window or turn it off so it remains at a particular location
 - Add an extension preference to close an open log window if the integration is removed
+- Add a new button to the Integrations view that opens the Apache Camel K Operator log
+- Add a new context menu to published integrations in the Integrations view to open the builder log
 
 ## 0.0.12
 
