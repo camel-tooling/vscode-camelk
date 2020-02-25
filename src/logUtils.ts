@@ -24,6 +24,7 @@ import { mainOutputChannel, closeLogViewWhenIntegrationRemoved } from './extensi
 import * as kubectl from './kubectl';
 import * as config from './config';
 import * as kubectlutils from './kubectlutils';
+import { window } from 'vscode';
 
 export function handleLogViaKamelCli(integrationName: string) : Promise<string> {
 	return new Promise<string>( async () => {
@@ -64,7 +65,7 @@ export function handleLogViaKamelCli(integrationName: string) : Promise<string> 
 }
 
 export function handleLogViaKubectlCli(podName: string) : Promise<string> {
-	return new Promise<string>( async (resolve) => {
+	return new Promise<string>( async (reject) => {
 		let kubectlExe = kubectl.create();
 		let ns = `default`;
 		const currentNs = config.getNamespaceconfig();
@@ -81,17 +82,28 @@ export function handleLogViaKubectlCli(podName: string) : Promise<string> {
 		let args : string[] = ['logs', `-f`, `${podName}`];
 		await kubectlExe.invokeArgs(args)
 			.then( async (proc : ChildProcess) => {
-				const panel = LogsPanel.createOrShow(`Waiting for ${podName} to start...\n`, cresource);
-				if (proc && proc.stdout) {
-					proc.stdout.on('data', async (data: string) => {
+				var panel : LogsPanel | undefined = undefined;
+				if (proc && proc.stderr) {
+					proc.stderr.on('data', async (data: string) => {
 						if (data.length > 0) {
-							var buf = Buffer.from(data);
-							var text = buf.toString();
-							panel.addContent(text);
+							var text = data.toString();
+							window.showErrorMessage(`Error encountered while opening log for ${podName}. See Apache Camel K output channel for details and wait a moment before trying again. It's likely the pod simply hasn't started yet.`);
+							reject(text);
+							return;
 						}
 					});
 				}
-				}).catch( (error) => {
+				if (proc && proc.stdout) {
+					proc.stdout.on('data', async (data: string) => {
+						if (data.length > 0) {
+							if (!panel) {
+								panel = LogsPanel.createOrShow(`Waiting for ${podName} to start...\n`, cresource);
+							}
+							var text = data.toString();
+							panel.addContent(text);
+						}
+					});
+				}}).catch( (error) => {
 					utils.shareMessage(mainOutputChannel, `exec error: ${error}`);
 				});
 	});
