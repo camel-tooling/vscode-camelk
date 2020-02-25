@@ -33,7 +33,6 @@ import { CamelKTaskCompletionItemProvider } from './task/CamelKTaskCompletionIte
 import { CamelKTaskProvider } from './task/CamelKTaskDefinition';
 import { ChildProcess } from 'child_process';
 import { LogsPanel } from './logsWebview';
-import { promise } from 'vscode-extension-tester';
 
 export const DELAY_RETRY_KUBECTL_CONNECTION = 1000;
 
