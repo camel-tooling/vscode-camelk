@@ -212,7 +212,7 @@ Optionally, to disable status bar messages:
 
 ## Viewing the log for a Apache Camel K Operator
 
-In the background of each Apache Camel K system, there is usually an Operator coordinating the various builders and integrations being spun up. This log will often contain information not found in the other logs (see Viewing the running log and Viewing the Kit Builder Log below for details on opening the other available logs).
+In the background of each Apache Camel K system, there is usually an Operator coordinating the various builders and integrations being spun up. This log will often contain information not found in the other logs (see [Viewing the running log](#viewing-the-running-log-for-a-published-apache-camel-k-integration) and [Viewing the Kit Builder Log](#viewing-the-kit-builder-log-for-an-apache-camel-k-integration) below for details on opening the other available logs).
 
 ![Apache Camel K Integrations view - Follow log](images/camelk-integrations-view-operator-log-action.jpg)
 

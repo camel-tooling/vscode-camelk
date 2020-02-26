@@ -26,14 +26,19 @@ import * as config from './config';
 import * as kubectlutils from './kubectlutils';
 import { window } from 'vscode';
 
+function getCurrentNamespace() : string {
+	let ns = `default`;
+	const currentNs = config.getNamespaceconfig();
+	if (currentNs) {
+		ns = currentNs;
+	}
+	return ns;
+}
+
 export function handleLogViaKamelCli(integrationName: string) : Promise<string> {
 	return new Promise<string>( async () => {
 		let kamelExe = kamel.create();
-		let ns = `default`;
-		const currentNs = config.getNamespaceconfig();
-		if (currentNs) {
-			ns = currentNs;
-		}
+		let ns = getCurrentNamespace();
 		let resource = {
 			kindName: `custom/${integrationName}`,
 			namespace: ns,
@@ -67,11 +72,7 @@ export function handleLogViaKamelCli(integrationName: string) : Promise<string> 
 export function handleLogViaKubectlCli(podName: string) : Promise<string> {
 	return new Promise<string>( async (reject) => {
 		let kubectlExe = kubectl.create();
-		let ns = `default`;
-		const currentNs = config.getNamespaceconfig();
-		if (currentNs) {
-			ns = currentNs;
-		}
+		let ns = getCurrentNamespace();
 		let resource = {
 			kindName: `custom/${podName}`,
 			namespace: ns,
