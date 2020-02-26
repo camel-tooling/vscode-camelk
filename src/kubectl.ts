@@ -80,7 +80,7 @@ async function execStreaming(cmd: string, callback: (proc: ChildProcess) => void
 	try {
 		return await execCore(cmd, null, callback);
 	} catch (ex) {
-		utils.shareMessage(extension.mainOutputChannel, `Error ${ex}`);
+		utils.shareMessage(extension.mainOutputChannel, `${ex}`);
 		return undefined;
 	}
 }
@@ -89,7 +89,7 @@ async function exec(cmd: string, stdin?: string): Promise<ShellResult | undefine
 	try {
 		return await execCore(cmd, null, null, stdin);
 	} catch (ex) {
-		utils.shareMessage(extension.mainOutputChannel, `Error ${ex}`);
+		utils.shareMessage(extension.mainOutputChannel, `${ex}`);
 		return undefined;
 	}
 }
@@ -132,7 +132,7 @@ async function kubectllInternalArgs(args: string[], namespace: string | undefine
 				}        
 				if (sr.stderr) {
 					sr.stderr.on('data', function (data) {
-						utils.shareMessage(extension.mainOutputChannel, `Error ${data}`);
+						utils.shareMessage(extension.mainOutputChannel, `${data}`);
 						reject(new Error(data));
 					});
 				}

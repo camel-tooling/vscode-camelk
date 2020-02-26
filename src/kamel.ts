@@ -91,7 +91,7 @@ async function kamelInternal(command: string, devMode: boolean, namespace : stri
 			}        
 			if (sr.stderr) {
 				sr.stderr.on('data', function (data) {
-					utils.shareMessage(extension.mainOutputChannel, `Error ${data}`);
+					utils.shareMessage(extension.mainOutputChannel, `${data}`);
 					reject(new Error(data));
 				});
 				return;
@@ -124,7 +124,7 @@ async function kamelInternalArgs(args: string[], devMode: boolean, namespace: st
 				}        
 				if (sr.stderr) {
 					sr.stderr.on('data', function (data) {
-						utils.shareMessage(extension.mainOutputChannel, `Error ${data}`);
+						utils.shareMessage(extension.mainOutputChannel, `${data}`);
 					});
 				}
 				resolve(sr);
