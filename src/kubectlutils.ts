@@ -141,7 +141,7 @@ export function getPodsFromKubectlCli() : Promise<string> {
 					let error = `Unable to invoke kubectl to retrieve pod information`;
 					if (result && result.stderr) {
 						error = result.stderr;
-					}  
+					}
 					reject(error);
 				} else if (result) {
 					const splitResults = result.stdout;
@@ -153,30 +153,54 @@ export function getPodsFromKubectlCli() : Promise<string> {
 }
 
 export async function getKubernetesVersion(): Promise<string | undefined> {
-    const kubectl = await k8s.extension.kubectl.v1;
-    if (!kubectl.available) {
-        return '';
-    }
+	const kubectl = await k8s.extension.kubectl.v1;
+	if (!kubectl.available) {
+		return '';
+	}
 
-    const kubectlPromise = await kubectl.api.invokeCommand(`version --client --output json`);
-    let sr : any= null;
-    if (kubectlPromise) {
-        sr = kubectlPromise as k8s.KubectlV1.ShellResult;
-    }
-    if (!sr || sr.code !== 0) {
-        return undefined;
-    }
+	const kubectlPromise = await kubectl.api.invokeCommand(`version --client --output json`);
+	let sr : any= null;
+	if (kubectlPromise) {
+		sr = kubectlPromise as k8s.KubectlV1.ShellResult;
+	}
+	if (!sr || sr.code !== 0) {
+		return undefined;
+	}
 
-    const versionInfo = JSON.parse(sr.stdout);
-    if (!versionInfo || !versionInfo.clientVersion) {
-        return '';
-    }
+	const versionInfo = JSON.parse(sr.stdout);
+	if (!versionInfo || !versionInfo.clientVersion) {
+		return '';
+	}
 
-    const major = versionInfo.clientVersion.major;
+	const major = versionInfo.clientVersion.major;
 	const minor = versionInfo.clientVersion.minor;
-    if (!major || !minor) {
-        return '';
-    }
+	if (!major || !minor) {
+		return '';
+	}
 
-    return `${major}.${minor}`;
+	return `${major}.${minor}`;
+}
+
+export async function getNamedPodsFromKubectl(podNameRoot : string): Promise<string[]> {
+	return new Promise <string[]> ( async (resolve, reject) => {
+		await getPodsFromKubectlCli()
+		.then( (allPods) => {
+			let podArray = parseShellResult(allPods);
+			let outArray : string[] = [];
+			podArray.forEach(podName => {
+				if (podName.startsWith(podNameRoot)) {
+					outArray.push(podName);
+				}
+			});
+			if (outArray && outArray.length > 0) {
+				resolve(outArray);
+			} else {
+				resolve(undefined);
+			}
+			return;
+		}).catch ( (error) => {
+			reject(error);
+			return;
+		});
+	});
 }

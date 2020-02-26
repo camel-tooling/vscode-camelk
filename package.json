@@ -122,6 +122,18 @@
 			{
 				"command": "camelk.integrations.createsecretfromfolder",
 				"title": "Create Kubernetes Secret From all Files in Folder"
+			},
+			{
+				"command": "camelk.integrations.openOperatorLog",
+				"title": "Open Apache Camel K Operator Log",
+				"icon": {
+					"dark": "resources/dark/note.svg",
+					"light": "resources/light/note.svg"
+				}
+			},
+			{
+				"command": "camelk.integrations.kitlog",
+				"title": "Follow kit builder log for running Apache Camel K Integration"
 			}
 		],
 		"menus": {
@@ -157,17 +169,27 @@
 					"command": "camelk.integrations.refresh",
 					"group": "navigation",
 					"when": "view == camelk.integrations"
+				},
+				{
+					"command": "camelk.integrations.openOperatorLog",
+					"group": "navigation",
+					"when": "view == camelk.integrations"
 				}
 			],
 			"view/item/context": [
 				{
 					"command": "camelk.integrations.remove",
-					"group": "1",
+					"group": "group@1",
 					"when": "view == camelk.integrations"
 				},
 				{
 					"command": "camelk.integrations.log",
-					"group": "1",
+					"group": "group@2",
+					"when": "view == camelk.integrations"
+				},
+				{
+					"command": "camelk.integrations.kitlog",
+					"group": "group@3",
 					"when": "view == camelk.integrations"
 				}
 			]

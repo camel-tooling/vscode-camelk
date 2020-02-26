@@ -33,6 +33,7 @@ import { CamelKTaskCompletionItemProvider } from './task/CamelKTaskCompletionIte
 import { CamelKTaskProvider } from './task/CamelKTaskDefinition';
 import { ChildProcess } from 'child_process';
 import { LogsPanel } from './logsWebview';
+import * as logUtils from './logUtils';
 
 export const DELAY_RETRY_KUBECTL_CONNECTION = 1000;
 
@@ -46,7 +47,7 @@ let eventEmitter = new events.EventEmitter();
 const restartKubectlWatchEvent = 'restartKubectlWatch';
 let runningKubectl : ChildProcess | undefined;
 let timestampLastkubectlIntegrationStart = 0;
-let closeLogViewWhenIntegrationRemoved : boolean;
+export let closeLogViewWhenIntegrationRemoved : boolean;
 
 let stashedContext : vscode.ExtensionContext;
 
@@ -118,12 +119,11 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 		// create the integration view action -- start log
 		vscode.commands.registerCommand('camelk.integrations.log', async (node: TreeNode) => {
 			if (node && node.label) {
-				setStatusLineMessageAndShow(`Retrieving log for running Apache Camel K Integration...`);
+				utils.shareMessage(mainOutputChannel, `Retrieving log for running Apache Camel K Integration...`);
 				let integrationName : string = node.label;
-				await handleLogViaKamelCli(integrationName).catch((error) => {
+				await logUtils.handleLogViaKamelCli(integrationName).catch((error) => {
 					utils.shareMessage(mainOutputChannel, `error: ${error} \n`);
 				});
-				hideStatusLine();
 			}
 		});
 	
@@ -134,6 +134,27 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 		// add commands to create config-map and secret objects from .properties files
 		configmapsandsecrets.registerCommands();
 		
+		// create the integration view action -- open operator log
+		vscode.commands.registerCommand('camelk.integrations.openOperatorLog', async () => {
+			utils.shareMessage(mainOutputChannel, `Retrieving log for Apache Camel K Operator...`);
+			await logUtils.handleOperatorLog()
+			.catch( (err) => {
+				utils.shareMessage(mainOutputChannel, `No Apache Camel K Operator available: ${err} \n`);
+			});
+		});
+
+		// create the context menu integration view action -- open kit log
+		vscode.commands.registerCommand('camelk.integrations.kitlog', async (node: TreeNode) => {
+			if (node && node.label) {
+				let integrationName : string = node.label;
+				utils.shareMessage(mainOutputChannel, `Retrieving log for Apache Camel K Integration kit...`);
+				await logUtils.handleKitLog(integrationName)
+				.catch( (err) => {
+					utils.shareMessage(mainOutputChannel, `No Apache Camel K Integration Kit available: ${err} \n`);
+				});
+			}
+		});
+
 	});
 
 	let destination = downloadJavaDependencies(context);
@@ -147,7 +168,6 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 	}
 	
 }
-
 
 export function setStatusLineMessageAndShow( message: string): void {
 	if (myStatusBarItem && message && showStatusBar) {
@@ -298,7 +318,6 @@ function createIntegrationsView(): void {
 }
 
 export async function installDependencies(context: vscode.ExtensionContext) {
-
 	let gotKamel : boolean = false;
 
 	await checkKamelNeedsUpdate()
@@ -344,44 +363,6 @@ export function shareMessageInMainOutputChannel(msg: string) {
 	utils.shareMessage(mainOutputChannel, msg);
 }
 
-function handleLogViaKamelCli(integrationName: string) : Promise<string> {
-	return new Promise<string>( async () => {
-		let kamelExe = kamel.create();
-		let ns = `default`;
-		const currentNs = config.getNamespaceconfig();
-		if (currentNs) {
-			ns = currentNs;
-		}
-		let resource = {
-			kindName: `custom/${integrationName}`,
-			namespace: ns,
-			containers: undefined,
-			containersQueryPath: `.spec`
-		};
-		const cresource = `${resource.namespace}/${resource.kindName}`;
-		let args : string[] = ['log', `${integrationName}`];
-		await kamelExe.invokeArgs(args)
-			.then( async (proc : ChildProcess) => {
-				const panel = LogsPanel.createOrShow(`Waiting for integration ${integrationName} to start...\n`, cresource);
-				if (proc && proc.stdout) {
-					proc.stdout.on('data', async (data: string) => {
-						if (data.length > 0) {
-							var buf = Buffer.from(data);
-							var text = buf.toString();
-							if (text.indexOf(`Received hang up - stopping the main instance`) > 0 && !closeLogViewWhenIntegrationRemoved) {
-								var title = panel.getTitle();
-								updateLogViewTitleToStopped(panel, title);
-							}
-							panel.addContent(buf.toString());
-						}
-					});
-				}
-				}).catch( (error) => {
-					utils.shareMessage(mainOutputChannel, `exec error: ${error}`);
-				});
-	});
-}
-
 // for testing purposes only
 export function getStashedContext() : vscode.ExtensionContext {
 	return stashedContext;
@@ -400,22 +381,9 @@ function removeIntegrationLogView(integrationName: string) : Promise<string> {
 			LogsPanel.currentPanels.forEach((value : LogsPanel) => {
 				var title = value.getTitle();
 				if (title.indexOf(integrationName) >= 0) {
-					updateLogViewTitleToStopped(value, title);
+					logUtils.updateLogViewTitleToStopped(value, title);
 				}
 			});
 		}
 	});
-}
-
-function updateLogViewTitleToStopped(panel: LogsPanel, title: string) {
-	if (panel && title) {
-		// make sure we only show the log as stopped once 
-		const stoppedString = `[Integration stopped]`;
-		let boolHasIntegrationStopped = title.indexOf(stoppedString) > 0;
-		if (!boolHasIntegrationStopped) {
-			panel.updateTitle(title + ` ` + stoppedString);
-		} else {
-			panel.updateTitle(title);
-		}
-	}
 }
