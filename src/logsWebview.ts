@@ -118,14 +118,15 @@ export class LogsPanel extends WebPanel {
 					var lastMode = '';
 					var lastRegexp = '';
 					var renderNonce = 0;
-
+					var checkBox = document.getElementById("autoscroll");
+					var bottom = document.getElementById('bottom');
+					var elt = document.getElementById('content');
 					var orig = \`${this.content}\`.split('\\n');
 
 					window.addEventListener('message', event => {
 						const message = event.data;
 						switch (message.command) {
 							case 'content':
-								const elt = document.getElementById('content');
 								const text = message.toString().split('\\n');
 								text.forEach((line) => {
 									if (line.trim() != "" && line.length > 0) {
@@ -135,9 +136,8 @@ export class LogsPanel extends WebPanel {
 								// TODO: need to apply filters here!
 								elt.appendChild(document.createTextNode(message.text));
 
-								var checkBox = document.getElementById("autoscroll");
 								if (checkBox.checked == true){
-									document.getElementById('bottom').scrollIntoView();
+									bottom.scrollIntoView();
 								}   
 							}
 						});
