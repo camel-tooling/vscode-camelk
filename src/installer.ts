@@ -28,13 +28,17 @@ import * as vscode from 'vscode';
 import * as kubectlutils from './kubectlutils';
 import * as downloader from './downloader';
 import * as download from 'download';
+import * as versionUtils from './versionUtils';
 
 export const kamel = 'kamel';
 export const kamel_windows = 'kamel.exe';
-export const version = '1.0.0-RC2'; //need to retrieve this if possible, but have a default
 export const PLATFORM_WINDOWS = 'windows';
 export const PLATFORM_MAC = 'mac';
 export const PLATFORM_LINUX = 'linux';
+
+export const platformString = getPlatform(); // looks for windows, mac, linux
+const isWindows = (platformString === 'windows');
+const binFile = (!isWindows) ? kamel : kamel_windows;
 
 export function isKamelAvailable() : Promise<boolean> {
 	return new Promise<boolean>( async (resolve, reject) => {
@@ -48,30 +52,16 @@ export function isKamelAvailable() : Promise<boolean> {
 					resolve(false);
 					return;
 				}
-			}).catch ( (error) => {
-				console.log(`Apache Camel K CLI (kamel) unavailable: ${error}`);
-				reject(new Error(error));
-				return;
-		});
+			}).catch (kamelUnavailableRejection(reject));
 	});
 }
 
-export function checkKamelCLIVersion() : Promise<string> {
-	return new Promise<string>( async (resolve, reject) => {
-		let kamelLocal = kamelCli.create();
-		await kamelLocal.invoke('version')
-			.then( (rtnValue) => {
-				const strArray = rtnValue.split(' ');
-				const version = strArray[strArray.length - 1].trim();
-				console.log(`Apache Camel K CLI (kamel) version returned: ${version}`);
-				resolve(version);
-				return;
-			}).catch ( (error) => {
-				console.log(`Apache Camel K CLI (kamel) unavailable: ${error}`);
-				reject(new Error(error));
-				return;
-		});
-	});
+export function kamelUnavailableRejection(reject: (reason?: any) => void): ((reason: any) => void | PromiseLike<void>) | null | undefined {
+	return (error) => {
+		console.log(`Apache Camel K CLI (kamel) unavailable: ${error}`);
+		reject(new Error(error));
+		return;
+	};
 }
 
 export function isKubernetesAvailable(): Promise<boolean> {
@@ -137,62 +127,42 @@ function updateStatusBarItem(sbItem : vscode.StatusBarItem, text: string, toolti
 	}
 }
 
-export async function checkKamelNeedsUpdate(versionToUse? : string): Promise<boolean> {
-	return new Promise<boolean>( async (resolve) => {	
-		if (!versionToUse){ 
-			const latestversion = await getLatestCamelKVersion();
-			if (failed(latestversion)) {
-				console.error(latestversion.error);
-				resolve(true);
-				return true;
-			}
-			versionToUse = latestversion.result.trim();
-		}
-		await checkKamelCLIVersion().then((currentVersion) => {
-			if (versionToUse && versionToUse.toLowerCase() === currentVersion.toLowerCase()) {
-				// no need to install, it's already here
-				resolve(false);
-				return false;
-			} else {
-				resolve(true);
-				return true;
-			}
-		}).catch ( (error) => {
-			console.error(error);
-			resolve(true);
-			return true;
-		});
-	});
-}
-
 export async function installKamel(context: vscode.ExtensionContext): Promise<Errorable<null>> {
-	const latestversion = await getLatestCamelKVersion();
+	const latestversion = await versionUtils.getLatestCamelKVersion();
 	if (failed(latestversion)) {
 		return { succeeded: false, error: latestversion.error };
 	}
 
 	let versionToUse = latestversion.result.trim();
+	let runtimeVersionSetting = vscode.workspace.getConfiguration().get(config.RUNTIME_VERSION_KEY) as string;
+	if (runtimeVersionSetting && runtimeVersionSetting.toLowerCase() !== versionUtils.version.toLowerCase()) {
+		versionToUse = runtimeVersionSetting;
+	}
 
-	await checkKamelNeedsUpdate(versionToUse).then((needsUpdate) => {
+	await versionUtils.checkKamelNeedsUpdate(versionToUse).then((needsUpdate) => {
 		if (needsUpdate) {
-			extension.shareMessageInMainOutputChannel(`Apache Camel K CLI version ${versionToUse} available`);
+			extension.shareMessageInMainOutputChannel(`Checking to see if Apache Camel K CLI version ${versionToUse} available`);
 			return { succeeded: true, result: null };
 		}
 	}).catch ( (error) => {
 		console.error(error);
 	});
 
-	const platformString = getPlatform(); // looks for windows, mac, linux
-	const isWindows = (platformString === 'windows');
-	const binFile = (!isWindows) ? kamel : kamel_windows;
-
 	const installFolder = getInstallFolder(kamel, context);
-	console.log(`Downloading Apache Camel K CLI to ${installFolder}`);
+	console.log(`Attempting to download Apache Camel K CLI to ${installFolder}`);
 	mkdirp.sync(installFolder);
 
 	const kamelUrl = `https://github.com/apache/camel-k/releases/download/${versionToUse}/camel-k-client-${versionToUse}-${platformString}-64bit.tar.gz`;
 	const kamelCliFile = `camel-k-client-${versionToUse}-${platformString}-64bit.tar.gz`;
 	const downloadFile = path.join(installFolder, binFile);
+
+	await versionUtils.pingGithubUrl(kamelUrl).then( (result) => {
+		if (!result) {
+			var msg = `Camel K CLI Version ${versionToUse} unavailable. Please check the Apache Camel K version specified in VS Code Settings. Inaccessible url: ${kamelUrl}`;
+			extension.shareMessageInMainOutputChannel(msg);
+			throw new Error(msg);
+		}
+	});
 
 	extension.shareMessageInMainOutputChannel(`Downloading kamel cli tool from ${kamelUrl} to ${downloadFile}`);
 
@@ -216,21 +186,6 @@ export async function installKamel(context: vscode.ExtensionContext): Promise<Er
 
 function getInstallFolder(tool: string, context : vscode.ExtensionContext): string {
 	return path.join(context.globalStoragePath, `camelk/tools/${tool}`);
-}
-
-export async function getLatestCamelKVersion(): Promise<Errorable<string>> {
-	const latestURL = 'https://api.github.com/repos/apache/camel-k/releases/latest';
-	const downloadResult = await downloader.toTempFile(latestURL);
-	if (failed(downloadResult)) {
-		return { succeeded: false, error: [`Failed to establish kubectl stable version: ${downloadResult.error[0]}`] };
-	}
-	const rawtext = fs.readFileSync(downloadResult.result, 'utf-8');
-	let latestJSON = JSON.parse(rawtext);
-	let tagName = latestJSON.tag_name;
-	if (tagName) {
-		return { succeeded: true, result: tagName };
-	}
-	return { succeeded: false, error: [`Failed to retrieve latest Apache Camel K version tag from : ${latestURL}`] };
 }
 
 async function getStableKubectlVersion(): Promise<Errorable<string>> {

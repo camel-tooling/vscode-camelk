@@ -17,6 +17,7 @@
 
 import * as vscode from 'vscode';
 import {platform} from 'os';
+import {version} from './versionUtils';
 
 export const EXTENSION_CONFIG_KEY = "camelk.tools";
 export const KAMEL_PATH_CONFIG_KEY = "camelk.tools.kamel-path";
@@ -25,6 +26,8 @@ export const KUBECTL_PATH_CONFIG_KEY = "vs-kubernetes.kubectl-path";
 export const NAMESPACE_KEY = "camelk.namespace";
 export const SHOW_STATUS_BAR_KEY = "camelk.integrations.showStatusBarMessages";
 export const REMOVE_LOGVIEW_ON_SHUTDOWN_KEY = "camelk.integrations.closeLogViewWhenIntegrationRemoved";
+export const RUNTIME_VERSION_KEY = "camelk.integrations.runtimeVersion";
+export const AUTOUPGRADE_KEY = "camelk.integrations.autoUpgrade";
 
 export async function addKamelPathToConfig(value: string) : Promise<void> {
 	await setConfigValue(KAMEL_PATH_CONFIG_KEY, value);
@@ -145,4 +148,28 @@ export function getNamespaceconfig(): string | undefined {
 		return undefined;
 	}
 	return namespace;
+}
+
+export function getKamelRuntimeVersionConfig(): string | undefined {
+	const runtimeVersionSetting : string = vscode.workspace.getConfiguration().get(RUNTIME_VERSION_KEY, version);
+	if (!runtimeVersionSetting || runtimeVersionSetting.length === 0) {
+		return undefined;
+	}
+	return runtimeVersionSetting;
+}
+
+export async function setKamelRuntimeVersionConfig(value : string) : Promise<void> {
+	const configuration = vscode.workspace.getConfiguration();
+	return await configuration.update(RUNTIME_VERSION_KEY, value, vscode.ConfigurationTarget.Global);
+}
+
+export function getKamelAutoupgradeConfig() : boolean {
+	const configuration = vscode.workspace.getConfiguration();
+	return configuration.get(AUTOUPGRADE_KEY, true) as boolean;
+}
+
+// for testing purposes 
+export async function setKamelAutoupgradeConfig(value : boolean) : Promise<void> {
+	const configuration = vscode.workspace.getConfiguration();
+	return await configuration.update(AUTOUPGRADE_KEY, value, vscode.ConfigurationTarget.Global);
 }

@@ -22,7 +22,7 @@ import * as utils from './CamelKJSONUtils';
 import * as configmapsandsecrets from './ConfigMapAndSecrets';
 import * as integrationutils from './IntegrationUtils';
 import * as events from 'events';
-import { installKamel, installKubectl, checkKamelNeedsUpdate } from './installer';
+import { installKamel, installKubectl} from './installer';
 import { Errorable, failed } from './errorable';
 import * as kubectl from './kubectl';
 import * as kamel from './kamel';
@@ -34,6 +34,7 @@ import { CamelKTaskProvider } from './task/CamelKTaskDefinition';
 import { ChildProcess } from 'child_process';
 import { LogsPanel } from './logsWebview';
 import * as logUtils from './logUtils';
+import {checkKamelNeedsUpdate, version, handleChangeRuntimeConfiguration} from './versionUtils';
 
 export const DELAY_RETRY_KUBECTL_CONNECTION = 1000;
 
@@ -48,6 +49,7 @@ const restartKubectlWatchEvent = 'restartKubectlWatch';
 let runningKubectl : ChildProcess | undefined;
 let timestampLastkubectlIntegrationStart = 0;
 export let closeLogViewWhenIntegrationRemoved : boolean;
+export var runtimeVersionSetting : string | undefined;
 
 let stashedContext : vscode.ExtensionContext;
 
@@ -286,6 +288,32 @@ function applyLogviewSettings(): void {
 	});
 }
 
+async function applyDefaultVersionSettings() : Promise<void> {
+	let runtimeSetting = config.getKamelRuntimeVersionConfig();
+	let autoUpgradeSetting = config.getKamelAutoupgradeConfig();
+	if (!runtimeSetting) {
+		await config.setKamelRuntimeVersionConfig(version).then ( () => {
+			runtimeVersionSetting = version;
+			shareMessageInMainOutputChannel(`No version found. Using default version ${runtimeVersionSetting} of Apache Camel K CLI`);
+		});
+	} else {
+		if (autoUpgradeSetting && autoUpgradeSetting === true) {
+			if (runtimeSetting && version.toLowerCase() !== runtimeSetting.toLowerCase()) {
+				await config.setKamelRuntimeVersionConfig(version).then ( () => {
+					runtimeVersionSetting = version;	
+					shareMessageInMainOutputChannel(`Auto-upgrade setting enabled. Updating to default version ${version} of Apache Camel K CLI`);
+				});
+			}
+		} else {
+			shareMessageInMainOutputChannel(`Using version ${runtimeSetting} of Apache Camel K CLI`);
+			runtimeVersionSetting = runtimeSetting;
+		}
+	}
+	vscode.workspace.onDidChangeConfiguration(async () => {
+		await handleChangeRuntimeConfiguration();
+	});
+}
+
 function refreshIfNamespaceChanges(): void {
 	vscode.workspace.onDidChangeConfiguration(async () => {
 		if (camelKIntegrationsTreeView && camelKIntegrationsTreeView.visible === true) {
@@ -294,11 +322,11 @@ function refreshIfNamespaceChanges(): void {
 	});
 }
 
-
 function applyUserSettings(): void {
 	applyStatusBarSettings();
 	refreshIfNamespaceChanges();
 	applyLogviewSettings();
+	applyDefaultVersionSettings();
 }
 
 function createIntegrationsView(): void {
@@ -386,4 +414,8 @@ function removeIntegrationLogView(integrationName: string) : Promise<string> {
 			});
 		}
 	});
+}
+
+export function setRuntimeVersionSetting(value: string) {
+	runtimeVersionSetting = value;	
 }

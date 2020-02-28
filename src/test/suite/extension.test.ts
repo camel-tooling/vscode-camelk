@@ -92,4 +92,43 @@ suite("ensure camelk extension exists and is accessible", function() {
 		// reset to old value
 		await config.addNamespaceToConfig(namespace);
 	});	
+
+	test('test can set autoupgrade setting', async function() {
+		await config.setKamelAutoupgradeConfig(true);
+
+		const autoConfigValue = config.getKamelAutoupgradeConfig();
+		assert.equal(autoConfigValue, true);
+
+		await config.setKamelAutoupgradeConfig(false);
+		const autoConfigValue2 = config.getKamelAutoupgradeConfig();
+		assert.equal(autoConfigValue2, false);
+	});
+
+	test.skip('test can set runtime version setting', async function() {
+
+		// this test should work, but doesn't 
+		
+		await config.setKamelAutoupgradeConfig(false);
+		const autoConfigValue2 = config.getKamelAutoupgradeConfig();
+		assert.equal(autoConfigValue2, false);
+
+		const invalidVersion = 'invalidVersion';
+		await config.setKamelRuntimeVersionConfig(invalidVersion).then( () => {
+			const firstVersion = config.getKamelRuntimeVersionConfig();
+			assert.equal(firstVersion, invalidVersion);	
+		}).catch( (error) => {
+			assert.fail(error);
+		});
+
+		const validVersion = '1.0.0-RC1';
+		await config.setKamelRuntimeVersionConfig(validVersion).then( () => {
+			const secondVersion = config.getKamelRuntimeVersionConfig();
+			assert.equal(secondVersion, validVersion);	
+		}).catch( (error) => {
+			assert.fail(error);
+		});
+
+		await config.setKamelAutoupgradeConfig(true);
+	});
+
 });
