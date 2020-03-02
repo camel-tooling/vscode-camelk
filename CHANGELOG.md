@@ -10,6 +10,7 @@ All notable changes to the "vscode-camelk" extension will be documented in this 
 - Add an extension preference to close an open log window if the integration is removed
 - Add a new button to the Integrations view that opens the Apache Camel K Operator log
 - Add a new context menu to published integrations in the Integrations view to open the Kit Builder log
+- Update default runtime version to 1.0.0-RC2
 
 ## 0.0.12
 
