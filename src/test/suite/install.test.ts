@@ -22,17 +22,14 @@ import * as config from '../../config';
 import * as fs from 'fs';
 import * as sinon from 'sinon';
 import * as installer from '../../installer';
+import {describe} from 'mocha';
 
 const extensionId = 'redhat.vscode-camelk';
 
-suite("ensure install methods are functioning as expected", function() {
-
-	let installKubectlSpy  = sinon.spy(installer, 'installKubectl');
+describe("ensure install methods are functioning as expected", function() {
 
 	test("install Camel K and Kubernetes CLIs on activation", async function() {
-		// reset the call count
-		installKubectlSpy.resetHistory();	
-
+		var installKubectlSpy = sinon.spy(installer, 'installKubectl');
 		let extension = vscode.extensions.getExtension(extensionId);
 		if (extension !== null && extension !== undefined) {
 			await extension.activate().then( () => {
@@ -42,6 +39,8 @@ suite("ensure install methods are functioning as expected", function() {
 			assert.fail("Camel K extension is undefined and cannot be activated");
 		}
 
+		installKubectlSpy.resetHistory();
+		
 		// now try to activate again to ensure that we don't install a second time
 		if (extension !== null && extension !== undefined) {
 			await extension.activate().then( () => {
@@ -53,9 +52,7 @@ suite("ensure install methods are functioning as expected", function() {
 				}
 			});
 		}
-
-		// reset the call count to clean up after the test
-		installKubectlSpy.resetHistory();	
+		installKubectlSpy.restore();
 	});
 
 	test("ensure cli version checking works correctly", async function() {

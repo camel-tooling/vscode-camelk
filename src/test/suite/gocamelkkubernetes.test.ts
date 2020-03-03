@@ -36,25 +36,27 @@ suite("ensure that the upstream kubernetes.go sanitize in camel-k have not chang
 	var fileName : string = 'sanitize.go';
 	var url = 'https://raw.githubusercontent.com/apache/camel-k/master/pkg/util/kubernetes/sanitize.go';
 	
+	var replaceCarriageReturns = function(str:string) {
+		var regxp = /\r\n/g;
+		str = str.replace(regxp, " ");
+		return str;
+	};
+
 	test("test to see if the sanitize.go file has changed since we stashed it", function(done) {
 		var goPath = retrieveSanitizeFileFromUpstream(fileName, url);
 		let stashedFile = path.join(__dirname, '../../../src/test/suite/sanitize.go.saved');
 
 		var str1 = fs.readFileSync(goPath, 'utf-8');
 		var str2 = fs.readFileSync(stashedFile, 'utf-8');
-		str2 = replaceCarriageReturns(str1);
+		str1 = replaceCarriageReturns(str1);
+		str2 = replaceCarriageReturns(str2);
 
-		assert.equal(fs.existsSync(goPath), true);
+		var exists = fs.existsSync(goPath);
+		assert.equal(exists, true);
 		assert.strictEqual(str1, str2);
 		done();
 	});
 });
-
-var replaceCarriageReturns = function(str:string) {
-	var regxp = /\r\n/g;
-	str = str.replace(regxp, " ");
-	return str;
-}
 
 function retrieveSanitizeFileFromUpstream(fileName: string, url: string) {
 	var goPath = path.join(fs.realpathSync(os.tmpdir()), fileName);

@@ -20,6 +20,7 @@ import * as vscode from 'vscode';
 import * as assert from 'assert';
 import * as kamel from '../../kamel';
 import * as config from '../../config';
+import {suite, test} from 'mocha';
 
 suite("ensure camelk extension exists and is accessible", function() {
 	const extensionId = 'redhat.vscode-camelk';
@@ -29,7 +30,7 @@ suite("ensure camelk extension exists and is accessible", function() {
 		done();
 	});
 
-	test('vscode-camelk extension should activate', function (done) {
+	test('vscode-camelk extension should activate', function () {
 		let extension = vscode.extensions.getExtension(extensionId);
 		if (extension !== null && extension !== undefined) {
 			extension.activate().then(() => {
@@ -37,11 +38,9 @@ suite("ensure camelk extension exists and is accessible", function() {
 					const camelKIsActive = extension.isActive;
 					assert.deepEqual(camelKIsActive, true);
 				}
-				done();
 			});
 		} else {
 			assert.fail("Camel K extension is undefined");
-			done();
 		}
 	});	
 
@@ -81,15 +80,15 @@ suite("ensure camelk extension exists and is accessible", function() {
 		const testNs = 'testing';
 
 		// override namespace
-		await config.addNamespaceToConfig(testNs);
+		await config.addNamespaceToConfig(testNs).then ( async () => {
+			// re-retrieve namespace, should be test NS we specified
+			const resetNs : string | undefined = config.getNamespaceconfig();
 
-		// re-retrieve namespace, should be test NS we specified
-		const resetNs : string | undefined = config.getNamespaceconfig();
+			// this should be 'testing'
+			assert.equal(resetNs, testNs);
 
-		// this should be 'testing'
-		assert.equal(resetNs, testNs);
-
-		// reset to old value
-		await config.addNamespaceToConfig(namespace);
+			// reset to old value
+			await config.addNamespaceToConfig(namespace);
+		});
 	});	
 });
