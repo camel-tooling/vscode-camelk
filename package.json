@@ -278,7 +278,7 @@
 		"@types/glob": "^7.1.1",
 		"@types/istanbul": "^0.4.30",
 		"@types/mkdirp": "^1.0.0",
-		"@types/mocha": "^7.0.1",
+		"@types/mocha": "^7.0.2",
 		"@types/nock": "^11.1.0",
 		"@types/node": "^13.7.6",
 		"@types/sinon": "^7.5.2",
