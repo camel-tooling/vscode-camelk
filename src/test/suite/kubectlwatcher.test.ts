@@ -45,10 +45,9 @@ describe("Kubectl integration watcher", function() {
 		sandbox.reset();
 	});
 	
-	it('Check there is no loop for closing kubectl process', async function(done) {
+	it('Check there is no loop for closing kubectl process', async function() {
 		await sleep(extension.DELAY_RETRY_KUBECTL_CONNECTION).then( () => {
 			sinon.assert.notCalled(messageSpy);
-			done();
 		});
 	});
 	
