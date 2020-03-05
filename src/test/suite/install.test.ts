@@ -22,7 +22,7 @@ import * as config from '../../config';
 import * as fs from 'fs';
 import * as sinon from 'sinon';
 import * as installer from '../../installer';
-import {describe} from 'mocha';
+import {describe, test} from 'mocha';
 
 const extensionId = 'redhat.vscode-camelk';
 
