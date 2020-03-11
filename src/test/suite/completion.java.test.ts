@@ -19,23 +19,22 @@
 import * as vscode from 'vscode';
 import { areJavaDependenciesDownloaded } from '../../JavaDependenciesManager';
 import { getDocUri, checkExpectedCompletion } from './completion.util';
-import * as os from 'os';
-import waitUntil = require('async-wait-until');
-import { test, describe} from 'mocha';
 
-describe('Should do completion in Camel K standalone files', () => {
+const os = require('os');
+const waitUntil = require('async-wait-until');
+
+suite('Should do completion in Camel K standalone files', () => {
 
 	const docUriJava = getDocUri('MyRouteBuilder.java');
+
 	const expectedCompletion = { label: 'from(String uri) : RouteDefinition'};
 
-	test('java completion method', function() {
-		var testVar = test('Completes from method for Java', async () => {
-			if(os.homedir().includes('hudson')) {
-				testVar.skip();
-			}
-			await testCompletion(docUriJava, new vscode.Position(5, 11), expectedCompletion);
-		}).timeout(76000);
-	});
+	var testVar = test('Completes from method for Java', async () => {
+		if(os.homedir().includes('hudson')) {
+			testVar.skip();
+		}
+		await testCompletion(docUriJava, new vscode.Position(5, 11), expectedCompletion);
+	}).timeout(76000);
 
 });
 
