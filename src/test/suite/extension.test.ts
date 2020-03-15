@@ -104,7 +104,7 @@ suite("ensure camelk extension exists and is accessible", function() {
 		assert.equal(autoConfigValue2, false);
 	});
 
-	test.skip('test can set runtime version setting', async function() {
+	test('test can set runtime version setting', async function() {
 
 		// this test should work, but doesn't 
 		
