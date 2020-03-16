@@ -11,6 +11,8 @@ All notable changes to the "vscode-camelk" extension will be documented in this 
 - Add a new button to the Integrations view that opens the Apache Camel K Operator log
 - Add a new context menu to published integrations in the Integrations view to open the Kit Builder log
 - Update default runtime version to 1.0.0-RC2
+- Add a setting to override the default version to use for the Camel K cli to avoid auto-upgrades 
+- Add a validation when new Camel K CLI is downloaded to verify that it is available. If not, provide error to help with diagnosis
 
 ## 0.0.12
 

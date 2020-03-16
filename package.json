@@ -73,6 +73,17 @@
 						"description": "Close log view when removing its running integration",
 						"scope": "window"
 					},
+					"camelk.integrations.runtimeVersion": {
+						"type": "string",
+						"description": "Default Apache Camel K Runtime Version",
+						"scope": "window"
+					},
+					"camelk.integrations.autoUpgrade": {
+						"type": "boolean",
+						"default": true,
+						"description": "Automatically upgrade Apache Camel K Runtime CLI when new CLI version is released",
+						"scope": "window"
+					},
 					"vs-kubernetes": {
 						"type": "object",
 						"description": "CLI locations",
@@ -310,6 +321,7 @@
 		"@types/shelljs": "^0.8.6",
 		"@types/tmp": "^0.1.0",
 		"child_process": "^1.0.2",
+		"cross-fetch": "^3.0.4",
 		"download": "^7.1.0",
 		"jsonc-parser": "^2.2.1",
 		"maven": "^4.7.0",

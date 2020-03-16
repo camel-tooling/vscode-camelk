@@ -22,6 +22,8 @@ import * as config from '../../config';
 import * as fs from 'fs';
 import * as sinon from 'sinon';
 import * as installer from '../../installer';
+import * as versionUtils from '../../versionUtils';
+import { failed } from '../../errorable';
 
 const extensionId = 'redhat.vscode-camelk';
 
@@ -59,17 +61,21 @@ suite("ensure install methods are functioning as expected", function() {
 	});
 
 	test("ensure cli version checking works correctly", async function() {
-		await installer.checkKamelNeedsUpdate('bogusversion').then( (boolVal) => {
-			// should return a true since the versions don't match
-			assert.ok(typeof boolVal === "boolean" && boolVal, 'cli version checking, negative case worked');
+		await versionUtils.checkKamelNeedsUpdate('bogusversion').then( () => {
+			assert.fail('cli version checking, negative case worked');
+		}).catch( (error) => {
+			assert.ok(error, 'cli version checking, negative case worked');
 		});
-		await installer.getLatestCamelKVersion().then( async (latestversion) => {
-			if (latestversion && typeof latestversion === "string") {
-				await installer.checkKamelNeedsUpdate(latestversion).then( (boolVal) => {
-					// should return a false since the versions should match
-					assert.ok(typeof boolVal === "boolean" && !boolVal, 'cli version checking, positive case worked');
-				});
-			}
+	
+		const retrievedVersion = await versionUtils.getLatestCamelKVersion();
+		if (failed(retrievedVersion)) {
+			assert.fail(retrievedVersion.error[0]);
+		}
+		let latestversion = retrievedVersion.result.trim();
+		assert.ok(typeof latestversion === "string" && latestversion, 'unable to retrieve latest version');
+		await versionUtils.checkKamelNeedsUpdate(latestversion).then( (boolVal) => {
+			// should return a false since the versions should match
+			assert.ok(typeof boolVal === "boolean" && !boolVal, 'cli version checking, positive case worked');
 		});
 	});
 
