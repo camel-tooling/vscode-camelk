@@ -179,17 +179,17 @@
 			"view/item/context": [
 				{
 					"command": "camelk.integrations.remove",
-					"group": "group@1",
+					"group": "1_actiongroup",
 					"when": "view == camelk.integrations"
 				},
 				{
 					"command": "camelk.integrations.log",
-					"group": "group@2",
+					"group": "2_loggroup@1",
 					"when": "view == camelk.integrations"
 				},
 				{
 					"command": "camelk.integrations.kitlog",
-					"group": "group@3",
+					"group": "2_loggroup@2",
 					"when": "view == camelk.integrations"
 				}
 			]
