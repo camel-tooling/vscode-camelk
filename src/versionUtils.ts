@@ -132,28 +132,43 @@ function checkKamelCLIVersion() : Promise<string> {
 export async function handleChangeRuntimeConfiguration() {
 	let runtimeSetting = config.getKamelRuntimeVersionConfig();
 	let newUpgradeSetting = config.getKamelAutoupgradeConfig();
+
+	/* 
+		This series of IF statements can be a bit tricky to follow.
+		
+		The first IF (newUpgradeSetting === true) handles the standard auto-upgrade case.
+		If the user sets it to true, we simply override whatever is there with the version we specify as the default.
+		We will need to make sure we keep 'version' in sync with the latest supported runtime version.
+
+		The second IF (extension.runtimeVersionSetting) checks to see if there was already an override version specified.
+		The extension 'runtimeVersionSetting' is loaded at startup from the global settings and may still be undefined if the 
+		user had auto-upgrade = true initially. We don't need to update the version if it's the same as what was already set.
+
+		The third IF (runtimeVersion and it's not the default) handles the case where runtimeVersionSetting was undefined.
+		We don't need to write the version to settings if it's the default. 
+	*/
 	if (newUpgradeSetting === true) {
 		if (runtimeSetting && version.toLowerCase() !== runtimeSetting.toLowerCase()) {
 			extension.shareMessageInMainOutputChannel(`Auto-upgrade setting enabled. Updating to default version ${version} of Apache Camel K CLI`);
 			await config.setKamelRuntimeVersionConfig(version).then ( () => {
 				const msg = `Setting for Apache Camel K runtime version has changed to default ${version}. Please restart the workspace to refresh the Camel K cli.`;
-				extension.shareMessageInMainOutputChannel(msg);
-				vscode.window.showWarningMessage(msg);
-				extension.setRuntimeVersionSetting(version);	
+				setVersionAndTellUser(msg, version);
 			});
 		}
 	} else if (extension.runtimeVersionSetting) {
 		if (runtimeSetting && runtimeSetting.trim().length > 0 
 			&& extension.runtimeVersionSetting.toLowerCase() !== runtimeSetting.toLowerCase()) {
 			const msg = `Setting for Apache Camel K runtime version has changed to ${runtimeSetting}. Please restart the workspace to refresh the Camel K cli.`;
-			extension.shareMessageInMainOutputChannel(msg);
-			vscode.window.showWarningMessage(msg);
-			extension.setRuntimeVersionSetting(runtimeSetting);	
+			setVersionAndTellUser(msg, runtimeSetting);
 		}
 	} else if (runtimeSetting && runtimeSetting.trim().length > 0 && version.toLowerCase() !== runtimeSetting.toLowerCase()) {
 		const msg = `Setting for Apache Camel K runtime version has changed to ${runtimeSetting}. Please restart the workspace to refresh the Camel K cli.`;
-		extension.shareMessageInMainOutputChannel(msg);
-		vscode.window.showWarningMessage(msg);
-		extension.setRuntimeVersionSetting(runtimeSetting);	
+		setVersionAndTellUser(msg, runtimeSetting);
 	}
+}
+
+function setVersionAndTellUser(msg: string, newVersion: string) {
+	extension.shareMessageInMainOutputChannel(msg);
+	vscode.window.showWarningMessage(msg);
+	extension.setRuntimeVersionSetting(newVersion);	
 }
