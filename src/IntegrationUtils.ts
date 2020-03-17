@@ -24,6 +24,7 @@ import * as child_process from 'child_process';
 import { getConfigMaps, getSecrets } from './kubectlutils';
 import * as k8s from 'vscode-kubernetes-tools-api';
 import * as kamel from './kamel';
+import { CamelKTaskProvider, CamelKTaskDefinition } from './task/CamelKTaskDefinition';
 
 const validNameRegex = /^[A-Za-z][A-Za-z0-9\-\.]*(?:[A-Za-z0-9]$){1}/;
 
@@ -34,6 +35,7 @@ const secretIntegration: string = 'Secret - Apache Camel K Integration with Kube
 const resourceIntegration: string = 'Resource - Apache Camel K Integration with Resource file';
 const propertyIntegration: string = 'Property - Apache Camel K Integration with Property';
 const dependencyIntegration: string = 'Dependencies - Apache Camel K Integration with Explicit Dependencies';
+export const vscodeTasksIntegration: string = 'Use a predefined Task - useful for multi-attributes deployment';
 
 const ResourceOptions: vscode.OpenDialogOptions = {
 	canSelectMany: true,
@@ -51,7 +53,8 @@ const choiceList = [
 	secretIntegration,
 	resourceIntegration,
 	propertyIntegration,
-	dependencyIntegration
+	dependencyIntegration,
+	vscodeTasksIntegration
  ];
 
  let childProcessMap : Map<string, child_process.ChildProcess>;
@@ -138,6 +141,9 @@ const choiceList = [
 				case basicIntegration:
 					// do nothing with config-map or secret
 					break;
+				case vscodeTasksIntegration:
+					await handleDefinedTask(context);
+					resolve();
 			}
 
 			if (!errorEncountered) {
@@ -153,6 +159,36 @@ const choiceList = [
 			reject(new Error('No integration selection made.'));
 		}
 	});
+}
+
+async function handleDefinedTask(context: vscode.Uri) {
+	let allCamelKTasks = await vscode.tasks.fetchTasks({type: CamelKTaskProvider.START_CAMELK_TYPE});
+	let filteredCamelKTasks = allCamelKTasks.filter(task => {
+		let camelTaskDefinition = task.definition as CamelKTaskDefinition;
+		let file = camelTaskDefinition.file;
+		return file && (isAVariable(file) || isTheExactFile(file, context));
+	});
+	if (filteredCamelKTasks && filteredCamelKTasks.length > 0) {
+		let camelKTaskNames = filteredCamelKTasks.map(task => task.name);
+		let camelKTaskNameToLaunch = await vscode.window.showQuickPick(camelKTaskNames, {placeHolder: 'Choose a predefined task'});
+		if(camelKTaskNameToLaunch) {
+			let camelKTaskToLaunch = filteredCamelKTasks.find(task => task.name === camelKTaskNameToLaunch);
+			if(camelKTaskToLaunch) {
+				await vscode.tasks.executeTask(camelKTaskToLaunch);
+			}
+		}
+	} else {
+		await vscode.window.showInformationMessage('No Camel K Task applicable has been found. You can create one using "Tasks: Open User Tasks" or by creating a tasks.json file in .vscode folder.');
+	}
+
+	function isTheExactFile(file: string, context: vscode.Uri): boolean {
+		return file === vscode.workspace.asRelativePath(context.path);
+	}
+
+	// this can be smarter in future by evaluating the variable for the task and then comparing with file used in the context
+	function isAVariable(file: string): boolean {
+		return file.includes("${");
+	}
 }
 
 function getSelectedConfigMap(): Promise<string | undefined> {
