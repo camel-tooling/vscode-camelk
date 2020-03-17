@@ -2,6 +2,10 @@
 
 All notable changes to the "vscode-camelk" extension will be documented in this file.
 
+## 0.0.14
+
+- TBD
+
 ## 0.0.13
 
 - Provide tasks to support multi-arguments launch of Camel K integrations
