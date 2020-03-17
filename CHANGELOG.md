@@ -4,7 +4,7 @@ All notable changes to the "vscode-camelk" extension will be documented in this 
 
 ## 0.0.14
 
-- TBD
+- Listing VS Code task to deploy Camel K integration in "Start Apache Camel Integration" command
 
 ## 0.0.13
 
