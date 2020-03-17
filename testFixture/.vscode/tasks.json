@@ -1,0 +1,12 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Test Camel K task",
+            "type": "camel-k",
+            "dev": true,
+            "file": "MyRouteBuilder.java",
+            "problemMatcher": []
+        }
+    ]
+}
