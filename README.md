@@ -94,9 +94,9 @@ You can start a new Camel K integration with or without additional options such 
 
     Specify dependency details either by their camel-component artifact Id or by their Maven coordinates (group:artifact:version), with the option to specify more than one. For more information about configuration with Dependencies, see [Dependencies and Component Resolution](https://camel.apache.org/camel-k/latest/configuration/dependencies.html) in the Apache Camel K documentation.
 
-* **Use a predefined Task - useful for multi-attributes deployment**
+* **Define a Task for Easily Reproducible Multi-attribute Deployment**
 
-    Allow to use a predefined Task of type "camel-k". It is useful when deploying an Apache Camel K integration which requires several parameters. To provide a task, see section [Creating a new Camel K Integration with multiple parameters](#Creating-a-new-Camel-K-Integration-with-multiple-parameters) 
+    Some types of deployments require more complex combinations of attributes. In these cases, defining a custom Task of type "camel-k" is useful. To create a task, see section[Creating a new Camel K Integration with multiple parameters](#Creating-a-new-Camel-K-Integration-with-multiple-parameters) 
 
 When you start a new integration, the extension starts the deployment process with the *kamel run [filename]* command and any options after that.
 
@@ -108,7 +108,7 @@ To update the state of your currently deployed integrations, hover over the **Ap
 
 ## Creating a new Camel K Integration with multiple parameters
 
-The right-click menu is providing by default several ways to start a new integration and works well for simple cases. When the Camel K integration requires more configuration, you can set that up using a Task.
+Though the simple "Start Apache Camel K Integration" menu works well for simple cases, you can use a Task for more complex integrations. When the Camel K integration requires more configuration, you can set that up using a Task.
 
 To create a new Task, you have a few options.
 
@@ -148,7 +148,7 @@ Once you've created your Camel K task, you can use auto-complete to explore the 
 }
 ```
 
-When you're done, you have two options to use it:
+When you've defined your Task, you can use one of two options to execute it:
 - call command from palette `Tasks: Run Task`. You will see the command listed with the label that you provided previously.
 - with the `Start Apache Camel Integration` command, pick the option `Use a predefined Task - useful for multi-attributes deployment`
 
