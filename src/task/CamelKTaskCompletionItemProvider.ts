@@ -18,6 +18,7 @@
 
 import * as jsonparser from 'jsonc-parser';
 import * as vscode from 'vscode';
+import { TraitManager } from './TraitManager';
 
 export class CamelKTaskCompletionItemProvider implements vscode.CompletionItemProvider {
 
@@ -25,13 +26,14 @@ export class CamelKTaskCompletionItemProvider implements vscode.CompletionItemPr
         return this.provideCompletionItemsForText(document.getText(), document.offsetAt(position));
     }
 
-    public provideCompletionItemsForText(text: string, offset: number): vscode.CompletionItem[] {
+    public async provideCompletionItemsForText(text: string, offset: number): Promise<vscode.CompletionItem[]> {
         let node = jsonparser.findNodeAtOffset(jsonparser.parseTree(text), offset, false);
         let completions: vscode.CompletionItem[] = [];
-        if (node !== undefined && this.isInTasksArray(node)) {
-            let completionBasic: vscode.CompletionItem = {
-                label: 'Camel K basic development mode',
-                insertText:
+        if (node !== undefined) {
+            if (this.isInTasksArray(node)) {
+                let completionBasic: vscode.CompletionItem = {
+                    label: 'Camel K basic development mode',
+                    insertText:
 `{
     "label": "Start in dev mode Camel K integration opened in active editor",
     "type": "camel-k",
@@ -39,10 +41,34 @@ export class CamelKTaskCompletionItemProvider implements vscode.CompletionItemPr
     "file": "\${file}",
     "problemMatcher": []
 }`
-            };
-            completions.push(completionBasic);
+                };
+                completions.push(completionBasic);
+            } else if(this.isInTraitsArray(node)) {
+                let traitCompletions: vscode.CompletionItem[] = await TraitManager.provideAvailableTraits();
+                completions = completions.concat(traitCompletions);
+            }
         }
-        return completions;
+        return Promise.resolve(completions);
+    }
+
+    private isInTraitsArray(node: jsonparser.Node) {
+        return this.isInArray(node)
+            && this.isSiblingTraitTasks(node);
+    }
+
+    private isParentHasStringPropertyOfType(node: jsonparser.Node, type: string) {
+        let parent = node.parent;
+        if (parent !== undefined && parent.type === "property") {
+            let nodeTasks = parent.children?.find(child => {
+                return child.type === "string" && child.value === type;
+            });
+            return nodeTasks !== undefined;
+        }
+        return false;
+    }
+
+    private isSiblingTraitTasks(node: jsonparser.Node) {
+        return this.isParentHasStringPropertyOfType(node, 'traits');
     }
 
     private isInTasksArray(node: jsonparser.Node) {
@@ -55,13 +81,6 @@ export class CamelKTaskCompletionItemProvider implements vscode.CompletionItemPr
     }
 
     private isParentTasks(node: jsonparser.Node) {
-        let parent = node.parent;
-        if (parent !== undefined && parent.type === "property") {
-            let nodeTasks = parent.children?.find(child => {
-                return child.type === "string" && child.value === "tasks";
-            });
-            return nodeTasks !== undefined;
-        }
-        return false;
+        return this.isParentHasStringPropertyOfType(node, 'tasks');
     }
 }

@@ -17,26 +17,42 @@
 'use strict';
 
 import { expect } from 'chai';
-import * as vscode from 'vscode';
 import { CamelKTaskCompletionItemProvider } from "../../task/CamelKTaskCompletionItemProvider";
 
 suite("Camel K Task Completion", function () {
 
-    let content = `{
+    let simpleContent = `{
         "version": "2.0.0",
         "tasks": [
             
         ]
     }`;
 
-    test("no result outside of tasks", function (done) {
-        expect(new CamelKTaskCompletionItemProvider().provideCompletionItemsForText(content, 2)).to.be.empty;
-        done();
+    test("no result outside of tasks", async () => {
+        expect(await new CamelKTaskCompletionItemProvider().provideCompletionItemsForText(simpleContent, 2)).to.be.empty;
     });
 
-    test("One completion in tasks array ", function (done) {
-        let res = new CamelKTaskCompletionItemProvider().provideCompletionItemsForText(content, 49) as vscode.CompletionItem[];
+    test("One completion in tasks array", async () => {
+        let res = await new CamelKTaskCompletionItemProvider().provideCompletionItemsForText(simpleContent, 49);
         expect(res).to.have.lengthOf(1);
-        done();
+    });
+
+    test("Completion for traits", async () => {
+        let contentWithEmptyTrait =
+`{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Config with traits",
+            "type": "camel-k",
+            "dev": true,
+            "file": "dummy",
+            "problemMatcher": [],
+            "traits": []
+        }
+    ]
+}`;
+        let res = await new CamelKTaskCompletionItemProvider().provideCompletionItemsForText(contentWithEmptyTrait, 236);
+        expect(res).to.have.lengthOf(26);
     });
 });

@@ -22,16 +22,26 @@ const os = require('os');
 
 suite('Should do completion in tasks.json', () => {
 	const docURiTasksJson = getDocUri('tasks.json');
-	const expectedCompletion = { label: 'Camel K basic development mode' };
-
+	
 	var testVar = test('Completes for Camel K template', async () => {
-		if(os.homedir().includes('hudson')) {
-			testVar.skip();
-		}
+		assumeNotOnJenkins(testVar);
+		const expectedCompletion = { label: 'Camel K basic development mode' };
 		await testCompletion(docURiTasksJson, new vscode.Position(3, 7), expectedCompletion);
 	});
 
+	var testTraits = test('Completes for traits', async () => {
+		assumeNotOnJenkins(testTraits);
+		const expectedCompletion = { label: 'platform' };
+		await testCompletion(docURiTasksJson, new vscode.Position(9, 23), expectedCompletion);
+	});
+
 });
+
+function assumeNotOnJenkins(testVar: Mocha.Test) {
+	if (os.homedir().includes('hudson')) {
+		testVar.skip();
+	}
+}
 
 async function testCompletion(
 	docUri: vscode.Uri,
