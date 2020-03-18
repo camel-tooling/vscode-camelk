@@ -1,6 +1,13 @@
 {
     "version": "2.0.0",
     "tasks": [
-        
+        {
+            "label": "Config with traits",
+            "type": "camel-k",
+            "dev": true,
+            "file": "${file}",
+            "problemMatcher": [],
+            "traits": []
+        }
     ]
 }
