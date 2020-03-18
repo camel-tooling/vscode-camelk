@@ -55,7 +55,7 @@ suite("IntegrationUtil tests", function() {
         showQuickPickStub.onFirstCall().returns(IntegrationUtils.vscodeTasksIntegration);
         showQuickPickStub.onSecondCall().returns(undefined);
         
-        await IntegrationUtils.startIntegration(getDocUri('UnRelated.java'));
+        await IntegrationUtils.startIntegration(getDocUri('ADifferentRouteBuilder.java'));
 
         sinon.assert.calledWith(showQuickPickStub,
             ['Start in dev mode Camel K integration opened in active editor'],
