@@ -17,32 +17,22 @@
 'use strict';
 
 import * as assert from 'assert';
-import * as vscode from 'vscode';
 import * as config from '../../config';
 import * as fs from 'fs';
 import * as sinon from 'sinon';
 import * as installer from '../../installer';
+import * as Utils from './Utils';
 import * as versionUtils from '../../versionUtils';
 import { failed } from '../../errorable';
-
-const extensionId = 'redhat.vscode-camelk';
 
 suite("ensure install methods are functioning as expected", function() {
 
 	let installKubectlSpy  = sinon.spy(installer, 'installKubectl');
 
 	test("install Camel K and Kubernetes CLIs on activation", async function() {
-		// reset the call count
-		installKubectlSpy.resetHistory();	
+		let extension = await Utils.ensureExtensionActivated();
 
-		let extension = vscode.extensions.getExtension(extensionId);
-		if (extension !== null && extension !== undefined) {
-			await extension.activate().then( () => {
-				assert.ok("Camel K extension is ready to go");
-			});
-		} else {
-			assert.fail("Camel K extension is undefined and cannot be activated");
-		}
+		installKubectlSpy.resetHistory();	
 
 		// now try to activate again to ensure that we don't install a second time
 		if (extension !== null && extension !== undefined) {
