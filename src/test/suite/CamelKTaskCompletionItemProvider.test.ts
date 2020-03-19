@@ -18,6 +18,7 @@
 
 import { expect } from 'chai';
 import { CamelKTaskCompletionItemProvider } from "../../task/CamelKTaskCompletionItemProvider";
+import * as Utils from './Utils';
 
 suite("Camel K Task Completion", function () {
 
@@ -38,6 +39,7 @@ suite("Camel K Task Completion", function () {
     });
 
     test("Completion for traits", async () => {
+        await Utils.ensureExtensionActivated();
         let contentWithEmptyTrait =
 `{
     "version": "2.0.0",
