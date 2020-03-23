@@ -317,7 +317,7 @@
 		"ms-kubernetes-tools.vscode-kubernetes-tools"
 	],
 	"dependencies": {
-		"@types/request-promise": "^4.1.45",
+		"@types/request-promise": "^4.1.46",
 		"@types/shelljs": "^0.8.6",
 		"@types/tmp": "^0.1.0",
 		"child_process": "^1.0.2",
