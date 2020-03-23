@@ -19,6 +19,9 @@
 import * as kamel from '../kamel';
 import * as vscode from 'vscode';
 import { TraitDefinition } from './TraitDefinition';
+import { TraitProperty } from './TraitProperty';
+
+const SORT_PREFIX_TO_HAVE_COMPLETIONS_BEFORE_VARIABLES = '${1';
 
 export class TraitManager {
 
@@ -33,7 +36,20 @@ export class TraitManager {
 			};
 			completions.push(completionBasic);
 		}
-		return Promise.resolve(completions);
+		return completions;
+	}
+	static async provideTraitProperties(traitName: string, position: vscode.Position): Promise<vscode.CompletionItem[]> {
+		const completions: vscode.CompletionItem[] = [];
+		const traitDefs = await TraitManager.retrieveTraitsDefinitions(traitName);
+		traitDefs[0].properties.forEach((property: TraitProperty) => {
+			const propertyCompletion: vscode.CompletionItem = {
+				label: property.name,
+				sortText: SORT_PREFIX_TO_HAVE_COMPLETIONS_BEFORE_VARIABLES + property.name,
+				range: new vscode.Range(position, position)
+			};
+			completions.push(propertyCompletion);
+		});
+		return completions;
 	}
 
 	private static computeSnippetForTrait(trait: TraitDefinition): vscode.SnippetString {
@@ -42,9 +58,9 @@ export class TraitManager {
 		return new vscode.SnippetString(`"${trait.name}.${propertiesChoices}="`);
 	}
 
-	private static async retrieveTraitsDefinitions(): Promise<TraitDefinition[]> {
+	private static async retrieveTraitsDefinitions(traitName?: string): Promise<TraitDefinition[]> {
 		const kamelExe = kamel.create();
-		const trait = await kamelExe.invoke(`help trait --all -o json`);
+		const trait = await kamelExe.invoke(`help trait ${traitName ? traitName : '--all'} -o json`);
 		return JSON.parse(trait) as TraitDefinition[];
 	}
 }

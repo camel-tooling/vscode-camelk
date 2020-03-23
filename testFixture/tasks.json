@@ -8,6 +8,14 @@
             "file": "${file}",
             "problemMatcher": [],
             "traits": []
+		},
+		{
+            "label": "Config for trait properties",
+            "type": "camel-k",
+            "dev": true,
+            "file": "${file}",
+            "problemMatcher": [],
+            "traits": ["affinity."]
         }
     ]
 }

@@ -5,7 +5,7 @@ All notable changes to the "vscode-camelk" extension will be documented in this 
 ## 0.0.14
 
 - Listing VS Code task to deploy Camel K integration in "Start Apache Camel Integration" command
-- Completion for trait names in tasks.json
+- Completion for trait names and trait properties in tasks.json
 - Command to create new Apache Camel K Integration files
 
 ## 0.0.13
