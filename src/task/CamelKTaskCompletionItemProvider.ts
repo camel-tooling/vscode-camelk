@@ -22,65 +22,66 @@ import { TraitManager } from './TraitManager';
 
 export class CamelKTaskCompletionItemProvider implements vscode.CompletionItemProvider {
 
-    provideCompletionItems(document: vscode.TextDocument, position: vscode.Position, token: vscode.CancellationToken, context: vscode.CompletionContext): vscode.ProviderResult<vscode.CompletionItem[] | vscode.CompletionList> {
-        return this.provideCompletionItemsForText(document.getText(), document.offsetAt(position));
-    }
+	provideCompletionItems(document: vscode.TextDocument, position: vscode.Position, token: vscode.CancellationToken, context: vscode.CompletionContext): vscode.ProviderResult<vscode.CompletionItem[] | vscode.CompletionList> {
+		return this.provideCompletionItemsForText(document.getText(), document.offsetAt(position));
+	}
 
-    public async provideCompletionItemsForText(text: string, offset: number): Promise<vscode.CompletionItem[]> {
-        let node = jsonparser.findNodeAtOffset(jsonparser.parseTree(text), offset, false);
-        let completions: vscode.CompletionItem[] = [];
-        if (node !== undefined) {
-            if (this.isInTasksArray(node)) {
-                let completionBasic: vscode.CompletionItem = {
-                    label: 'Camel K basic development mode',
-                    insertText:
-`{
+	public async provideCompletionItemsForText(text: string, offset: number): Promise<vscode.CompletionItem[]> {
+		const globalNode = jsonparser.parseTree(text);
+		const node = jsonparser.findNodeAtOffset(globalNode, offset, false);
+		let completions: vscode.CompletionItem[] = [];
+		if (node) {
+			if (this.isInTasksArray(node)) {
+				const completionBasic: vscode.CompletionItem = {
+					label: 'Camel K basic development mode',
+					insertText:
+						`{
     "label": "Start in dev mode Camel K integration opened in active editor",
     "type": "camel-k",
     "dev": true,
     "file": "\${file}",
     "problemMatcher": []
 }`
-                };
-                completions.push(completionBasic);
-            } else if(this.isInTraitsArray(node)) {
-                let traitCompletions: vscode.CompletionItem[] = await TraitManager.provideAvailableTraits();
-                completions = completions.concat(traitCompletions);
-            }
-        }
-        return Promise.resolve(completions);
-    }
+				};
+				completions.push(completionBasic);
+			} else if (this.isInTraitsArray(node)) {
+				const traitCompletions: vscode.CompletionItem[] = await TraitManager.provideAvailableTraits();
+				completions = completions.concat(traitCompletions);
+			}
+		}
+		return Promise.resolve(completions);
+	}
 
-    private isInTraitsArray(node: jsonparser.Node) {
-        return this.isInArray(node)
-            && this.isSiblingTraitTasks(node);
-    }
+	private isInTraitsArray(node: jsonparser.Node) {
+		return this.isInArray(node)
+			&& this.isSiblingTraitTasks(node);
+	}
 
-    private isParentHasStringPropertyOfType(node: jsonparser.Node, type: string) {
-        let parent = node.parent;
-        if (parent !== undefined && parent.type === "property") {
-            let nodeTasks = parent.children?.find(child => {
-                return child.type === "string" && child.value === type;
-            });
-            return nodeTasks !== undefined;
-        }
-        return false;
-    }
+	private isParentHasStringPropertyOfType(node: jsonparser.Node, type: string) {
+		const parent = node.parent;
+		if (parent !== undefined && parent.type === "property") {
+			const nodeTasks = parent.children?.find(child => {
+				return child.type === "string" && child.value === type;
+			});
+			return nodeTasks !== undefined;
+		}
+		return false;
+	}
 
-    private isSiblingTraitTasks(node: jsonparser.Node) {
-        return this.isParentHasStringPropertyOfType(node, 'traits');
-    }
+	private isSiblingTraitTasks(node: jsonparser.Node) {
+		return this.isParentHasStringPropertyOfType(node, 'traits');
+	}
 
-    private isInTasksArray(node: jsonparser.Node) {
-        return this.isInArray(node)
-            && this.isParentTasks(node);
-    }
+	private isInTasksArray(node: jsonparser.Node) {
+		return this.isInArray(node)
+			&& this.isParentTasks(node);
+	}
 
-    private isInArray(node: jsonparser.Node) {
-        return node?.type === "array";
-    }
+	private isInArray(node: jsonparser.Node) {
+		return node?.type === "array";
+	}
 
-    private isParentTasks(node: jsonparser.Node) {
-        return this.isParentHasStringPropertyOfType(node, 'tasks');
-    }
+	private isParentTasks(node: jsonparser.Node) {
+		return this.isParentHasStringPropertyOfType(node, 'tasks');
+	}
 }

@@ -16,36 +16,47 @@
  */
 'use strict';
 
-import * as kamel from './../kamel';
+import * as kamel from '../kamel';
 import * as vscode from 'vscode';
 
 export class TraitManager {
 
-    static async provideAvailableTraits(): Promise<vscode.CompletionItem[]> {
-        let completions: vscode.CompletionItem[] = [];
-        let kamelExe = kamel.create();
-        let allTraits = await kamelExe.invoke('help trait --all -o json');
-        let traits = JSON.parse(allTraits) as TraitDefinition[];
-        for (let trait of traits) {
-            let completionBasic: vscode.CompletionItem = {
-                label: trait.name,
-                insertText: `"${trait.name}"`
-            };
-            completions.push(completionBasic);
-        }
-        return Promise.resolve(completions);
-    }
+	static async provideAvailableTraits(): Promise<vscode.CompletionItem[]> {
+		const completions: vscode.CompletionItem[] = [];
+		const traits = await TraitManager.retrieveTraitsDefinitions();
+		for (const trait of traits) {
+			const completionBasic: vscode.CompletionItem = {
+				label: trait.name,
+				insertText: TraitManager.computeSnippetForTrait(trait),
+				kind: vscode.CompletionItemKind.Snippet,
+			};
+			completions.push(completionBasic);
+		}
+		return Promise.resolve(completions);
+	}
+
+	private static computeSnippetForTrait(trait: TraitDefinition): vscode.SnippetString {
+		const propertyNames = trait.properties.map(property => property.name);
+		const propertiesChoices = '${1|' + propertyNames.join(',') + '|}';
+		return new vscode.SnippetString(`"${trait.name}.${propertiesChoices}="`);
+	}
+
+	private static async retrieveTraitsDefinitions(): Promise<TraitDefinition[]> {
+		const kamelExe = kamel.create();
+		const trait = await kamelExe.invoke(`help trait --all -o json`);
+		return JSON.parse(trait) as TraitDefinition[];
+	}
 }
 
 interface TraitDefinition {
-    name: string;
-    platform: boolean;
-    profiles: string[];
-    properties: Property[];
+	name: string;
+	platform: boolean;
+	profiles: string[];
+	properties: Property[];
 }
 
 interface Property {
-    name: string;
-    type: string;
-    defaultValue?: boolean | number | string;
+	name: string;
+	type: string;
+	defaultValue?: boolean | number | string;
 }
