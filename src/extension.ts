@@ -35,6 +35,7 @@ import { ChildProcess } from 'child_process';
 import { LogsPanel } from './logsWebview';
 import * as logUtils from './logUtils';
 import {checkKamelNeedsUpdate, version, handleChangeRuntimeConfiguration} from './versionUtils';
+import * as NewIntegrationFileCommand from './commands/NewIntegrationFileCommand';
 
 export const DELAY_RETRY_KUBECTL_CONNECTION = 1000;
 
@@ -156,6 +157,8 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 				});
 			}
 		});
+
+		vscode.commands.registerCommand('camelk.integrations.createNewIntegrationFile', NewIntegrationFileCommand.create);
 
 	});
 
