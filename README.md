@@ -39,6 +39,15 @@ The **Tooling for Apache Camel K** extension is available in the VS Code Extensi
 
     You can install them by following the same steps except search for Kubernetes or Apache Camel in the list of extensions.
 
+## Creating a new Camel K Integration file
+
+1. From command palette, choose `Create a new Apache Camel K Integration file`
+2. Choose the language to use.
+3. Choose the workspace folder
+4. Provide a name for the new file
+
+The new Apache Camel K Integration file is created at the root of the chosen workspace folder.
+
 ## Starting a new Camel K Integration
 
 After your Apache Camel K/Minikube environment is running and you have installed the **Tooling for Apache Camel K** (vscode-camelk) extension, you can start a new Apache Camel K integration.
@@ -106,7 +115,7 @@ To update the state of your currently deployed integrations, hover over the **Ap
 
 ![Apache Camel K Integrations view - Refresh](images/camelk-integrations-view-refresh-action.jpg)
 
-## Creating a new Camel K Integration with multiple parameters
+## Creating a new Camel K Integration task configuration with multiple parameters
 
 Though the simple "Start Apache Camel K Integration" menu works well for simple cases, you can use a Task for more complex integrations. When the Camel K integration requires more configuration, you can set that up using a Task.
 
