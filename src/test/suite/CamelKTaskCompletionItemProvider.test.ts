@@ -19,6 +19,7 @@
 import { expect } from 'chai';
 import { CamelKTaskCompletionItemProvider } from "../../task/CamelKTaskCompletionItemProvider";
 import * as Utils from './Utils';
+import * as vscode from 'vscode';
 
 suite("Camel K Task Completion", function () {
 
@@ -54,7 +55,11 @@ suite("Camel K Task Completion", function () {
         }
     ]
 }`;
-        let res = await new CamelKTaskCompletionItemProvider().provideCompletionItemsForText(contentWithEmptyTrait, 236);
-        expect(res).to.have.lengthOf(26);
+		const res = await new CamelKTaskCompletionItemProvider().provideCompletionItemsForText(contentWithEmptyTrait, 236);
+		expect(res).to.have.lengthOf(26);
+		const affinityCompletionItem = res.find(item => item.label === 'affinity');
+		const affinitySnippet = affinityCompletionItem?.insertText as vscode.SnippetString;
+		expect(affinitySnippet.value).equals('"affinity.${1|enabled,pod-affinity,pod-anti-affinity,node-affinity-labels,pod-affinity-labels,pod-anti-affinity-labels|}="');
     }).timeout(120000);
+
 });
