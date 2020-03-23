@@ -23,10 +23,10 @@ import { TraitManager } from './TraitManager';
 export class CamelKTaskCompletionItemProvider implements vscode.CompletionItemProvider {
 
 	provideCompletionItems(document: vscode.TextDocument, position: vscode.Position, token: vscode.CancellationToken, context: vscode.CompletionContext): vscode.ProviderResult<vscode.CompletionItem[] | vscode.CompletionList> {
-		return this.provideCompletionItemsForText(document.getText(), document.offsetAt(position));
+		return this.provideCompletionItemsForText(document.getText(), document.offsetAt(position), position);
 	}
 
-	public async provideCompletionItemsForText(text: string, offset: number): Promise<vscode.CompletionItem[]> {
+	public async provideCompletionItemsForText(text: string, offset: number, position: vscode.Position): Promise<vscode.CompletionItem[]> {
 		const globalNode = jsonparser.parseTree(text);
 		const node = jsonparser.findNodeAtOffset(globalNode, offset, false);
 		let completions: vscode.CompletionItem[] = [];
@@ -47,6 +47,10 @@ export class CamelKTaskCompletionItemProvider implements vscode.CompletionItemPr
 			} else if (this.isInTraitsArray(node)) {
 				const traitCompletions: vscode.CompletionItem[] = await TraitManager.provideAvailableTraits();
 				completions = completions.concat(traitCompletions);
+			} else if (this.isInTraitsArrayMember(node)) {
+				const value = node.value as string;
+				const traitpropertyCompletions: vscode.CompletionItem[] = await TraitManager.provideTraitProperties(value.substr(0, value.length - 1), position);
+				completions = completions.concat(traitpropertyCompletions);
 			}
 		}
 		return Promise.resolve(completions);
@@ -55,6 +59,17 @@ export class CamelKTaskCompletionItemProvider implements vscode.CompletionItemPr
 	private isInTraitsArray(node: jsonparser.Node) {
 		return this.isInArray(node)
 			&& this.isSiblingTraitTasks(node);
+	}
+	
+	private isInTraitsArrayMember(node: jsonparser.Node) {
+		const parent = node.parent;
+		if (parent && this.isInTraitsArray(parent) && node.type === "string") {
+			const value = node.value as string;
+			if (value && value.endsWith('.')) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	private isParentHasStringPropertyOfType(node: jsonparser.Node, type: string) {
