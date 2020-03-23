@@ -145,6 +145,11 @@
 			{
 				"command": "camelk.integrations.kitlog",
 				"title": "Follow kit builder log for running Apache Camel K Integration"
+			},
+			{
+				"command": "camelk.integrations.createNewIntegrationFile",
+				"title": "Create a new Apache Camel K Integration file",
+				"enablement": "workspaceFolderCount != 0"
 			}
 		],
 		"menus": {
@@ -331,6 +336,7 @@
 		"shelljs": "^0.8.3",
 		"tar": "^6.0.1",
 		"tmp": "^0.1.0",
+		"valid-filename": "^3.1.0",
 		"vscode-kubernetes-tools-api": "^1.1.0"
 	}
 }
