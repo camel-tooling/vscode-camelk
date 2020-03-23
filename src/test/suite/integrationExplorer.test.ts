@@ -23,6 +23,7 @@ import * as extension from '../../extension';
 import * as assert from 'assert';
 import * as fs from 'fs';
 import * as path from 'path';
+import * as Utils from './Utils';
 
 const expect = chai.expect;
 chai.use(sinonChai);
@@ -33,6 +34,7 @@ suite('Camel-k Integrations View', () => {
 	let integrationExplorer: CamelKNodeProvider.CamelKNodeProvider;
 
 	setup(() => {
+		Utils.ensureExtensionActivated();
 		sandbox = sinon.createSandbox();
 		integrationExplorer = new CamelKNodeProvider.CamelKNodeProvider();
 		integrationExplorer.setRetrieveIntegrations(false);

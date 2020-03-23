@@ -17,18 +17,28 @@
 'use strict';
 
 import { expect } from 'chai';
+import * as fs from 'fs';
 import * as sinon from 'sinon';
 import * as vscode from 'vscode';
 import * as extension from '../../extension';
 import * as utils from '../../CamelKJSONUtils';
 import * as CamelKNodeProvider from '../../CamelKNodeProvider';
+import * as Utils from './Utils';
+
+const homedir = require('os').homedir();
 
 suite("Kubectl integration watcher", function() {
 	
 	let messageSpy = sinon.spy(utils, "shareMessage");
 	let refreshStub: sinon.SinonStub<[], Promise<void>>;
 	let sandbox: sinon.SinonSandbox;
+	let kubeconfigFilePath : string = homedir + '/.kube/config';
 	
+	this.beforeAll(async () => {
+		this.timeout(40000);
+		await Utils.ensureExtensionActivated();
+	});
+
 	this.beforeEach(() => {
 		sandbox = sinon.createSandbox();
 		refreshStub = sandbox.stub(extension.camelKIntegrationsProvider, 'refresh');
@@ -36,8 +46,11 @@ suite("Kubectl integration watcher", function() {
 	});
 	
 	this.afterEach(() => {
-		sandbox.reset();
+		if(fs.existsSync(kubeconfigFilePath+ '.bak')){
+			fs.renameSync(kubeconfigFilePath + '.bak', kubeconfigFilePath);
+		}
 		refreshStub.restore();
+		sandbox.reset();
 	});
 	
 	test('Check there is no loop for closing kubectl process', async function() {
@@ -46,6 +59,9 @@ suite("Kubectl integration watcher", function() {
 	});
 	
 	test('Check there is one message logged in case of connection error', async function() {
+		if(fs.existsSync(kubeconfigFilePath)) {
+			fs.renameSync(kubeconfigFilePath, kubeconfigFilePath + '.bak');
+		}
 		await extension.getIntegrationsFromKubectlCliWithWatch();
 		sinon.assert.calledOnce(messageSpy);
 	});
@@ -59,6 +75,9 @@ suite("Kubectl integration watcher", function() {
 	});
 	
 	test('Check there is only one message logged in case of connection error with View visible', async function() {
+		if(fs.existsSync(kubeconfigFilePath)) {
+			fs.renameSync(kubeconfigFilePath, kubeconfigFilePath + '.bak');
+		}
 		await openCamelKTreeView(sandbox);
 		messageSpy.resetHistory();
 		await extension.getIntegrationsFromKubectlCliWithWatch();

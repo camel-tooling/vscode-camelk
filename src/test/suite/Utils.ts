@@ -24,6 +24,7 @@ const extensionId = 'redhat.vscode-camelk';
 export async function ensureExtensionActivated() {
     let extension = vscode.extensions.getExtension(extensionId);
     if (extension !== null && extension !== undefined) {
+        console.log('not activated yet');
         await extension.activate().then( () => {
             assert.ok("Camel K extension is ready to go");
         });
