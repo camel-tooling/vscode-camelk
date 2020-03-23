@@ -1,6 +1,16 @@
 language: java
+sudo: required
 services:
   - xvfb
+env:
+  global:
+    - DISPLAY=:99
+    - CHANGE_MINIKUBE_NONE_USER=true
+    - MINIKUBE_WANTUPDATENOTIFICATION=false
+    - MINIKUBE_WANTREPORTERRORPROMPT=false
+    - MINIKUBE_HOME=$HOME
+    - CHANGE_MINIKUBE_NONE_USER=true
+    - KUBECONFIG=$HOME/.kube/config
 before_install:
   - 'nvm install --lts'
   - 'export PATH=./node_modules/.bin:$PATH'
@@ -12,6 +22,27 @@ install:
   - 'npm run vscode:prepublish'
   - 'npm install -g vsce'
   - 'vsce package'
+before_script:
+  # Download and provide in path kubectl , which is a requirement for using minikube.
+  - curl -Lo kubectl https://storage.googleapis.com/kubernetes-release/release/v1.17.4/bin/linux/amd64/kubectl && chmod +x kubectl && sudo mv kubectl /usr/local/bin/
+  # Download and provide in path minikube.
+  - curl -Lo minikube https://storage.googleapis.com/minikube/releases/v1.9.2/minikube-linux-amd64 && chmod +x minikube && sudo mv minikube /usr/local/bin/
+  # Download and provide in path kamel.
+  - curl -Lo kamel.tar.gz https://github.com/apache/camel-k/releases/download/1.0.0-RC2/camel-k-client-1.0.0-RC2-linux-64bit.tar.gz
+  - tar -zxvf kamel.tar.gz
+  - chmod +x kamel
+  - sudo mv kamel /usr/local/bin/
+  - mkdir -p $HOME/.kube $HOME/.minikube
+  - touch $KUBECONFIG
+  - sudo minikube start --vm-driver=none --kubernetes-version=v1.17.4
+  - sudo minikube addons enable registry
+  - 'sudo chown -R travis: /home/travis/.minikube/'
+  - 'kubectl cluster-info'
+  - 'kamel install'
+  # Clean CLI which were used to start the Kubernetes instance
+  - sudo rm /usr/local/bin/minikube
+  - sudo rm /usr/local/bin/kubectl
+  - sudo rm /usr/local/bin/kamel
 script:
   - 'npm test --silent'
   - 'npm run ui-test'
@@ -22,7 +53,6 @@ after_success:
 cache:
   directories:
     - "node_modules"
-env: DISPLAY=:99
 branches:
   except:
     - /^dependabot.*$/
