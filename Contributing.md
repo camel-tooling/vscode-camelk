@@ -24,4 +24,4 @@
 
 # Note about test execution and GitHub API access
 
-Access to GitHub API has rate limit. This rate limit is lower for unauthenticated request. On CI, this rate limit was often hit (either Travis or Jenkins). To avoid that, a GitHub token needs to be provided through VSCODE_CAMELK_GITHUB_TOKEN environment variable. This token doesn't require any specific rights.
+Access to GitHub API has a rate limit. This rate limit is lower for unauthenticated requests. On CI, this rate limit was often hit (either Travis or Jenkins). To avoid that, a GitHub token needs to be provided through VSCODE_CAMELK_GITHUB_TOKEN environment variable. This token doesn't require any specific rights.

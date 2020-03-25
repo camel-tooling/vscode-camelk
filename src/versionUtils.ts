@@ -110,14 +110,14 @@ export async function getLatestCamelKVersion(): Promise<Errorable<string>> {
 	} else {
 		const latestURL = 'https://api.github.com/repos/apache/camel-k/releases/latest';
 		const headers = [['If-Modified-Since', LAST_MODIFIED_DATE_OF_DEFAULT_VERSION]];
-		let githubToken = process.env.VSCODE_CAMELK_GITHUB_TOKEN;
+		const githubToken = process.env.VSCODE_CAMELK_GITHUB_TOKEN;
 		if(githubToken) {
 			headers.push(['Authorization', `token ${githubToken}`]);
 		}
 		const res = await fetch(latestURL, { headers: headers });
 		if (res.status === 200) {
-			let latestJSON = await res.json();
-			let tagName = latestJSON.tag_name;
+			const latestJSON = await res.json();
+			const tagName = latestJSON.tag_name;
 			if (tagName) {
 				latestVersionFromOnline = tagName;
 				return { succeeded: true, result: tagName };
@@ -136,7 +136,7 @@ export async function getLatestCamelKVersion(): Promise<Errorable<string>> {
 
 function checkKamelCLIVersion(): Promise<string> {
 	return new Promise<string>(async (resolve, reject) => {
-		let kamelLocal = kamelCli.create();
+		const kamelLocal = kamelCli.create();
 		await kamelLocal.invoke('version')
 			.then((rtnValue) => {
 				const strArray = rtnValue.split(' ');
