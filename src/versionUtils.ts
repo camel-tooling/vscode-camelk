@@ -24,8 +24,9 @@ import { platformString, kamelUnavailableRejection } from './installer';
 import fetch from 'cross-fetch';
 
 export const version: string = '1.0.0-RC2'; //need to retrieve this if possible, but have a default
-/* Can be retrieved using `curl -i https://api.github.com/repos/apache/camel-k/releases/latest`
-* To be updated when upting the default "version" attribute
+/*
+* Can be retrieved using `curl -i https://api.github.com/repos/apache/camel-k/releases/latest` and searchign for "last-modified" attribute
+* To be updated when updating the default "version" attribute
 */
 const LAST_MODIFIED_DATE_OF_DEFAULT_VERSION: string = 'Fri, 28 Feb 2020 07:24:17 GMT';
 let latestVersionFromOnline: string;
@@ -108,7 +109,12 @@ export async function getLatestCamelKVersion(): Promise<Errorable<string>> {
 		return { succeeded: true, result: latestVersionFromOnline };
 	} else {
 		const latestURL = 'https://api.github.com/repos/apache/camel-k/releases/latest';
-		const res = await fetch(latestURL, { headers: [['If-Modified-Since', LAST_MODIFIED_DATE_OF_DEFAULT_VERSION]] });
+		const headers = [['If-Modified-Since', LAST_MODIFIED_DATE_OF_DEFAULT_VERSION]];
+		let githubToken = process.env.VSCODE_CAMELK_GITHUB_TOKEN;
+		if(githubToken) {
+			headers.push(['Authorization', `token ${githubToken}`]);
+		}
+		const res = await fetch(latestURL, { headers: headers });
 		if (res.status === 200) {
 			let latestJSON = await res.json();
 			let tagName = latestJSON.tag_name;
@@ -122,6 +128,7 @@ export async function getLatestCamelKVersion(): Promise<Errorable<string>> {
 			latestVersionFromOnline = version;
 			return { succeeded: true, result: latestVersionFromOnline };
 		} else {
+			console.log(`error ${res.status} ${res.statusText}`);
 			return { succeeded: false, error: [`Failed to establish Apache Camel K stable version: ${res.status} ${res.statusText}`] };
 		}
 	}
