@@ -25,7 +25,7 @@ import fetch from 'cross-fetch';
 
 export const version: string = '1.0.0-RC2'; //need to retrieve this if possible, but have a default
 /*
-* Can be retrieved using `curl -i https://api.github.com/repos/apache/camel-k/releases/latest` and searchign for "last-modified" attribute
+* Can be retrieved using `curl -i https://api.github.com/repos/apache/camel-k/releases/latest` and searching for "last-modified" attribute
 * To be updated when updating the default "version" attribute
 */
 const LAST_MODIFIED_DATE_OF_DEFAULT_VERSION: string = 'Fri, 28 Feb 2020 07:24:17 GMT';
