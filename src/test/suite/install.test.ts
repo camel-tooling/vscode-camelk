@@ -53,6 +53,7 @@ suite("ensure install methods are functioning as expected", function() {
 	var testVar = test("ensure cli version checking works correctly", async function() {
 		if(!process.env.VSCODE_CAMELK_GITHUB_TOKEN) {
 			testVar.skip();
+			//dummy change for different sha1
 		}
 
 		await versionUtils.checkKamelNeedsUpdate('bogusversion').then( () => {
