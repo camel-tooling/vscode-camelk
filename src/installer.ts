@@ -128,15 +128,18 @@ function updateStatusBarItem(sbItem : vscode.StatusBarItem, text: string, toolti
 }
 
 export async function installKamel(context: vscode.ExtensionContext): Promise<Errorable<null>> {
-	const latestversion = await versionUtils.getLatestCamelKVersion();
-	if (failed(latestversion)) {
-		return { succeeded: false, error: latestversion.error };
-	}
-
-	let versionToUse = latestversion.result.trim();
+	let versionToUse: string;
 	let runtimeVersionSetting = vscode.workspace.getConfiguration().get(config.RUNTIME_VERSION_KEY) as string;
 	if (runtimeVersionSetting && runtimeVersionSetting.toLowerCase() !== versionUtils.version.toLowerCase()) {
 		versionToUse = runtimeVersionSetting;
+	} else {
+		const latestversion = await versionUtils.getLatestCamelKVersion();
+		if (failed(latestversion)) {
+			extension.shareMessageInMainOutputChannel(`Cannot retrieve latest available Camel version and none specified in settings. Will fallback to use the default ${versionUtils.version}`);
+			versionToUse = versionUtils.version;
+		} else {
+			versionToUse = latestversion.result.trim();
+		}
 	}
 
 	await versionUtils.checkKamelNeedsUpdate(versionToUse).then((needsUpdate) => {
