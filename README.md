@@ -39,6 +39,16 @@ The **Tooling for Apache Camel K** extension is available in the VS Code Extensi
 
     You can install them by following the same steps except search for Kubernetes or Apache Camel in the list of extensions.
 
+## Apache Camel K CLI Installation
+
+If you have pre-installed the Apache Camel K CLI (`kamel`), it is now used by the tooling. 
+
+If the CLI has not been pre-installed, the Tooling for Apache Camel K extension will install it in the global configuration area of Visual Studio Code. If the tooling manages the CLI, you have control over what version of the CLI to use and whether to auto-upgrade to the latest version in future extension updates in the settings. 
+
+If the CLI was pre-installed and you want to change versions, you will have to do that yourself or remove/rename the existing CLI so the extension knows to manage it for you. 
+
+Note: To check which version is currently installed on your system, you can use the `Retrieve version for current Apache Camel K CLI` command to display the version in the Apache Camel K output channel.
+
 ## Starting a new Camel K Integration
 
 After your Apache Camel K/Minikube environment is running and you have installed the **Tooling for Apache Camel K** (vscode-camelk) extension, you can start a new Apache Camel K integration.
@@ -264,6 +274,8 @@ Settings include:
 * **Close Log View When Integration Removed** - Indicates whether an open Log view for a published integration should be closed if the integration is removed (stopped). Defaults to true (checked). If unchecked, the Log will remain open and indicate that the integration has been stopped in the title bar.
 * **Show Status Bar Messages** - Indicates whether to show messages in the status bar to indicate when the system is updating, such as when the Camel K Integrations view is being refreshed or a new Integration is being deployed.
 * **Namespace** - The namespace to be used for all Apache Camel K and Kubernetes operations. This defaults to `default` but can be set to whatever your namespace has been configured to in your runtime. When it is updated, the Apache Camel K Integrations view is refreshed automatically. (See [Changing the Namespace](#changing-the-namespace) below for a bit more detail.)
+* **Auto Upgrade** - Indicates whether the Apache Camel K CLI will be upgraded on your system if an upgrade is available and the extension is managing your CLI. 
+* **Runtime Version** - Notes the version of the Apache Camel K CLI being used. It will default to the latest release, but can be overridden if the **Auto Upgrade** setting is unchecked. 
 
 ## Your First Integration
 
