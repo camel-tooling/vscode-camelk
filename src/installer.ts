@@ -52,16 +52,12 @@ export function isKamelAvailable() : Promise<boolean> {
 					resolve(false);
 					return;
 				}
-			}).catch (kamelUnavailableRejection(reject));
+			}).catch ((error) => {
+				console.log(`Apache Camel K CLI (kamel) unavailable: ${error}`);
+				reject(new Error(error));
+				return;		
+			});
 	});
-}
-
-export function kamelUnavailableRejection(reject: (reason?: any) => void): ((reason: any) => void | PromiseLike<void>) | null | undefined {
-	return (error) => {
-		console.log(`Apache Camel K CLI (kamel) unavailable: ${error}`);
-		reject(new Error(error));
-		return;
-	};
 }
 
 export function isKubernetesAvailable(): Promise<boolean> {

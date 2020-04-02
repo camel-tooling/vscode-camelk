@@ -321,6 +321,19 @@ function getSelectedDependencies(): Promise<string[]> {
 	});
 }
 
+export function getCamelKVersion() : Promise<string | undefined>{
+	return new Promise( async (resolve, reject) => {
+		let kamelExe = kamel.create();
+		await kamelExe.invoke('version').then( (result) => {
+			resolve(result);
+			return;
+		}).catch ( () => {
+			reject(new Error(`No version returned`));
+			return;
+		});
+	});
+}
+
 // use command-line "kamel" utility to start a new integration
 export function createNewIntegration(integrationFileUri: vscode.Uri, devMode? : boolean, configmap? : string, secret? : string, resource? : string, propertyArray? : string[], dependencyArray? : string[]): Promise<boolean> {
 	return new Promise( async (resolve, reject) => {

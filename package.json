@@ -145,6 +145,10 @@
 			{
 				"command": "camelk.integrations.kitlog",
 				"title": "Follow kit builder log for running Apache Camel K Integration"
+			},
+			{
+				"command": "camelk.version",
+				"title": "Retrieve version for current Apache Camel K CLI"
 			}
 		],
 		"menus": {

@@ -20,7 +20,7 @@ import * as extension from './extension';
 import { Errorable, failed } from './errorable';
 import * as config from './config';
 import * as kamelCli from './kamel';
-import { platformString, kamelUnavailableRejection } from './installer';
+import { platformString } from './installer';
 import fetch from 'cross-fetch';
 
 export const version: string = '1.0.0-RC2'; //need to retrieve this if possible, but have a default
@@ -46,12 +46,29 @@ async function testVersionAvailable(versionToUse: string): Promise<boolean> {
 
 export async function checkKamelNeedsUpdate(versionToUse?: string): Promise<boolean> {
 	return new Promise<boolean>(async (resolve, reject) => {
-		let runtimeVersionSetting = vscode.workspace.getConfiguration().get(config.RUNTIME_VERSION_KEY) as string;
 
+		// default to any kamel CLI we discover on the system path
+		try {
+			await kamelCli.kamelVersionFromSystemPath().then( (cliVersion) => {
+				if (cliVersion) {
+					var msg = `Using Camel K CLI version ${cliVersion.trim()} found on the system path. If you want to use the CLI version downloaded by the Tooling for Apache Camel K extension instead, you must disable the existing CLI. See the extension readme for more information.\n\n`;
+					extension.shareMessageInMainOutputChannel(msg);
+					resolve(false);
+					return false;
+				}
+			}).catch( () => {
+				// ignore error, continue checking
+			});
+		} catch (error) {
+			// ignore error, continue checking
+		}
+
+		// if we didn't find a CLI on the system path, download one to use and manage that
+		let runtimeVersionSetting = vscode.workspace.getConfiguration().get(config.RUNTIME_VERSION_KEY) as string;
 		if (versionToUse) {
 			let thisVersionAvailable = await testVersionAvailable(versionToUse);
 			if (!thisVersionAvailable) {
-				var msg = `Camel K CLI Version ${versionToUse} unavailable.`;
+				var msg = `Camel K CLI Version (${versionToUse}) specified in the user settings is unavailable.`;
 				extension.shareMessageInMainOutputChannel(msg);
 				reject(new Error(msg));
 				return false;
@@ -75,6 +92,7 @@ export async function checkKamelNeedsUpdate(versionToUse?: string): Promise<bool
 			await checkKamelCLIVersion().then((currentVersion) => {
 				if (versionToUse && versionToUse.toLowerCase() === currentVersion.toLowerCase()) {
 					// no need to install, it's already here
+					extension.shareMessageInMainOutputChannel(`Using Apache Camel K CLI version ${versionToUse}`);
 					resolve(false);
 					return false;
 				} else {
@@ -144,7 +162,11 @@ function checkKamelCLIVersion(): Promise<string> {
 				console.log(`Apache Camel K CLI (kamel) version returned: ${version}`);
 				resolve(version);
 				return;
-			}).catch(kamelUnavailableRejection(reject));
+			}).catch ((error) => {
+				console.log(`Apache Camel K CLI (kamel) unavailable: ${error}`);
+				reject(new Error(error));
+				return;		
+			});
 	});
 }
 

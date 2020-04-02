@@ -24,6 +24,9 @@ import * as path from 'path';
 import * as fs from 'fs';
 import * as shell from './shell';
 
+const kamelCmdName = 'kamel';
+const kamelUnavailableMsg = `Apache Camel K CLI (kamel) unavailable`;
+
 export interface Kamel {
 	devMode : boolean;
 	namespace: string | undefined;
@@ -74,7 +77,7 @@ async function kamelInternal(command: string, devMode: boolean, namespace : stri
 		const bin = await baseKamelPath();
 		const binpath = bin.trim();
 		if (!fs.existsSync(binpath)) {
-			reject(new Error(`Apache Camel K CLI (kamel) unavailable`));
+			reject(new Error(kamelUnavailableMsg));
 			return;
 		}
 		const cmd = getBaseCmd(binpath, command, namespace);
@@ -137,17 +140,25 @@ async function kamelInternalArgs(args: string[], devMode: boolean, namespace: st
 }
 
 export async function baseKamelPath(): Promise<string> {
-	let result : FindBinaryResult = await findBinary('kamel');
-	if (result && result.output && result.err === null) {
-		return result.output;
+	let result : string | undefined = await baseKamelSystemPath();
+	if (result) {
+		return result;
 	}
 	let bin = config.getActiveKamelconfig();
 	if (!bin) {
-		bin = 'kamel';
+		bin = kamelCmdName;
 		return bin;
 	}
 	let binpath = path.normalize(bin);
 	return binpath;
+}
+
+async function baseKamelSystemPath() : Promise<string|undefined> {
+	let result : FindBinaryResult = await findBinary(kamelCmdName);
+	if (result && result.output && result.err === null) {
+		return result.output;
+	}
+	return undefined;
 }
 
 interface FindBinaryResult {
@@ -176,4 +187,37 @@ async function findBinary(binName: string): Promise<FindBinaryResult> {
 	}
 
 	return { err: null, output: execResult.stdout };
+}
+
+export async function kamelVersionFromSystemPath(): Promise<string> {
+	return new Promise(async (resolve, reject) => {
+		const bin: string | undefined = await baseKamelSystemPath();
+		if (bin) {
+			const binpath = bin.trim();
+			if (!fs.existsSync(binpath)) {
+				reject(new Error(kamelUnavailableMsg));
+				return;
+			}
+			const cmd = getBaseCmd(binpath, 'version', undefined);
+			const sr = exec(cmd);
+			if (sr) {
+				if (sr.stdout) {
+					sr.stdout.on('data', function (data) {
+						resolve(data);
+					});
+					return;
+				}
+				if (sr.stderr) {
+					sr.stderr.on('data', function (data) {
+						utils.shareMessage(extension.mainOutputChannel, `${data}`);
+						reject(new Error(data));
+					});
+					return;
+				}
+			}
+		} else {
+			reject(new Error(kamelUnavailableMsg));
+			return;
+		}
+	});
 }

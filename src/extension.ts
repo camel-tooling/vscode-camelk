@@ -157,6 +157,9 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 			}
 		});
 
+		let camelkVersionCommand = vscode.commands.registerCommand('camelk.version', async (uri:vscode.Uri) => await getCamelKVersion(uri));
+		context.subscriptions.push(camelkVersionCommand);
+
 	});
 
 	let destination = downloadJavaDependencies(context);
@@ -170,6 +173,17 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 	}
 	
 }
+
+async function getCamelKVersion(context: vscode.Uri) {
+	await integrationutils.getCamelKVersion()
+		.then( (version) => {
+			utils.shareMessage(mainOutputChannel, `Currently using Apache Camel K CLI version ${version}`);
+		})
+		.catch ( (error) => {
+			utils.shareMessage(mainOutputChannel, `Error encountered when retrieving Apache Camel K CLI Version: ${error}`);
+			console.log(error);
+		});
+} 
 
 export function setStatusLineMessageAndShow( message: string): void {
 	if (myStatusBarItem && message && showStatusBar) {
