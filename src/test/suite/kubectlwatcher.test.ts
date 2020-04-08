@@ -58,12 +58,10 @@ suite("Kubectl integration watcher", function() {
 		sinon.assert.notCalled(messageSpy);
 	});
 	
-	test('Check there is one message logged in case of connection error', async function() {
-		if(fs.existsSync(kubeconfigFilePath)) {
-			fs.renameSync(kubeconfigFilePath, kubeconfigFilePath + '.bak');
-		}
+	test('Check there is one set of message logged in case of connection error', async function() {
+		invalidateKubeConfigFileByRenamingIt(kubeconfigFilePath);
 		await extension.getIntegrationsFromKubectlCliWithWatch();
-		sinon.assert.calledOnce(messageSpy);
+		checkErrorMessageLogged(messageSpy);
 	});
 	
 	test('Check there is no loop for closing kubectl process with View visible', async function() {
@@ -74,17 +72,26 @@ suite("Kubectl integration watcher", function() {
 		sinon.assert.notCalled(messageSpy);
 	});
 	
-	test('Check there is only one message logged in case of connection error with View visible', async function() {
-		if(fs.existsSync(kubeconfigFilePath)) {
-			fs.renameSync(kubeconfigFilePath, kubeconfigFilePath + '.bak');
-		}
+	test('Check there is only one set of message logged in case of connection error with View visible', async function() {
+		invalidateKubeConfigFileByRenamingIt(kubeconfigFilePath);
 		await openCamelKTreeView(sandbox);
 		messageSpy.resetHistory();
 		await extension.getIntegrationsFromKubectlCliWithWatch();
-		sinon.assert.calledOnce(messageSpy);
+		checkErrorMessageLogged(messageSpy);
 	});
 	
 });
+
+function invalidateKubeConfigFileByRenamingIt(kubeconfigFilePath: string) {
+	if (fs.existsSync(kubeconfigFilePath)) {
+		fs.renameSync(kubeconfigFilePath, kubeconfigFilePath + '.bak');
+	}
+}
+
+function checkErrorMessageLogged(messageSpy: sinon.SinonSpy<[vscode.OutputChannel, string], void>) {
+	//Depending on latency, versions used and environment configuration, one or two messages can be logged
+	expect(messageSpy.callCount).above(0).below(3);
+}
 
 async function openCamelKTreeView(sandbox: sinon.SinonSandbox) {
 	/* To open Tree View, reveal must be used.
