@@ -165,7 +165,7 @@ interface FindBinaryResult {
 	output: string;
 }
 
-async function findBinary(binName: string): Promise<FindBinaryResult> {
+export async function findBinary(binName: string): Promise<FindBinaryResult> {
 	let cmd = `which ${binName}`;
 
 	if (shell.isWindows()) {
