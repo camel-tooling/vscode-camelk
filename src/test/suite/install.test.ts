@@ -19,6 +19,7 @@
 import * as assert from 'assert';
 import * as config from '../../config';
 import * as fs from 'fs';
+import * as kubectl from '../../kubectl';
 import * as sinon from 'sinon';
 import * as installer from '../../installer';
 import * as Utils from './Utils';
@@ -80,10 +81,12 @@ suite("ensure install methods are functioning as expected", function() {
 		done();
 	});
 
-	test("ensure we have access to the kubectl cli", function(done) {
-		let kubectlPath = config.getActiveKubectlconfig();
+	test("ensure we have access to the kubectl cli when kubectl not available on command line", async() => {
+		const findKubectlBinary = await kubectl.findBinary('kubectl');
+		assert.equal(findKubectlBinary && findKubectlBinary.output  && findKubectlBinary.err === null, false, 'this test requires to not have kubectl on system path');
+
+		let kubectlPath = await kubectl.baseKubectlPath();
 		console.log(`kubectlPath= ${kubectlPath}`);
 		assert.equal(fs.existsSync(kubectlPath), true);
-		done();
 	});
 });
