@@ -19,17 +19,22 @@
 import * as assert from 'assert';
 import * as vscode from 'vscode';
 
+const waitUntil = require('async-wait-until');
+
 const extensionId = 'redhat.vscode-camelk';
 
 export async function ensureExtensionActivated() {
-    let extension = vscode.extensions.getExtension(extensionId);
-    if (extension !== null && extension !== undefined) {
-        console.log('not activated yet');
-        await extension.activate().then( () => {
-            assert.ok("Camel K extension is ready to go");
-        });
-    } else {
-        assert.fail("Camel K extension is undefined and cannot be activated");
-    }
-    return extension;
+	const extension = vscode.extensions.getExtension(extensionId);
+	if (extension !== null && extension !== undefined) {
+		await waitUntil(() => {
+			return extension.isActive;
+		}, 45000).catch( () => {
+			extension.activate().then( () => {
+				assert.ok("Camel K extension is ready to go");
+			});
+		});
+	} else {
+		assert.fail("Camel K extension is undefined and cannot be activated");
+	}
+	return extension;
 }
