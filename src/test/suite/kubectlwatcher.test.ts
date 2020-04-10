@@ -35,7 +35,7 @@ suite("Kubectl integration watcher", function() {
 	let kubeconfigFilePath : string = homedir + '/.kube/config';
 	
 	this.beforeAll(async () => {
-		this.timeout(40000);
+		this.timeout(60000);
 		await Utils.ensureExtensionActivated();
 	});
 
@@ -89,8 +89,7 @@ function invalidateKubeConfigFileByRenamingIt(kubeconfigFilePath: string) {
 }
 
 function checkErrorMessageLogged(messageSpy: sinon.SinonSpy<[vscode.OutputChannel, string], void>) {
-	//Depending on latency, versions used and environment configuration, one or two messages can be logged
-	expect(messageSpy.callCount).above(0).below(3);
+	expect(messageSpy.callCount, 'Depending on latency, versions used and environment configuration, one or two messages can be logged').above(0).below(3);
 }
 
 async function openCamelKTreeView(sandbox: sinon.SinonSandbox) {
