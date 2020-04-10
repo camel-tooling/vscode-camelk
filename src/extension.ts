@@ -54,17 +54,11 @@ export var runtimeVersionSetting : string | undefined;
 let stashedContext : vscode.ExtensionContext;
 
 export async function activate(context: vscode.ExtensionContext): Promise<void> {
-	console.log('activate');
-
 	stashedContext = context;
 
 	camelKIntegrationsProvider = new CamelKNodeProvider(context);
 
-	console.log('activate: CamelKNodeProvider done');
-
 	applyUserSettings();
-
-	console.log('activate: user settings applied');
 
 	mainOutputChannel = vscode.window.createOutputChannel("Apache Camel K");
 	myStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 100);
@@ -73,8 +67,6 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 	vscode.tasks.registerTaskProvider(CamelKTaskProvider.START_CAMELK_TYPE, new CamelKTaskProvider());
 	let tasksJson:vscode.DocumentSelector = { scheme: 'file', language: 'jsonc', pattern: '**/tasks.json' };
 	vscode.languages.registerCompletionItemProvider(tasksJson, new CamelKTaskCompletionItemProvider());
-
-	console.log('activate: before install depdencies');
 
 	await installDependencies(context).then ( () => {
 		
@@ -165,9 +157,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 		});
 
 	});
-	console.log('activate: before downloadjavadependeices');
 	let destination = downloadJavaDependencies(context);
-	console.log('activate: after downloadjavadependeices');
 	
 	vscode.window.onDidChangeActiveTextEditor((editor) => {
 		updateReferenceLibraries(editor, destination);
@@ -176,7 +166,6 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 	if (vscode.window.activeTextEditor) {
 		updateReferenceLibraries(vscode.window.activeTextEditor, destination);
 	}
-	console.log('end of activate');
 }
 
 export function setStatusLineMessageAndShow( message: string): void {
