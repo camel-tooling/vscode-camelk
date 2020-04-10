@@ -54,6 +54,7 @@ export var runtimeVersionSetting : string | undefined;
 let stashedContext : vscode.ExtensionContext;
 
 export async function activate(context: vscode.ExtensionContext): Promise<void> {
+
 	stashedContext = context;
 
 	camelKIntegrationsProvider = new CamelKNodeProvider(context);
@@ -157,6 +158,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 		});
 
 	});
+
 	let destination = downloadJavaDependencies(context);
 	
 	vscode.window.onDidChangeActiveTextEditor((editor) => {
@@ -166,6 +168,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 	if (vscode.window.activeTextEditor) {
 		updateReferenceLibraries(vscode.window.activeTextEditor, destination);
 	}
+	
 }
 
 export function setStatusLineMessageAndShow( message: string): void {

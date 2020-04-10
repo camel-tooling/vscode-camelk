@@ -26,6 +26,8 @@ import * as Utils from './Utils';
 import * as versionUtils from '../../versionUtils';
 import { failed } from '../../errorable';
 
+const os = require('os');
+
 suite("ensure install methods are functioning as expected", function() {
 
 	let installKubectlSpy  = sinon.spy(installer, 'installKubectl');
@@ -81,12 +83,24 @@ suite("ensure install methods are functioning as expected", function() {
 		done();
 	});
 
-	test("ensure we have access to the kubectl cli when kubectl not available on command line", async() => {
-		const findKubectlBinary = await kubectl.findBinary('kubectl');
-		assert.equal(findKubectlBinary && findKubectlBinary.output  && findKubectlBinary.err === null, false, 'this test requires to not have kubectl on system path');
+	const kubectlTest = test("ensure we have access to the kubectl cli when kubectl not available on command line", async() => {
+		if(await isKubectlAvailableOnCommandLine() && !isTestRunningCI()) {
+			kubectlTest.skip();
+		}
 
 		let kubectlPath = await kubectl.baseKubectlPath();
 		console.log(`kubectlPath= ${kubectlPath}`);
 		assert.equal(fs.existsSync(kubectlPath), true);
 	});
 });
+
+function isTestRunningCI() {
+	const homedir = os.homedir();
+	return homedir.includes('hudson') || homedir.includes('travis');
+}
+
+async function isKubectlAvailableOnCommandLine() {
+	const findKubectlBinary = await kubectl.findBinary('kubectl');
+	return findKubectlBinary && findKubectlBinary.output && findKubectlBinary.err === null;
+}
+
