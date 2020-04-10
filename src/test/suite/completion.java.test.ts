@@ -19,9 +19,14 @@
 import * as vscode from 'vscode';
 import { areJavaDependenciesDownloaded } from '../../JavaDependenciesManager';
 import { getDocUri, checkExpectedCompletion } from './completion.util';
+import { fail } from 'assert';
 
 const os = require('os');
 const waitUntil = require('async-wait-until');
+
+const DOWNLOAD_JAVA_DEPENDENCIES_TIMEOUT = 60000;
+const JAVA_EXTENSION_READINESS_TIMEOUT = 20000;
+const TOTAL_TIMEOUT = DOWNLOAD_JAVA_DEPENDENCIES_TIMEOUT + JAVA_EXTENSION_READINESS_TIMEOUT + 5000;
 
 suite('Should do completion in Camel K standalone files', () => {
 
@@ -34,7 +39,7 @@ suite('Should do completion in Camel K standalone files', () => {
 			testVar.skip();
 		}
 		await testCompletion(docUriJava, new vscode.Position(5, 11), expectedCompletion);
-	}).timeout(76000);
+	}).timeout(TOTAL_TIMEOUT);
 
 });
 
@@ -45,14 +50,21 @@ async function testCompletion(
 ) {
 	await waitUntil(()=> {
 		return areJavaDependenciesDownloaded;
-	}, 45000);
+	}, DOWNLOAD_JAVA_DEPENDENCIES_TIMEOUT).catch(() => {
+		fail(`Camel Java dependencies not downloaded in reasonable time (${DOWNLOAD_JAVA_DEPENDENCIES_TIMEOUT})`);
+	});
 
 	let doc = await vscode.workspace.openTextDocument(docUri);
 	await vscode.window.showTextDocument(doc);
+	let javaExtension: vscode.Extension<any> | undefined;
 	await waitUntil(() => {
-		let javaExtension = vscode.extensions.getExtension('redhat.java');
+		javaExtension = vscode.extensions.getExtension('redhat.java');
 		return javaExtension?.isActive && javaExtension?.exports.status === "Started";
-	}, 20000);
+	}, JAVA_EXTENSION_READINESS_TIMEOUT).catch(() => {
+		fail(`VS Code Java extension problem not ready in ${JAVA_EXTENSION_READINESS_TIMEOUT}: is defined?`+ javaExtension
+			+ ' is Active?' + javaExtension?.isActive
+			+ ' is started? '+ (javaExtension?.exports.status === "Started"));
+	});
 
 	await checkExpectedCompletion(docUri, position, expectedCompletion);
 }
