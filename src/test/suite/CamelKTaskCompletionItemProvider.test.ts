@@ -56,5 +56,5 @@ suite("Camel K Task Completion", function () {
 }`;
         let res = await new CamelKTaskCompletionItemProvider().provideCompletionItemsForText(contentWithEmptyTrait, 236);
         expect(res).to.have.lengthOf(26);
-    });
+    }).timeout(120000);
 });
