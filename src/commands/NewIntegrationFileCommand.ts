@@ -33,9 +33,10 @@ const LANGUAGES_WITH_FILENAME_EXTENSIONS = new Map([
 const LANGUAGES = Array.from(LANGUAGES_WITH_FILENAME_EXTENSIONS.keys());
 
 export async function create() : Promise<void> {
-	const language = await vscode.window.showQuickPick(LANGUAGES);
+	const language = await vscode.window.showQuickPick(LANGUAGES, {placeHolder:'Please select the language in which the new file will be generated.'});
 	if (language) {
-		const workspaceFolder = await vscode.window.showWorkspaceFolderPick();
+		const workspaceFolder = await vscode.window.showWorkspaceFolderPick(
+			{placeHolder: 'Please select the workspace folder in which the new file will be created.'});
 		if (workspaceFolder) {
 			const filename = await vscode.window.showInputBox({
 				prompt: 'Please provide a name for the new file (without extension)',
