@@ -18,6 +18,7 @@
 
 import * as kamel from '../kamel';
 import * as vscode from 'vscode';
+import { TraitDefinition } from './TraitDefinition';
 
 export class TraitManager {
 
@@ -46,17 +47,4 @@ export class TraitManager {
 		const trait = await kamelExe.invoke(`help trait --all -o json`);
 		return JSON.parse(trait) as TraitDefinition[];
 	}
-}
-
-interface TraitDefinition {
-	name: string;
-	platform: boolean;
-	profiles: string[];
-	properties: Property[];
-}
-
-interface Property {
-	name: string;
-	type: string;
-	defaultValue?: boolean | number | string;
 }
