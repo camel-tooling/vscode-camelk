@@ -22,6 +22,7 @@ import * as sinon from 'sinon';
 import * as vscode from 'vscode';
 import { fail } from "assert";
 
+const os = require('os');
 const waitUntil = require('async-wait-until');
 
 suite('New Apache Camel K integration file', function() {
@@ -46,31 +47,34 @@ suite('New Apache Camel K integration file', function() {
 		}
 	});
 
-	test('Can create a new java integration file', async function() {
-		await testIntegrationFileCreation('TestCreation.java', 'Java', 'TestCreation');
+	const javaTest = test('Can create a new java integration file', async function() {
+		await testIntegrationFileCreation('TestCreation.java', 'Java', 'TestCreation', javaTest);
 	});
 
-	test('Can create a new xml integration file', async function() {
-		await testIntegrationFileCreation('TestCreation.xml', 'XML', 'TestCreation');
+	const xmlTest = test('Can create a new xml integration file', async function() {
+		await testIntegrationFileCreation('TestCreation.xml', 'XML', 'TestCreation', xmlTest);
 	});
 
-	test('Can create a new yaml integration file', async function() {
-		await testIntegrationFileCreation('TestCreation.yaml', 'Yaml', 'TestCreation');
+	const yamlTest = test('Can create a new yaml integration file', async function() {
+		await testIntegrationFileCreation('TestCreation.yaml', 'Yaml', 'TestCreation', yamlTest);
 	});
 
-	test('Can create a new Groovy integration file', async function() {
-		await testIntegrationFileCreation('TestCreation.groovy', 'Groovy', 'TestCreation');
+	const groovyTest = test('Can create a new Groovy integration file', async function() {
+		await testIntegrationFileCreation('TestCreation.groovy', 'Groovy', 'TestCreation', groovyTest);
 	});
 
-	test('Can create a new Kotlin integration file', async function() {
-		await testIntegrationFileCreation('TestCreation.kts', 'Kotlin', 'TestCreation');
+	const kotlinTest = test('Can create a new Kotlin integration file', async function() {
+		await testIntegrationFileCreation('TestCreation.kts', 'Kotlin', 'TestCreation', kotlinTest);
 	});
 
-	test('Can create a new JavaScript integration file', async function() {
-		await testIntegrationFileCreation('TestCreation.js', 'JavaScript', 'TestCreation');
+	const javascriptTest = test('Can create a new JavaScript integration file', async function() {
+		await testIntegrationFileCreation('TestCreation.js', 'JavaScript', 'TestCreation', javascriptTest);
 	});
 
-	async function testIntegrationFileCreation(expectedFileNameWithExtension: string, languageToPick: string, providedFilename: string) {
+	async function testIntegrationFileCreation(expectedFileNameWithExtension: string, languageToPick: string, providedFilename: string, currentTest: Mocha.Test) {
+		if (os.homedir().includes('hudson')) {
+			currentTest.skip();
+		}
 		expect(await vscode.workspace.findFiles(expectedFileNameWithExtension)).to.be.an('array').that.is.empty;
 		showQuickpickStub.onFirstCall().returns(languageToPick);
 		const workspaceFolder = (vscode.workspace.workspaceFolders as vscode.WorkspaceFolder[])[0];
@@ -106,3 +110,4 @@ suite('New Apache Camel K integration file', function() {
 		});
 	}
 });
+
