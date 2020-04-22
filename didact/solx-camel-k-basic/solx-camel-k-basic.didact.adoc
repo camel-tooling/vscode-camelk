@@ -1,0 +1,80 @@
+= Starting a new Camel K Route
+
+Useful place to start for any new Camel K integration project.
+
+== Prerequisites
+
+++++
+<a href='didact://?commandId=vscode.didact.validateAllRequirements' title='Validate all requirements!'><button>Validate all Requirements at Once!</button></a>
+<p/>
+++++
+
+[options="header"]
+|===========================
+| Requirement (Click to Verify)  | Status | Additional Information/Solution
+| link:didact://?commandId=vscode.didact.cliCommandSuccessful&text=kamel-status$$kamel[Is Kamel available?] | ++++<em id="kamel-status">Status: unknown</em>++++ 	| link:https://camel.apache.org/camel-k/[Check the Apache Camel K documentation for details]
+|===========================
+
+[time=10]
+== Create a simple Camel K route and start it running
+
+Follow these steps to create your route and see results in your log.
+
+. In your workspace, right-click and choose `New Folder`. Name it `simple.` 
++
+link:didact://?commandId=explorer.newFolder[^ execute]
+. In your new folder, create a Camel K route. Right-click, choose `New File`, and name it `HelloWorld.java`. 
++
+link:didact://?commandId=explorer.newFile[^ execute]
+. With your new route open, 
++
+link:didact://?commandId=vscode.openFolder&projectFilePath=simple/hello.java[^ execute]
++
+copy the following text into the file:
++
+[source,java]
+....
+// camel-k: language=java
+
+import org.apache.camel.builder.RouteBuilder;
+
+public class HelloWorld extends RouteBuilder {
+  @Override
+  public void configure() throws Exception {
+
+      // Write your routes here, for example:
+      from("timer:java?period=1s")
+        .routeId("java")
+        .setBody()
+          .simple("Hello Camel K from ${routeId}")
+        .to("log:info");
+  }
+}
+....
+. Deploy the route by selecting it in the Explorer, right-clicking and selecting `Start Apache Camel K Integration`.
+. Choose `Basic`.
+. To open a separate log window for your route, right-click on the deployed integration 'hello' in the `Apache Camel K Integrations` view and select `Follow log for running Apache Camel K integration`. 
+. When your route finishes deploying, you will begin to see messages showing up in the log window. 
+
+....
+...
+[1] 2020-04-14 20:54:29.993 [32mINFO [m [main] AbstractCamelContext - Route: java started and consuming from: timer://java
+[1] 2020-04-14 20:54:29.997 [32mINFO [m [main] AbstractCamelContext - Total 1 routes, of which 1 are started
+[1] 2020-04-14 20:54:29.997 [32mINFO [m [main] AbstractCamelContext - Apache Camel 3.1.0 (CamelContext: camel-k) started in 0.126 seconds
+[1] 2020-04-14 20:54:29.998 [32mINFO [m [main] ApplicationRuntime - Listener org.apache.camel.k.listener.RoutesDumper@245b4bdc executed in phase Started
+[1] 2020-04-14 20:54:31.039 [32mINFO [m [Camel (camel-k) thread #2 - timer://java] info - Exchange[ExchangePattern: InOnly, BodyType: String, Body: Hello Camel K from java]
+[1] 2020-04-14 20:54:31.995 [32mINFO [m [Camel (camel-k) thread #2 - timer://java] info - Exchange[ExchangePattern: InOnly, BodyType: String, Body: Hello Camel K from java]
+[1] 2020-04-14 20:54:32.996 [32mINFO [m [Camel (camel-k) thread #2 - timer://java] info - Exchange[ExchangePattern: InOnly, BodyType: String, Body: Hello Camel K from java]
+...
+....
+
+=== Did it work? 
+
+You should see your Camel route injecting a new message in the log every few seconds.
+
+=== Did it not work?
+
+Remove the simple directory and try the steps again. If it's still not working:
+
+. Validate that you have access to the Apache Camel K CLI (via terminal or via command)
+. Check if something went wrong when starting the integration. View the Apache Camel K Operator log from the view toolbar or Kit Builder log avaialble when you right-click the integration
