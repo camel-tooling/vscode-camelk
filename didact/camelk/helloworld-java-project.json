@@ -1,0 +1,18 @@
+{
+    "folders": [
+    {
+       "name":"helloworld-camelk-integration",
+       "folders": [
+         {
+             "name":"src",
+             "files": [
+                 {
+                    "name":"HelloWorld.java",
+                    "copy":"camelk-HelloWorld.java"
+                 }
+             ]
+           }
+     ]
+    }
+ ]
+}
