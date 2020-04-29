@@ -1,4 +1,4 @@
-= Starting a new Camel K Route
+= Starting a new Camel K Route (Alternate Version)
 
 Useful place to start for any new Camel K integration project.
 
@@ -19,27 +19,45 @@ Useful place to start for any new Camel K integration project.
 [time=10]
 == Create a simple Camel K route and start it running
 
-=== Step 1: Creating a Folder with your Java Integration
+=== Step 1: Create a Simple Java Integration
 
-First, we need to set up our sample project. Camel K has many examples available at their link:https://github.com/apache/camel-k/tree/master/examples[GitHub project hosting the source], but we're just going to use the simplest one: `simple.groovy`.
+First, we need to create a simple Java Camel K example. You can do this using the `Create a new Apache Camel K Integration file` command. (link:didact://?commandId=camelk.integrations.createNewIntegrationFile&text=Java$$HelloWorld[Execute^])
 
-You can download the file yourself from the GitHub repo and then copy it into a folder in your workspace called `helloworld-camelk-integration` or use link:didact://?commandId=vscode.didact.scaffoldProject&extFilePath=redhat.vscode-camelk/didact/camelk/helloworld-java-project.json[this link].
+Inside VS Code, press `F1` or `Ctrl+Shift+P` to bring up the Command Palette, and type `Create a new Apache Camel K Integration file`. When the command is selected, click Enter.
 
-You will end up with a structure like this:
+1. Choose the language to use (choose `Java`).
+2. Choose the workspace folder (press Enter to select the current workspace root folder)
+3. Provide a name for the new file (be sure not to include the file extension or it will be repeated) (type `HelloWorld`)
 
-....
-- helloworld-camelk-integration
-  - src
-      HelloWorld.java
-....
+When you complete step 3, you should see the file `HelloWorld.java` appear in your workspace folder.
 
 === Step 2: Exploring the Java Integration file
 
-Now that you have an integration file, let's take a quick look at it. If you created the file yourself, go ahead and open it now. Go to the Explorer activity (Ctrl+Shift+E) and look at the workspace folders listed.
+Now that you have an integration file, let's take a quick look at it. Go ahead and open it now. Go to the Explorer activity (Ctrl+Shift+E) and find it in the tree view.
 
-If you clicked the link to create the sample project, you can find it in `helloworld-camelk-integration/src/HelloWorld.java` in the Explorer view.
+* Note: If you have the `HelloWorld.java` file in the root folder of your workspace, you can open the HelloWorld.java file in the editor with link:didact://?commandId=vscode.openFolder&projectFilePath=HelloWorld.java[this link].
 
-* Note: If you have the `helloworld-camelk-integration` project in your workspace, you can open the HelloWorld.java file in the editor with link:didact://?commandId=vscode.openFolder&projectFilePath=helloworld-camelk-integration/src/HelloWorld.java[this link].
+Your file should look like this:
+
+....
+// camel-k: language=java
+
+import org.apache.camel.builder.RouteBuilder;
+
+public class HelloWorld extends RouteBuilder {
+  @Override
+  public void configure() throws Exception {
+
+      // Write your routes here, for example:
+      from("timer:java?period=1s")
+        .routeId("java")
+        .setBody()
+          .simple("Hello Camel K from ${routeId}")
+        .to("log:info");
+
+  }
+}
+....
 
 For this file, we're simply telling Camel to put the message `Hello Camel K from ${routeId}` in the console once every second.
 
@@ -49,10 +67,9 @@ image:https://raw.githubusercontent.com/camel-tooling/vscode-camelk/master/image
 
 The `Tooling for Camel K` extension offers several tools to get your new integration started. 
 
-First, you can right-click the `HelloWorld.java` file and select `Start Apache Camel K Integration`. That will provide a drop-down in the Command palette area with a number of deployment options. In this case, select the `Dev Mode - Apache Camel K Integration in Dev Mode` option. 
+First, you can right-click your integration file and select `Start Apache Camel K Integration`. That will provide a drop-down in the Command palette area with a number of deployment options. In this case, select the `Dev Mode - Apache Camel K Integration in Dev Mode` option. 
 
-* Note: link:didact://?commandId=camelk.startintegration&projectFilePath=helloworld-camelk-integration/src/HelloWorld.java[Click here to see the drop-down and select the mode you want to start the integration in]
-* Note: link:didact://?commandId=camelk.startintegration&projectFilePath=helloworld-camelk-integration/src/HelloWorld.java&text=Dev%20Mode[Click here to start the HelloWorld.java integration in Dev Mode]
+* (link:didact://?commandId=camelk.startintegration[Execute^])
 
 Since this is likely the first time you've started a new integration in Camel K, it might take a bit to spin up the necessary resources on the target system. While that starts up, we can look at the `Apache Camel K` Output channel and watch as the Camel K operator starts up the necessary resources to run our integration.
 
@@ -76,27 +93,26 @@ While our integration is running in `Dev Mode`, we can modify it and see those c
 
 Change the message sent to the `.simple()` command of the Camel route in quotes to `We just changed our first Camel K integration while it was running!`. 
 
-Save the file and see what happens in the Output channel.
+Save the file and see what happens in the Apache Camel K Output channel.
 
 == Step 5: Managing our Integration
 
 We can see what integrations we currently have running in our Minikube system in the `Apache Camel K Integrations` view in the Explorer activity (Ctrl+Shift+E).
 
-* Open the `Apache Camel K Integrations` view
+* Open the `Apache Camel K Integrations` view (link:didact://?commandId=camelk.integrations.focus[Execute^])
 
 image:https://raw.githubusercontent.com/camel-tooling/vscode-camelk/master/images/camelk-integrations-view-remove-menu.jpg[Integrations view with context menu,role="right"]
 
 From here, we can:
 
-* Hover over the `Apache Camel K Integrations` view and click the `Open Apache Camel K Operator Log` button to view it.
-* Hover over the integration name to see its current state in the tooltip. 
-* Right-click on the running integration to `Remove Apache Camel K Integration` and undeploy it.
-* Right-click on the running integration to `Follow log for running Apache Camel K Integration`
-* Right-click on the running integration to `Follow kit builder log for running Apache Camel K integration`
+* Hover over the `Apache Camel K Integrations` view and click the `Open Apache Camel K Operator Log` button to view it. (link:didact://?commandId=camelk.integrations.openOperatorLog[Execute^])
+* Hover over the integration name to see its current state in the tooltip. (link:didact://?commandId=camelk.integrations.selectFirstNode[Execute to select first integration in tree^])
+* Right-click on the running integration to `Remove Apache Camel K Integration` and undeploy it. (link:didact://?commandId=camelk.integrations.remove[DANGER! WILL REMOVE RUNNING INTEGRATION])
+* Right-click on the running integration to `Follow kit builder log for running Apache Camel K integration` (link:didact://?commandId=camelk.integrations.kitlog[Execute to view log for first integration in tree^])
 
-While we are running in `Dev Mode`, all our logged output goes to the main `Apache Camel K` Output channel, but if the integration is running in another mode (such as `Basic`), we can explicitly open a new Output channel to follow the log for that running integration.
+While we are running in `Dev Mode`, all our logged output goes to the main `Apache Camel K` Output channel, but if the integration is running in another mode (such as `Basic`), we can explicitly open a new log window to see events for that running integration.
 
-* To open a separate log window for your route, right-click on the deployed integration 'hello-world' in the `Apache Camel K Integrations` view and select `Follow log for running Apache Camel K integration`. 
+* To open a separate log window for your route, right-click on the deployed integration 'hello-world' in the `Apache Camel K Integrations` view and select `Follow log for running Apache Camel K integration`. (link:didact://?commandId=camelk.integrations.log[Execute to view log for first integration in tree^])
 
 == Did it work? 
 
@@ -104,7 +120,7 @@ You should see your Camel route injecting a new message in the log every few sec
 
 == Did it not work?
 
-Remove the simple directory and try the steps again. If it's still not working:
+Remove the integration and try the steps again. If it's still not working:
 
 . Validate that you have access to the Apache Camel K CLI (via terminal or via command)
 . Check if something went wrong when starting the integration. View the Apache Camel K Operator log from the view toolbar or Kit Builder log avaialble when you right-click the integration

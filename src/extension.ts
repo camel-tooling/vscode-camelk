@@ -94,9 +94,15 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 	
 		// create the integration view action -- remove
 		vscode.commands.registerCommand('camelk.integrations.remove', async (node: TreeNode) => {
-			if (node && node.label) {
+			let selection : TreeNode = node;
+			if (!selection) {
+				if (camelKIntegrationsTreeView.selection) {
+					selection = camelKIntegrationsTreeView.selection[0] as TreeNode;
+				}
+			}
+			if (selection && selection.label) {
 				setStatusLineMessageAndShow(`Removing Apache Camel K Integration...`);
-				let integrationName : string = node.label;
+				let integrationName : string = selection.label;
 				let kamelExe = kamel.create();
 				utils.shareMessage(mainOutputChannel, 'Removing ' + integrationName + ' via Kamel executable Delete');
 				let args : string[] = ['delete', `${integrationName}`];
@@ -122,9 +128,15 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 	
 		// create the integration view action -- start log
 		vscode.commands.registerCommand('camelk.integrations.log', async (node: TreeNode) => {
-			if (node && node.label) {
+			let selection : TreeNode = node;
+			if (!selection) {
+				if (camelKIntegrationsTreeView.selection) {
+					selection = camelKIntegrationsTreeView.selection[0] as TreeNode;
+				}
+			}
+			if (selection && selection.label) {
 				utils.shareMessage(mainOutputChannel, `Retrieving log for running Apache Camel K Integration...`);
-				let integrationName : string = node.label;
+				let integrationName : string = selection.label;
 				await logUtils.handleLogViaKamelCli(integrationName).catch((error) => {
 					utils.shareMessage(mainOutputChannel, `error: ${error} \n`);
 				});
@@ -149,8 +161,14 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 
 		// create the context menu integration view action -- open kit log
 		vscode.commands.registerCommand('camelk.integrations.kitlog', async (node: TreeNode) => {
-			if (node && node.label) {
-				let integrationName : string = node.label;
+			let selection : TreeNode = node;
+			if (!selection) {
+				if (camelKIntegrationsTreeView.selection) {
+					selection = camelKIntegrationsTreeView.selection[0] as TreeNode;
+				}
+			}
+			if (selection && selection.label) {
+				let integrationName : string = selection.label;
 				utils.shareMessage(mainOutputChannel, `Retrieving log for Apache Camel K Integration kit...`);
 				await logUtils.handleKitLog(integrationName)
 				.catch( (err) => {
@@ -159,8 +177,9 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 			}
 		});
 
-		vscode.commands.registerCommand('camelk.integrations.createNewIntegrationFile', NewIntegrationFileCommand.create);
+		vscode.commands.registerCommand('camelk.integrations.createNewIntegrationFile', async (...args:any[]) => { await NewIntegrationFileCommand.create(args);});
 
+		vscode.commands.registerCommand('camelk.integrations.selectFirstNode', () => { selectFirstItemInTree();});
 	});
 
 	let destination = downloadJavaDependencies(context);
@@ -174,6 +193,14 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 	}
 	
 	await installAllTutorials(context);
+}
+
+function selectFirstItemInTree() {
+	let nodes = camelKIntegrationsProvider.getTreeNodes();
+	if (nodes && nodes.length > 0) {
+		let firstNode = nodes[0];
+		camelKIntegrationsTreeView.reveal(firstNode, {select:true});
+	}
 }
 
 export function setStatusLineMessageAndShow( message: string): void {
@@ -430,8 +457,8 @@ async function installAllTutorials(context : vscode.ExtensionContext) {
 		"tutorials": [
 			{"name": "Your First Integration", 
 				"extpath" : "./didact/camelk/first-integration.md", "category": "Apache Camel K"},
-			{"name": "Starting a new Camel K Route (Solution Pattern)", 
-				"extpath" : "./didact/solx-camel-k-basic/solx-camel-k-basic.didact.adoc", "category": "Apache Camel K"}
+			{"name": "Starting a new Camel K Route - Alternate (Solution Pattern)", 
+				"extpath" : "./didact/solx-camel-k-basic/solx-camel-k-basic-alt.didact.adoc", "category": "Apache Camel K"},
 		]
 	};
 

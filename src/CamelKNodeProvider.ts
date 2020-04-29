@@ -41,6 +41,10 @@ export class CamelKNodeProvider implements vscode.TreeDataProvider<TreeNode> {
 		this.treeNodes = [];
 	}
 
+	public getTreeNodes() : TreeNode[] {
+		return this.treeNodes;
+	}
+
 	// set up so we don't pollute test runs with camel k integrations
 	public setRetrieveIntegrations(flag:boolean): void {
 		this.retrieveIntegrations = flag;
