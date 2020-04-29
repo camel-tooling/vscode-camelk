@@ -20,6 +20,8 @@ import * as vscode from 'vscode';
 import * as assert from 'assert';
 import * as kamel from '../../kamel';
 import * as config from '../../config';
+import * as utils from './Utils';
+import { ACTIVATION_TIMEOUT } from './Utils';
 
 suite("ensure camelk extension exists and is accessible", function() {
 	const extensionId = 'redhat.vscode-camelk';
@@ -29,22 +31,9 @@ suite("ensure camelk extension exists and is accessible", function() {
 		done();
 	});
 
-	test('vscode-camelk extension should activate', function (done) {
-		let extension = vscode.extensions.getExtension(extensionId);
-		if (extension !== null && extension !== undefined) {
-			extension.activate().then(() => {
-				if (extension !== null && extension !== undefined) {
-					const camelKIsActive = extension.isActive;
-					assert.deepEqual(camelKIsActive, true);
-				}
-				done();
-			});
-		} else {
-			assert.fail("Camel K extension is undefined");
-			done();
-		}
-	});	
-
+	test('vscode-camelk extension should activate', async() => {
+		await utils.ensureExtensionActivated();
+	}).timeout(ACTIVATION_TIMEOUT + 1000);	
 
 	test('test optional namespace support', function(done) {
 		let cmdStrNoNS : string = kamel.getBaseCmd(`fakepath`,`fakecommand`, undefined);
