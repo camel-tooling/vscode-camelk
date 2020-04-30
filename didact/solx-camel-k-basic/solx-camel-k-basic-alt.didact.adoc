@@ -108,11 +108,11 @@ From here, we can:
 * Hover over the `Apache Camel K Integrations` view and click the `Open Apache Camel K Operator Log` button to view it. (link:didact://?commandId=camelk.integrations.openOperatorLog[Execute^])
 * Hover over the integration name to see its current state in the tooltip. (link:didact://?commandId=camelk.integrations.selectFirstNode[Execute to select first integration in tree^])
 * Right-click on the running integration to `Remove Apache Camel K Integration` and undeploy it. (link:didact://?commandId=camelk.integrations.remove[DANGER! WILL REMOVE RUNNING INTEGRATION])
-* Right-click on the running integration to `Follow kit builder log for running Apache Camel K integration` (link:didact://?commandId=camelk.integrations.kitlog[Execute to view log for first integration in tree^])
+* Right-click on the running integration to `Follow kit builder log for running Apache Camel K Integration` (link:didact://?commandId=camelk.integrations.kitlog[Execute to view log for first integration in tree^])
 
 While we are running in `Dev Mode`, all our logged output goes to the main `Apache Camel K` Output channel, but if the integration is running in another mode (such as `Basic`), we can explicitly open a new log window to see events for that running integration.
 
-* To open a separate log window for your route, right-click on the deployed integration 'hello-world' in the `Apache Camel K Integrations` view and select `Follow log for running Apache Camel K integration`. (link:didact://?commandId=camelk.integrations.log[Execute to view log for first integration in tree^])
+* To open a separate log window for your route, right-click on the deployed integration 'hello-world' in the `Apache Camel K Integrations` view and select `Follow log for running Apache Camel K Integration`. (link:didact://?commandId=camelk.integrations.log[Execute to view log for first integration in tree^])
 
 == Did it work? 
 
@@ -123,7 +123,7 @@ You should see your Camel route injecting a new message in the log every few sec
 Remove the integration and try the steps again. If it's still not working:
 
 . Validate that you have access to the Apache Camel K CLI (via terminal or via command)
-. Check if something went wrong when starting the integration. View the Apache Camel K Operator log from the view toolbar or Kit Builder log avaialble when you right-click the integration
+. Check if something went wrong when starting the integration. View the Apache Camel K Operator log from the view toolbar or Kit Builder log available when you right-click the integration
 
 == Finding more information
 
