@@ -142,8 +142,13 @@ const choiceList = [
 					// do nothing with config-map or secret
 					break;
 				case vscodeTasksIntegration:
-					await handleDefinedTask(context);
-					resolve();
+					await handleDefinedTask(context).then(() => {
+						resolve();
+					}).catch(onrejected => {
+						reject(onrejected);
+						errorEncountered = true;
+					});
+					return;
 			}
 
 			if (!errorEncountered) {
@@ -176,6 +181,8 @@ async function handleDefinedTask(context: vscode.Uri) {
 			if(camelKTaskToLaunch) {
 				await vscode.tasks.executeTask(camelKTaskToLaunch);
 			}
+		} else {
+			throw new Error('No Camel K Task chosen');
 		}
 	} else {
 		await vscode.window.showInformationMessage('No Camel K Task applicable has been found. You can create one using "Tasks: Open User Tasks" or by creating a tasks.json file in .vscode folder.');
