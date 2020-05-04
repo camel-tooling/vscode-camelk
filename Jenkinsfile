@@ -3,7 +3,7 @@
 node('rhel7'){
 	stage('Checkout repo') {
 		deleteDir()
-		git url: 'https://github.com/camel-tooling/vscode-camelk'
+		git branch: 'FUSETOOLS2-359-sendemailonfailure-testjenkins', url: 'https://github.com/apupier/vscode-camelk'
 	}
 
 	stage('Install requirements') {
