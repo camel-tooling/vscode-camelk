@@ -46,6 +46,14 @@ node('rhel7'){
             sh "rsync -Pzrlt --rsh=ssh --protocol=28 ${tgzFilesToPush[0].path} ${UPLOAD_LOCATION}/snapshots/vscode-camelk/"
         }
     }
+    
+    post {
+    	failure {
+       		mail to: 'apupier@redhat.com,bfitzpat@redhat.com,lhein@redhat.com',
+             	subject: "Failed Pipeline: ${currentBuild.fullDisplayName}",
+             	body: "Something is wrong with ${env.BUILD_URL}"
+    	}
+	}
 }
 
 node('rhel7'){
@@ -71,12 +79,4 @@ node('rhel7'){
             sh "rsync -Pzrlt --rsh=ssh --protocol=28 ${tgz[0].path} ${UPLOAD_LOCATION}/stable/vscode-camelk/"
         }
 	}
-}
-
-post {
-    failure {
-        mail to: 'apupier@redhat.com,bfitzpat@redhat.com,lhein@redhat.com',
-             subject: "Failed Pipeline: ${currentBuild.fullDisplayName}",
-             body: "Something is wrong with ${env.BUILD_URL}"
-    }
 }
