@@ -47,7 +47,8 @@ suite("IntegrationUtil tests", function () {
 		showQuickPickStub.onFirstCall().returns(IntegrationUtils.vscodeTasksIntegration);
 		showQuickPickStub.onSecondCall().returns('Test Camel K task');
 
-		await IntegrationUtils.startIntegration(getDocUri('MyRouteBuilder.java'));
+		const status = await IntegrationUtils.startIntegration(getDocUri('MyRouteBuilder.java'));
+		assert.isTrue(status, 'Command should return boolean for success status');
 
 		sinon.assert.calledWith(showQuickPickStub,
 			['Start in dev mode Camel K integration opened in active editor', 'Test Camel K task'],

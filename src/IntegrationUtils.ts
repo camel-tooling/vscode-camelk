@@ -143,7 +143,7 @@ const choiceList = [
 					break;
 				case vscodeTasksIntegration:
 					await handleDefinedTask(context).then(() => {
-						resolve();
+						resolve(true);
 					}).catch(onrejected => {
 						reject(onrejected);
 						errorEncountered = true;
