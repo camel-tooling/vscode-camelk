@@ -87,15 +87,21 @@ async function kamelInternal(command: string, devMode: boolean, namespace : stri
 					}
 					resolve(data);
 				});
-				return;
 			}        
 			if (sr.stderr) {
 				sr.stderr.on('data', function (data) {
 					utils.shareMessage(extension.mainOutputChannel, `${data}`);
 					reject(new Error(data));
 				});
-				return;
-			}				
+			}
+			sr.on('close', function (exitCode) {
+				const exitCodeAsString = exitCode.toString();
+				if(exitCode === 0){
+					resolve(exitCodeAsString);
+				} else {
+					reject(new Error(exitCodeAsString));
+				}
+			});
 		}
 	});
 }
