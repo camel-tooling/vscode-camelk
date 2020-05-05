@@ -47,7 +47,9 @@ export async function create() : Promise<void> {
 			if (filename) {
 				const kamelExe = kamel.create();
 				const newFileFullPath: string = computeFullpath(language, workspaceFolder, filename);
-				kamelExe.invoke(`init "${newFileFullPath}"`);
+				await kamelExe.invoke(`init "${newFileFullPath}"`);
+				const textDocument = await vscode.workspace.openTextDocument(newFileFullPath);
+				await vscode.window.showTextDocument(textDocument);
 			}
 		}
 	}

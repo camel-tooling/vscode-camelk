@@ -89,6 +89,10 @@ suite('New Apache Camel K integration file', function() {
 
 		await checkFileCreated(expectedFileNameWithExtension);
 
+		await waitUntil(() => {
+			return vscode.window.activeTextEditor?.document.fileName.endsWith(expectedFileNameWithExtension);
+		}, 5000, `Text editor has not opened for ${providedFilename}`);
+
 		checkContainsCamelKMode(createdFile);
 	}
 
