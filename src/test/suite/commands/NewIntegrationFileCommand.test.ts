@@ -71,6 +71,10 @@ suite('New Apache Camel K integration file', function() {
 		await testIntegrationFileCreation('TestCreation.js', 'JavaScript', 'TestCreation', javascriptTest);
 	});
 
+	const withSpaceTest = test('Can create a new integration file with space', async function() {
+		await testIntegrationFileCreation('Test Creation with space.xml', 'XML', 'Test Creation with space', withSpaceTest);
+	});
+
 	async function testIntegrationFileCreation(expectedFileNameWithExtension: string, languageToPick: string, providedFilename: string, currentTest: Mocha.Test) {
 		if (os.homedir().includes('hudson')) {
 			currentTest.skip();
