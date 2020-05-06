@@ -47,7 +47,7 @@ export async function create() : Promise<void> {
 			if (filename) {
 				const kamelExe = kamel.create();
 				const newFileFullPath: string = computeFullpath(language, workspaceFolder, filename);
-				kamelExe.invoke(`init ${newFileFullPath}`);
+				kamelExe.invoke(`init "${newFileFullPath}"`);
 			}
 		}
 	}
