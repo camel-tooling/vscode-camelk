@@ -17,7 +17,7 @@
 'use strict';
 
 import * as vscode from 'vscode';
-import { getDocUri, checkExpectedCompletion } from './completion.util';
+import { getDocUri, checkExpectedCompletion } from '../completion.util';
 const os = require('os');
 
 suite('Should do completion in tasks.json', () => {

@@ -17,8 +17,8 @@
 'use strict';
 
 import * as vscode from 'vscode';
-import { areJavaDependenciesDownloaded } from '../../JavaDependenciesManager';
-import { getDocUri, checkExpectedCompletion } from './completion.util';
+import { areJavaDependenciesDownloaded } from '../../../JavaDependenciesManager';
+import { getDocUri, checkExpectedCompletion } from '../completion.util';
 import { fail } from 'assert';
 
 const os = require('os');

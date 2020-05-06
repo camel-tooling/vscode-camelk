@@ -25,7 +25,7 @@ import { fail } from "assert";
 const os = require('os');
 const waitUntil = require('async-wait-until');
 
-suite('New Apache Camel K integration file', function() {
+suite('Test command to create an Apache Camel K integration file', function() {
 
 	let showQuickpickStub: sinon.SinonStub;
 	let showInputBoxStub: sinon.SinonStub;
