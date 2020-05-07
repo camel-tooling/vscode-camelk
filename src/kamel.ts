@@ -130,7 +130,19 @@ async function kamelInternalArgs(args: string[], devMode: boolean, namespace: st
 				}        
 				if (sr.stderr) {
 					sr.stderr.on('data', function (data) {
-						utils.shareMessage(extension.mainOutputChannel, `${data}`);
+						const errorMessage = `${data}`;
+						utils.shareMessage(extension.mainOutputChannel, errorMessage);
+						if (errorMessage.includes('no matches for kind "Integration"')
+								&& errorMessage.includes('camel.apache.org')) {
+							utils.shareMessage(extension.mainOutputChannel,
+								'It seems that the targeted container host doesn\'t have Camel K installed.\n'
+								+'Please check documentation at https://camel.apache.org/camel-k/latest/installation/installation.html to install it.');
+						}
+						if (errorMessage.includes('cannot get command client:')) {
+							utils.shareMessage(extension.mainOutputChannel,
+								'It seems that no container host can be reached.\n'
+								+'Please check documentation at https://camel.apache.org/camel-k/latest/installation/installation.html to install one with Camel K.');
+						}
 					});
 				}
 				resolve(sr);
