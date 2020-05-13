@@ -110,7 +110,7 @@ export class CamelKNodeProvider implements vscode.TreeDataProvider<TreeNode> {
 					});
 			}
 			extension.hideStatusLine();
-			this._onDidChangeTreeData.fire();
+			this._onDidChangeTreeData.fire(undefined);
 			let newCount = this.treeNodes.length;
 			if (newCount === 0 && !inaccessible) {
 				let namespace : string | undefined = config.getNamespaceconfig();
