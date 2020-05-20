@@ -42,10 +42,13 @@ export async function create(...args: any[]) : Promise<void> {
 	}
 	let filename : string | undefined;
 
-	if (args) {
+	// for didact use, we expect two arguments
+	if (args && args.length === 2) {
 		let innerArgs1 : any[] = args[0];
-		language = innerArgs1[0];
-		filename = innerArgs1[1];
+		if (innerArgs1 && innerArgs1[0] && innerArgs1[1]) {
+			language = innerArgs1[0];
+			filename = innerArgs1[1];
+		}
 	}
 
 	if (!language && !filename) {
@@ -69,7 +72,7 @@ export async function create(...args: any[]) : Promise<void> {
 	if (filename && language && workspaceFolder) {
 		const kamelExe = kamel.create();
 		const newFileFullPath: string = computeFullpath(language, workspaceFolder, filename);
-		kamelExe.invoke(`init ${newFileFullPath}`);
+		await kamelExe.invoke(`init "${newFileFullPath}"`);
 		const textDocument = await vscode.workspace.openTextDocument(newFileFullPath);
 		await vscode.window.showTextDocument(textDocument);
 	}
