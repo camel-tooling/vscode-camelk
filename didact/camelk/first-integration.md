@@ -1,4 +1,4 @@
-![Apache Camel](https://raw.githubusercontent.com/bfitzpat/vscode-didact/master/example/camelinaction/post-logo-apache-camel-d.png)
+![Apache Camel](./post-logo-apache-camel-d.png)
 
 # Apache Camel K
 
@@ -92,15 +92,18 @@ Save the file and see what happens in the Output channel.
 
 We can see what integrations we currently have running in our Minikube system in the `Apache Camel K Integrations` view in the Explorer activity (Ctrl+Shift+E).
 
-- [ ] Open the `Apache Camel K Integrations` view
+- [ ] [Open the `Apache Camel K Integrations` view](didact://?commandId=camelk.integrations.focus)
 
 ![Integrations view with context menu](https://raw.githubusercontent.com/camel-tooling/vscode-camelk/master/images/camelk-integrations-view-remove-menu.jpg){.imageRight}
 
 From here, we can:
 
-- Hover over the integration name to see its current state in the tooltip. 
+- Hover over the `Apache Camel K Integrations` view and click the `Open Apache Camel K Operator Log` button to view it. [(Open the Operator log.)](didact://?commandId=camelk.integrations.openOperatorLog)
+- Hover over the integration name to see its current state in the tooltip. [(Select first integration in tree.)](didact://?commandId=camelk.integrations.selectFirstNode)
 - Right-click on the running integration to `Remove Apache Camel K Integration` and undeploy it.
-- Right-click on the running integration to `Follow log for running Apache Camel K Integration`
+- Right-click on the running integration to `Follow log for running Apache Camel K Integration` [(Open log for selected integration in tree.)](didact://?commandId=camelk.integrations.log)
+- Right-click on the running integration to `Follow kit builder log for running Apache Camel K Integration` [(Open log for selected integration in tree.)](didact://?commandId=camelk.integrations.kitlog)
+
 
 While we are running in `Dev Mode`, all our logged output goes to the main `Apache Camel K` Output channel, but if the integration is running in another mode (such as `Basic`), we can explicitly open a new Output channel to follow the log for that running integration.
 

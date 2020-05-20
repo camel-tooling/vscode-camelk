@@ -1,4 +1,6 @@
-= Starting a new Camel K Route (Alternate Version)
+image:post-logo-apache-camel-d.png[Apache Camel K,role="center"]
+
+= Starting a new Camel K Route
 
 Useful place to start for any new Camel K integration project.
 
@@ -69,7 +71,7 @@ The `Tooling for Camel K` extension offers several tools to get your new integra
 
 First, you can right-click your integration file and select `Start Apache Camel K Integration`. That will provide a drop-down in the Command palette area with a number of deployment options. In this case, select the `Dev Mode - Apache Camel K Integration in Dev Mode` option. 
 
-* (link:didact://?commandId=camelk.startintegration[Execute^])
+* Or with your `HelloWorld.java` file selected in the Explorer, click here: (link:didact://?commandId=camelk.startintegration[Execute^])
 
 Since this is likely the first time you've started a new integration in Camel K, it might take a bit to spin up the necessary resources on the target system. While that starts up, we can look at the `Apache Camel K` Output channel and watch as the Camel K operator starts up the necessary resources to run our integration.
 

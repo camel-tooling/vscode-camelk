@@ -76,23 +76,24 @@ const choiceList = [
 				return;	
 			});
 		} else {
-			// if there's only one argument, it's the file URI
-			if (args && args.length === 1) {
-				context = args[0] as vscode.Uri;
-				inChoice = undefined;
-			} else {
+			if (args && args.length > 0) {
 				// if there are multiple arguments, assume didact input
 				// at this time we only support the URI & basic/dev mode type of integration
-				let innerArgs1 : any[] = args[0];
-				let innerArgs2 : any[] = innerArgs1[0];
-				let innerArgs3 : any[] = innerArgs2[0];
-				context = innerArgs3[0] as vscode.Uri;
-				inChoice = undefined;
+				if (args[0] instanceof vscode.Uri) {
+					context = args[0];
+					inChoice = undefined;
+				} else if (Array.isArray(args[0])) {
+					let innerArgs1 : any[] = args[0];
+					let innerArgs2 : any[] = innerArgs1[0];
+					let innerArgs3 : any[] = innerArgs2[0];
+					context = innerArgs3[0] as vscode.Uri;
+					inChoice = undefined;
 
-				if (innerArgs3.length > 1) {
-					let value = innerArgs3[1];
-					if (isString(value)) {
-						inChoice = value;
+					if (innerArgs3.length > 1) {
+						let value = innerArgs3[1];
+						if (isString(value)) {
+							inChoice = value;
+						}
 					}
 				}
 			}
