@@ -456,12 +456,8 @@ async function installAllTutorials(context : vscode.ExtensionContext) {
 	let tutorialList = {
 		"tutorials": [
 			{"name": "Your First Integration", 
-				"extpath" : "./didact/camelk/first-integration.md", "category": "Apache Camel K"},
-			{"name": "Starting a new Camel K Route - Alternate (Solution Pattern)", 
-				"extpath" : "./didact/solx-camel-k-basic/solx-camel-k-basic-alt.didact.adoc", "category": "Apache Camel K"},
-	]
-		// {"name": "Starting a new Camel K Route", 
-		// "extpath" : "./didact/demo/camel-basic.didact.md", "category": "Apache Camel K"}
+				"extpath" : "./didact/camelk/first-integration.md", "category": "Apache Camel K"}
+		]
 	};
 
 	tutorialList.tutorials.forEach( async tutorial => {

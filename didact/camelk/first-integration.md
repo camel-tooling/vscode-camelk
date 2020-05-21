@@ -26,34 +26,52 @@ You must have a few things set up prior to walking through the steps in this tut
 
 | Requirement (Click to Verify)  | Availability | Additional Information/Solution |
 | :--- | :--- | :--- |
-| [At least one folder exists in the workspace](didact://?commandId=vscode.didact.workspaceFolderExistsCheck&text=workspace-folder-status&completion=A%20valid%20folder%20exists%20in%20the%20workspace. "Ensure that at least one folder exists in the user workspace"){.didact} | *Status: unknown*{#workspace-folder-status} | Create a workspace folder (or [click here to create a temporary folder](didact://?commandId=vscode.didact.createWorkspaceFolder&completion=Created%20temporary%20folder%20in%20the%20workspace. "Create a temporary folder and add it to the workspace."){.didact}), close, and reopen the Didact window
-| [Minikube is accessible and running at the command line](didact://?commandId=vscode.didact.requirementCheck&text=minikube-requirements-status$$minikube%20status$$host:%20Running&completion=Minikube%20is%20available%20on%20this%20system. "Tests to see if `minikube status` returns a result"){.didact} 	| *Status: unknown*{#minikube-requirements-status} 	| See [Installing Camel K on Minikube](https://camel.apache.org/camel-k/latest/installation/minikube.html "Documentation on how to Install Apache Camel K on Minikube, with links to the official doc for Minikube installation")
-| [VS Code Extension Pack for Apache Camel by Red Hat is installed](didact://?commandId=vscode.didact.extensionRequirementCheck&text=extension-requirement-status$$redhat.apache-camel-extension-pack&completion=Camel%20extension%20pack%20available. "Checks the VS Code workspace to make sure the extension pack is installed"){.didact} | *Status: unknown*{#extension-requirement-status} 	| [Click here to install](vscode:extension/redhat.apache-camel-extension-pack "Opens the extension page and provides an install link") |
-| [VS Code Tooling for Apache Camel K by Red Hat is installed](didact://?commandId=vscode.didact.extensionRequirementCheck&text=camelk-extension-requirement-status$$redhat.vscode-camelk&completion=Camel%20K%20extension%20pack%20available. "Checks the VS Code workspace to make sure the extension pack is installed"){.didact} | *Status: unknown*{#camelk-extension-requirement-status} 	| [Click here to install](vscode:extension/redhat.vscode-camelk "Opens the extension page and provides an install link") |
+| [At least one folder exists in the workspace](didact://?commandId=vscode.didact.workspaceFolderExistsCheck&text=workspace-folder-status "Ensure that at least one folder exists in the user workspace"){.didact} | *Status: unknown*{#workspace-folder-status} | Create a workspace folder (or [click here to create a temporary folder](didact://?commandId=vscode.didact.createWorkspaceFolder "Create a temporary folder and add it to the workspace."){.didact}), close, and reopen the Didact window
+| [Is Kamel available?](didact://?commandId=vscode.didact.cliCommandSuccessful&text=kamel-status$$kamel "Tests to see if `kamel` returns a result"){.didact} 	| *Status: unknown*{#kamel-status} 	| See [Installing Camel K](https://camel.apache.org/camel-k/latest/installation/installation.html "Documentation on how to Install Apache Camel K")
+| [VS Code Extension Pack for Apache Camel by Red Hat is installed](didact://?commandId=vscode.didact.extensionRequirementCheck&text=extension-requirement-status$$redhat.apache-camel-extension-pack "Checks the VS Code workspace to make sure the extension pack is installed"){.didact} | *Status: unknown*{#extension-requirement-status} 	| [Click here to install](vscode:extension/redhat.apache-camel-extension-pack "Opens the extension page and provides an install link") |
+| [VS Code Tooling for Apache Camel K by Red Hat is installed](didact://?commandId=vscode.didact.extensionRequirementCheck&text=camelk-extension-requirement-status$$redhat.vscode-camelk "Checks the VS Code workspace to make sure the extension pack is installed"){.didact} | *Status: unknown*{#camelk-extension-requirement-status} 	| [Click here to install](vscode:extension/redhat.vscode-camelk "Opens the extension page and provides an install link") |
 
 ## Your First Camel K Integration
 
-You can write an integration in one of several languages supported ([Groovy, Kotlin, JavaScript, Java, XML, etc.](https://camel.apache.org/camel-k/latest/languages/languages.html)), but today we're going to focus on Groovy which is one of the easiest and most popular.
+You can write an integration in one of several languages supported ([Groovy, Kotlin, JavaScript, Java, XML, YAML, etc.](https://camel.apache.org/camel-k/latest/languages/languages.html)), but today we're going to focus on Groovy which is one of the most common: Java.
 
-### Step 1: Creating a Folder and Your Integration
+### Step 1: Creating Your Integration
 
-First, we need to set up our sample project. Camel K has many examples available at their [GitHub project hosting the source](https://github.com/apache/camel-k/tree/master/examples), but we're just going to use the simplest one: `simple.groovy`.
+First, we need to create the new integration. Camel K has many examples available at their [GitHub project hosting the source](https://github.com/apache/camel-k/tree/master/examples), but we're just going to use a simple one: `simple.java`. Thankfully, the Camel K command-line tool has given us a way to do that quickly and we can leverage that in the tooling. 
 
-You can download the file yourself from the GitHub repo and then copy it into a folder in your workspace. Or you can create a sample folder and copy in the file with the link below.
+You can download the file yourself from the GitHub repo and then copy it into a folder in your workspace. Or you can create it with the tooling.
 
-- [ ] [Create a sample folder in your VS Code workspace and we will define it there.](didact://?commandId=vscode.didact.scaffoldProject&extFilePath=redhat.vscode-camelk/didact/camelk/simple-groovy-project.json&completion=Created%20simple-groovy%20project. "Creates a folder and copies in simple.groovy"){.didact}
+Inside VS Code, press `F1` or `Ctrl+Shift+P` to bring up the Command Palette, and type `Create a new Apache Camel K Integration file`. When the command is selected, click Enter.
+
+1. Choose the language to use (choose `Java`).
+2. Choose the workspace folder (press Enter to select the current workspace root folder)
+3. Provide a name for the new file (be sure not to include the file extension or it will be repeated) (type `simple`)
+
+When you complete step 3, you should see the file `simple.java` appear in your workspace folder. [(Execute^)](didact://?commandId=camelk.integrations.createNewIntegrationFile&text=simple$$Java)
 
 <details><summary>Advanced Users!</summary>
 
-If you simply want to get started writing some Groovy code, you can create a folder in your workspace, create a file called `simple.groovy`, and copy in the following code:
+If you simply want to get started writing some Java, create a file called `simple.java`, and copy in the following code:
 
-```groovy
-// camel-k: language=groovy
-from('timer:groovy?period=1s')
-    .routeId('groovy')
-    .setBody()
-        .simple('Hello Camel K from ${routeId}')
-    .to('log:info?showAll=false')
+```java
+// camel-k: language=java
+
+import org.apache.camel.builder.RouteBuilder;
+
+public class simple extends RouteBuilder {
+  @Override
+  public void configure() throws Exception {
+
+      // Write your routes here, for example:
+      from("timer:java?period=1s")
+        .routeId("java")
+        .setBody()
+          .simple("Hello Camel K from ${routeId}")
+        .to("log:info");
+
+  }
+}
+
 ```
 
 </details>
@@ -62,11 +80,11 @@ from('timer:groovy?period=1s')
 
 Now that you have an integration file, let's take a quick look at it. If you created the file yourself, go ahead and open it now. Go to the Explorer activity (Ctrl+Shift+E) and look at the workspace folders listed.
 
-If you clicked the link to create the sample project, you can find it in `first-camelk-integration/src/simple.groovy` in the Explorer view.
+If you clicked the link to create integration file earlier, look for `simple.java` in the Explorer view.
 
-- [ ] If you have the `first-camelk-integration` project in your workspace, you can [open the simple.groovy file in the editor.](didact://?commandId=vscode.openFolder&projectFilePath=first-camelk-integration/src/simple.groovy&completion=Opened%20the%20simple.groovy%20file "Opens the simple.groovy file"){.didact}
+- [ ] If you created the file in your workspace earlier, you can [open the simple.java file in the editor.](didact://?commandId=vscode.openFolder&projectFilePath=simple.java "Opens the simple.java file"){.didact}
 
-For this file, we're simply telling Camel to put the message `Hello Camel K from ${routeId}` in the console once every second.
+For this file, we're simply telling Camel to put the message `Hello Camel K from ${routeId}` in the console once a second.
 
 ## Step 3: Deploying the Integration
 
@@ -76,7 +94,7 @@ The `Tooling for Camel K` extension offers several tools to get your new integra
 
 First, you can right-click the `simple.groovy` file and select `Start Apache Camel K Integration`. That will provide a drop-down in the Command palette area with a number of deployment options. In this case, select the `Dev Mode - Apache Camel K Integration in Dev Mode` option. 
 
-- [ ] [Start the simple.groovy integration in Dev Mode](didact://?commandId=camelk.startintegration&projectFilePath=first-camelk-integration/src/simple.groovy&text=Dev%20Mode "Deploys the simple.groovy file in 'Dev mode'"){.didact}
+- [ ] [Start the simple.java integration in Dev Mode](didact://?commandId=camelk.startintegration&projectFilePath=simple.java&text=Dev%20Mode "Deploys the simple.java file in 'Dev mode'"){.didact}
 
 Since this is likely the first time you've started a new integration in Camel K, it might take a bit to spin up the necessary resources on the target system. While that starts up, we can look at the `Apache Camel K` Output channel and watch as the Camel K operator starts up the necessary resources to run our integration.
 
