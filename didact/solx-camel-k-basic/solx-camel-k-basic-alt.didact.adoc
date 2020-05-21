@@ -23,7 +23,7 @@ Useful place to start for any new Camel K integration project.
 
 === Step 1: Create a Simple Java Integration
 
-First, we need to create a simple Java Camel K example. You can do this using the `Create a new Apache Camel K Integration file` command. (link:didact://?commandId=camelk.integrations.createNewIntegrationFile&text=Java$$HelloWorld[Execute^])
+First, we need to create a simple Java Camel K example. You can do this using the `Create a new Apache Camel K Integration file` command. (link:didact://?commandId=camelk.integrations.createNewIntegrationFile&text=HelloWorld$$Java[Execute^])
 
 Inside VS Code, press `F1` or `Ctrl+Shift+P` to bring up the Command Palette, and type `Create a new Apache Camel K Integration file`. When the command is selected, click Enter.
 

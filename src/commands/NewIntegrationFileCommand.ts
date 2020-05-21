@@ -42,7 +42,7 @@ export async function create(...args: any[]) : Promise<void> {
 	}
 	let filename : string | undefined;
 
-	// for didact use, we expect two arguments
+	// for didact use, we expect two arguments -- filename and language
 	if (args && args.length > 0 && Array.isArray(args[0])) {
 		let innerArgs1 : any[] = args[0];
 		if (innerArgs1[0] && innerArgs1[1]) {
