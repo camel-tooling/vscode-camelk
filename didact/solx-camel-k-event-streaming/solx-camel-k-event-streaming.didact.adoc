@@ -1,0 +1,42 @@
+= Using Camel K with Kafka and OpenShift for Event Streaming
+
+Useful place to start when combining features from Apache Camel K, Kafka, and OpenShift to implement a system handling different types of events and information. 
+
+== Prerequisites
+
+++++
+<a href='didact://?commandId=vscode.didact.validateAllRequirements' title='Validate all requirements!'><button>Validate all Requirements at Once!</button></a>
+<p/>
+++++
+
+[options="header"]
+|===========================
+| Requirement (Click to Verify)  | Status | Additional Information/Solution
+| link:didact://?commandId=vscode.didact.cliCommandSuccessful&text=kamel-status$$kamel[Is Kamel available?] | ++++<em id="kamel-status">Status: unknown</em>++++ 	| link:https://camel.apache.org/camel-k/[Check the Apache Camel K documentation for details]
+| link:didact://?commandId=vscode.didact.extensionRequirementCheck&text=extension-requirement-status$$redhat.apache-camel-extension-pack[VS Code Extension Pack for Apache Camel by Red Hat is installed] | ++++<em id="extension-requirement-status">Status: unknown</em>++++ | link:vscode:extension/redhat.vscode-camelk[Click here to install]
+| link:didact://?commandId=vscode.didact.sendNamedTerminalAString&text=oc-terminal-status$$oc%20status[Is OC available?] | ++++<em id="oc-terminal-status">Status: unknown</em>++++ | link:https://help.openshift.com/[Openshift Online Help Center, window="_blank"]
+| link:didact://?commandId=vscode.didact.sendNamedTerminalAString&text=crc-terminal-status$$crc%20version[Is CRC available?] | ++++<em id="crc-terminal-status">Status: unknown</em>++++ | link:https://developers.redhat.com/products/codeready-containers/overview[CodeReady Containers Overview, window="_blank"]
+|===========================
+
+[time=10]
+== Breaking it Down
+
+To begin orchestrating a scenario that combines features from many different services, we have to build things up a little at a time. 
+
+We will start by ensuring that the AMQ Streams Operator, Red Hat's data streaming platform based on Apache Kafka, is installed and running. 
+
+
+
+== Did it work? 
+
+You should see some results.
+
+== Did it not work?
+
+You should do some diagnosis.
+
+== Finding more information
+
+For more about **Apache Camel K**, link:https://camel.apache.org/camel-k/latest/index.html[check out the project documentation].
+
+For more about what the **Tooling for Apache Camel K** extension has to offer in VS Code, link:https://github.com/camel-tooling/vscode-camelk/blob/master/README.md[check out the readme].
