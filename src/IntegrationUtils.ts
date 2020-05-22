@@ -62,8 +62,8 @@ const choiceList = [
 
  export function startIntegration(...args: any[]): Promise<boolean> {
 	return new Promise <boolean> ( async (resolve, reject) => {
-		let context : vscode.Uri | undefined = undefined;
-		let inChoice : string | undefined = undefined;
+		let context : vscode.Uri | undefined;
+		let inChoice : string | undefined;
 
 		// with no arguments, try working with the selected file
 		if (!args || args.length === 0) {
@@ -568,19 +568,18 @@ function findChoiceFromStartsWith(inChoice: string | undefined) : string | undef
  }
 
  export async function getCurrentFileSelectionPath(): Promise<vscode.Uri> {
-	if (vscode.window.activeTextEditor)
-	{
+	if (vscode.window.activeTextEditor) {
 	  return vscode.window.activeTextEditor.document.uri;
 	}
-	else{
-		  // set focus to the Explorer view
-	  await vscode.commands.executeCommand('workbench.view.explorer');
-	  // then get the resource with focus
-	  await vscode.commands.executeCommand('copyFilePath');
-	  const copyPath = await vscode.env.clipboard.readText();
-	  if (fs.existsSync(copyPath) && fs.lstatSync(copyPath).isFile() ) {
-		return vscode.Uri.file(copyPath);
-	  }
+	else {
+		// set focus to the Explorer view
+		await vscode.commands.executeCommand('workbench.view.explorer');
+		// then get the resource with focus
+		await vscode.commands.executeCommand('copyFilePath');
+		const copyPath = await vscode.env.clipboard.readText();
+		if (fs.existsSync(copyPath) && fs.lstatSync(copyPath).isFile() ) {
+			return vscode.Uri.file(copyPath);
+		}
 	}
 	throw new Error("Can not determine current file selection");
-  }
+}

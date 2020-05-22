@@ -35,7 +35,7 @@ const LANGUAGES = Array.from(LANGUAGES_WITH_FILENAME_EXTENSIONS.keys());
 export async function create(...args: any[]) : Promise<void> {
 
 	let language : string | undefined;
-	let workspaceFolder : vscode.WorkspaceFolder | undefined = undefined;
+	let workspaceFolder : vscode.WorkspaceFolder | undefined;
 	if (vscode.workspace.workspaceFolders) {
 		// default to root workspace folder
 		workspaceFolder = vscode.workspace.workspaceFolders[0];
