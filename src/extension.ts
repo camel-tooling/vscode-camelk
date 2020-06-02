@@ -218,9 +218,12 @@ export function hideStatusLine(): void {
 
 // start the integration file
 async function runTheFile(...args: any[]) {
-	await startIntegration(args)
-		.then( async () => await camelKIntegrationsProvider.refresh())
-		.catch ( (error) => console.log(error) );
+	try {
+		await startIntegration(args);
+		await camelKIntegrationsProvider.refresh();
+	} catch (error) {
+		console.log(error);
+	}
 }
 
 // start an integration from a file
