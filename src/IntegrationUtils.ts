@@ -567,9 +567,8 @@ function findChoiceFromStartsWith(inChoice: string | undefined) : string | undef
 
  export async function getCurrentFileSelectionPath(): Promise<vscode.Uri> {
 	if (vscode.window.activeTextEditor) {
-	  return vscode.window.activeTextEditor.document.uri;
-	}
-	else {
+		return vscode.window.activeTextEditor.document.uri;
+	} else {
 		// set focus to the Explorer view
 		await vscode.commands.executeCommand('workbench.view.explorer');
 		// then get the resource with focus
