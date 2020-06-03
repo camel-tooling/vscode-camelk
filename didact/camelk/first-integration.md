@@ -14,9 +14,9 @@ What follows is a simple step-by-step process that helps you create and deploy a
 
 We will:
 
-* Create a folder with a sample Apache Camel integration written in Groovy
+* Create a new Camel K integration written in Java
 * Deploy the file in a local Minikube instance
-* Update the Groovy file and watch the change ripple through to the running integration in seconds! 
+* Update the Java file and watch the change ripple through to the running integration in seconds! 
 
 ## Prerequisites 
 
@@ -33,7 +33,7 @@ You must have a few things set up prior to walking through the steps in this tut
 
 ## Your First Camel K Integration
 
-You can write an integration in one of several languages supported ([Groovy, Kotlin, JavaScript, Java, XML, YAML, etc.](https://camel.apache.org/camel-k/latest/languages/languages.html)), but today we're going to focus on Groovy which is one of the most common: Java.
+You can write an integration in one of several languages supported ([Groovy, Kotlin, JavaScript, Java, XML, YAML, etc.](https://camel.apache.org/camel-k/latest/languages/languages.html)), but today we're going to focus one of the most common: Java.
 
 ### Step 1: Creating Your Integration
 
@@ -76,7 +76,7 @@ public class simple extends RouteBuilder {
 
 </details>
 
-## Step 2: Exploring the Groovy integration file
+## Step 2: Exploring the Java integration file
 
 Now that you have an integration file, let's take a quick look at it. If you created the file yourself, go ahead and open it now. Go to the Explorer activity (Ctrl+Shift+E) and look at the workspace folders listed.
 
@@ -92,7 +92,7 @@ For this file, we're simply telling Camel to put the message `Hello Camel K from
 
 The `Tooling for Camel K` extension offers several tools to get your new integration started. 
 
-First, you can right-click the `simple.groovy` file and select `Start Apache Camel K Integration`. That will provide a drop-down in the Command palette area with a number of deployment options. In this case, select the `Dev Mode - Apache Camel K Integration in Dev Mode` option. 
+First, you can right-click the `simple.java` file and select `Start Apache Camel K Integration`. That will provide a drop-down in the Command palette area with a number of deployment options. In this case, select the `Dev Mode - Apache Camel K Integration in Dev Mode` option. 
 
 - [ ] [Start the simple.java integration in Dev Mode](didact://?commandId=camelk.startintegration&projectFilePath=simple.java&text=Dev%20Mode "Deploys the simple.java file in 'Dev mode'"){.didact}
 
