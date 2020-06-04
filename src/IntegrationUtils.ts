@@ -89,8 +89,13 @@ const choiceList = [
 		if (!context) {
 			// with no arguments, try working with the selected file
 			try {
-				context = await getCurrentFileSelectionPath();
-				inChoice = devModeIntegration;
+				let currentFile = await getCurrentFileSelectionPath();
+
+				// validate that the file is in fact a file we might be interested in
+				const regex = /\.(groovy|java|xml|js|kts|yaml)$/g;
+				if (currentFile.fsPath.match(regex)) {
+					context = currentFile;
+				}
 			 } catch (error) {
 				reject('No arguments provided to start integration function call');
 				return;	
@@ -98,7 +103,10 @@ const choiceList = [
 		}
 
 		let choice: string | undefined;
-		if (!inChoice && context) {
+		if (!context) {
+			reject('No valid file specified to start integration function call');
+			return;	
+		} else if (!inChoice && context) {
 			choice = await vscode.window.showQuickPick(choiceList, {
 				placeHolder: 'Select the type of Apache Camel K Integration'
 			});
