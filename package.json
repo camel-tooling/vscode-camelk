@@ -291,7 +291,7 @@
 	"devDependencies": {
 		"@types/chai": "^4.2.11",
 		"@types/download": "^6.2.4",
-		"@types/glob": "^7.1.1",
+		"@types/glob": "^7.1.2",
 		"@types/istanbul": "^0.4.30",
 		"@types/mkdirp": "^1.0.0",
 		"@types/mocha": "^7.0.2",
