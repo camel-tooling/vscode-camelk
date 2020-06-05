@@ -36,6 +36,7 @@ import { LogsPanel } from './logsWebview';
 import * as logUtils from './logUtils';
 import {checkKamelNeedsUpdate, version, handleChangeRuntimeConfiguration} from './versionUtils';
 import * as NewIntegrationFileCommand from './commands/NewIntegrationFileCommand';
+import * as path from 'path';
 
 export const DELAY_RETRY_KUBECTL_CONNECTION = 1000;
 
@@ -93,9 +94,15 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 	
 		// create the integration view action -- remove
 		vscode.commands.registerCommand('camelk.integrations.remove', async (node: TreeNode) => {
-			if (node && node.label) {
+			let selection : TreeNode = node;
+			if (!selection) {
+				if (camelKIntegrationsTreeView.selection) {
+					selection = camelKIntegrationsTreeView.selection[0] as TreeNode;
+				}
+			}
+			if (selection && selection.label) {
 				setStatusLineMessageAndShow(`Removing Apache Camel K Integration...`);
-				let integrationName : string = node.label;
+				let integrationName : string = selection.label;
 				let kamelExe = kamel.create();
 				utils.shareMessage(mainOutputChannel, 'Removing ' + integrationName + ' via Kamel executable Delete');
 				let args : string[] = ['delete', `${integrationName}`];
@@ -121,9 +128,15 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 	
 		// create the integration view action -- start log
 		vscode.commands.registerCommand('camelk.integrations.log', async (node: TreeNode) => {
-			if (node && node.label) {
+			let selection : TreeNode = node;
+			if (!selection) {
+				if (camelKIntegrationsTreeView.selection) {
+					selection = camelKIntegrationsTreeView.selection[0] as TreeNode;
+				}
+			}
+			if (selection && selection.label) {
 				utils.shareMessage(mainOutputChannel, `Retrieving log for running Apache Camel K Integration...`);
-				let integrationName : string = node.label;
+				let integrationName : string = selection.label;
 				await logUtils.handleLogViaKamelCli(integrationName).catch((error) => {
 					utils.shareMessage(mainOutputChannel, `error: ${error} \n`);
 				});
@@ -131,7 +144,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 		});
 	
 		// create the integration view action -- start new integration
-		let startIntegration = vscode.commands.registerCommand('camelk.startintegration', async (uri:vscode.Uri) => { await runTheFile(uri);});
+		let startIntegration = vscode.commands.registerCommand('camelk.startintegration', async (...args:any[]) => { await runTheFile(args);});
 		context.subscriptions.push(startIntegration);
 	
 		// add commands to create config-map and secret objects from .properties files
@@ -148,8 +161,14 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 
 		// create the context menu integration view action -- open kit log
 		vscode.commands.registerCommand('camelk.integrations.kitlog', async (node: TreeNode) => {
-			if (node && node.label) {
-				let integrationName : string = node.label;
+			let selection : TreeNode = node;
+			if (!selection) {
+				if (camelKIntegrationsTreeView.selection) {
+					selection = camelKIntegrationsTreeView.selection[0] as TreeNode;
+				}
+			}
+			if (selection && selection.label) {
+				let integrationName : string = selection.label;
 				utils.shareMessage(mainOutputChannel, `Retrieving log for Apache Camel K Integration kit...`);
 				await logUtils.handleKitLog(integrationName)
 				.catch( (err) => {
@@ -158,8 +177,9 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 			}
 		});
 
-		vscode.commands.registerCommand('camelk.integrations.createNewIntegrationFile', NewIntegrationFileCommand.create);
+		vscode.commands.registerCommand('camelk.integrations.createNewIntegrationFile', async (...args:any[]) => { await NewIntegrationFileCommand.create(args);});
 
+		vscode.commands.registerCommand('camelk.integrations.selectFirstNode', () => { selectFirstItemInTree();});
 	});
 
 	let destination = downloadJavaDependencies(context);
@@ -172,6 +192,15 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 		updateReferenceLibraries(vscode.window.activeTextEditor, destination);
 	}
 	
+	await installAllTutorials(context);
+}
+
+function selectFirstItemInTree() {
+	let nodes = camelKIntegrationsProvider.getTreeNodes();
+	if (nodes && nodes.length > 0) {
+		let firstNode = nodes[0];
+		camelKIntegrationsTreeView.reveal(firstNode, {select:true});
+	}
 }
 
 export function setStatusLineMessageAndShow( message: string): void {
@@ -188,18 +217,21 @@ export function hideStatusLine(): void {
 }
 
 // start the integration file
-async function runTheFile(context: vscode.Uri) {
-	await startIntegration(context)
-		.then( async () => await camelKIntegrationsProvider.refresh())
-		.catch ( (error) => console.log(error) );
+async function runTheFile(...args: any[]) {
+	try {
+		await startIntegration(args);
+		await camelKIntegrationsProvider.refresh();
+	} catch (error) {
+		console.log(error);
+	}
 }
 
 // start an integration from a file
-function startIntegration(context: vscode.Uri): Promise<any> {
+function startIntegration(...args: any[]): Promise<any> {
 	return new Promise <any> ( async (resolve, reject) => {
 		setStatusLineMessageAndShow(`Starting new Apache Camel K Integration...`);
 		utils.shareMessage(mainOutputChannel, "Starting new integration via Kamel executable.");
-		await integrationutils.startIntegration(context)
+		await integrationutils.startIntegration(args)
 			.then( success => {
 				if (!success) {
 					vscode.window.showErrorMessage("Unable to call Kamel.");
@@ -421,4 +453,35 @@ function removeIntegrationLogView(integrationName: string) : Promise<string> {
 
 export function setRuntimeVersionSetting(value: string) {
 	runtimeVersionSetting = value;	
+}
+
+async function installAllTutorials(context : vscode.ExtensionContext) {
+	let tutorialList = {
+		"tutorials": [
+			{"name": "Your First Integration", 
+				"extpath" : "./didact/camelk/first-integration.md", "category": "Apache Camel K"}
+		]
+	};
+
+	tutorialList.tutorials.forEach( async tutorial => {
+		await registerTutorialWithDidact(context, tutorial.name, tutorial.extpath, tutorial.category);
+	});
+}
+
+async function registerTutorialWithDidact(context: vscode.ExtensionContext, name : string, extpath : string, category : string) {
+	try {
+		// test to ensure didact is available 
+		const extensionId = 'redhat.vscode-didact';
+		const didactExt : any = vscode.extensions.getExtension(extensionId);
+		if (didactExt) {
+			const commandId = 'vscode.didact.register';
+			const tutorialPath = path.join(context.extensionPath, extpath);
+			const tutorialUri = vscode.Uri.parse(`file://${tutorialPath}`);
+
+			// then pass name, uri, and category
+			await vscode.commands.executeCommand(commandId,	name, tutorialUri, category);
+		}
+	} catch (error) {
+		console.log(error);
+	}
 }

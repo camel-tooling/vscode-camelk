@@ -25,9 +25,10 @@ import { getConfigMaps, getSecrets } from './kubectlutils';
 import * as k8s from 'vscode-kubernetes-tools-api';
 import * as kamel from './kamel';
 import { CamelKTaskProvider, CamelKTaskDefinition } from './task/CamelKTaskDefinition';
+import { isString } from 'util';
+import * as fs from 'fs';
 
 const validNameRegex = /^[A-Za-z][A-Za-z0-9\-\.]*(?:[A-Za-z0-9]$){1}/;
-
 const devModeIntegration: string = 'Dev Mode - Apache Camel K Integration in Dev Mode';
 const basicIntegration: string = 'Basic - Apache Camel K Integration (no ConfigMap or Secret)';
 const configMapIntegration: string = 'ConfigMap - Apache Camel K Integration with Kubernetes ConfigMap';
@@ -59,13 +60,61 @@ const choiceList = [
 
  let childProcessMap : Map<string, child_process.ChildProcess>;
 
- export function startIntegration(context: vscode.Uri): Promise<boolean> {
+ export function startIntegration(...args: any[]): Promise<boolean> {
 	return new Promise <boolean> ( async (resolve, reject) => {
-		const choice : string | undefined = await vscode.window.showQuickPick(choiceList, {
-			placeHolder: 'Select the type of Apache Camel K Integration'
-		});
+		let context : vscode.Uri | undefined;
+		let inChoice : string | undefined;
 
-		if (choice) {
+		if (args && args.length > 0) {
+			// if there are multiple arguments, assume didact input
+			// at this time we only support the URI & basic/dev mode type of integration
+			if (args[0] instanceof vscode.Uri) {
+				context = args[0];
+				inChoice = undefined;
+			} else if (Array.isArray(args[0])) {
+				let innerArgs1 : any[] = args[0];
+				let innerArgs2 : any[] = innerArgs1[0];
+				let innerArgs3 : any[] = innerArgs2[0];
+				context = innerArgs3[0] as vscode.Uri;
+				inChoice = undefined;
+
+				if (innerArgs3.length > 1) {
+					let value = innerArgs3[1];
+					if (isString(value)) {
+						inChoice = value;
+					}
+				}
+			}
+		}
+		if (!context) {
+			// with no arguments, try working with the selected file
+			try {
+				let currentFile = await getCurrentFileSelectionPath();
+
+				// validate that the file is in fact a file we might be interested in
+				const regex = /\.(groovy|java|xml|js|kts|yaml)$/g;
+				if (currentFile.fsPath.match(regex)) {
+					context = currentFile;
+				}
+			 } catch (error) {
+				reject('No arguments provided to start integration function call');
+				return;	
+			 }
+		}
+
+		let choice: string | undefined;
+		if (!context) {
+			reject('No valid file specified to start integration function call');
+			return;	
+		} else if (!inChoice && context) {
+			choice = await vscode.window.showQuickPick(choiceList, {
+				placeHolder: 'Select the type of Apache Camel K Integration'
+			});
+		} else {
+			choice = findChoiceFromStartsWith(inChoice);
+		}
+
+		if (choice && context) {
 			let selectedConfigMap : any = undefined;
 			let selectedSecret : any = undefined;
 			let devMode : boolean = false;
@@ -509,4 +558,33 @@ export function killChildProcessForIntegration(integration:string) : Promise<boo
 		}
 		resolve(childProcess ? childProcess.killed : true);
 	});	
+}
+
+function findChoiceFromStartsWith(inChoice: string | undefined) : string | undefined {
+	if (inChoice) {
+		if (devModeIntegration.startsWith(inChoice)) {
+			return devModeIntegration;
+		}
+		if (basicIntegration.startsWith(inChoice)) {
+			return basicIntegration;
+		}
+	}
+	// other choices not supported at present because they will require additional inputs
+	return undefined;
+ }
+
+ export async function getCurrentFileSelectionPath(): Promise<vscode.Uri> {
+	if (vscode.window.activeTextEditor) {
+		return vscode.window.activeTextEditor.document.uri;
+	} else {
+		// set focus to the Explorer view
+		await vscode.commands.executeCommand('workbench.view.explorer');
+		// then get the resource with focus
+		await vscode.commands.executeCommand('copyFilePath');
+		const copyPath = await vscode.env.clipboard.readText();
+		if (fs.existsSync(copyPath) && fs.lstatSync(copyPath).isFile() ) {
+			return vscode.Uri.file(copyPath);
+		}
+	}
+	throw new Error("Can not determine current file selection");
 }

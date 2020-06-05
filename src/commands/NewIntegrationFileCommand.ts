@@ -32,26 +32,49 @@ const LANGUAGES_WITH_FILENAME_EXTENSIONS = new Map([
 	['Kotlin', 'kts']]);
 const LANGUAGES = Array.from(LANGUAGES_WITH_FILENAME_EXTENSIONS.keys());
 
-export async function create() : Promise<void> {
-	const language = await vscode.window.showQuickPick(LANGUAGES, {placeHolder:'Please select the language in which the new file will be generated.'});
-	if (language) {
-		const workspaceFolder = await vscode.window.showWorkspaceFolderPick(
-			{placeHolder: 'Please select the workspace folder in which the new file will be created.'});
-		if (workspaceFolder) {
-			const filename = await vscode.window.showInputBox({
-				prompt: 'Please provide a name for the new file (without extension)',
-				validateInput: (name: string) => {
-					return validateFileName(name, language, workspaceFolder);
-				}
-			});
-			if (filename) {
-				const kamelExe = kamel.create();
-				const newFileFullPath: string = computeFullpath(language, workspaceFolder, filename);
-				await kamelExe.invoke(`init "${newFileFullPath}"`);
-				const textDocument = await vscode.workspace.openTextDocument(newFileFullPath);
-				await vscode.window.showTextDocument(textDocument);
+export async function create(...args: any[]) : Promise<void> {
+
+	let language : string | undefined;
+	let workspaceFolder : vscode.WorkspaceFolder | undefined;
+	if (vscode.workspace.workspaceFolders) {
+		// default to root workspace folder
+		workspaceFolder = vscode.workspace.workspaceFolders[0];
+	}
+	let filename : string | undefined;
+
+	// for didact use, we expect two arguments -- filename and language
+	if (args && args.length > 0 && Array.isArray(args[0])) {
+		let innerArgs1 : any[] = args[0];
+		if (innerArgs1[0] && innerArgs1[1]) {
+			filename = innerArgs1[0];
+			language = innerArgs1[1];
+		}
+	}
+
+	if (!language && !filename) {
+		const selectedLanguage = await vscode.window.showQuickPick(LANGUAGES, {placeHolder:'Please select the language in which the new file will be generated.'});
+		if (selectedLanguage) {
+			const selectedWorkspaceFolder = await vscode.window.showWorkspaceFolderPick(
+				{placeHolder: 'Please select the workspace folder in which the new file will be created.'});
+			if (selectedWorkspaceFolder) {
+				filename = await vscode.window.showInputBox({
+					prompt: 'Please provide a name for the new file (without extension)',
+					validateInput: (name: string) => {
+						return validateFileName(name, selectedLanguage, selectedWorkspaceFolder);
+					}
+				});
+				language = selectedLanguage;
+				workspaceFolder = selectedWorkspaceFolder;
 			}
 		}
+	}
+
+	if (filename && language && workspaceFolder) {
+		const kamelExe = kamel.create();
+		const newFileFullPath: string = computeFullpath(language, workspaceFolder, filename);
+		await kamelExe.invoke(`init "${newFileFullPath}"`);
+		const textDocument = await vscode.workspace.openTextDocument(newFileFullPath);
+		await vscode.window.showTextDocument(textDocument);
 	}
 }
 

@@ -117,5 +117,27 @@ suite('Test command to create an Apache Camel K integration file', function() {
 				`Until https://github.com/apache/camel-k/issues/1368 is fixed, it will require to have a valid local Kubernetes setup.`);
 		});
 	}
+
+	const javaArgsTest = test('Can create a new java integration file with arguments instead of user input', async function() {
+		await testIntegrationFileCreationPassingArguments('TestArgsCreation.java', 'Java', 'TestArgsCreation', javaArgsTest);
+	});
+
+	async function testIntegrationFileCreationPassingArguments(expectedFileNameWithExtension: string, languageToPick: string, providedFilename: string, currentTest: Mocha.Test) {
+		if (os.homedir().includes('hudson')) {
+			currentTest.skip();
+		}
+		expect(await vscode.workspace.findFiles(expectedFileNameWithExtension)).to.be.an('array').that.is.empty;
+
+		await vscode.commands.executeCommand('camelk.integrations.createNewIntegrationFile', providedFilename, languageToPick);
+
+		await checkFileCreated(expectedFileNameWithExtension);
+
+		await waitUntil(() => {
+			return vscode.window.activeTextEditor?.document.fileName.endsWith(expectedFileNameWithExtension);
+		}, 5000, `Text editor has not opened for ${providedFilename}`);
+
+		checkContainsCamelKMode(createdFile);
+	}
+
 });
 
