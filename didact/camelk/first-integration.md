@@ -54,7 +54,7 @@ The file we created in the previous step instructs Camel to log the message `Hel
 
 ## Step 3: Deploying the Integration
 
-![Camel K Start Integration menu](https://raw.githubusercontent.com/camel-tooling/vscode-camelk/master/images/camelk-start-integration-popup-menu.jpg){.imageRight}
+![Camel K Start Integration menu](./camelk-start-integration-popup-menu.png){.imageRight}
 
 The `Tooling for Camel K` extension offers several tools to get your new integration started. 
 
@@ -78,7 +78,7 @@ We can see the integrations we currently have running in our environment in the 
 
 - [ ] Open the `Apache Camel K Integrations` view[(Execute^)](didact://?commandId=camelk.integrations.focus)
 
-![Integrations view with context menu](https://raw.githubusercontent.com/camel-tooling/vscode-camelk/master/images/camelk-integrations-view-remove-menu.jpg){.imageRight}
+![Integrations view with context menu](./camelk-integrations-view-contextual-menu.png){.imageRight}
 
 From here, we can:
 
