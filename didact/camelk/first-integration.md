@@ -100,7 +100,7 @@ Since this is likely the first time you've started a new integration in Camel K,
 
 While our integration is running in `Dev Mode`, we can modify it and see those changes reflected in the deployed integration. Let's try that now.
 
-Change the message sent to the `.simple()` command of the Camel route in quotes to `We just changed our first Camel K integration while it was running!`. 
+Change the message sent to the `.simple()` command of the Camel route in quotes to **We just changed our first Camel K integration while it was running!**. 
 
 Save the file. Doing so automatically redeploys the file while it is deployed in Dev Mode. You should see the updated message displayed in the Output channel. 
 
