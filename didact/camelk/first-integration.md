@@ -49,40 +49,9 @@ Inside VS Code, press `F1` or `Ctrl+Shift+P` to bring up the Command Palette, an
 
 When you complete step 3, you should see the file `Simple.java` appear in your workspace folder. [(Execute^)](didact://?commandId=camelk.integrations.createNewIntegrationFile&text=Simple$$Java)
 
-<details><summary>Advanced Users!</summary>
-
-If you simply want to get started writing some Java, create a file called `Simple.java`, and copy in the following code:
-
-```java
-// camel-k: language=java
-
-import org.apache.camel.builder.RouteBuilder;
-
-public class Simple extends RouteBuilder {
-  @Override
-  public void configure() throws Exception {
-
-      // Write your routes here, for example:
-      from("timer:java?period=1s")
-        .routeId("java")
-        .setBody()
-          .simple("Hello Camel K from ${routeId}")
-        .to("log:info");
-
-  }
-}
-
-```
-
-</details>
-
 ## Step 2: Exploring the Java integration file
 
-Now that you have an integration file, let's take a quick look at it. If you created the file yourself, go ahead and open it now. Go to the Explorer activity (Ctrl+Shift+E) and look at the workspace files and folders listed to find `Simple.java`.
-
-- [ ] If you created the file in your workspace earlier by hand, you can open the Simple.java file in the editor.[(Execute^)](didact://?commandId=vscode.openFolder&projectFilePath=Simple.java "Opens the Simple.java file"){.didact}
-
-For this file, we're simply telling Camel to put the message `Hello Camel K from ${routeId}` in the console once a second.
+The file we created in the previous step instructs Camel to log the message `Hello Camel K from ${routeId}` in the console once a second.
 
 ## Step 3: Deploying the Integration
 
