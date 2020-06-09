@@ -61,6 +61,15 @@ export class TraitManager {
 	private static async retrieveTraitsDefinitions(traitName?: string): Promise<TraitDefinition[]> {
 		const kamelExe = kamel.create();
 		const trait = await kamelExe.invoke(`help trait ${traitName ? traitName : '--all'} -o json`);
-		return JSON.parse(trait) as TraitDefinition[];
+		const sanitizedTrait = sanitizeToWorkaroundBugInKamel1_0_0(trait);
+		return JSON.parse(sanitizedTrait) as TraitDefinition[];
 	}
+}
+
+function sanitizeToWorkaroundBugInKamel1_0_0(trait: string) {
+	const indexOfJSonStart = trait.indexOf('[{"');
+	if (indexOfJSonStart > 0) {
+		trait = trait.substring(indexOfJSonStart, trait.length);
+	}
+	return trait;
 }
