@@ -25,7 +25,7 @@ export var areJavaDependenciesDownloaded = false;
 export function downloadJavaDependencies(context:vscode.ExtensionContext): string {
     let pomTemplate = context.asAbsolutePath(path.join('resources', 'maven-project', 'pom-to-copy-java-dependencies.xml'));
     let extensionStorage = context.globalStoragePath;
-    let camelVersion = "3.0.1";
+    let camelVersion = "3.3.0";
 
     let destination = path.join(extensionStorage, `java-dependencies-${camelVersion}`);
     fs.mkdirSync(destination, { recursive: true });

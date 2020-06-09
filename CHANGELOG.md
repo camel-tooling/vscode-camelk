@@ -4,6 +4,7 @@ All notable changes to the "vscode-camelk" extension will be documented in this 
 
 ## 0.0.14
 
+- Update default runtime version to 1.0.0
 - Listing VS Code task to deploy Camel K integration in "Start Apache Camel Integration" command
 - Completion for trait names and trait properties in tasks.json
 - Command to create new Apache Camel K Integration files
