@@ -79,13 +79,14 @@ async function kamelInternal(command: string, devMode: boolean, namespace : stri
 		}
 		const cmd = getBaseCmd(binpath, command, namespace);
 		const sr = exec(cmd);
+		let wholeOutData = '';
 		if (sr) {
 			if (sr.stdout) {
 				sr.stdout.on('data', function (data) {
 					if (devMode && devMode === true) {
 						utils.shareMessage(extension.mainOutputChannel, `Dev Mode -- ${data}`);
 					}
-					resolve(data);
+					wholeOutData += data;
 				});
 			}        
 			if (sr.stderr) {
@@ -97,7 +98,11 @@ async function kamelInternal(command: string, devMode: boolean, namespace : stri
 			sr.on('close', function (exitCode) {
 				const exitCodeAsString = exitCode.toString();
 				if(exitCode === 0){
-					resolve(exitCodeAsString);
+					if(wholeOutData !== ''){
+						resolve(wholeOutData);
+					} else {
+						resolve(exitCodeAsString);
+					}
 				} else {
 					reject(new Error(exitCodeAsString));
 				}

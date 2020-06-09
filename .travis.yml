@@ -29,7 +29,7 @@ before_script:
   # Download and provide in path minikube.
   - curl -Lo minikube https://storage.googleapis.com/minikube/releases/v1.9.2/minikube-linux-amd64 && chmod +x minikube && sudo mv minikube /usr/local/bin/
   # Download and provide in path kamel.
-  - curl -Lo kamel.tar.gz https://github.com/apache/camel-k/releases/download/1.0.0-RC2/camel-k-client-1.0.0-RC2-linux-64bit.tar.gz
+  - curl -Lo kamel.tar.gz https://github.com/apache/camel-k/releases/download/1.0.0/camel-k-client-1.0.0-linux-64bit.tar.gz
   - tar -zxvf kamel.tar.gz
   - chmod +x kamel
   - sudo mv kamel /usr/local/bin/
