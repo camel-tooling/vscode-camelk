@@ -98,8 +98,10 @@ export async function pingGithubUrl(urlStr: string): Promise<boolean> {
 		if (res.status === 200) {
 			return Promise.resolve(true);
 		}
+		console.log(res);
 		return Promise.resolve(false);
 	} catch (err) {
+		console.log(err);
 		return Promise.resolve(false);
 	}
 }
