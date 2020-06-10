@@ -96,6 +96,7 @@ export async function pingGithubUrl(urlStr: string): Promise<boolean> {
 	try {
 		const res = await fetch(urlStr);
 		if (res.status === 200) {
+			console.log('ping success');
 			return Promise.resolve(true);
 		}
 		console.log(res);
