@@ -108,7 +108,7 @@ async function downloadAndExtract(link : string, dlFilename: string, installFold
 			let tooltip = `Download progress for ${dlFilename}`;
 			console.log(`Download progress: ${progress.transferred} / ${progress.total} (${percent}%)`);
 			updateStatusBarItem(myStatusBarItem, message, tooltip);
-		}).then(async () => {
+		}).then(() => {
 			extension.mainOutputChannel.appendLine(`Downloaded ${dlFilename}.`);
 			console.log(`Downloaded ${dlFilename}.`);
 			myStatusBarItem.dispose();
