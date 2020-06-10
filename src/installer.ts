@@ -117,6 +117,7 @@ async function downloadAndExtract(link : string, dlFilename: string, installFold
 			console.log(error);
 		});
 	myStatusBarItem.dispose();
+	console.log('return of downloadAndExtract');
 	return false;
 }
 
