@@ -97,6 +97,7 @@ async function downloadAndExtract(link : string, dlFilename: string, installFold
 		extract: extractFlag,
 	  };
 	extension.mainOutputChannel.appendLine('Downloading from: ' + link);
+	console.log('Downloading from: ' + link);
 	await download(link, installFolder, downloadSettings)
 		.on('response', (response) => {
 			extension.mainOutputChannel.appendLine(`Bytes to transfer: ${response.headers['content-length']}`);
@@ -105,9 +106,11 @@ async function downloadAndExtract(link : string, dlFilename: string, installFold
 			let percent = Math.round(incr);
 			let message = `Download progress: ${progress.transferred} / ${progress.total} (${percent}%)`;
 			let tooltip = `Download progress for ${dlFilename}`;
+			console.log(`Download progress: ${progress.transferred} / ${progress.total} (${percent}%)`);
 			updateStatusBarItem(myStatusBarItem, message, tooltip);
 		}).then(async () => {
 			extension.mainOutputChannel.appendLine(`Downloaded ${dlFilename}.`);
+			console.log(`Downloaded ${dlFilename}.`);
 			myStatusBarItem.dispose();
 			return true;
 		}).catch((error) => {
