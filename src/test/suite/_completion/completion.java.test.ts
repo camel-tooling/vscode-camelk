@@ -17,7 +17,7 @@
 'use strict';
 
 import * as vscode from 'vscode';
-import { areJavaDependenciesDownloaded } from '../../../JavaDependenciesManager';
+import * as JavaDependenciesManager from '../../../JavaDependenciesManager';
 import { getDocUri, checkExpectedCompletion } from '../completion.util';
 import { fail } from 'assert';
 
@@ -49,9 +49,9 @@ async function testCompletion(
 	expectedCompletion: vscode.CompletionItem
 ) {
 	await waitUntil(()=> {
-		return areJavaDependenciesDownloaded;
-	}, DOWNLOAD_JAVA_DEPENDENCIES_TIMEOUT).catch(() => {
-		fail(`Camel Java dependencies not downloaded in reasonable time (${DOWNLOAD_JAVA_DEPENDENCIES_TIMEOUT})`);
+		return JavaDependenciesManager.areJavaDependenciesDownloaded();
+	}, DOWNLOAD_JAVA_DEPENDENCIES_TIMEOUT, 5000).catch(() => {
+		console.log(`Suspicious: either Camel Java dependencies not downloaded in reasonable time (${DOWNLOAD_JAVA_DEPENDENCIES_TIMEOUT}) or the detection failed.`);
 	});
 
 	let doc = await vscode.workspace.openTextDocument(docUri);

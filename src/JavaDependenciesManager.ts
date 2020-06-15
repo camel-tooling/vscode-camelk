@@ -19,69 +19,88 @@ import * as path from 'path';
 import * as vscode from 'vscode';
 
 const PREFERENCE_KEY_JAVA_REFERENCED_LIBRARIES = "java.project.referencedLibraries";
+export const CAMEL_VERSION = "3.3.0";
 
-export var areJavaDependenciesDownloaded = false;
-
-export function downloadJavaDependencies(context:vscode.ExtensionContext): string {
-    let pomTemplate = context.asAbsolutePath(path.join('resources', 'maven-project', 'pom-to-copy-java-dependencies.xml'));
-    let extensionStorage = context.globalStoragePath;
-    let camelVersion = "3.3.0";
-
-    let destination = path.join(extensionStorage, `java-dependencies-${camelVersion}`);
-    fs.mkdirSync(destination, { recursive: true });
-
-    /* provides only camel-core-engine dependencies for now, to improve:
-    * - rely on kamel inspect to know all extra potential libraries that can be provided
-    */
-    const mvn = require('maven').create({
-        cwd: destination,
-        file: pomTemplate,
-
-    });
-    mvn.execute(['dependency:copy-dependencies'], {'camelVersion': camelVersion, 'outputDirectory': destination}).then(() => {
-        areJavaDependenciesDownloaded = true;
-    });
-    return destination;
+export class JavaDependenciesManager {
+	static javaDependenciesDownloaded: boolean = false;
+}
+export function areJavaDependenciesDownloaded() {
+	return JavaDependenciesManager.javaDependenciesDownloaded;
 }
 
-export function updateReferenceLibraries(editor: vscode.TextEditor | undefined, destination:string) {
-    const camelKReferencedLibrariesPattern = destination + '/*.jar';
-    let documentEdited = editor?.document;
-    if (documentEdited?.fileName.endsWith(".java")) {
-        let text = documentEdited.getText();
-        const configuration = vscode.workspace.getConfiguration();
-        let refLibrariesTopLevelConfig = configuration.get(PREFERENCE_KEY_JAVA_REFERENCED_LIBRARIES);
-        if(refLibrariesTopLevelConfig instanceof Array) {
-            updateReferenceLibrariesForConfigKey(text, refLibrariesTopLevelConfig, camelKReferencedLibrariesPattern, configuration, PREFERENCE_KEY_JAVA_REFERENCED_LIBRARIES);
-        } else {
-            let includepropertyKeyConfig = PREFERENCE_KEY_JAVA_REFERENCED_LIBRARIES + '.include';
-            let refLibrariesIncludeConfig = configuration.get(includepropertyKeyConfig) as Array<string>;
-            updateReferenceLibrariesForConfigKey(text, refLibrariesIncludeConfig, camelKReferencedLibrariesPattern, configuration, includepropertyKeyConfig);
-        }
-    }
+export function downloadJavaDependencies(context: vscode.ExtensionContext): string {
+	const pomTemplate = context.asAbsolutePath(path.join('resources', 'maven-project', 'pom-to-copy-java-dependencies.xml'));
+	const destination = destinationFolderForDependencies(context);
+	fs.mkdirSync(destination, { recursive: true });
+
+	/* provides only camel-core-engine dependencies for now, to improve:
+	* - rely on kamel inspect to know all extra potential libraries that can be provided
+	*/
+	const mvn = require('maven').create({
+		cwd: destination,
+		file: pomTemplate,
+		logFile: destination + '/log.txt'
+
+	});
+	mvn.execute(['dependency:copy-dependencies'], { 'camelVersion': CAMEL_VERSION, 'outputDirectory': destination }).then(() => {
+		console.log('downloaded java dependencies');
+		JavaDependenciesManager.javaDependenciesDownloaded = true;
+		const log: string = fs.readFileSync(destination + '/log.txt', 'utf8');
+		log.split(/[\r\n]+/).forEach(line => {
+			console.log(line);
+		});
+	}).catch((error: any) => {
+		console.log('error:' + error);
+		const log: string = fs.readFileSync(destination + '/log.txt', 'utf8');
+		log.split(/[\r\n]+/).forEach(line => {
+			console.log(line);
+		});
+	});
+	return destination;
 }
 
-function updateReferenceLibrariesForConfigKey(text: string, refLibrariesConfig: string[], camelKReferencedLibrariesPattern: string, configuration: vscode.WorkspaceConfiguration, configurationKey: string) {
-    if (text.includes("camel")) {
-        ensureReferencedLibrariesContainsCamelK(refLibrariesConfig, camelKReferencedLibrariesPattern, configuration, configurationKey);
-    } else if (refLibrariesConfig.includes(camelKReferencedLibrariesPattern)) {
-        removeCamelKFromReferencedlibraries(refLibrariesConfig, camelKReferencedLibrariesPattern, configuration, configurationKey);
-    }
+export function destinationFolderForDependencies(context: vscode.ExtensionContext) {
+	let extensionStorage = context.globalStoragePath;
+	return  path.join(extensionStorage, `java-dependencies-${CAMEL_VERSION}`);
+}
+
+export function updateReferenceLibraries(editor: vscode.TextEditor | undefined, destination: string) {
+	const camelKReferencedLibrariesPattern = destination + '/*.jar';
+	let documentEdited = editor?.document;
+	if (documentEdited?.fileName.endsWith(".java")) {
+		let text = documentEdited.getText();
+		const configuration = vscode.workspace.getConfiguration();
+		let refLibrariesTopLevelConfig = configuration.get(PREFERENCE_KEY_JAVA_REFERENCED_LIBRARIES);
+		if (refLibrariesTopLevelConfig instanceof Array) {
+			updateReferenceLibrariesForConfigKey(text, refLibrariesTopLevelConfig, camelKReferencedLibrariesPattern, configuration, PREFERENCE_KEY_JAVA_REFERENCED_LIBRARIES);
+		} else {
+			let includepropertyKeyConfig = PREFERENCE_KEY_JAVA_REFERENCED_LIBRARIES + '.include';
+			let refLibrariesIncludeConfig = configuration.get(includepropertyKeyConfig) as Array<string>;
+			updateReferenceLibrariesForConfigKey(text, refLibrariesIncludeConfig, camelKReferencedLibrariesPattern, configuration, includepropertyKeyConfig);
+		}
+	}
+}
+
+export function updateReferenceLibrariesForConfigKey(text: string, refLibrariesConfig: string[], camelKReferencedLibrariesPattern: string, configuration: vscode.WorkspaceConfiguration, configurationKey: string) {
+	if (text.includes("camel")) {
+		ensureReferencedLibrariesContainsCamelK(refLibrariesConfig, camelKReferencedLibrariesPattern, configuration, configurationKey);
+	} else if (refLibrariesConfig.includes(camelKReferencedLibrariesPattern)) {
+		removeCamelKFromReferencedlibraries(refLibrariesConfig, camelKReferencedLibrariesPattern, configuration, configurationKey);
+	}
 }
 
 function removeCamelKFromReferencedlibraries(refLibrariesConfig: string[], camelKReferencedLibrariesPattern: string, configuration: vscode.WorkspaceConfiguration, configurationKey: string) {
-    for (var i = 0; i < refLibrariesConfig.length; i++) {
-        if (refLibrariesConfig[i] === camelKReferencedLibrariesPattern) {
-            refLibrariesConfig.splice(i, 1);
-        }
-    }
-    configuration.update(configurationKey, refLibrariesConfig);
+	for (var i = 0; i < refLibrariesConfig.length; i++) {
+		if (refLibrariesConfig[i] === camelKReferencedLibrariesPattern) {
+			refLibrariesConfig.splice(i, 1);
+		}
+	}
+	configuration.update(configurationKey, refLibrariesConfig);
 }
 
 function ensureReferencedLibrariesContainsCamelK(refLibrariesConfig: string[], camelKReferencedLibrariesPattern: string, configuration: vscode.WorkspaceConfiguration, configurationKey: string) {
-    if (!refLibrariesConfig.includes(camelKReferencedLibrariesPattern)) {
-        refLibrariesConfig.push(camelKReferencedLibrariesPattern);
-        configuration.update(configurationKey, refLibrariesConfig);
-    }
+	if (!refLibrariesConfig.includes(camelKReferencedLibrariesPattern)) {
+		refLibrariesConfig.push(camelKReferencedLibrariesPattern);
+		configuration.update(configurationKey, refLibrariesConfig);
+	}
 }
-
