@@ -42,43 +42,43 @@ export function destinationFolderForDependencies(context: vscode.ExtensionContex
 	return  path.join(extensionStorage, `java-dependencies-${CAMEL_VERSION}`);
 }
 
-export function updateReferenceLibraries(editor: vscode.TextEditor | undefined, destination: string) {
-	const camelKReferencedLibrariesPattern = destination + '/*.jar';
-	let documentEdited = editor?.document;
-	if (documentEdited?.fileName.endsWith(".java")) {
-		let text = documentEdited.getText();
-		const configuration = vscode.workspace.getConfiguration();
-		let refLibrariesTopLevelConfig = configuration.get(PREFERENCE_KEY_JAVA_REFERENCED_LIBRARIES);
-		if (refLibrariesTopLevelConfig instanceof Array) {
-			updateReferenceLibrariesForConfigKey(text, refLibrariesTopLevelConfig, camelKReferencedLibrariesPattern, configuration, PREFERENCE_KEY_JAVA_REFERENCED_LIBRARIES);
-		} else {
-			let includepropertyKeyConfig = PREFERENCE_KEY_JAVA_REFERENCED_LIBRARIES + '.include';
-			let refLibrariesIncludeConfig = configuration.get(includepropertyKeyConfig) as Array<string>;
-			updateReferenceLibrariesForConfigKey(text, refLibrariesIncludeConfig, camelKReferencedLibrariesPattern, configuration, includepropertyKeyConfig);
-		}
-	}
+export function updateReferenceLibraries(editor: vscode.TextEditor | undefined, destination:string) {
+    const camelKReferencedLibrariesPattern = destination + '/*.jar';
+    let documentEdited = editor?.document;
+    if (documentEdited?.fileName.endsWith(".java")) {
+        let text = documentEdited.getText();
+        const configuration = vscode.workspace.getConfiguration();
+        let refLibrariesTopLevelConfig = configuration.get(PREFERENCE_KEY_JAVA_REFERENCED_LIBRARIES);
+        if(refLibrariesTopLevelConfig instanceof Array) {
+            updateReferenceLibrariesForConfigKey(text, refLibrariesTopLevelConfig, camelKReferencedLibrariesPattern, configuration, PREFERENCE_KEY_JAVA_REFERENCED_LIBRARIES);
+        } else {
+            let includepropertyKeyConfig = PREFERENCE_KEY_JAVA_REFERENCED_LIBRARIES + '.include';
+            let refLibrariesIncludeConfig = configuration.get(includepropertyKeyConfig) as Array<string>;
+            updateReferenceLibrariesForConfigKey(text, refLibrariesIncludeConfig, camelKReferencedLibrariesPattern, configuration, includepropertyKeyConfig);
+        }
+    }
 }
 
-export function updateReferenceLibrariesForConfigKey(text: string, refLibrariesConfig: string[], camelKReferencedLibrariesPattern: string, configuration: vscode.WorkspaceConfiguration, configurationKey: string) {
-	if (text.includes("camel")) {
-		ensureReferencedLibrariesContainsCamelK(refLibrariesConfig, camelKReferencedLibrariesPattern, configuration, configurationKey);
-	} else if (refLibrariesConfig.includes(camelKReferencedLibrariesPattern)) {
-		removeCamelKFromReferencedlibraries(refLibrariesConfig, camelKReferencedLibrariesPattern, configuration, configurationKey);
-	}
+function updateReferenceLibrariesForConfigKey(text: string, refLibrariesConfig: string[], camelKReferencedLibrariesPattern: string, configuration: vscode.WorkspaceConfiguration, configurationKey: string) {
+    if (text.includes("camel")) {
+        ensureReferencedLibrariesContainsCamelK(refLibrariesConfig, camelKReferencedLibrariesPattern, configuration, configurationKey);
+    } else if (refLibrariesConfig.includes(camelKReferencedLibrariesPattern)) {
+        removeCamelKFromReferencedlibraries(refLibrariesConfig, camelKReferencedLibrariesPattern, configuration, configurationKey);
+    }
 }
 
 function removeCamelKFromReferencedlibraries(refLibrariesConfig: string[], camelKReferencedLibrariesPattern: string, configuration: vscode.WorkspaceConfiguration, configurationKey: string) {
-	for (var i = 0; i < refLibrariesConfig.length; i++) {
-		if (refLibrariesConfig[i] === camelKReferencedLibrariesPattern) {
-			refLibrariesConfig.splice(i, 1);
-		}
-	}
-	configuration.update(configurationKey, refLibrariesConfig);
+    for (var i = 0; i < refLibrariesConfig.length; i++) {
+        if (refLibrariesConfig[i] === camelKReferencedLibrariesPattern) {
+            refLibrariesConfig.splice(i, 1);
+        }
+    }
+    configuration.update(configurationKey, refLibrariesConfig);
 }
 
 function ensureReferencedLibrariesContainsCamelK(refLibrariesConfig: string[], camelKReferencedLibrariesPattern: string, configuration: vscode.WorkspaceConfiguration, configurationKey: string) {
-	if (!refLibrariesConfig.includes(camelKReferencedLibrariesPattern)) {
-		refLibrariesConfig.push(camelKReferencedLibrariesPattern);
-		configuration.update(configurationKey, refLibrariesConfig);
-	}
+    if (!refLibrariesConfig.includes(camelKReferencedLibrariesPattern)) {
+        refLibrariesConfig.push(camelKReferencedLibrariesPattern);
+        configuration.update(configurationKey, refLibrariesConfig);
+    }
 }
