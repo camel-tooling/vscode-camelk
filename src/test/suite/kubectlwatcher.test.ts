@@ -59,6 +59,7 @@ suite("Kubectl integration watcher", function() {
 	});
 	
 	test('Check there is one set of message logged in case of connection error', async function() {
+		this.skip();
 		invalidateKubeConfigFileByRenamingIt(kubeconfigFilePath);
 		await Utils.getIntegrationsFromKubectlCliWithWatchTestApi();
 		checkErrorMessageLogged(messageSpy);
@@ -73,6 +74,7 @@ suite("Kubectl integration watcher", function() {
 	});
 	
 	test('Check there is only one set of message logged in case of connection error with View visible', async function() {
+		this.skip();
 		invalidateKubeConfigFileByRenamingIt(kubeconfigFilePath);
 		await openCamelKTreeView();
 		messageSpy.resetHistory();
