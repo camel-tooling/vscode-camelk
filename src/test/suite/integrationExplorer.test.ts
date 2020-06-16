@@ -36,7 +36,7 @@ suite('Camel-k Integrations View', () => {
 	setup(() => {
 		Utils.ensureExtensionActivated();
 		sandbox = sinon.createSandbox();
-		integrationExplorer = new CamelKNodeProvider.CamelKNodeProvider();
+		integrationExplorer = Utils.getCamelKIntegrationsProvider();
 		integrationExplorer.setRetrieveIntegrations(false);
 	});
 
@@ -69,21 +69,19 @@ suite('Camel-k Integrations View', () => {
 		});
 	});
 
-	test('verify that we are successfully retrieving tree image for running status - Skipped since VS Code 1.46.0 for cwhich the extension attributes are no more reachable', function(done) {
-		this.skip();
+	test('verify that we are successfully retrieving tree image for running status', function(done) {
 		checkIConForPodStatus("running");
 		done();
 	});
 
-	test('verify that we are successfully retrieving tree images for not running status - Skipped since VS Code 1.46.0 for cwhich the extension attributes are no more reachable', function(done) {
-		this.skip();
+	test('verify that we are successfully retrieving tree images for not running status', function(done) {
 		checkIConForPodStatus("not running");
 		done();
 	});
 });
 
 function checkIConForPodStatus(status: string) {
-	const context = extension.getStashedContext();
+	const context = Utils.retrieveExtensionContext();
 	let iconPath = CamelKNodeProvider.TreeNode.getIconForPodStatus(status, context);
 	assert.notEqual(iconPath, undefined);
 	if (iconPath) {
