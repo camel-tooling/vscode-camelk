@@ -21,13 +21,6 @@ import * as vscode from 'vscode';
 const PREFERENCE_KEY_JAVA_REFERENCED_LIBRARIES = "java.project.referencedLibraries";
 export const CAMEL_VERSION = "3.3.0";
 
-export class JavaDependenciesManager {
-	static javaDependenciesDownloaded: boolean = false;
-}
-export function areJavaDependenciesDownloaded() {
-	return JavaDependenciesManager.javaDependenciesDownloaded;
-}
-
 export function downloadJavaDependencies(context: vscode.ExtensionContext): string {
 	const pomTemplate = context.asAbsolutePath(path.join('resources', 'maven-project', 'pom-to-copy-java-dependencies.xml'));
 	const destination = destinationFolderForDependencies(context);
@@ -38,24 +31,9 @@ export function downloadJavaDependencies(context: vscode.ExtensionContext): stri
 	*/
 	const mvn = require('maven').create({
 		cwd: destination,
-		file: pomTemplate,
-		logFile: destination + '/log.txt'
-
+		file: pomTemplate
 	});
-	mvn.execute(['dependency:copy-dependencies'], { 'camelVersion': CAMEL_VERSION, 'outputDirectory': destination }).then(() => {
-		console.log('downloaded java dependencies');
-		JavaDependenciesManager.javaDependenciesDownloaded = true;
-		const log: string = fs.readFileSync(destination + '/log.txt', 'utf8');
-		log.split(/[\r\n]+/).forEach(line => {
-			console.log(line);
-		});
-	}).catch((error: any) => {
-		console.log('error:' + error);
-		const log: string = fs.readFileSync(destination + '/log.txt', 'utf8');
-		log.split(/[\r\n]+/).forEach(line => {
-			console.log(line);
-		});
-	});
+	mvn.execute(['dependency:copy-dependencies'], { 'camelVersion': CAMEL_VERSION, 'outputDirectory': destination });
 	return destination;
 }
 
