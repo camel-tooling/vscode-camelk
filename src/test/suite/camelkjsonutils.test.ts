@@ -16,42 +16,10 @@
  */
 'use strict';
 
-import * as path from 'path';
 import * as utils from '../../CamelKJSONUtils';
 import * as assert from 'assert';
 
 suite('ensure camelk utilities work as expected', function() {
-
-	test('should be able to stringify existing file', function(done) {
-		let testFilePath = path.join(__dirname, '../../../../src/test/suite/helloworld.groovy');
-		utils.stringifyFileContents(testFilePath)
-			.then((text) => {
-				console.log('file results = ' + text);
-				assert.ok(text.length > 0);
-				done();
-			}).catch((err) => {
-				assert.fail();
-				done(err);
-			});
-	});
-
-	test('should be able to create deploy descriptor for incoming camel file', function(done) {
-		let testFilePath = path.join(__dirname, '../../../../src/test/suite/helloworld.groovy');
-		let fileContents:string;
-		utils.stringifyFileContents(testFilePath).then((text) => {
-			fileContents = text;
-			utils.createCamelKDeployJSON('helloworld', fileContents, 'helloworld.groovy')
-				.then((output) => {
-					console.log('deployment output = ' + output);
-					assert.ok(output.length > 0);
-					done();
-				});
-		})
-		.catch((err) => {
-			assert.fail();
-			done(err);
-		});
-	});
 
 	test('test kebab case utility', function(done) {
 

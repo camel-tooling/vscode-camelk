@@ -14,53 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import * as fs from 'fs';
 import * as vscode from 'vscode';
-
-const camelAPIVersion = "v1alpha1";
-
-export function stringifyFileContents(absoluteFilePath:string) : Promise<string> {
-	return new Promise( (resolve, reject) => {
-		var text = fs.readFileSync(absoluteFilePath);
-		if (text) {
-			resolve(text.toString());
-		} else {
-			reject(new Error(`Unable to read content of ${absoluteFilePath}.`));
-		}
-	});
-}
-
-export function createCamelKDeployJSON( name:string, fileContent:string, fileName:string) : Promise<string> {
-	return new Promise( (resolve, reject) => {
-		let content = {
-			"kind":"Integration",
-			"apiVersion":"camel.apache.org/" + camelAPIVersion,
-			"metadata": {
-				"name" : name.toLowerCase()
-			},
-			"spec" : {
-				"sources" : [
-					{
-						"content" : fileContent,
-						"name" : fileName
-					}
-				]
-			}
-		};
-		try {
-			let jsonText: string = JSON.stringify(content);
-			resolve(jsonText);
-		} catch ( error ) {
-			reject(error);
-		}
-	});
-}
-
-export function delay (amount : number) {
-	return new Promise((resolve, reject) => {
-		setTimeout(resolve, amount);
-	});
-}
 
 export function shareMessage(outputChannel: vscode.OutputChannel, msg:string): void {
 	if (outputChannel) {
