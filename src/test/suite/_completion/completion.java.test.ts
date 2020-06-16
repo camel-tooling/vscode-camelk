@@ -55,6 +55,12 @@ async function testCompletion(
 		const destination = JavaDependenciesManager.destinationFolderForDependencies(context);
 		return fs.existsSync(destination) && fs.readdirSync(destination).length >=8;
 	}, DOWNLOAD_JAVA_DEPENDENCIES_TIMEOUT, 5000).catch(() => {
+		const context = Utils.retrieveExtensionContext();
+		const destination = JavaDependenciesManager.destinationFolderForDependencies(context);
+		console.log(destination);
+		if(fs.existsSync(destination)) {
+			console.log(fs.readdirSync(destination).join(';'));
+		}
 		fail(`Camel Java dependencies not downloaded in reasonable time (${DOWNLOAD_JAVA_DEPENDENCIES_TIMEOUT}).`);
 	});
 
