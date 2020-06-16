@@ -41,7 +41,7 @@ suite("Kubectl integration watcher", function() {
 
 	this.beforeEach(() => {
 		sandbox = sinon.createSandbox();
-		refreshStub = sandbox.stub(extension.camelKIntegrationsProvider, 'refresh');
+		refreshStub = sandbox.stub(Utils.getCamelKIntegrationsProvider(), 'refresh');
 		messageSpy.resetHistory();
 	});
 	
@@ -60,12 +60,12 @@ suite("Kubectl integration watcher", function() {
 	
 	test('Check there is one set of message logged in case of connection error', async function() {
 		invalidateKubeConfigFileByRenamingIt(kubeconfigFilePath);
-		await extension.getIntegrationsFromKubectlCliWithWatch();
+		await Utils.getIntegrationsFromKubectlCliWithWatchTestApi();
 		checkErrorMessageLogged(messageSpy);
 	});
 	
 	test('Check there is no loop for closing kubectl process with View visible', async function() {
-		await openCamelKTreeView(sandbox);
+		await openCamelKTreeView();
 		await sleep(extension.DELAY_RETRY_KUBECTL_CONNECTION);
 		messageSpy.resetHistory();
 		await sleep(extension.DELAY_RETRY_KUBECTL_CONNECTION);
@@ -74,9 +74,9 @@ suite("Kubectl integration watcher", function() {
 	
 	test('Check there is only one set of message logged in case of connection error with View visible', async function() {
 		invalidateKubeConfigFileByRenamingIt(kubeconfigFilePath);
-		await openCamelKTreeView(sandbox);
+		await openCamelKTreeView();
 		messageSpy.resetHistory();
-		await extension.getIntegrationsFromKubectlCliWithWatch();
+		await Utils.getIntegrationsFromKubectlCliWithWatchTestApi();
 		checkErrorMessageLogged(messageSpy);
 	});
 	
@@ -89,18 +89,20 @@ function invalidateKubeConfigFileByRenamingIt(kubeconfigFilePath: string) {
 }
 
 function checkErrorMessageLogged(messageSpy: sinon.SinonSpy<[vscode.OutputChannel, string], void>) {
-	expect(messageSpy.callCount, 'Depending on latency, versions used and environment configuration, one or two messages can be logged').above(0).below(3);
+	expect(messageSpy.callCount,
+		`Depending on latency, versions used and environment configuration, one or two messages can be logged. Number of messages logged ${messageSpy.callCount}`)
+		.above(0).below(3);
 }
 
-async function openCamelKTreeView(sandbox: sinon.SinonSandbox) {
+async function openCamelKTreeView() {
 	/* To open Tree View, reveal must be used.
 	Consequently, it requires to have at least an element in the tree and that getParent of the TreeNodeProvider is implemented.
 	Given that, we are testing in case there is no connection and so there is no TreeNodes, we are forced to create a fake one.*/
 	const fakeNode = new CamelKNodeProvider.TreeNode("string", "mockIntegration", "running", vscode.TreeItemCollapsibleState.None);
-	let children = await extension.camelKIntegrationsProvider.getChildren();
-	await extension.camelKIntegrationsProvider.addChild(children, fakeNode, true);
-	await extension.camelKIntegrationsTreeView.reveal(fakeNode);
-	expect(extension.camelKIntegrationsTreeView.visible, 'The Tree View of Camel K integration is not visible').to.be.true;
+	let children = await Utils.getCamelKIntegrationsProvider().getChildren();
+	await Utils.getCamelKIntegrationsProvider().addChild(children, fakeNode, true);
+	await Utils.getCamelKIntegrationsTreeView().reveal(fakeNode);
+	expect(Utils.getCamelKIntegrationsTreeView().visible, 'The Tree View of Camel K integration is not visible').to.be.true;
 }
 
 function sleep(ms = 0) {

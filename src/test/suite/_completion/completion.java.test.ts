@@ -16,10 +16,12 @@
  */
 'use strict';
 
+import * as fs from 'fs';
 import * as vscode from 'vscode';
 import * as JavaDependenciesManager from '../../../JavaDependenciesManager';
 import { getDocUri, checkExpectedCompletion } from '../completion.util';
 import { fail } from 'assert';
+import * as Utils from '../Utils';
 
 const os = require('os');
 const waitUntil = require('async-wait-until');
@@ -49,9 +51,12 @@ async function testCompletion(
 	expectedCompletion: vscode.CompletionItem
 ) {
 	await waitUntil(()=> {
-		return JavaDependenciesManager.areJavaDependenciesDownloaded();
+		const context = Utils.retrieveExtensionContext();
+		const destination = JavaDependenciesManager.destinationFolderForDependencies(context);
+		console.log(fs.readdirSync(destination));
+		return fs.existsSync(destination) && fs.readdirSync(destination).length >=8;
 	}, DOWNLOAD_JAVA_DEPENDENCIES_TIMEOUT, 5000).catch(() => {
-		console.log(`Suspicious: either Camel Java dependencies not downloaded in reasonable time (${DOWNLOAD_JAVA_DEPENDENCIES_TIMEOUT}) or the detection failed.`);
+		fail(`Camel Java dependencies not downloaded in reasonable time (${DOWNLOAD_JAVA_DEPENDENCIES_TIMEOUT}).`);
 	});
 
 	let doc = await vscode.workspace.openTextDocument(docUri);

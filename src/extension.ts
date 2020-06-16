@@ -55,7 +55,7 @@ export var runtimeVersionSetting : string | undefined;
 
 let stashedContext : vscode.ExtensionContext;
 
-export async function activate(context: vscode.ExtensionContext): Promise<void> {
+export async function activate(context: vscode.ExtensionContext) {
 
 	stashedContext = context;
 
@@ -193,6 +193,21 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 	}
 	
 	await installAllTutorials(context);
+	
+	return {
+		getStashedContext() : vscode.ExtensionContext {
+			return stashedContext;
+		},
+		getCamelKIntegrationsProvider(): CamelKNodeProvider {
+			return camelKIntegrationsProvider;
+		},
+		getCamelKIntegrationsTreeView(): vscode.TreeView<TreeNode | undefined>{
+			return camelKIntegrationsTreeView;
+		},
+		getIntegrationsFromKubectlCliWithWatchTestApi(): Promise<void> {
+			return getIntegrationsFromKubectlCliWithWatch();
+		}
+	};
 }
 
 function selectFirstItemInTree() {

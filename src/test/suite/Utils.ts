@@ -18,6 +18,7 @@
 
 import * as assert from 'assert';
 import * as vscode from 'vscode';
+import { CamelKNodeProvider, TreeNode } from '../../CamelKNodeProvider';
 
 const waitUntil = require('async-wait-until');
 
@@ -50,4 +51,27 @@ async function waitInCaseExtensionIsActivating(extension: vscode.Extension<any>)
 	}, ACTIVATION_TIMEOUT).catch(() => {
 		console.log('Extension has not started automatically, we will force call to activate it.');
 	});
+}
+export function retrieveExtensionContext(): vscode.ExtensionContext {
+	const extension = retrieveCamelKExtension();
+	return extension?.exports.getStashedContext();
+}
+
+export function getCamelKIntegrationsProvider(): CamelKNodeProvider {
+	const extension = retrieveCamelKExtension();
+	return extension?.exports.getCamelKIntegrationsProvider();
+}
+
+export function getCamelKIntegrationsTreeView(): vscode.TreeView<TreeNode | undefined> {
+	const extension = retrieveCamelKExtension();
+	return extension?.exports.getCamelKIntegrationsTreeView();
+}
+
+export async function getIntegrationsFromKubectlCliWithWatchTestApi(): Promise<void> {
+	const extension = retrieveCamelKExtension();
+	return extension?.exports.getIntegrationsFromKubectlCliWithWatchTestApi();
+}
+
+function retrieveCamelKExtension(): vscode.Extension<any> | undefined {
+	return vscode.extensions.getExtension('redhat.vscode-camelk');
 }
