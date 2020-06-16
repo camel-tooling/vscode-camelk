@@ -51,17 +51,17 @@ async function testCompletion(
 	expectedCompletion: vscode.CompletionItem
 ) {
 	await waitUntil(()=> {
-		const context = Utils.retrieveExtensionContext();
-		const destination = JavaDependenciesManager.destinationFolderForDependencies(context);
-		return fs.existsSync(destination) && fs.readdirSync(destination).length >=8;
+		const destination = retrieveDestination();
+		return fs.existsSync(destination) && fs.readdirSync(destination).length >=7;
 	}, DOWNLOAD_JAVA_DEPENDENCIES_TIMEOUT, 5000).catch(() => {
-		const context = Utils.retrieveExtensionContext();
-		const destination = JavaDependenciesManager.destinationFolderForDependencies(context);
-		console.log(destination);
+		const destination = retrieveDestination();
+		let messageForDownloaded: string;
 		if(fs.existsSync(destination)) {
-			console.log(fs.readdirSync(destination).join(';'));
+			messageForDownloaded = `The one that were downloaded are: ${fs.readdirSync(destination).join(';')}`;
+		} else {
+			messageForDownloaded = `The destination folder has not been created ${destination}`;
 		}
-		fail(`Camel Java dependencies not downloaded in reasonable time (${DOWNLOAD_JAVA_DEPENDENCIES_TIMEOUT}).`);
+		fail(`Camel Java dependencies not downloaded in reasonable time (${DOWNLOAD_JAVA_DEPENDENCIES_TIMEOUT}). ${messageForDownloaded}`);
 	});
 
 	let doc = await vscode.workspace.openTextDocument(docUri);
@@ -77,4 +77,10 @@ async function testCompletion(
 	});
 
 	await checkExpectedCompletion(docUri, position, expectedCompletion);
+
+	function retrieveDestination() {
+		const context = Utils.retrieveExtensionContext();
+		const destination = JavaDependenciesManager.destinationFolderForDependencies(context);
+		return destination;
+	}
 }
