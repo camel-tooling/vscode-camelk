@@ -327,7 +327,7 @@
 		"@types/shelljs": "^0.8.8",
 		"@types/tmp": "^0.2.0",
 		"child_process": "^1.0.2",
-		"cross-fetch": "^3.0.4",
+		"cross-fetch": "^3.0.5",
 		"download": "^8.0.0",
 		"jsonc-parser": "^2.2.1",
 		"maven": "^5.0.0",
