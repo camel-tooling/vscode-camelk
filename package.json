@@ -143,10 +143,6 @@
 				}
 			},
 			{
-				"command": "camelk.integrations.kitlog",
-				"title": "Follow kit builder log for running Apache Camel K Integration"
-			},
-			{
 				"command": "camelk.integrations.createNewIntegrationFile",
 				"title": "Create a new Apache Camel K Integration file",
 				"enablement": "workspaceFolderCount != 0"
@@ -201,11 +197,6 @@
 				{
 					"command": "camelk.integrations.log",
 					"group": "2_loggroup@1",
-					"when": "view == camelk.integrations"
-				},
-				{
-					"command": "camelk.integrations.kitlog",
-					"group": "2_loggroup@2",
 					"when": "view == camelk.integrations"
 				}
 			]

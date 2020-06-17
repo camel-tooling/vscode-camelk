@@ -85,7 +85,6 @@ From here, we can:
 - Hover over the `Apache Camel K Integrations` view and click the `Open Apache Camel K Operator Log` button to view it. [(Execute^)](didact://?commandId=camelk.integrations.openOperatorLog)
 - Hover over the integration name to see its current state in the tooltip. [(Execute to select first integration in tree^)](didact://?commandId=camelk.integrations.selectFirstNode)
 - Right-click on the running integration to `Follow log for running Apache Camel K Integration` [(Execute for selected integration^)](didact://?commandId=camelk.integrations.log)
-- Right-click on the running integration to `Follow kit builder log for running Apache Camel K Integration` [(Execute for selected integration^)](didact://?commandId=camelk.integrations.kitlog)
 - Right-click on the running integration to `Remove Apache Camel K Integration` and undeploy it.
 
 
