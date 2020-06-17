@@ -125,29 +125,6 @@ export function parseKamelGetResponseForKitName(incoming : string) : string | un
 	return undefined;
 }
 
-export function handleKitLog(integrationName: string) : Promise<string> {
-	return new Promise<string>( async () => {
-		await getIntegrationsListFromKamel(integrationName).then( async (result : string ) => {
-			if (result && result.length > 0) {
-				let kitname = parseKamelGetResponseForKitName(result);
-				if (kitname) {
-					let fullkitname = `camel-k-${kitname}-builder`;
-					await handleLogViaKubectlCli(fullkitname)
-					.then( () => {
-						Promise.resolve();
-					}).catch((error) => {
-						throw new Error(error);
-					});
-				} else {
-					throw new Error(`Kit name for integration ${integrationName} not found`);
-				}
-			}
-		}).catch( (err) => {
-			throw new Error(err);
-		});
-	});
-}
-
 export function handleOperatorLog() : Promise<string> {
 	return new Promise<string>( async () => {
 		const operatorName = `camel-k-operator`;
