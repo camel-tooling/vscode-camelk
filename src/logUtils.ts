@@ -110,21 +110,6 @@ export function handleLogViaKubectlCli(podName: string) : Promise<string> {
 	});
 }
 
-export function parseKamelGetResponseForKitName(incoming : string) : string | undefined {
-	if (incoming) {
-		let lines : string[] = incoming.split("\n");
-		if (lines.length > 1) {
-			let secondLine = lines[1];
-			let columns : string[] = secondLine.split("\t");
-			if (columns.length > 2) {
-				let kitname = columns[2];
-				return kitname;
-			}
-		}
-	}
-	return undefined;
-}
-
 export function handleOperatorLog() : Promise<string> {
 	return new Promise<string>( async () => {
 		const operatorName = `camel-k-operator`;
