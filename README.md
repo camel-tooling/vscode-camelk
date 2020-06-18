@@ -235,7 +235,7 @@ Optionally, to disable status bar messages:
 
 ## Viewing the log for a Apache Camel K Operator
 
-In the background of each Apache Camel K system, there is usually an Operator coordinating the various builders and integrations being spun up. This log will often contain information not found in the other logs (see [Viewing the running log](#viewing-the-running-log-for-a-published-apache-camel-k-integration) and [Viewing the Kit Builder Log](#viewing-the-kit-builder-log-for-an-apache-camel-k-integration) below for details on opening the other available logs).
+In the background of each Apache Camel K system, there is an Operator coordinating the various builders and integrations being spun up. This log will often contain information not found in the integration log, including kit builder details. (See [Viewing the running log](#viewing-the-running-log-for-a-published-apache-camel-k-integration) below for details on opening the integration log.)
 
 ![Apache Camel K Integrations view - Follow log](images/camelk-integrations-view-operator-log-action.jpg)
 
@@ -259,13 +259,6 @@ Note: By default, `Auto-scroll` is checked and new entries in the log will autom
 
 1. From the **Apache Camel K Integrations** view, right-click the integration that you want to stop.
 2. Select **Remove Apache Camel K Integration**.
-
-## Viewing the Kit Builder Log for an Apache Camel K integration
-
-1. From the **Apache Camel K Integrations** view, right-click the integration that you want to stop.
-2. Select **Follow kit builder log for running Apache Camel K integration**.
-
-A new view opens. It is named for the running pod where the Kit Builder is running. This log updates as new data is added. 
 
 ## Apache Camel K Extension Settings
 

@@ -159,24 +159,6 @@ export async function activate(context: vscode.ExtensionContext) {
 			});
 		});
 
-		// create the context menu integration view action -- open kit log
-		vscode.commands.registerCommand('camelk.integrations.kitlog', async (node: TreeNode) => {
-			let selection : TreeNode = node;
-			if (!selection) {
-				if (camelKIntegrationsTreeView.selection) {
-					selection = camelKIntegrationsTreeView.selection[0] as TreeNode;
-				}
-			}
-			if (selection && selection.label) {
-				let integrationName : string = selection.label;
-				utils.shareMessage(mainOutputChannel, `Retrieving log for Apache Camel K Integration kit...`);
-				await logUtils.handleKitLog(integrationName)
-				.catch( (err) => {
-					utils.shareMessage(mainOutputChannel, `No Apache Camel K Integration Kit available: ${err} \n`);
-				});
-			}
-		});
-
 		vscode.commands.registerCommand('camelk.integrations.createNewIntegrationFile', async (...args:any[]) => { await NewIntegrationFileCommand.create(args);});
 
 		vscode.commands.registerCommand('camelk.integrations.selectFirstNode', () => { selectFirstItemInTree();});
