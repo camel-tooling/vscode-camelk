@@ -9,6 +9,7 @@ All notable changes to the "vscode-camelk" extension will be documented in this 
 - Completion for trait names and trait properties in tasks.json
 - Command to create new Apache Camel K Integration files
 - A tutorial to create and deploy your first Camel K Integration is available (requires [VS Code Didact](https://marketplace.visualstudio.com/items?itemName=redhat.vscode-didact) to be installed)
+- Access to Kit builder log has been removed. Since Camel K 1.0.0, the corresponding log is by default in the [Apache Camel K Operator log](./README.md#Viewing-the-log-for-a-apache-camel-k-operator)
 
 ## 0.0.13
 
