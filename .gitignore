@@ -5,4 +5,4 @@ node_modules
 *.sonarlint
 test-resources
 coverage
-testFixture/.vscode/settings.json
+test Fixture with speci@l chars/.vscode/settings.json

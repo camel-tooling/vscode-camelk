@@ -11,7 +11,7 @@ async function main() : Promise<void> {
 		console.log(`extensionTestsPath = ${extensionTestsPath}`);
 		const vscodeExecutablePath : string = await downloadAndUnzipVSCode('stable');
 		console.log(`vscodeExecutablePath = ${vscodeExecutablePath}`);
-		const testWorkspace = path.resolve(__dirname, '../../../testFixture');
+		const testWorkspace = path.resolve(__dirname, '../../../test Fixture with speci@l chars');
 
 		const cliPath: string = resolveCliPathFromVSCodeExecutablePath(vscodeExecutablePath);
 		installExtraExtension(cliPath, 'ms-kubernetes-tools.vscode-kubernetes-tools');
