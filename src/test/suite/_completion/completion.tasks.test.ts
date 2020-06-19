@@ -37,7 +37,7 @@ suite('Should do completion in tasks.json', () => {
 
 	var testTraitProperties = test('Completes for trait properties', async () => {
 		assumeNotOnJenkins(testTraitProperties);
-		const expectedCompletion = { label: 'enabled' };
+		const expectedCompletion = { label: 'enabled', insertText: 'enabled=false' };
 		await testCompletion(docURiTasksJson, new vscode.Position(17, 33), expectedCompletion);
 	});
 

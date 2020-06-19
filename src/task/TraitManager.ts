@@ -45,11 +45,20 @@ export class TraitManager {
 			const propertyCompletion: vscode.CompletionItem = {
 				label: property.name,
 				sortText: SORT_PREFIX_TO_HAVE_COMPLETIONS_BEFORE_VARIABLES + property.name,
-				range: new vscode.Range(position, position)
+				range: new vscode.Range(position, position),
+				insertText: TraitManager.computeTraitPropertyInsertText(property)
 			};
 			completions.push(propertyCompletion);
 		});
 		return completions;
+	}
+
+	private static computeTraitPropertyInsertText(property: TraitProperty): string {
+		if(property.defaultValue !== undefined) {
+			return `${property.name}=${property.defaultValue}`;
+		} else {
+			return property.name;
+		}
 	}
 
 	private static computeSnippetForTrait(trait: TraitDefinition): vscode.SnippetString {

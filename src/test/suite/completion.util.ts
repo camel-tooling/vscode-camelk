@@ -31,9 +31,15 @@ export async function checkExpectedCompletion(docUri: vscode.Uri, position: vsco
     await waitUntil(() => {
         // Executing the command `vscode.executeCompletionItemProvider` to simulate triggering completion
         (vscode.commands.executeCommand('vscode.executeCompletionItemProvider', docUri, position)).then(value => {
-            let actualCompletionList = value as vscode.CompletionList;
-            const actualCompletionLabelList = actualCompletionList.items.map(c => { return c.label; });
-            hasExpectedCompletion = actualCompletionLabelList.includes(expectedCompletion.label);
+            const actualCompletionList = value as vscode.CompletionList;
+			const actualCompletionLabelList = actualCompletionList.items.map(c => { return c.label; });
+			let hasExpectedInsertText = true;
+			const hasExpectedLabel = actualCompletionLabelList.includes(expectedCompletion.label);
+			if(expectedCompletion.insertText){
+				const actualCompletionInsertTextList = actualCompletionList.items.map(c => { return c.insertText; });
+				hasExpectedInsertText = actualCompletionInsertTextList.includes(expectedCompletion.insertText);
+			}
+			hasExpectedCompletion = hasExpectedLabel && hasExpectedInsertText;
         });
         return hasExpectedCompletion;
     }, 10000, 500);
