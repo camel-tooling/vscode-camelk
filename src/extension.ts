@@ -103,10 +103,10 @@ export async function activate(context: vscode.ExtensionContext) {
 			if (selection && selection.label) {
 				setStatusLineMessageAndShow(`Removing Apache Camel K Integration...`);
 				let integrationName : string = selection.label;
-				let kamelExe = kamel.create();
+				let kamelExecutor = kamel.create();
 				utils.shareMessage(mainOutputChannel, 'Removing ' + integrationName + ' via Kamel executable Delete');
 				let args : string[] = ['delete', `${integrationName}`];
-				await kamelExe.invokeArgs(args)
+				await kamelExecutor.invokeArgs(args)
 					.then( /* empty for now but here in case we need it */ )
 					.catch( (error) => {
 						utils.shareMessage(mainOutputChannel, `exec error: ${error}`);

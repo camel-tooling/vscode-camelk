@@ -37,7 +37,7 @@ function getCurrentNamespace() : string {
 
 export function handleLogViaKamelCli(integrationName: string) : Promise<string> {
 	return new Promise<string>( async () => {
-		let kamelExe = kamel.create();
+		let kamelExecutor = kamel.create();
 		let ns = getCurrentNamespace();
 		let resource = {
 			kindName: `custom/${integrationName}`,
@@ -47,7 +47,7 @@ export function handleLogViaKamelCli(integrationName: string) : Promise<string> 
 		};
 		const cresource = `${resource.namespace}/${resource.kindName}`;
 		let args : string[] = ['log', `${integrationName}`];
-		await kamelExe.invokeArgs(args)
+		await kamelExecutor.invokeArgs(args)
 			.then( async (proc : ChildProcess) => {
 				const panel = LogsPanel.createOrShow(`Waiting for integration ${integrationName} to start...\n`, cresource);
 				if (proc && proc.stdout) {
@@ -161,12 +161,12 @@ export function updateLogViewTitleToStopped(panel: LogsPanel, title: string) {
 
 export function getIntegrationsListFromKamel(integrationName? : string) : Promise<string> {
 	return new Promise<string>( async (resolve, reject) => {
-		let kamelExe = kamel.create();
+		let kamelExecutor = kamel.create();
 		let cmdLine = `get`;
 		if (integrationName) {
 			cmdLine = `get ${integrationName}`;
 		}
-		await kamelExe.invoke(cmdLine)
+		await kamelExecutor.invoke(cmdLine)
 			.then( async (result : string) => {
 					resolve(result);
 				}).catch( (error) => {

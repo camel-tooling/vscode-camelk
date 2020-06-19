@@ -386,7 +386,7 @@ export function createNewIntegration(integrationFileUri: vscode.Uri, devMode? : 
 		let rootName = absoluteRoot.split('.', 1)[0];
 		let integrationName = utils.toKebabCase(rootName);
 		utils.shareMessage(extension.mainOutputChannel, `Deploying file ${absoluteRoot} as integration ${integrationName}`);
-				let kamelExe = kamel.create();
+				let kamelExecutor = kamel.create();
 				let kamelArgs: string[] = computeKamelArgs(
 					absoluteRoot,
 					devMode,
@@ -402,9 +402,9 @@ export function createNewIntegration(integrationFileUri: vscode.Uri, devMode? : 
 					}
 				}
 				if (devMode && devMode === true) {
-					kamelExe.setDevMode(devMode);
+					kamelExecutor.setDevMode(devMode);
 				}
-				await kamelExe.invokeArgs(kamelArgs, foldername)
+				await kamelExecutor.invokeArgs(kamelArgs, foldername)
 					.then( (runKubectl) => {
 						if (runKubectl) {
 							if (!childProcessMap) {
