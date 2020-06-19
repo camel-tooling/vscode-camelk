@@ -20,7 +20,7 @@ import * as vscode from 'vscode';
 const waitUntil = require('async-wait-until');
 
 const getDocPath = (p: string) => {
-	return path.resolve(__dirname, '../../../../testFixture', p);
+	return path.resolve(__dirname, '../../../../test Fixture with speci@l chars', p);
 };
 export const getDocUri = (p: string) => {
 	return vscode.Uri.file(getDocPath(p));
