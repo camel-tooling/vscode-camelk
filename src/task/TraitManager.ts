@@ -33,6 +33,7 @@ export class TraitManager {
 				label: trait.name,
 				insertText: TraitManager.computeSnippetForTrait(trait),
 				kind: vscode.CompletionItemKind.Snippet,
+				documentation: trait.description
 			};
 			completions.push(completionBasic);
 		}
@@ -46,7 +47,8 @@ export class TraitManager {
 				label: property.name,
 				sortText: SORT_PREFIX_TO_HAVE_COMPLETIONS_BEFORE_VARIABLES + property.name,
 				range: new vscode.Range(position, position),
-				insertText: TraitManager.computeTraitPropertyInsertText(property)
+				insertText: TraitManager.computeTraitPropertyInsertText(property),
+				documentation: property.description
 			};
 			completions.push(propertyCompletion);
 		});

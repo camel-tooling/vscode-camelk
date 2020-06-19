@@ -20,6 +20,7 @@ import { TraitProperty } from './TraitProperty';
 
 export interface TraitDefinition {
 	name: string;
+	description?: string;
 	platform: boolean;
 	profiles: string[];
 	properties: TraitProperty[];
