@@ -18,6 +18,7 @@
 
 export interface TraitProperty {
 	name: string;
+	description?: string;
 	type: string;
 	defaultValue?: boolean | number | string;
 }

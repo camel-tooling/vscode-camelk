@@ -31,13 +31,13 @@ suite('Should do completion in tasks.json', () => {
 
 	var testTraits = test('Completes for traits', async () => {
 		assumeNotOnJenkins(testTraits);
-		const expectedCompletion = { label: 'platform' };
+		const expectedCompletion = { label: 'platform', documentation: `The platform trait is a base trait that is used to assign an integration platform to an integration.In case the platform is missing, the trait is allowed to create a default platform.This feature is especially useful in contexts where there's no need to provide a custom configuration for the platform(e.g. on OpenShift the default settings work, since there's an embedded container image registry).` };
 		await testCompletion(docURiTasksJson, new vscode.Position(9, 23), expectedCompletion);
 	});
 
 	var testTraitProperties = test('Completes for trait properties', async () => {
 		assumeNotOnJenkins(testTraitProperties);
-		const expectedCompletion = { label: 'enabled', insertText: 'enabled=false' };
+		const expectedCompletion = { label: 'enabled', insertText: 'enabled=false', documentation: 'Can be used to enable or disable a trait. All traits share this common property.' };
 		await testCompletion(docURiTasksJson, new vscode.Position(17, 33), expectedCompletion);
 	});
 
