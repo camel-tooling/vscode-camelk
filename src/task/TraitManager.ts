@@ -68,8 +68,8 @@ export class TraitManager {
 	}
 
 	private static async retrieveTraitsDefinitions(traitName?: string): Promise<TraitDefinition[]> {
-		const kamelExe = kamel.create();
-		const trait = await kamelExe.invoke(`help trait ${traitName ? traitName : '--all'} -o json`);
+		const kamelExecutor = kamel.create();
+		const trait = await kamelExecutor.invoke(`help trait ${traitName ? traitName : '--all'} -o json`);
 		const sanitizedTrait = sanitizeToWorkaroundBugInKamel1_0_0(trait);
 		return JSON.parse(sanitizedTrait) as TraitDefinition[];
 	}
