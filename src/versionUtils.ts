@@ -23,7 +23,7 @@ import * as kamelCli from './kamel';
 import { platformString, kamelUnavailableRejection } from './installer';
 import fetch from 'cross-fetch';
 
-export const version: string = '1.0.0'; //need to retrieve this if possible, but have a default
+export const version: string = '1.0.1'; //need to retrieve this if possible, but have a default
 /*
 * Can be retrieved using `curl -i https://api.github.com/repos/apache/camel-k/releases/latest` and searching for "last-modified" attribute
 * To be updated when updating the default "version" attribute

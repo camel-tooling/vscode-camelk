@@ -6,6 +6,7 @@ All notable changes to the "vscode-camelk" extension will be documented in this 
 
 - Add default value for trait property when auto-completing from trait name
 - Provide description for trait completion in tasks.json
+- Update default runtime version to 1.0.1
 
 ## 0.0.14
 
