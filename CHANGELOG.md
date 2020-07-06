@@ -2,6 +2,8 @@
 
 All notable changes to the "vscode-camelk" extension will be documented in this file.
 
+## 0.0.16
+
 ## 0.0.15
 
 - Add default value for trait property when auto-completing from trait name
