@@ -287,7 +287,7 @@
 		"@types/mkdirp": "^1.0.1",
 		"@types/mocha": "^7.0.2",
 		"@types/nock": "^11.1.0",
-		"@types/node": "^14.0.14",
+		"@types/node": "^14.0.18",
 		"@types/sinon": "^9.0.4",
 		"@types/sinon-chai": "^3.2.4",
 		"@types/vscode": "^1.46.0",
