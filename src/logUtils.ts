@@ -27,130 +27,114 @@ import * as kubectlutils from './kubectlutils';
 import { window } from 'vscode';
 
 function getCurrentNamespace() : string {
-	let ns = `default`;
-	const currentNs = config.getNamespaceconfig();
+	let ns: string = `default`;
+	const currentNs: string | undefined = config.getNamespaceconfig();
 	if (currentNs) {
 		ns = currentNs;
 	}
 	return ns;
 }
 
-export function handleLogViaKamelCli(integrationName: string) : Promise<string> {
-	return new Promise<string>( async () => {
-		let kamelExecutor = kamel.create();
-		let ns = getCurrentNamespace();
-		let resource = {
-			kindName: `custom/${integrationName}`,
-			namespace: ns,
-			containers: undefined,
-			containersQueryPath: `.spec`
-		};
-		const cresource = `${resource.namespace}/${resource.kindName}`;
-		let args : string[] = ['log', `${integrationName}`];
-		await kamelExecutor.invokeArgs(args)
-			.then( async (proc : ChildProcess) => {
-				const panel = LogsPanel.createOrShow(`Waiting for integration ${integrationName} to start...\n`, cresource);
-				if (proc && proc.stdout) {
-					proc.stdout.on('data', async (data: string) => {
-						if (data.length > 0) {
-							var buf = Buffer.from(data);
-							var text = buf.toString();
-							if (text.indexOf(`Received hang up - stopping the main instance`) > 0 && !closeLogViewWhenIntegrationRemoved) {
-								var title = panel.getTitle();
-								updateLogViewTitleToStopped(panel, title);
-							}
-							panel.addContent(buf.toString());
-						}
-					});
-				}
-				}).catch( (error) => {
-					utils.shareMessage(mainOutputChannel, `exec error: ${error}`);
-				});
-	});
-}
-
-export function handleLogViaKubectlCli(podName: string) : Promise<string> {
-	return new Promise<string>( async (reject) => {
-		let kubectlExe = kubectl.create();
-		let ns = getCurrentNamespace();
-		let resource = {
-			kindName: `custom/${podName}`,
-			namespace: ns,
-			containers: undefined,
-			containersQueryPath: `.spec`
-		};
-		const cresource = `${resource.namespace}/${resource.kindName}`;
-		let args : string[] = ['logs', `-f`, `${podName}`];
-		await kubectlExe.invokeArgs(args)
-			.then( async (proc : ChildProcess) => {
-				var panel : LogsPanel | undefined = undefined;
-				if (proc && proc.stderr) {
-					proc.stderr.on('data', async (data: string) => {
-						if (data.length > 0) {
-							var text = data.toString();
-							window.showErrorMessage(`Error encountered while opening log for ${podName}. See Apache Camel K output channel for details and wait a moment before trying again. It's likely the pod simply hasn't started yet.`);
-							reject(text);
-							return;
-						}
-					});
-				}
-				if (proc && proc.stdout) {
-					proc.stdout.on('data', async (data: string) => {
-						if (data.length > 0) {
-							if (!panel) {
-								panel = LogsPanel.createOrShow(`Waiting for ${podName} to start...\n`, cresource);
-							}
-							var text = data.toString();
-							panel.addContent(text);
-						}
-					});
-				}}).catch( (error) => {
-					utils.shareMessage(mainOutputChannel, `exec error: ${error}`);
-				});
-	});
-}
-
-export function handleOperatorLog() : Promise<string> {
-	return new Promise<string>( async () => {
-		const operatorName = `camel-k-operator`;
-		await kubectlutils.getNamedPodsFromKubectl(operatorName).then( async (podNames) => {
-			await handleLogViaKubectlCli(podNames[0])
-			.then( () => {
-				Promise.resolve();
-			}).catch((error) => {
-				throw new Error(error);
-			});
-		}).catch( (err) => {
-			throw new Error(err);
-		});
-	});
-}
-
-export function removeIntegrationLogView(integrationName: string) : Promise<string> {
-	return new Promise<string>( async () => {
-		if (closeLogViewWhenIntegrationRemoved) {
-			LogsPanel.currentPanels.forEach((value : LogsPanel) => {
-				var title = value.getTitle();
-				if (title.indexOf(integrationName) >= 0) {
-					value.disposeView();
-				}
-			});
-		} else {
-			LogsPanel.currentPanels.forEach((value : LogsPanel) => {
-				var title = value.getTitle();
-				if (title.indexOf(integrationName) >= 0) {
-					updateLogViewTitleToStopped(value, title);
+export async function handleLogViaKamelCli(integrationName: string) : Promise<void> {
+	const kamelExecutor: kamel.Kamel = kamel.create();
+	const ns: string = getCurrentNamespace();
+	const resource = {
+		kindName: `custom/${integrationName}`,
+		namespace: ns,
+		containers: undefined,
+		containersQueryPath: `.spec`
+	};
+	const cresource: string = `${resource.namespace}/${resource.kindName}`;
+	const args : string[] = ['log', `${integrationName}`];
+	try { 
+		const proc: ChildProcess = await kamelExecutor.invokeArgs(args);
+		const panel = LogsPanel.createOrShow(`Waiting for integration ${integrationName} to start...\n`, cresource);
+		if (proc && proc.stdout) {
+			proc.stdout.on('data', async (data: string) => {
+				if (data.length > 0) {
+					var buf = Buffer.from(data);
+					var text = buf.toString();
+					if (text.indexOf(`Received hang up - stopping the main instance`) !== -1 && !closeLogViewWhenIntegrationRemoved) {
+						const title: string = panel.getTitle();
+						updateLogViewTitleToStopped(panel, title);
+					}
+					panel.addContent(buf.toString());
 				}
 			});
 		}
-	});
+	} catch(error) {
+		utils.shareMessage(mainOutputChannel, `exec error: ${error}`);
+	}
+}
+
+export async function handleLogViaKubectlCli(podName: string) : Promise<string | void> {
+	const kubectlExe: kubectl.Kubectl = kubectl.create();
+	const ns: string = getCurrentNamespace();
+	const resource = {
+		kindName: `custom/${podName}`,
+		namespace: ns,
+		containers: undefined,
+		containersQueryPath: `.spec`
+	};
+	const cresource: string = `${resource.namespace}/${resource.kindName}`;
+	const args : string[] = ['logs', `-f`, `${podName}`];
+	try {
+		const proc: ChildProcess = await kubectlExe.invokeArgs(args);
+		let panel : LogsPanel | undefined = undefined;
+		if (proc && proc.stderr) {
+			proc.stderr.on('data', async (data: string) => {
+				if (data.length > 0) {
+					const text: string = data.toString();
+					window.showErrorMessage(`Error encountered while opening log for ${podName}. See Apache Camel K output channel for details and wait a moment before trying again. It's likely the pod simply hasn't started yet.`);
+					return text;
+				}
+			});
+		}
+		if (proc && proc.stdout) {
+			proc.stdout.on('data', async (data: string) => {
+				if (data.length > 0) {
+					if (!panel) {
+						panel = LogsPanel.createOrShow(`Waiting for ${podName} to start...\n`, cresource);
+					}
+					const text: string = data.toString();
+					panel.addContent(text);
+				}
+			});
+		}
+	} catch( error ) {
+		utils.shareMessage(mainOutputChannel, `exec error: ${error}`);
+	}
+}
+
+export async function handleOperatorLog() : Promise<void> {
+	const operatorName: string = `camel-k-operator`;
+	const podNames: string[] = await kubectlutils.getNamedPodsFromKubectl(operatorName);
+	await handleLogViaKubectlCli(podNames[0]);
+}
+
+export function removeIntegrationLogView(integrationName: string) : void {
+	if (closeLogViewWhenIntegrationRemoved) {
+		LogsPanel.currentPanels.forEach((value : LogsPanel) => {
+			const title: string = value.getTitle();
+			if (title.indexOf(integrationName) >= 0) {
+				value.disposeView();
+			}
+		});
+	} else {
+		LogsPanel.currentPanels.forEach((value : LogsPanel) => {
+			const title: string = value.getTitle();
+			if (title.indexOf(integrationName) >= 0) {
+				updateLogViewTitleToStopped(value, title);
+			}
+		});
+	}
 }
 
 export function updateLogViewTitleToStopped(panel: LogsPanel, title: string) {
 	if (panel && title) {
 		// make sure we only show the log as stopped once 
-		const stoppedString = `[Integration stopped]`;
-		let boolHasIntegrationStopped = title.indexOf(stoppedString) > 0;
+		const stoppedString: string = `[Integration stopped]`;
+		const boolHasIntegrationStopped = title.indexOf(stoppedString) !== -1;
 		if (!boolHasIntegrationStopped) {
 			panel.updateTitle(title + ` ` + stoppedString);
 		} else {
@@ -159,19 +143,18 @@ export function updateLogViewTitleToStopped(panel: LogsPanel, title: string) {
 	}
 }
 
-export function getIntegrationsListFromKamel(integrationName? : string) : Promise<string> {
-	return new Promise<string>( async (resolve, reject) => {
-		let kamelExecutor = kamel.create();
-		let cmdLine = `get`;
-		if (integrationName) {
-			cmdLine = `get ${integrationName}`;
-		}
-		await kamelExecutor.invoke(cmdLine)
-			.then( async (result : string) => {
-					resolve(result);
-				}).catch( (error) => {
-					reject(`exec error: ${error}`);
-					utils.shareMessage(mainOutputChannel, `exec error: ${error}`);
-				});
-	});
+export async function getIntegrationsListFromKamel(integrationName? : string) : Promise<string> {
+	const kamelExecutor: kamel.Kamel = kamel.create();
+	let cmdLine: string = `get`;
+	if (integrationName) {
+		cmdLine += integrationName;
+	}
+	let result: string;
+	try {
+		result = await kamelExecutor.invoke(cmdLine);
+	} catch (error) {
+		utils.shareMessage(mainOutputChannel, `exec error: ${error}`);
+		result = `exec error: ${error}`;
+	}
+	return result;
 }
