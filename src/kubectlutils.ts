@@ -17,157 +17,123 @@
 import * as k8s from 'vscode-kubernetes-tools-api';
 import * as config from './config';
 
-export function isKubernetesAvailable(): Promise<boolean> {
-	return new Promise<boolean>( (resolve) => {
-		k8s.extension.kubectl.v1
-			.then( (kubectl) => {
-				resolve(kubectl && kubectl.available);
-			})
-			.catch( err => {
-				resolve(false);
-			});
-	});
+export async function isKubernetesAvailable(): Promise<boolean> {
+	const kubectl: k8s.API<k8s.KubectlV1> = await k8s.extension.kubectl.v1;
+	return kubectl && kubectl.available;
 }
 
-export function getNamedListFromKubernetes(itemType : string, extra? : string): Promise<string> {
-	return new Promise<string>( async (resolve, reject) => {
-		await k8s.extension.kubectl.v1
-			.then( async (kubectl) => {
-				let cmd = `get ${itemType}`;
-				if (extra) {
-					cmd += ` ${extra}`;
-				}
-				if (kubectl && kubectl.available) {
-					return await kubectl.api.invokeCommand(cmd);
-				} else {
-					reject(new Error('Kubernetes not available'));
-				}
-			})
-			.then( (result) => {
-				if (!result || result.code !== 0) {
-					let error = `Unable to invoke kubectl to retrieve ${itemType}`;
-					if (result && result.stderr) {
-						error = result.stderr;
-					}  
-					reject(error);
-				} else if (result) {
-					const splitResults = result.stdout;
-					resolve(splitResults);
-				}
-			})
-			.catch( (err) => reject(err) );
-	});
+export async function getNamedListFromKubernetes(itemType : string, extra? : string): Promise<string> {
+	const kubectl: k8s.API<k8s.KubectlV1> = await k8s.extension.kubectl.v1;
+	let cmd = `get ${itemType}`;
+	if (extra) {
+		cmd += ` ${extra}`;
+	}
+	if (kubectl && kubectl.available) {
+		const result: k8s.KubectlV1.ShellResult | undefined = await kubectl.api.invokeCommand(cmd);
+		if (!result || result.code !== 0) {
+			let error = `Unable to invoke kubectl to retrieve ${itemType}`;
+			if (result && result.stderr) {
+				error = result.stderr;
+			}  
+			return error;
+		} else if (result) {
+			return result.stdout;
+		}
+	}
+	return 'kubectl not available';
 }
 
-export function getNamedListFromKubernetesThenParseList(itemType : string, extra? : string): Promise<string[]> {
-	return new Promise<string[]>( (resolve, reject) => {
-		getNamedListFromKubernetes(itemType, extra)
-			.then ((result) => {
-				const itemList : string[] = parseShellResult(result);
-				resolve(itemList);
-				return;
-			}).catch( (error) => {
-				reject(error);
-				return;
-			});
-	});
+export async function getNamedListFromKubernetesThenParseList(itemType : string, extra? : string): Promise<string[]> {
+	try {
+		const result = await getNamedListFromKubernetes(itemType, extra);
+		return parseShellResult(result);
+	} catch (error) {
+		return Promise.reject(error);
+	}
 }
 
 export function parseShellResult(output: string) : string[] {
-	let processedList : string[] = [''];
+	const processedList : string[] = [''];
 	if (output) {
-		let lines = output.split('\n');
-		for (let entry of lines) {
-			let line = entry.split('  ');
-			let cleanLine = [];
+		let lines: string[] = output.split('\n');
+		for (const entry of lines) {
+			const line: string[] = entry.split('  ');
+			const cleanLine = [];
 			for (var i=0; i < line.length; i++) {
 				if (line[i].trim().length === 0) {
 					continue;
 				}
 				cleanLine.push(line[i].trim());
 			}
-			let firstString : string = cleanLine[0];
+			const firstString : string = cleanLine[0];
 			if (firstString === undefined || firstString.toUpperCase().startsWith('NAME') || firstString.trim().length === 0) {
 				continue;
 			}
 
-			let itemName = cleanLine[0];
+			const itemName = cleanLine[0];
 			processedList.push(itemName);
 		}
 	}
 	return processedList;
 }
 
-export function getConfigMaps(): Promise<string[]> {
-	let namespace: string | undefined = config.getNamespaceconfig();
+export async function getConfigMaps(): Promise<string[]> {
+	const namespace: string | undefined = config.getNamespaceconfig();
 	if (namespace) {
-		return getNamedListFromKubernetesThenParseList('configmap', `--namespace=${namespace}`);
+		return await getNamedListFromKubernetesThenParseList('configmap', `--namespace=${namespace}`);
 	} else {
-		return getNamedListFromKubernetesThenParseList('configmap');
+		return await getNamedListFromKubernetesThenParseList('configmap');
 	}
 }
 
-export function getSecrets(): Promise<string[]> {
-	let namespace: string | undefined = config.getNamespaceconfig();
+export async function getSecrets(): Promise<string[]> {
+	const namespace: string | undefined = config.getNamespaceconfig();
 	if (namespace) {
-		return getNamedListFromKubernetesThenParseList('secret', `--namespace=${namespace}`);
+		return await getNamedListFromKubernetesThenParseList('secret', `--namespace=${namespace}`);
 	} else {
-		return getNamedListFromKubernetesThenParseList('secret');
+		return await getNamedListFromKubernetesThenParseList('secret');
 	}
 }
 
-export function getIntegrations(): Promise<string> {
-	let namespace: string | undefined = config.getNamespaceconfig();
+export async function getIntegrations(): Promise<string> {
+	const namespace: string | undefined = config.getNamespaceconfig();
 	if (namespace) {
-		return getNamedListFromKubernetes('integration', `--namespace=${namespace}`);
+		return await getNamedListFromKubernetes('integration', `--namespace=${namespace}`);
 	} else {
-		return getNamedListFromKubernetes('integration');
+		return await getNamedListFromKubernetes('integration');
 	}
 }
 
-export function getPodsFromKubectlCli() : Promise<string> {
-	return new Promise<string>( async (resolve, reject) => {
-		await k8s.extension.kubectl.v1
-			.then( async (kubectl) => {
-				let cmd = `get pods`;
-				if (kubectl && kubectl.available) {
-					return await kubectl.api.invokeCommand(cmd);
-				} else {
-					reject(new Error('Kubernetes not available'));
-				}
-			})
-			.then( (result) => {
-				if (!result || result.code !== 0) {
-					let error = `Unable to invoke kubectl to retrieve pod information`;
-					if (result && result.stderr) {
-						error = result.stderr;
-					}
-					reject(error);
-				} else if (result) {
-					const splitResults = result.stdout;
-					resolve(splitResults);
-				}
-			})
-			.catch( (err) => reject(err) );
-	});
+export async function getPodsFromKubectlCli() : Promise<string> {
+	const kubectl: k8s.API<k8s.KubectlV1> = await k8s.extension.kubectl.v1;
+	const cmd: string = `get pods`;
+	if (kubectl && kubectl.available) {
+		const result: k8s.KubectlV1.ShellResult | undefined = await kubectl.api.invokeCommand(cmd);
+		if (!result || result.code !== 0) {
+			let error: string = `Unable to invoke kubectl to retrieve pod information`;
+			if (result && result.stderr) {
+				error = result.stderr;
+			}
+			return error;
+		} else if (result) {
+			return result.stdout;
+		}
+	}
+	return 'kubectl not available';
 }
 
 export async function getKubernetesVersion(): Promise<string | undefined> {
-	const kubectl = await k8s.extension.kubectl.v1;
-	if (!kubectl.available) {
+	const kubectl: k8s.API<k8s.KubectlV1> = await k8s.extension.kubectl.v1;
+	if (!kubectl || !kubectl.available) {
 		return '';
 	}
 
-	const kubectlPromise = await kubectl.api.invokeCommand(`version --client --output json`);
-	let sr : any= null;
-	if (kubectlPromise) {
-		sr = kubectlPromise as k8s.KubectlV1.ShellResult;
-	}
-	if (!sr || sr.code !== 0) {
+	const result: k8s.KubectlV1.ShellResult | undefined = await kubectl.api.invokeCommand('version --client --output json');
+	if (!result || result.code !== 0) {
 		return undefined;
 	}
 
-	const versionInfo = JSON.parse(sr.stdout);
+	const versionInfo = JSON.parse(result.stdout);
 	if (!versionInfo || !versionInfo.clientVersion) {
 		return '';
 	}
@@ -182,25 +148,18 @@ export async function getKubernetesVersion(): Promise<string | undefined> {
 }
 
 export async function getNamedPodsFromKubectl(podNameRoot : string): Promise<string[]> {
-	return new Promise <string[]> ( async (resolve, reject) => {
-		await getPodsFromKubectlCli()
-		.then( (allPods) => {
-			let podArray = parseShellResult(allPods);
-			let outArray : string[] = [];
-			podArray.forEach(podName => {
-				if (podName.startsWith(podNameRoot)) {
-					outArray.push(podName);
-				}
-			});
-			if (outArray && outArray.length > 0) {
-				resolve(outArray);
-			} else {
-				resolve(undefined);
+	let outArray : string[] = [];
+	try {
+		const allPods: string = await getPodsFromKubectlCli();
+		let podArray = parseShellResult(allPods);
+		for (const podName of podArray) {
+			if (podName.startsWith(podNameRoot)) {
+				outArray.push(podName);
 			}
-			return;
-		}).catch ( (error) => {
-			reject(error);
-			return;
-		});
-	});
+		}
+	} catch (error) {
+		console.error(error);
+		return Promise.reject(error);
+	}
+	return outArray;
 }
