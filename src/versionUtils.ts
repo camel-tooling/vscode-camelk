@@ -65,15 +65,13 @@ export async function checkKamelNeedsUpdate(versionToUse?: string): Promise<bool
 	}
 
 	if (versionToUse) {
-		try { 
-			const currentVersion: string = await checkKamelCLIVersion();
+		const currentVersion: string | void = await checkKamelCLIVersion();
+		if (currentVersion) {
 			return versionToUse.toLowerCase() !== currentVersion.toLowerCase();
-		} catch (error) {
-			console.error(error);
+		} else {
 			return true;
-		}
+		}		
 	}
-
 	return false;
 }
 
@@ -119,13 +117,17 @@ export async function getLatestCamelKVersion(): Promise<Errorable<string>> {
 	}
 }
 
-async function checkKamelCLIVersion(): Promise<string> {
-	const kamelLocal: kamelCli.Kamel = kamelCli.create();
-	const rtnValue: string | void = await kamelLocal.invoke('version');
-	const strArray: string[] = rtnValue.split(' ');
-	const detectedVersion: string = strArray[strArray.length - 1].trim();
-	console.log(`Apache Camel K CLI (kamel) version returned: ${detectedVersion}`);
-	return detectedVersion;
+async function checkKamelCLIVersion(): Promise<string | void> {
+	try { 
+		const kamelLocal: kamelCli.Kamel = kamelCli.create();
+		const rtnValue: string | void = await kamelLocal.invoke('version');
+		const strArray: string[] = rtnValue.split(' ');
+		const detectedVersion: string = strArray[strArray.length - 1].trim();
+		console.log(`Apache Camel K CLI (kamel) version returned: ${detectedVersion}`);
+		return detectedVersion;
+	} catch (error) {
+		console.error(error);
+	}	
 }
 
 export async function handleChangeRuntimeConfiguration() {
