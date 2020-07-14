@@ -21,9 +21,9 @@ import { TestRunnerOptions, CoverageRunner } from './../coverage';
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const tty = require('tty');
 if (!tty.getWindowSize) {
-    tty.getWindowSize = (): number[] => {
-        return [80, 75];
-    };
+	tty.getWindowSize = (): number[] => {
+		return [80, 75];
+	};
 }
 
 function loadCoverageRunner(testsRoot: string): CoverageRunner | undefined {
@@ -36,15 +36,14 @@ function loadCoverageRunner(testsRoot: string): CoverageRunner | undefined {
 	}
 }
 
-let mocha = new Mocha({
+// Create the mocha test
+const mocha = new Mocha({
 	ui: 'tdd',
 	timeout: 20000,
 	reporter: 'mocha-jenkins-reporter',
-	useColors: true
 });
 
 export function run(): Promise<void> {
-
 	const testsRoot = path.resolve(__dirname, '..');
 	console.log(`testsRoot = ${testsRoot}`);
 	const coverageRunner = loadCoverageRunner(testsRoot);
@@ -69,8 +68,8 @@ export function run(): Promise<void> {
 						c();
 					}
 				}).on('end', () => coverageRunner && coverageRunner.reportCoverage());
-			} catch (err) {
-				e(err);
+			} catch (innererr) {
+				e(innererr);
 			}
 		});
 	});
