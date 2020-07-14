@@ -41,6 +41,7 @@ const mocha = new Mocha({
 	ui: 'tdd',
 	timeout: 20000,
 	reporter: 'mocha-jenkins-reporter',
+	color: true
 });
 
 export function run(): Promise<void> {
