@@ -35,12 +35,12 @@ export async function getNamedListFromKubernetes(itemType : string, extra? : str
 			if (result && result.stderr) {
 				error = result.stderr;
 			}  
-			return error;
+			return Promise.reject(error);
 		} else if (result) {
 			return result.stdout;
 		}
 	}
-	return 'kubectl not available';
+	return Promise.reject('kubectl not available');
 }
 
 export async function getNamedListFromKubernetesThenParseList(itemType : string, extra? : string): Promise<string[]> {
@@ -114,12 +114,12 @@ export async function getPodsFromKubectlCli() : Promise<string> {
 			if (result && result.stderr) {
 				error = result.stderr;
 			}
-			return error;
+			return Promise.reject(error);
 		} else if (result) {
 			return result.stdout;
 		}
 	}
-	return 'kubectl not available';
+	return Promise.reject('kubectl not available');
 }
 
 export async function getKubernetesVersion(): Promise<string | undefined> {
