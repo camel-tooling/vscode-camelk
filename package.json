@@ -297,7 +297,7 @@
 		"decache": "^4.6.0",
 		"glob": "^7.1.6",
 		"istanbul": "^0.4.5",
-		"mocha": "^7.2.0",
+		"mocha": "^8.0.0",
 		"mocha-jenkins-reporter": "^0.4.3",
 		"nock": "^13.0.2",
 		"remap-istanbul": "^0.13.0",
