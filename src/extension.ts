@@ -37,6 +37,7 @@ import * as logUtils from './logUtils';
 import {checkKamelNeedsUpdate, version, handleChangeRuntimeConfiguration} from './versionUtils';
 import * as NewIntegrationFileCommand from './commands/NewIntegrationFileCommand';
 import * as path from 'path';
+import { registerCamelKSchemaProvider } from './CamelKSchemaManager';
 
 export const DELAY_RETRY_KUBECTL_CONNECTION: number = 1000;
 
@@ -62,6 +63,7 @@ export async function activate(context: vscode.ExtensionContext) {
 	applyUserSettings();
 
 	mainOutputChannel = vscode.window.createOutputChannel("Apache Camel K");
+	registerCamelKSchemaProvider(mainOutputChannel);
 	myStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 100);
 	context.subscriptions.push(myStatusBarItem);
 	
