@@ -311,7 +311,8 @@
 		"vscode-uitests-tooling": "^2.0.1"
 	},
 	"extensionDependencies": [
-		"ms-kubernetes-tools.vscode-kubernetes-tools"
+		"ms-kubernetes-tools.vscode-kubernetes-tools",
+		"redhat.vscode-yaml"
 	],
 	"dependencies": {
 		"@types/request-promise": "^4.1.46",
