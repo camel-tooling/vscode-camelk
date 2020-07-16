@@ -14,7 +14,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 import { spawn} from "child_process";
 import * as child_process from "child_process";
 import * as config from './config';
@@ -33,17 +32,31 @@ export interface Kubectl {
 	invokeAsync(command: string, stdin?: string, callback?: (proc: ChildProcess) => void): Promise<ShellResult | undefined>;
 }
 
+export interface ShellResult {
+	readonly code: number;
+	readonly stdout: string;
+	readonly stderr: string;
+}
+
+interface FindBinaryResult {
+	err: number | null;
+	output: string;
+}
+
 class KubectlImpl implements Kubectl {
 	namespace: string | undefined = config.getNamespaceconfig();
+
 	constructor() {
 	}
+
 	async getPath(): Promise<string> {
-		const bin = await baseKubectlPath();
-		return bin;
+		return await baseKubectlPath();
 	}
+
 	invokeArgs(args: string[], folderName?: string): Promise<child_process.ChildProcess> {
-		return kubectllInternalArgs(args, this.namespace, folderName);
+		return kubectlInternalArgs(args, this.namespace, folderName);
 	}
+
 	setNamespace(value: string): void {
 		this.namespace = value;
 	}
@@ -51,13 +64,6 @@ class KubectlImpl implements Kubectl {
 	async invokeAsync(command: string, stdin?: string, callback?: (proc: ChildProcess) => void): Promise<ShellResult | undefined> {
 		return internalInvokeAsync(command, stdin, callback);
 	}
-	
-}
-
-export interface ShellResult {
-	readonly code: number;
-	readonly stdout: string;
-	readonly stderr: string;
 }
 
 // code added to handle streaming of log content to the logsWebView/webpanel 
@@ -110,11 +116,11 @@ export function create() : Kubectl {
 	return new KubectlImpl();
 }
 
-async function kubectllInternalArgs(args: string[], namespace: string | undefined, foldername?: string): Promise<child_process.ChildProcess> {
+async function kubectlInternalArgs(args: string[], namespace: string | undefined, foldername?: string): Promise<child_process.ChildProcess> {
 	return new Promise( async (resolve, reject) => {
 		const bin : string = await baseKubectlPath();
 		if (bin) {
-			const binpath = bin.trim();
+			const binpath: string = bin.trim();
 			if (namespace) {
 				args.push(`--namespace=${namespace}`);
 			}
@@ -147,16 +153,35 @@ async function kubectllInternalArgs(args: string[], namespace: string | undefine
 }
 
 export async function baseKubectlPath(): Promise<string> {
-	let result : shell.FindBinaryResult = await shell.findBinary('kubectl');
+	const result : FindBinaryResult = await findBinary('kubectl');
 	if (result && result.output && result.err === null) {
 		return result.output;
 	}
-	let bin = config.getActiveKubectlconfig();
+	const bin: string = config.getActiveKubectlconfig();
 	if (!bin) {
-		bin = 'kubectl';
-		return bin;
+		return 'kubectl';
 	}
-	let binpath = path.normalize(bin);
-	return binpath;
+	return path.normalize(bin);
 }
 
+export async function findBinary(binName: string): Promise<FindBinaryResult> {
+	let cmd: string = `which ${binName}`;
+
+	if (shell.isWindows()) {
+		cmd = `where.exe ${binName}.exe`;
+	}
+
+	const opts: any = {
+		async: true,
+		env: {
+			HOME: process.env.HOME,
+			PATH: process.env.PATH
+		}
+	};
+
+	const execResult: ShellResult = await shell.execCore(cmd, opts);
+	if (execResult.code === 0) {
+		return { err: null, output: execResult.stdout };
+	}
+	return { err: execResult.code, output: execResult.stderr };
+}
