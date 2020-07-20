@@ -237,8 +237,8 @@ async function handleDefinedTask(context: vscode.Uri) {
 		await vscode.window.showInformationMessage('No Camel K Task applicable has been found. You can create one using "Tasks: Open User Tasks" or by creating a tasks.json file in .vscode folder.');
 	}
 
-	function isTheExactFile(file: string, context: vscode.Uri): boolean {
-		return file === vscode.workspace.asRelativePath(context.path);
+	function isTheExactFile(file: string, uri: vscode.Uri): boolean {
+		return file === vscode.workspace.asRelativePath(uri.path);
 	}
 
 	// this can be smarter in future by evaluating the variable for the task and then comparing with file used in the context
