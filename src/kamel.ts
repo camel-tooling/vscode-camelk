@@ -21,7 +21,7 @@ import * as utils from './CamelKJSONUtils';
 import * as extension from './extension';
 import * as path from 'path';
 import * as fs from 'fs';
-import { findBinary } from './kubectl';
+import { FindBinaryResult, findBinary } from "./shell";
 
 export interface Kamel {
 	devMode : boolean;
@@ -31,11 +31,6 @@ export interface Kamel {
 	invokeArgs(args: string[], folderName?: string): Promise<child_process.ChildProcess>;
 	setDevMode(flag: boolean): void;
 	setNamespace(value: string): void;
-}
-
-interface FindBinaryResult {
-	err: number | null;
-	output: string;
 }
 
 class KamelImpl implements Kamel {

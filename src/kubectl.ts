@@ -147,7 +147,7 @@ async function kubectllInternalArgs(args: string[], namespace: string | undefine
 }
 
 export async function baseKubectlPath(): Promise<string> {
-	let result : FindBinaryResult = await findBinary('kubectl');
+	let result : shell.FindBinaryResult = await shell.findBinary('kubectl');
 	if (result && result.output && result.err === null) {
 		return result.output;
 	}
@@ -160,30 +160,3 @@ export async function baseKubectlPath(): Promise<string> {
 	return binpath;
 }
 
-interface FindBinaryResult {
-	err: number | null;
-	output: string;
-}
-
-export async function findBinary(binName: string): Promise<FindBinaryResult> {
-	let cmd = `which ${binName}`;
-
-	if (shell.isWindows()) {
-		cmd = `where.exe ${binName}.exe`;
-	}
-
-	const opts = {
-		async: true,
-		env: {
-			HOME: process.env.HOME,
-			PATH: process.env.PATH
-		}
-	};
-
-	const execResult = await shell.execCore(cmd, opts);
-	if (execResult.code) {
-		return { err: execResult.code, output: execResult.stderr };
-	}
-
-	return { err: null, output: execResult.stdout };
-}

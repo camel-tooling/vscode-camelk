@@ -25,6 +25,7 @@ import * as installer from '../../installer';
 import * as Utils from './Utils';
 import * as versionUtils from '../../versionUtils';
 import { failed } from '../../errorable';
+import { findBinary } from '../../shell';
 
 const os = require('os');
 
@@ -100,7 +101,7 @@ function isTestRunningCI() {
 }
 
 async function isKubectlAvailableOnCommandLine() {
-	const findKubectlBinary = await kubectl.findBinary('kubectl');
+	const findKubectlBinary = await findBinary('kubectl');
 	return findKubectlBinary && findKubectlBinary.output && findKubectlBinary.err === null;
 }
 
