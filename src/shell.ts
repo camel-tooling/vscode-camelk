@@ -23,6 +23,11 @@ const WINDOWS: string = 'win32';
 const MACOS : string = 'darwin';
 const LINUX : string = 'linux';
 
+export interface FindBinaryResult {
+	err: number | null;
+	output: string;
+}
+
 export function concatIfBoth(s1: string | undefined, s2: string | undefined): string | undefined {
     return s1 && s2 ? s1.concat(s2) : undefined;
 }
@@ -69,4 +74,27 @@ export interface ShellResult {
     readonly code: number;
     readonly stdout: string;
     readonly stderr: string;
+}
+
+export async function findBinary(binName: string): Promise<FindBinaryResult> {
+	let cmd = `which ${binName}`;
+
+	if (isWindows()) {
+		cmd = `where.exe ${binName}.exe`;
+	}
+
+	const opts = {
+		async: true,
+		env: {
+			HOME: process.env.HOME,
+			PATH: process.env.PATH
+		}
+	};
+
+	const execResult = await execCore(cmd, opts);
+	if (execResult.code) {
+		return { err: execResult.code, output: execResult.stderr };
+	}
+
+	return { err: null, output: execResult.stdout };
 }
