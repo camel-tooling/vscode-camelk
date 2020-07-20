@@ -14,15 +14,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-import { exec, spawn} from "child_process";
+import { exec, spawn, ChildProcess} from "child_process";
 import * as child_process from "child_process";
 import * as config from './config';
 import * as utils from './CamelKJSONUtils';
 import * as extension from './extension';
 import * as path from 'path';
 import * as fs from 'fs';
-import * as shell from './shell';
+import { findBinary } from './kubectl';
 
 export interface Kamel {
 	devMode : boolean;
@@ -34,24 +33,34 @@ export interface Kamel {
 	setNamespace(value: string): void;
 }
 
+interface FindBinaryResult {
+	err: number | null;
+	output: string;
+}
+
 class KamelImpl implements Kamel {
 	devMode : boolean = false;
 	namespace: string | undefined = config.getNamespaceconfig();
+
 	constructor() {
 	}
+
 	async getPath(): Promise<string> {
-		const bin = await baseKamelPath();
-		return bin;
+		return await baseKamelPath();
 	}
+
 	async invoke(command: string): Promise<string> {
 		return kamelInternal(command, this.devMode, this.namespace);
 	}
+
 	invokeArgs(args: string[], folderName?: string): Promise<child_process.ChildProcess> {
 		return kamelInternalArgs(args, this.devMode, this.namespace, folderName);
 	}
+
 	setDevMode(flag: boolean): void {
 		this.devMode = flag;
 	}
+
 	setNamespace(value: string): void {
 		this.namespace = value;
 	}
@@ -62,7 +71,7 @@ export function create() : Kamel {
 }
 
 export function getBaseCmd(binpath: string, command: string, namespace : string | undefined) : string {
-	let cmd = `${binpath} ${command}`;
+	let cmd: string = `${binpath} ${command}`;
 	if (namespace) {
 		 cmd += ` --namespace=${namespace}`;
 	}
@@ -70,16 +79,17 @@ export function getBaseCmd(binpath: string, command: string, namespace : string 
 }
 
 async function kamelInternal(command: string, devMode: boolean, namespace : string | undefined): Promise<string> {
-	return new Promise( async (resolve, reject) => {
-		const bin = await baseKamelPath();
-		const binpath = bin.trim();
+	return new Promise<string>(async (resolve, reject) => {
+		const bin: string = await baseKamelPath();
+		const binpath: string = bin.trim();
 		if (!fs.existsSync(binpath)) {
 			reject(new Error(`Apache Camel K CLI (kamel) unavailable`));
 			return;
 		}
-		const cmd = getBaseCmd(binpath, command, namespace);
-		const sr = exec(cmd);
-		let wholeOutData = '';
+	
+		const cmd: string = getBaseCmd(binpath, command, namespace);
+		const sr: ChildProcess = exec(cmd);
+		let wholeOutData: string = '';
 		if (sr) {
 			if (sr.stdout) {
 				sr.stdout.on('data', function (data) {
@@ -88,7 +98,7 @@ async function kamelInternal(command: string, devMode: boolean, namespace : stri
 					}
 					wholeOutData += data;
 				});
-			}        
+			}
 			if (sr.stderr) {
 				sr.stderr.on('data', function (data) {
 					utils.shareMessage(extension.mainOutputChannel, `${data}`);
@@ -96,7 +106,7 @@ async function kamelInternal(command: string, devMode: boolean, namespace : stri
 				});
 			}
 			sr.on('close', function (exitCode) {
-				const exitCodeAsString = exitCode.toString();
+				const exitCodeAsString: string = exitCode.toString();
 				if(exitCode === 0){
 					if(wholeOutData !== ''){
 						resolve(wholeOutData);
@@ -104,7 +114,7 @@ async function kamelInternal(command: string, devMode: boolean, namespace : stri
 						resolve(exitCodeAsString);
 					}
 				} else {
-					reject(new Error(exitCodeAsString));
+					reject(exitCodeAsString);
 				}
 			});
 		}
@@ -112,10 +122,10 @@ async function kamelInternal(command: string, devMode: boolean, namespace : stri
 }
 
 async function kamelInternalArgs(args: string[], devMode: boolean, namespace: string | undefined, foldername?: string): Promise<child_process.ChildProcess> {
-	return new Promise( async (resolve, reject) => {
-		const bin : string = await baseKamelPath();
+	return new Promise<child_process.ChildProcess>(async (resolve, reject) => {
+		const bin: string = await baseKamelPath();
 		if (bin) {
-			const binpath = bin.trim();
+			const binpath: string = bin.trim();
 			if (namespace) {
 				args.push(`--namespace=${namespace}`);
 			}
@@ -135,10 +145,9 @@ async function kamelInternalArgs(args: string[], devMode: boolean, namespace: st
 				}        
 				if (sr.stderr) {
 					sr.stderr.on('data', function (data) {
-						const errorMessage = `${data}`;
+						const errorMessage: string = `${data}`;
 						utils.shareMessage(extension.mainOutputChannel, errorMessage);
-						if (errorMessage.includes('no matches for kind "Integration"')
-								&& errorMessage.includes('camel.apache.org')) {
+						if (errorMessage.includes('no matches for kind "Integration"') && errorMessage.includes('camel.apache.org')) {
 							utils.shareMessage(extension.mainOutputChannel,
 								'It seems that the targeted container host doesn\'t have Camel K installed.\n'
 								+'Please check documentation at https://camel.apache.org/camel-k/latest/installation/installation.html to install it.');
@@ -160,43 +169,13 @@ async function kamelInternalArgs(args: string[], devMode: boolean, namespace: st
 }
 
 export async function baseKamelPath(): Promise<string> {
-	let result : FindBinaryResult = await findBinary('kamel');
+	const result : FindBinaryResult = await findBinary('kamel');
 	if (result && result.output && result.err === null) {
 		return result.output;
 	}
-	let bin = config.getActiveKamelconfig();
+	const bin: string = config.getActiveKamelconfig();
 	if (!bin) {
-		bin = 'kamel';
-		return bin;
+		return 'kamel';
 	}
-	let binpath = path.normalize(bin);
-	return binpath;
-}
-
-interface FindBinaryResult {
-	err: number | null;
-	output: string;
-}
-
-async function findBinary(binName: string): Promise<FindBinaryResult> {
-	let cmd = `which ${binName}`;
-
-	if (shell.isWindows()) {
-		cmd = `where.exe ${binName}.exe`;
-	}
-
-	const opts = {
-		async: true,
-		env: {
-			HOME: process.env.HOME,
-			PATH: process.env.PATH
-		}
-	};
-
-	const execResult = await shell.execCore(cmd, opts);
-	if (execResult.code) {
-		return { err: execResult.code, output: execResult.stderr };
-	}
-
-	return { err: null, output: execResult.stdout };
+	return path.normalize(bin);
 }

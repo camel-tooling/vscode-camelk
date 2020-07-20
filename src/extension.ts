@@ -370,7 +370,11 @@ function createIntegrationsView(): void {
 			if (runningKubectl === undefined || runningKubectl.killed) {
 				eventEmitter.emit(restartKubectlWatchEvent);
 			}
-			await camelKIntegrationsProvider.refresh().catch(err => console.log(err));
+			try { 
+				await camelKIntegrationsProvider.refresh();
+			} catch( err ) {
+				console.log(err);
+			}
 		} else {
 			runningKubectl?.kill();
 		}
