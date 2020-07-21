@@ -29,18 +29,7 @@ export interface Kubectl {
 	getPath() : Promise<string>;
 	invokeArgs(args: string[], folderName?: string): Promise<child_process.ChildProcess>;
 	setNamespace(value: string): void;
-	invokeAsync(command: string, stdin?: string, callback?: (proc: ChildProcess) => void): Promise<ShellResult | undefined>;
-}
-
-export interface ShellResult {
-	readonly code: number;
-	readonly stdout: string;
-	readonly stderr: string;
-}
-
-interface FindBinaryResult {
-	err: number | null;
-	output: string;
+	invokeAsync(command: string, stdin?: string, callback?: (proc: ChildProcess) => void): Promise<shell.ShellResult | undefined>;
 }
 
 class KubectlImpl implements Kubectl {
@@ -61,18 +50,18 @@ class KubectlImpl implements Kubectl {
 		this.namespace = value;
 	}
 
-	async invokeAsync(command: string, stdin?: string, callback?: (proc: ChildProcess) => void): Promise<ShellResult | undefined> {
+	async invokeAsync(command: string, stdin?: string, callback?: (proc: ChildProcess) => void): Promise<shell.ShellResult | undefined> {
 		return internalInvokeAsync(command, stdin, callback);
 	}
 }
 
 // code added to handle streaming of log content to the logsWebView/webpanel 
-async function internalInvokeAsync(command: string, stdin?: string, callback?: (proc: ChildProcess) => void): Promise<ShellResult | undefined> {
+async function internalInvokeAsync(command: string, stdin?: string, callback?: (proc: ChildProcess) => void): Promise<shell.ShellResult | undefined> {
 	const bin = await baseKubectlPath();
 	if (bin) {
 		const binpath = bin.trim();
 		const cmd = `${binpath} ${command}`;
-		let sr: ShellResult | undefined;
+		let sr: shell.ShellResult | undefined;
 		if (stdin) {
 			sr = await exec(cmd, stdin);
 		} else if (callback) {
@@ -82,7 +71,7 @@ async function internalInvokeAsync(command: string, stdin?: string, callback?: (
 	}
 }
 
-async function execStreaming(cmd: string, callback: (proc: ChildProcess) => void): Promise<ShellResult | undefined> {
+async function execStreaming(cmd: string, callback: (proc: ChildProcess) => void): Promise<shell.ShellResult | undefined> {
 	try {
 		return await execCore(cmd, null, callback);
 	} catch (ex) {
@@ -91,7 +80,7 @@ async function execStreaming(cmd: string, callback: (proc: ChildProcess) => void
 	}
 }
 
-async function exec(cmd: string, stdin?: string): Promise<ShellResult | undefined> {
+async function exec(cmd: string, stdin?: string): Promise<shell.ShellResult | undefined> {
 	try {
 		return await execCore(cmd, null, null, stdin);
 	} catch (ex) {
@@ -100,8 +89,8 @@ async function exec(cmd: string, stdin?: string): Promise<ShellResult | undefine
 	}
 }
 
-function execCore(cmd: string, opts: any, callback?: ((proc: ChildProcess) => void) | null, stdin?: string): Promise<ShellResult> {
-	return new Promise<ShellResult>((resolve) => {
+function execCore(cmd: string, opts: any, callback?: ((proc: ChildProcess) => void) | null, stdin?: string): Promise<shell.ShellResult> {
+	return new Promise<shell.ShellResult>((resolve) => {
 		const proc = shelljs.exec(cmd, opts, (code, stdout, stderr) => resolve({code : code, stdout : stdout, stderr : stderr}));
 		if (stdin && proc.stdin) {
 			proc.stdin.end(stdin);
@@ -153,7 +142,7 @@ async function kubectlInternalArgs(args: string[], namespace: string | undefined
 }
 
 export async function baseKubectlPath(): Promise<string> {
-	const result : FindBinaryResult = await findBinary('kubectl');
+	const result : shell.FindBinaryResult = await shell.findBinary('kubectl');
 	if (result && result.output && result.err === null) {
 		return result.output;
 	}
@@ -162,26 +151,4 @@ export async function baseKubectlPath(): Promise<string> {
 		return 'kubectl';
 	}
 	return path.normalize(bin);
-}
-
-export async function findBinary(binName: string): Promise<FindBinaryResult> {
-	let cmd: string = `which ${binName}`;
-
-	if (shell.isWindows()) {
-		cmd = `where.exe ${binName}.exe`;
-	}
-
-	const opts: any = {
-		async: true,
-		env: {
-			HOME: process.env.HOME,
-			PATH: process.env.PATH
-		}
-	};
-
-	const execResult: ShellResult = await shell.execCore(cmd, opts);
-	if (execResult.code === 0) {
-		return { err: null, output: execResult.stdout };
-	}
-	return { err: execResult.code, output: execResult.stderr };
 }
