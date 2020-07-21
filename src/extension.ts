@@ -38,27 +38,25 @@ import {checkKamelNeedsUpdate, version, handleChangeRuntimeConfiguration} from '
 import * as NewIntegrationFileCommand from './commands/NewIntegrationFileCommand';
 import * as path from 'path';
 
-export const DELAY_RETRY_KUBECTL_CONNECTION = 1000;
+export const DELAY_RETRY_KUBECTL_CONNECTION: number = 1000;
 
 export let mainOutputChannel: vscode.OutputChannel;
 export let myStatusBarItem: vscode.StatusBarItem;
-export let camelKIntegrationsProvider : CamelKNodeProvider;
-export let camelKIntegrationsTreeView : vscode.TreeView<TreeNode | undefined>;
+export let camelKIntegrationsProvider: CamelKNodeProvider;
+export let camelKIntegrationsTreeView: vscode.TreeView<TreeNode | undefined>;
+export let closeLogViewWhenIntegrationRemoved: boolean;
+export var runtimeVersionSetting: string | undefined;
 
-let showStatusBar : boolean;
-let eventEmitter = new events.EventEmitter();
-const restartKubectlWatchEvent = 'restartKubectlWatch';
-let runningKubectl : ChildProcess | undefined;
-let timestampLastkubectlIntegrationStart = 0;
-export let closeLogViewWhenIntegrationRemoved : boolean;
-export var runtimeVersionSetting : string | undefined;
+const eventEmitter: events.EventEmitter = new events.EventEmitter();
+const restartKubectlWatchEvent: string = 'restartKubectlWatch';
 
-let stashedContext : vscode.ExtensionContext;
+let showStatusBar: boolean;
+let runningKubectl: ChildProcess | undefined;
+let timestampLastkubectlIntegrationStart: number = 0;
+let stashedContext: vscode.ExtensionContext;
 
 export async function activate(context: vscode.ExtensionContext) {
-
 	stashedContext = context;
-
 	camelKIntegrationsProvider = new CamelKNodeProvider(context);
 
 	applyUserSettings();
@@ -68,7 +66,7 @@ export async function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push(myStatusBarItem);
 	
 	vscode.tasks.registerTaskProvider(CamelKTaskProvider.START_CAMELK_TYPE, new CamelKTaskProvider());
-	let tasksJson:vscode.DocumentSelector = { scheme: 'file', language: 'jsonc', pattern: '**/tasks.json' };
+	const tasksJson:vscode.DocumentSelector = { scheme: 'file', language: 'jsonc', pattern: '**/tasks.json' };
 	vscode.languages.registerCompletionItemProvider(tasksJson, new CamelKTaskCompletionItemProvider());
 
 	await installDependencies(context).then ( () => {
@@ -144,8 +142,7 @@ export async function activate(context: vscode.ExtensionContext) {
 		});
 	
 		// create the integration view action -- start new integration
-		let startIntegrationCommand = vscode.commands.registerCommand('camelk.startintegration', async (...args:any[]) => { await runTheFile(args);});
-		context.subscriptions.push(startIntegrationCommand);
+		context.subscriptions.push(vscode.commands.registerCommand('camelk.startintegration', async (...args:any[]) => { await runTheFile(args);}));
 	
 		// add commands to create config-map and secret objects from .properties files
 		configmapsandsecrets.registerCommands();
@@ -153,14 +150,14 @@ export async function activate(context: vscode.ExtensionContext) {
 		// create the integration view action -- open operator log
 		vscode.commands.registerCommand('camelk.integrations.openOperatorLog', async () => {
 			utils.shareMessage(mainOutputChannel, `Retrieving log for Apache Camel K Operator...`);
-			await logUtils.handleOperatorLog()
-			.catch( (err) => {
+			try {
+				await logUtils.handleOperatorLog();
+			} catch (err) {
 				utils.shareMessage(mainOutputChannel, `No Apache Camel K Operator available: ${err} \n`);
-			});
+			}
 		});
 
 		vscode.commands.registerCommand('camelk.integrations.createNewIntegrationFile', async (...args:any[]) => { await NewIntegrationFileCommand.create(args);});
-
 		vscode.commands.registerCommand('camelk.integrations.selectFirstNode', () => { selectFirstItemInTree();});
 	});
 
@@ -224,26 +221,21 @@ async function runTheFile(...args: any[]) {
 }
 
 // start an integration from a file
-function startIntegration(...args: any[]): Promise<any> {
-	return new Promise <any> ( async (resolve, reject) => {
-		setStatusLineMessageAndShow(`Starting new Apache Camel K Integration...`);
-		utils.shareMessage(mainOutputChannel, "Starting new integration via Kamel executable.");
-		await integrationutils.startIntegration(args)
-			.then( success => {
-				if (!success) {
-					vscode.window.showErrorMessage("Unable to call Kamel.");
-					reject(new Error("Unable to call Kamel."));
-				} else {
-					resolve();
-				}
-				hideStatusLine();
-			})
-			.catch(err => {
-				utils.shareMessage(mainOutputChannel, ("Kamel execution return code: " + err));
-				reject(err);
-				hideStatusLine();
-			});
-	});
+async function startIntegration(...args: any[]): Promise<any> {
+	setStatusLineMessageAndShow(`Starting new Apache Camel K Integration...`);
+	utils.shareMessage(mainOutputChannel, "Starting new integration via Kamel executable.");
+	try {
+		const success: boolean = await integrationutils.startIntegration(args);
+		if (!success) {
+			vscode.window.showErrorMessage("Unable to call Kamel.");
+			return Promise.reject(new Error("Unable to call Kamel."));
+		} 
+	} catch (err) {
+		utils.shareMessage(mainOutputChannel, ("Kamel execution return code: " + err));
+		return Promise.reject(err);
+	} finally {
+		hideStatusLine();
+	}
 }
 
 // this method is called when your extension is deactivated
@@ -258,38 +250,37 @@ export function deactivate(): void {
 }
 
 export async function getIntegrationsFromKubectlCliWithWatch() : Promise<void> {
-	return new Promise<void>( async (resolve, reject) => {
-		let kubectlExe = kubectl.create();
-		let kubectlArgs : string[] = [];
-		kubectlArgs.push('get');
-		kubectlArgs.push(`integrations`);
-		kubectlArgs.push(`-w`);
-		timestampLastkubectlIntegrationStart = Date.now();
+	const kubectlExe: kubectl.Kubectl = kubectl.create();
+	const kubectlArgs : string[] = [];
+	kubectlArgs.push('get');
+	kubectlArgs.push(`integrations`);
+	kubectlArgs.push(`-w`);
+	timestampLastkubectlIntegrationStart = Date.now();
 
-		await kubectlExe.invokeArgs(kubectlArgs)
-			.then( async (runKubectl) => {
-				runningKubectl = runKubectl;
-				if (runKubectl.stdout) {
-					runKubectl.stdout.on('data', async function () {
-						if (camelKIntegrationsTreeView.visible === true) {
-							await camelKIntegrationsProvider.refresh().catch(err => console.log(err));
-						}
-					});
-				}
-				runKubectl.on("close", () => {
-					if (camelKIntegrationsTreeView.visible === true && Date.now() - timestampLastkubectlIntegrationStart > DELAY_RETRY_KUBECTL_CONNECTION) {
-						// stopped listening to server - likely timed out
-						eventEmitter.emit(restartKubectlWatchEvent);
+	try {
+		const runKubectl = await kubectlExe.invokeArgs(kubectlArgs);
+		runningKubectl = runKubectl;
+		if (runKubectl.stdout) {
+			runKubectl.stdout.on('data', async function () {
+				if (camelKIntegrationsTreeView.visible === true) {
+					try {
+						await camelKIntegrationsProvider.refresh();
+					} catch(err) {
+						console.log(err);
 					}
-					runningKubectl = undefined;
-					resolve();
-				});				
-			})
-			.catch( (error) => {
-				reject(new Error(`Kubernetes CLI unavailable: ${error}`));
-				return;
+				}
 			});
-	});
+		}
+		runKubectl.on("close", () => {
+			if (camelKIntegrationsTreeView.visible === true && Date.now() - timestampLastkubectlIntegrationStart > DELAY_RETRY_KUBECTL_CONNECTION) {
+				// stopped listening to server - likely timed out
+				eventEmitter.emit(restartKubectlWatchEvent);
+			}
+			runningKubectl = undefined;
+		});				
+	} catch (error) {
+		return Promise.reject(new Error(`Kubernetes CLI unavailable: ${error}`));
+	}
 }
 
 // use kubectl to keep an eye on the server for changes and update the view
@@ -298,12 +289,9 @@ export async function startListeningForServerChanges(): Promise<void> {
 }
 
 function applyStatusBarSettings(): void {
-	let statusBarSetting = vscode.workspace.getConfiguration().get(config.SHOW_STATUS_BAR_KEY) as boolean;
-	showStatusBar = statusBarSetting;
-
+	showStatusBar = vscode.workspace.getConfiguration().get(config.SHOW_STATUS_BAR_KEY) as boolean;
 	vscode.workspace.onDidChangeConfiguration(() => {
-		let statusBarSettingHandle = vscode.workspace.getConfiguration().get(config.SHOW_STATUS_BAR_KEY) as boolean;
-		showStatusBar = statusBarSettingHandle;
+		showStatusBar = vscode.workspace.getConfiguration().get(config.SHOW_STATUS_BAR_KEY) as boolean;
 		if (!showStatusBar) {
 			hideStatusLine();
 		}
@@ -311,29 +299,25 @@ function applyStatusBarSettings(): void {
 }
 
 function applyLogviewSettings(): void {
-	let logviewSetting = vscode.workspace.getConfiguration().get(config.REMOVE_LOGVIEW_ON_SHUTDOWN_KEY) as boolean;
-	closeLogViewWhenIntegrationRemoved = logviewSetting;
-
+	closeLogViewWhenIntegrationRemoved = vscode.workspace.getConfiguration().get(config.REMOVE_LOGVIEW_ON_SHUTDOWN_KEY) as boolean;
 	vscode.workspace.onDidChangeConfiguration(() => {
-		let statusBarSetting = vscode.workspace.getConfiguration().get(config.REMOVE_LOGVIEW_ON_SHUTDOWN_KEY) as boolean;
-		closeLogViewWhenIntegrationRemoved = statusBarSetting;
+		closeLogViewWhenIntegrationRemoved = vscode.workspace.getConfiguration().get(config.REMOVE_LOGVIEW_ON_SHUTDOWN_KEY) as boolean;
 	});
 }
 
 async function applyDefaultVersionSettings() : Promise<void> {
-	let runtimeSetting = config.getKamelRuntimeVersionConfig();
-	let autoUpgradeSetting = config.getKamelAutoupgradeConfig();
+	const runtimeSetting: string | undefined = config.getKamelRuntimeVersionConfig();
+	const autoUpgradeSetting: boolean = config.getKamelAutoupgradeConfig();
 	if (!runtimeSetting) {
-		await config.setKamelRuntimeVersionConfig(version).then ( () => {
-			runtimeVersionSetting = version;
-			shareMessageInMainOutputChannel(`No version found. Using default version ${runtimeVersionSetting} of Apache Camel K CLI`);
-		});
+		await config.setKamelRuntimeVersionConfig(version);
+		runtimeVersionSetting = version;
+		shareMessageInMainOutputChannel(`No version found. Using default version ${runtimeVersionSetting} of Apache Camel K CLI`);
 	} else {
 		if (autoUpgradeSetting && autoUpgradeSetting === true) {
 			if (runtimeSetting && version.toLowerCase() !== runtimeSetting.toLowerCase()) {
-				await config.setKamelRuntimeVersionConfig(version).then ( () => {
-					runtimeVersionSetting = version;	
-				});
+				await config.setKamelRuntimeVersionConfig(version);
+				runtimeVersionSetting = version;	
+				shareMessageInMainOutputChannel(`Auto-upgrade setting enabled. Updating to default version ${version} of Apache Camel K CLI`);
 			}
 		} else {
 			shareMessageInMainOutputChannel(`Using version ${runtimeSetting} of Apache Camel K CLI`);
@@ -348,7 +332,11 @@ async function applyDefaultVersionSettings() : Promise<void> {
 function refreshIfNamespaceChanges(): void {
 	vscode.workspace.onDidChangeConfiguration(async () => {
 		if (camelKIntegrationsTreeView && camelKIntegrationsTreeView.visible === true) {
-			await camelKIntegrationsProvider.refresh().catch(err => console.log(err));
+			try {
+				await camelKIntegrationsProvider.refresh();
+			} catch (err) {
+				console.log(err);
+			}
 		}
 	});
 }
@@ -382,25 +370,25 @@ function createIntegrationsView(): void {
 
 export async function installDependencies(context: vscode.ExtensionContext) {
 	let gotKamel : boolean = false;
-
-	await checkKamelNeedsUpdate()
-		.then ( (response) => { 
-			gotKamel = !response; 
-	}).catch ( (error) => {
+	try {
+		const response: boolean = await checkKamelNeedsUpdate();
+		gotKamel = !response; 
+	} catch (error) {
 		// ignore but log
 		console.log(`Error when checking for kamel version: ${error}`);
-	});
+	}
 
 	let gotKubernetes : boolean = false;
-	await kubectlutils.getKubernetesVersion().then ( async (kubectlCliVersion) => {
+	try {
+		const kubectlCliVersion: string | undefined = await kubectlutils.getKubernetesVersion();
 		if (kubectlCliVersion) {
 			shareMessageInMainOutputChannel(`Found Kubernetes CLI (kubectl) version ${kubectlCliVersion}...`);
 			gotKubernetes = true;
 		}
-	}).catch( (error) => {
+	} catch (error) {
 		// ignore but log
 		console.log(`Error when checking for Kubernetes version: ${error}`);
-	});
+	}
 
 	if (!gotKamel) {
 		await installDependency("kamel", gotKamel, context, installKamel);
@@ -413,7 +401,7 @@ export async function installDependencies(context: vscode.ExtensionContext) {
 async function installDependency(name: string, alreadyGot: boolean, context: vscode.ExtensionContext, installFunc: (context: vscode.ExtensionContext) => Promise<Errorable<null>>): Promise<void> {
 	if (!alreadyGot) {
 		shareMessageInMainOutputChannel(`Installing ${name}...`);
-		const result = await installFunc(context);
+		const result: Errorable<null> = await installFunc(context);
 		if (failed(result)) {
 			utils.shareMessage(mainOutputChannel, `Unable to install ${name}: ${result.error[0]}`);
 		} else {
@@ -431,24 +419,22 @@ export function getStashedContext() : vscode.ExtensionContext {
 	return stashedContext;
 }
 
-function removeIntegrationLogView(integrationName: string) : Promise<string> {
-	return new Promise<string>( async () => {
-		if (closeLogViewWhenIntegrationRemoved) {
-			LogsPanel.currentPanels.forEach((value : LogsPanel) => {
-				var title = value.getTitle();
-				if (title.indexOf(integrationName) >= 0) {
-					value.disposeView();
-				}
-			});
-		} else {
-			LogsPanel.currentPanels.forEach((value : LogsPanel) => {
-				var title = value.getTitle();
-				if (title.indexOf(integrationName) >= 0) {
-					logUtils.updateLogViewTitleToStopped(value, title);
-				}
-			});
-		}
-	});
+async function removeIntegrationLogView(integrationName: string) : Promise<void> {
+	if (closeLogViewWhenIntegrationRemoved) {
+		LogsPanel.currentPanels.forEach((value : LogsPanel) => {
+			var title = value.getTitle();
+			if (title.indexOf(integrationName) >= 0) {
+				value.disposeView();
+			}
+		});
+	} else {
+		LogsPanel.currentPanels.forEach((value : LogsPanel) => {
+			var title = value.getTitle();
+			if (title.indexOf(integrationName) >= 0) {
+				logUtils.updateLogViewTitleToStopped(value, title);
+			}
+		});
+	}
 }
 
 export function setRuntimeVersionSetting(value: string) {
@@ -456,27 +442,28 @@ export function setRuntimeVersionSetting(value: string) {
 }
 
 async function installAllTutorials(context : vscode.ExtensionContext) {
-	let tutorialList = {
+	const tutorialList = {
 		"tutorials": [
-			{"name": "Your First Integration", 
-				"extpath" : "./didact/camelk/first-integration.md", "category": "Apache Camel K"}
+			{
+				"name": "Your First Integration", 
+				"extpath" : "./didact/camelk/first-integration.md", "category": "Apache Camel K"
+			}
 		]
 	};
-
-	tutorialList.tutorials.forEach( async tutorial => {
+	for (let tutorial of tutorialList.tutorials) {
 		await registerTutorialWithDidact(context, tutorial.name, tutorial.extpath, tutorial.category);
-	});
+	}
 }
 
 async function registerTutorialWithDidact(context: vscode.ExtensionContext, name : string, extpath : string, category : string) {
 	try {
 		// test to ensure didact is available 
-		const extensionId = 'redhat.vscode-didact';
-		const didactExt : any = vscode.extensions.getExtension(extensionId);
+		const extensionId: string = 'redhat.vscode-didact';
+		const didactExt: any = vscode.extensions.getExtension(extensionId);
 		if (didactExt) {
-			const commandId = 'vscode.didact.register';
-			const tutorialPath = path.join(context.extensionPath, extpath);
-			const tutorialUri = vscode.Uri.parse(`file://${tutorialPath}`);
+			const commandId: string = 'vscode.didact.register';
+			const tutorialPath: string = path.join(context.extensionPath, extpath);
+			const tutorialUri: vscode.Uri = vscode.Uri.parse(`file://${tutorialPath}`);
 
 			// then pass name, uri, and category
 			await vscode.commands.executeCommand(commandId,	name, tutorialUri, category);
