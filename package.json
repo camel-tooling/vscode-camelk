@@ -324,7 +324,7 @@
 		"maven": "^5.0.0",
 		"path": "^0.12.7",
 		"request": "^2.88.2",
-		"request-promise": "^4.2.5",
+		"request-promise": "^4.2.6",
 		"shelljs": "^0.8.4",
 		"tar": "^6.0.2",
 		"tmp": "^0.2.1",
