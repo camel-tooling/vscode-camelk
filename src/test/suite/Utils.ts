@@ -62,6 +62,11 @@ export function getCamelKIntegrationsProvider(): CamelKNodeProvider {
 	return extension?.exports.getCamelKIntegrationsProvider();
 }
 
+export function getCamelKMainOutputChannel(): vscode.OutputChannel {
+	const extension = retrieveCamelKExtension();
+	return extension?.exports.getMainOutputChannel();
+}
+
 export function getCamelKIntegrationsTreeView(): vscode.TreeView<TreeNode | undefined> {
 	const extension = retrieveCamelKExtension();
 	return extension?.exports.getCamelKIntegrationsTreeView();
