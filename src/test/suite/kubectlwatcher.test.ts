@@ -21,15 +21,13 @@ import * as fs from 'fs';
 import * as sinon from 'sinon';
 import * as vscode from 'vscode';
 import * as extension from '../../extension';
-import * as utils from '../../CamelKJSONUtils';
 import * as CamelKNodeProvider from '../../CamelKNodeProvider';
 import * as Utils from './Utils';
 
 const homedir = require('os').homedir();
 
 suite("Kubectl integration watcher", function() {
-	
-	let messageSpy = sinon.spy(utils, "shareMessage");
+	let messageStub: sinon.SinonStub<[string], void>;
 	let refreshStub: sinon.SinonStub<[], Promise<void>>;
 	let sandbox: sinon.SinonSandbox;
 	let kubeconfigFilePath : string = homedir + '/.kube/config';
@@ -42,7 +40,7 @@ suite("Kubectl integration watcher", function() {
 	this.beforeEach(() => {
 		sandbox = sinon.createSandbox();
 		refreshStub = sandbox.stub(Utils.getCamelKIntegrationsProvider(), 'refresh');
-		messageSpy.resetHistory();
+		messageStub = sandbox.stub(Utils.getCamelKMainOutputChannel(), 'append');
 	});
 	
 	this.afterEach(() => {
@@ -50,36 +48,35 @@ suite("Kubectl integration watcher", function() {
 			fs.renameSync(kubeconfigFilePath + '.bak', kubeconfigFilePath);
 		}
 		refreshStub.restore();
+		messageStub.restore();
 		sandbox.reset();
 	});
 	
 	test('Check there is no loop for closing kubectl process', async function() {
 		await sleep(extension.DELAY_RETRY_KUBECTL_CONNECTION);
-		sinon.assert.notCalled(messageSpy);
+		sinon.assert.notCalled(messageStub);
 	});
 	
 	test('Check there is one set of message logged in case of connection error', async function() {
-		this.skip();
 		invalidateKubeConfigFileByRenamingIt(kubeconfigFilePath);
 		await Utils.getIntegrationsFromKubectlCliWithWatchTestApi();
-		checkErrorMessageLogged(messageSpy);
+		checkErrorMessageLogged(messageStub);
 	});
 	
 	test('Check there is no loop for closing kubectl process with View visible', async function() {
 		await openCamelKTreeView();
 		await sleep(extension.DELAY_RETRY_KUBECTL_CONNECTION);
-		messageSpy.resetHistory();
+		messageStub.resetHistory();
 		await sleep(extension.DELAY_RETRY_KUBECTL_CONNECTION);
-		sinon.assert.notCalled(messageSpy);
+		sinon.assert.notCalled(messageStub);
 	});
 	
 	test('Check there is only one set of message logged in case of connection error with View visible', async function() {
-		this.skip();
 		invalidateKubeConfigFileByRenamingIt(kubeconfigFilePath);
 		await openCamelKTreeView();
-		messageSpy.resetHistory();
+		messageStub.resetHistory();
 		await Utils.getIntegrationsFromKubectlCliWithWatchTestApi();
-		checkErrorMessageLogged(messageSpy);
+		checkErrorMessageLogged(messageStub);
 	});
 	
 });
@@ -90,9 +87,9 @@ function invalidateKubeConfigFileByRenamingIt(kubeconfigFilePath: string) {
 	}
 }
 
-function checkErrorMessageLogged(messageSpy: sinon.SinonSpy<[vscode.OutputChannel, string], void>) {
-	expect(messageSpy.callCount,
-		`Depending on latency, versions used and environment configuration, one or two messages can be logged. Number of messages logged ${messageSpy.callCount}`)
+function checkErrorMessageLogged(messageStub: sinon.SinonStub<[string], void>) {
+	expect(messageStub.callCount,
+		`Depending on latency, versions used and environment configuration, one or two messages can be logged. Number of messages logged ${messageStub.callCount}`)
 		.above(0).below(3);
 }
 

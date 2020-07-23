@@ -185,6 +185,9 @@ export async function activate(context: vscode.ExtensionContext) {
 		},
 		getIntegrationsFromKubectlCliWithWatchTestApi(): Promise<void> {
 			return getIntegrationsFromKubectlCliWithWatch();
+		},
+		getMainOutputChannel(): vscode.OutputChannel {
+			return mainOutputChannel;
 		}
 	};
 }
@@ -249,38 +252,42 @@ export function deactivate(): void {
 	}
 }
 
-export async function getIntegrationsFromKubectlCliWithWatch() : Promise<void> {
-	const kubectlExe: kubectl.Kubectl = kubectl.create();
-	const kubectlArgs : string[] = [];
-	kubectlArgs.push('get');
-	kubectlArgs.push(`integrations`);
-	kubectlArgs.push(`-w`);
-	timestampLastkubectlIntegrationStart = Date.now();
 
-	try {
-		const runKubectl = await kubectlExe.invokeArgs(kubectlArgs);
-		runningKubectl = runKubectl;
-		if (runKubectl.stdout) {
-			runKubectl.stdout.on('data', async function () {
-				if (camelKIntegrationsTreeView.visible === true) {
-					try {
-						await camelKIntegrationsProvider.refresh();
-					} catch(err) {
-						console.log(err);
+export function getIntegrationsFromKubectlCliWithWatch() : Promise<void> {
+	return new Promise<void>(async (resolve, reject) => {
+		const kubectlExe: kubectl.Kubectl = kubectl.create();
+		const kubectlArgs : string[] = [];
+		kubectlArgs.push('get');
+		kubectlArgs.push(`integrations`);
+		kubectlArgs.push(`-w`);
+		timestampLastkubectlIntegrationStart = Date.now();
+	
+		try {
+			const runKubectl: ChildProcess = await kubectlExe.invokeArgs(kubectlArgs);
+			runningKubectl = runKubectl;
+			if (runKubectl.stdout) {
+				runKubectl.stdout.on('data', async function () {
+					if (camelKIntegrationsTreeView.visible === true) {
+						try {
+							await camelKIntegrationsProvider.refresh();
+						} catch(err) {
+							console.log(err);
+						}
 					}
-				}
-			});
-		}
-		runKubectl.on("close", () => {
-			if (camelKIntegrationsTreeView.visible === true && Date.now() - timestampLastkubectlIntegrationStart > DELAY_RETRY_KUBECTL_CONNECTION) {
-				// stopped listening to server - likely timed out
-				eventEmitter.emit(restartKubectlWatchEvent);
+				});
 			}
-			runningKubectl = undefined;
-		});				
-	} catch (error) {
-		return Promise.reject(new Error(`Kubernetes CLI unavailable: ${error}`));
-	}
+			runKubectl.on('close', () => {
+				if (camelKIntegrationsTreeView.visible === true && Date.now() - timestampLastkubectlIntegrationStart > DELAY_RETRY_KUBECTL_CONNECTION) {
+					// stopped listening to server - likely timed out
+					eventEmitter.emit(restartKubectlWatchEvent);
+				}
+				runningKubectl = undefined;
+				resolve();
+			});				
+		} catch (error) {
+			reject(new Error(`Kubernetes CLI unavailable: ${error}`));
+		}
+	});
 }
 
 // use kubectl to keep an eye on the server for changes and update the view
