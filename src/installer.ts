@@ -115,7 +115,17 @@ export async function installKamel(context: vscode.ExtensionContext): Promise<Er
 	console.log(`Attempting to download Apache Camel K CLI to ${installFolder}`);
 	mkdirp.sync(installFolder);
 
-	const kamelUrl: string = `https://github.com/apache/camel-k/releases/download/${versionToUse}/camel-k-client-${versionToUse}-${platformString}-64bit.tar.gz`;
+	let githubUrl : any;
+	if (platformString && versionToUse) {
+		githubUrl = await versionUtils.getDownloadURLForCamelKTag(versionToUse, platformString);
+	}
+
+	let kamelUrl : string = `https://github.com/apache/camel-k/releases/download/${versionToUse}/camel-k-client-${versionToUse}-${platformString}-64bit.tar.gz`;
+	if (typeof githubUrl === 'string') {
+		kamelUrl = githubUrl;
+	}
+
+	//const kamelUrl: string = `https://github.com/apache/camel-k/releases/download/${versionToUse}/camel-k-client-${versionToUse}-${platformString}-64bit.tar.gz`;
 	const kamelCliFile: string = `camel-k-client-${versionToUse}-${platformString}-64bit.tar.gz`;
 	const downloadFile: string = path.join(installFolder, binFile);
 

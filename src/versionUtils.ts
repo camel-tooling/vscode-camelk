@@ -171,3 +171,29 @@ function setVersionAndTellUser(msg: string, newVersion: string) {
 	vscode.window.showWarningMessage(msg);
 	extension.setRuntimeVersionSetting(newVersion);
 }
+
+export async function getDownloadURLForCamelKTag(tag : string, platformStr : string): Promise<Errorable<string>> {
+	const tagURL: string = `https://api.github.com/repos/apache/camel-k/releases/tags/${tag}`;
+	const headers: string[][] = [];
+	const githubToken: string | undefined = process.env.VSCODE_CAMELK_GITHUB_TOKEN;
+	if (githubToken) {
+		headers.push(['Authorization', `token ${githubToken}`]);
+	}
+	console.log(tagURL);
+	const res: Response = await fetch(tagURL, { headers: headers });
+	if (res.status === 200) {
+		const latestJSON: any = await res.json();
+		const assetsJSON: any = await latestJSON.assets;
+		assetsJSON.forEach(function(asset:any){
+			const aUrl : string = asset.browser_download_url;
+			console.log(aUrl);
+			if (aUrl.includes(`-${platformStr}-`)) {
+				return { succeeded: true, result: aUrl };
+			}
+		});
+		return { succeeded: false, error: [`Failed to retrieve latest Apache Camel K version tag from: ${tagURL}`] };
+	} else {
+		console.log(`error ${res.status} ${res.statusText}`);
+		return { succeeded: false, error: [`Failed to find Camel K tag {tag} at github: ${res.status} ${res.statusText}`] };
+	}
+}
