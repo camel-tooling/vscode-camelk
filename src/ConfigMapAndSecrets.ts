@@ -21,11 +21,11 @@ import * as k8s from 'vscode-kubernetes-tools-api';
 import * as extension from './extension';
 import * as utils from './CamelKJSONUtils';
 import { isKubernetesAvailable } from './kubectlutils';
+import { ShellResult } from './shell';
 
-export const validNameRegex = /^[A-Za-z][A-Za-z0-9\-]*(?:[A-Za-z0-9]$){1}/;
+export const validNameRegex: RegExp = /^[A-Za-z][A-Za-z0-9\-]*(?:[A-Za-z0-9]$){1}/;
 
-export function registerCommands() {
-
+export function registerCommands(): void {
 	// create the integration view action -- create new configmap from file or folder
 	vscode.commands.registerCommand('camelk.integrations.createconfigmapfromfile', (uri:vscode.Uri) => {
 		createConfigMapFromUri(uri);
@@ -43,26 +43,26 @@ export function registerCommands() {
 	});
 }
 
-function createConfigMapFromUri(uri:vscode.Uri): void {
-	createConfigMapFromFilenameOrFolder(uri)
-		.then ( (output) => {
-			extension.setStatusLineMessageAndShow(`Received... ${output}`);
-		})
-		.catch( (error) => {
-			utils.shareMessage(extension.mainOutputChannel, ("Error encountered while creating Kubernetes ConfigMap: " + error));
-		});
+async function createConfigMapFromUri(uri:vscode.Uri): Promise<void> {
+	try {
+		const output: string = await createConfigMapFromFilenameOrFolder(uri);
+		extension.setStatusLineMessageAndShow(`Received... ${output}`);
+	} catch(error) {
+		utils.shareMessage(extension.mainOutputChannel, ("Error encountered while creating Kubernetes ConfigMap: " + error));
+	} finally {
 		extension.hideStatusLine();
+	}	
 }
 
-function createSecretFromUri(uri:vscode.Uri): void {
-	createSecretFromFilenameOrFolder(uri)
-		.then ( (output) => {
-			extension.setStatusLineMessageAndShow(`Received... ${output}`);
-		})
-		.catch( (error) => {
-			utils.shareMessage(extension.mainOutputChannel, ("Error encountered while creating Kubernetes Secret: " + error));
-		});
+async function createSecretFromUri(uri:vscode.Uri): Promise<void> {
+	try {
+		const output: string = await createSecretFromFilenameOrFolder(uri);
+		extension.setStatusLineMessageAndShow(`Received... ${output}`);
+	} catch(error) {
+		utils.shareMessage(extension.mainOutputChannel, ("Error encountered while creating Kubernetes Secret: " + error));
+	} finally {
 		extension.hideStatusLine();
+	}		
 }
 
 // call back function used to validate entries in the input box and return a human readable error message
@@ -70,133 +70,93 @@ function validateName(text : string): string | null {
 	return !validNameRegex.test(text) ? 'Name must be at least two characters long, start with a letter, and only include a-z, A-Z, and hyphens' : null;
 }
 
-function createConfigMapFromFilenameOrFolder(uri:vscode.Uri) : Promise<string> {
-	return new Promise<string>( (resolve, reject) => {
-		isKubernetesAvailable()
-			.then( (kubeIsReady) => {
-				if (kubeIsReady) {
-					return vscode.window.showInputBox({
-						prompt: 'Kubernetes ConfigMap Name',
-						placeHolder: 'Provide the unique identifier for this Kubernetes ConfigMap.',
-						value: 'new-configmap',
-						ignoreFocusOut: true,
-						validateInput: validateName
-					});
-				} else {
-					vscode.window.showInformationMessage(`Kubernetes extensions still coming up, please wait a moment and try again.`);
-					reject("Kubernetes not available.");
-				}
-			})
-			.then( (configMapName) => {
-				if (configMapName) {
-					createConfigMap(configMapName, uri)
-						.then( (output) => {
-							vscode.window.showInformationMessage(`Successfully created new Kubernetes ConfigMap named "${configMapName}"`);
-							resolve(output);
-						})
-						.catch(err => {
-							vscode.window.showErrorMessage(`Problem encountered creating new Kubernetes ConfigMap named "${configMapName}": ${err}`);
-							reject(err);
-						});
-				} else {
-					reject("No name given for Kubernetes ConfigMap.");
-				}
-			})
-			.catch( err => {
-				reject(err);
+async function createConfigMapFromFilenameOrFolder(uri:vscode.Uri) : Promise<string> {
+	try {
+		const kubeIsReady: boolean = await isKubernetesAvailable();
+		if (kubeIsReady) {
+			const configMapName: string | undefined = await vscode.window.showInputBox({
+				prompt: 'Kubernetes ConfigMap Name',
+				placeHolder: 'Provide the unique identifier for this Kubernetes ConfigMap.',
+				value: 'new-configmap',
+				ignoreFocusOut: true,
+				validateInput: validateName
 			});
-	});
+			if (configMapName) {
+				try { 
+					const output: string = await createConfigMap(configMapName, uri);
+					vscode.window.showInformationMessage(`Successfully created new Kubernetes ConfigMap named "${configMapName}"`);
+					return output;
+				} catch(err) {
+					vscode.window.showErrorMessage(`Problem encountered creating new Kubernetes ConfigMap named "${configMapName}": ${err}`);
+					return Promise.reject(err);
+				}
+			} else {
+				return Promise.reject("No name given for Kubernetes ConfigMap.");
+			}
+		} else {
+			vscode.window.showInformationMessage(`Kubernetes extensions still coming up, please wait a moment and try again.`);
+			return Promise.reject("Kubernetes not available.");
+		}
+	} catch (err) {
+		return Promise.reject(err);
+	}
 }
 
-function createSecretFromFilenameOrFolder(uri:vscode.Uri) : Promise<string> {
-	return new Promise( (resolve, reject) => {
-		isKubernetesAvailable()
-			.then( (kubeIsReady) => {
-				if (kubeIsReady) {
-					return vscode.window.showInputBox({
-						prompt: 'Kubernetes Secret Name',
-						placeHolder: 'Provide the unique identifier for this Kubernetes secret.',
-						value: 'new-secret',
-						validateInput: validateName
-					});
-				} else {
-					vscode.window.showInformationMessage(`Kubernetes extensions still coming up, please wait a moment and try again.`);
-					reject("Kubernetes not available.");
-				}
-			})
-			.then( (secretName) => {
-				if (secretName) {
-					createSecret(secretName, uri)
-						.then( (output) => {
-							vscode.window.showInformationMessage(`Successfully created new Kubernetes Secret named "${secretName}"`);
-							resolve(output);
-						})
-						.catch(err => {
-							vscode.window.showErrorMessage(`Problem encountered creating new Kubernetes Secret named "${secretName}": ${err}`);
-							reject(err);
-						});
-				} else {
-					reject("No name given for secret.");
-				}
-			})
-			.catch( err => {
-				reject(err);
+async function createSecretFromFilenameOrFolder(uri:vscode.Uri) : Promise<string> {
+	try {
+		const kubeIsReady: boolean = await isKubernetesAvailable();
+		if (kubeIsReady) {
+			const secretName: string | undefined = await vscode.window.showInputBox({
+				prompt: 'Kubernetes Secret Name',
+				placeHolder: 'Provide the unique identifier for this Kubernetes secret.',
+				value: 'new-secret',
+				validateInput: validateName
 			});
-	});
+			if (secretName) {
+				try {
+					const output: string = await createSecret(secretName, uri);
+					vscode.window.showInformationMessage(`Successfully created new Kubernetes Secret named "${secretName}"`);
+					return output;
+				} catch(err) {
+					vscode.window.showErrorMessage(`Problem encountered creating new Kubernetes Secret named "${secretName}": ${err}`);
+					return Promise.reject(err);
+				}
+			} else {
+				return Promise.reject("No name given for secret.");
+			}			
+		} else {
+			vscode.window.showInformationMessage(`Kubernetes extensions still coming up, please wait a moment and try again.`);
+			return Promise.reject("Kubernetes not available.");
+		}
+	} catch (err) {
+		return Promise.reject(err);
+	}
 }
 
-function createConfigMap(name:string, filename: vscode.Uri) : Promise<string> {
-	return new Promise<string>( (resolve, reject) => {
-		k8s.extension.kubectl.v1
-			.then( (kubectl) => {
-				if (kubectl && kubectl.available) {
-					let nameStr = ` --from-file="${filename.fsPath}"`;
-					return kubectl.api.invokeCommand(`create configmap ${name} ${nameStr}`);
-				} else {
-					reject('Kubernetes not available');
-				}
-			})
-			.then( (result) => {
-				if (!result || result.code !== 0) {
-					const error = result ? result.stderr : 'Unable to invoke kubectl';
-					reject(new Error(error));
-					return;
-				}
-				if (result && result.code === 0) {
-					resolve (result.stdout);
-					return;
-				}
-			})
-			.catch( err => {
-				reject(err);
-			});
-	});
+async function createConfigMap(name:string, filename: vscode.Uri) : Promise<string> {
+	return invokeKubeCtlCommand(`create configmap ${name} --from-file="${filename.fsPath}"`);
 }
 
-function createSecret(name:string, foldername: vscode.Uri) : Promise<string> {
-	return new Promise<string>( (resolve, reject) => {
-		k8s.extension.kubectl.v1
-			.then( (kubectl) => {
-				if (kubectl && kubectl.available) {
-					let nameStr = ` --from-file="${foldername.fsPath}"`;
-					return kubectl.api.invokeCommand(`create secret generic ${name} ${nameStr}`);
-				} else {
-					reject('Kubernetes not available');
-				}
-			})
-			.then( (result) => {
-				if (!result || result.code !== 0) {
-					const error = result ? result.stderr : 'Unable to invoke kubectl';
-					reject(new Error(error));
-					return;
-				}
-				if (result && result.code === 0) {
-					resolve (result.stdout);
-					return;
-				}
-			})
-			.catch (err => {
-				reject(err);
-			});
-	});
+async function createSecret(name:string, filename: vscode.Uri) : Promise<string> {
+	return invokeKubeCtlCommand(`create secret generic ${name} --from-file="${filename.fsPath}"`);
+}
+
+// TODO: move this function into kubectl or kubectlutils and adapt to use namespaces (see https://github.com/camel-tooling/vscode-camelk/issues/489)
+async function invokeKubeCtlCommand(cmd: string) : Promise<string> {
+	try {
+		const kubectl: k8s.API<k8s.KubectlV1> = await k8s.extension.kubectl.v1;
+		if (kubectl && kubectl.available) {
+			const result: ShellResult | undefined = await kubectl.api.invokeCommand(`${cmd}`);
+			if (result && result.code === 0) {
+				return result.stdout;
+			} else {
+				const error = result ? result.stderr : `Unable to invoke kubectl with command ${cmd}`;
+				return Promise.reject(new Error(error));
+			}
+		} else {
+			return Promise.reject('Kubernetes not available');
+		}
+	} catch (err) {
+		return Promise.reject(err);
+	}
 }

@@ -1,12 +1,10 @@
 import * as path from 'path';
 import * as stream from 'stream';
 import * as tmp from 'tmp';
-
 import { succeeded, Errorable } from './errorable';
 
-type DownloadFunc =
-    (url: string, destination?: string, options?: any)
-         => Promise<Buffer> & stream.Duplex; // Stream has additional events - see https://www.npmjs.com/package/download
+// Stream has additional events - see https://www.npmjs.com/package/download
+type DownloadFunc = (url: string, destination?: string, options?: any) => Promise<Buffer> & stream.Duplex; 
 
 let download: DownloadFunc | undefined;
 
@@ -24,8 +22,8 @@ function ensureDownloadFunc() {
 }
 
 export async function toTempFile(sourceUrl: string): Promise<Errorable<string>> {
-    const tempFileObj = tmp.fileSync({ prefix: "vsck-autoinstall-" });
-    const downloadResult = await to(sourceUrl, tempFileObj.name);
+    const tempFileObj: tmp.FileResult = tmp.fileSync( { prefix: "vsck-autoinstall-" } );
+    const downloadResult: Errorable<null> = await to(sourceUrl, tempFileObj.name);
     if (succeeded(downloadResult)) {
         return { succeeded: true, result: tempFileObj.name };
     }
