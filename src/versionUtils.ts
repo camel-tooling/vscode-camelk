@@ -24,16 +24,16 @@ import * as kamelCli from './kamel';
 import { platformString } from './installer';
 import fetch from 'cross-fetch';
 
-export const version: string = '1.0.1'; //need to retrieve this if possible, but have a default
+export const version: string = 'v1.1.0'; //need to retrieve this if possible, but have a default
 
 /*
 * Can be retrieved using `curl -i https://api.github.com/repos/apache/camel-k/releases/latest` and searching for "last-modified" attribute
 * To be updated when updating the default "version" attribute
 */
-const LAST_MODIFIED_DATE_OF_DEFAULT_VERSION: string = 'Tue, 09 Jun 2020 12:59:21 GMT';
+const LAST_MODIFIED_DATE_OF_DEFAULT_VERSION: string = 'Monday, 27 Jul 2020 19:27:00 GMT';
 let latestVersionFromOnline: string;
 
-async function testVersionAvailable(versionToUse: string): Promise<boolean> {
+export async function testVersionAvailable(versionToUse: string): Promise<boolean> {
 	if (platformString && versionToUse) {
 		//const kamelUrl = `https://github.com/apache/camel-k/releases/download/${versionToUse}/camel-k-client-${versionToUse}-${platformString}-64bit.tar.gz`;
 		try {
@@ -49,8 +49,8 @@ async function testVersionAvailable(versionToUse: string): Promise<boolean> {
 export async function checkKamelNeedsUpdate(versionToUse?: string): Promise<boolean> {
 	const runtimeVersionSetting = vscode.workspace.getConfiguration().get(config.RUNTIME_VERSION_KEY) as string;
 	if (versionToUse) {
-		const thisVersionAvailable = await testVersionAvailable(versionToUse);
-		if (!thisVersionAvailable) {
+		const passedVersionAvailable = await testVersionAvailable(versionToUse);
+		if (!passedVersionAvailable) {
 			const msg: string = `Camel K CLI Version ${versionToUse} unavailable.`;
 			extension.shareMessageInMainOutputChannel(msg);
 			return false;
@@ -65,8 +65,12 @@ export async function checkKamelNeedsUpdate(versionToUse?: string): Promise<bool
 	}
 
 	if (runtimeVersionSetting && runtimeVersionSetting.toLowerCase() !== versionToUse.toLowerCase()) {
-		versionToUse = runtimeVersionSetting;
-		extension.shareMessageInMainOutputChannel(`Using Apache Camel K CLI version ${versionToUse} instead of latest version ${version}`);
+		const runtimeVersionAvailable = await testVersionAvailable(runtimeVersionSetting);
+		if (!runtimeVersionAvailable) {
+			versionToUse = version;
+		} else {
+			versionToUse = runtimeVersionSetting;
+		}
 	}
 
 	if (versionToUse) {
@@ -162,8 +166,15 @@ export async function handleChangeRuntimeConfiguration() {
 		}
 	} else if (extension.runtimeVersionSetting) {
 		if (runtimeSetting && runtimeSetting.trim().length > 0 && extension.runtimeVersionSetting.toLowerCase() !== runtimeSetting.toLowerCase()) {
-			const msg: string = `Setting for Apache Camel K runtime version has changed to ${runtimeSetting}. Please restart the workspace to refresh the Camel K cli.`;
-			setVersionAndTellUser(msg, runtimeSetting);
+			let isAvailable : boolean = await testVersionAvailable(runtimeSetting);
+			if (isAvailable) {
+				const msg: string = `Setting for Apache Camel K runtime version has changed to ${runtimeSetting}. Please restart the workspace to refresh the Camel K cli.`;
+				setVersionAndTellUser(msg, runtimeSetting);
+			} else {
+				const msg: string = `Setting for Apache Camel K runtime version changed to invalid version ${runtimeSetting}. Please set the version to a valid runtime version.`;
+				extension.shareMessageInMainOutputChannel(msg);
+				vscode.window.showErrorMessage(msg);
+			}
 		}
 	} else if (runtimeSetting && runtimeSetting.trim().length > 0 && version.toLowerCase() !== runtimeSetting.toLowerCase()) {
 		const msg: string = `Setting for Apache Camel K runtime version has changed to ${runtimeSetting}. Please restart the workspace to refresh the Camel K cli.`;
@@ -199,6 +210,6 @@ export async function getDownloadURLForCamelKTag(tag : string, platformStr : str
 		return Promise.reject(`Failed to retrieve latest Apache Camel K version tag from: ${tagURL}`);
 	} else {
 		console.log(`error ${res.status} ${res.statusText}`);
-		return Promise.reject(`Failed to find Camel K tag {tag} at github: ${res.status} ${res.statusText}`);
+		return Promise.reject(`Failed to find Camel K tag ${tag} at github: ${res.status} ${res.statusText}`);
 	}
 }

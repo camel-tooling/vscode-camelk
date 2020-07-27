@@ -4,6 +4,9 @@ All notable changes to the "vscode-camelk" extension will be documented in this 
 
 ## 0.0.16
 
+- Update default runtime version to v1.1.0
+- Fix runtime retrieval to use more of the GitHub API to determine download location via browser_download_url
+
 ## 0.0.15
 
 - Add default value for trait property when auto-completing from trait name

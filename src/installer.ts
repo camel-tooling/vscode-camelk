@@ -88,25 +88,38 @@ function updateStatusBarItem(sbItem : vscode.StatusBarItem, text: string, toolti
 }
 
 export async function installKamel(context: vscode.ExtensionContext): Promise<Errorable<null>> {
-	let versionToUse: string;
+	let versionToUse: string = versionUtils.version;
 	const runtimeVersionSetting: string | undefined = vscode.workspace.getConfiguration().get(config.RUNTIME_VERSION_KEY);
+	const autoUpgrade : boolean = config.getKamelAutoupgradeConfig();
 	if (runtimeVersionSetting && runtimeVersionSetting.toLowerCase() !== versionUtils.version.toLowerCase()) {
-		versionToUse = runtimeVersionSetting;
-	} else {
+		const runtimeVersionAvailable = await versionUtils.testVersionAvailable(runtimeVersionSetting);
+		if (!runtimeVersionAvailable) {
+			const unavailableMsg: string = `Camel K CLI Version ${runtimeVersionSetting} unavailable. Will use default version ${versionUtils.version}`;
+			extension.shareMessageInMainOutputChannel(unavailableMsg);
+			versionToUse = versionUtils.version;
+		} else {
+			versionToUse = runtimeVersionSetting;
+		}
+	} else if (autoUpgrade) {
 		const latestversion: Errorable<string> = await versionUtils.getLatestCamelKVersion();
 		if (failed(latestversion)) {
 			extension.shareMessageInMainOutputChannel(`Cannot retrieve latest available Camel version and none has been specified in settings. Will fall back to use the default ${versionUtils.version}`);
 			versionToUse = versionUtils.version;
 		} else {
 			versionToUse = latestversion.result.trim();
+			extension.shareMessageInMainOutputChannel(`Auto-upgrade is enabled and a new version of the Camel K CLI was discovered. Will use new version ${versionToUse}`);
+			await config.setKamelRuntimeVersionConfig(versionToUse);
+			extension.setRuntimeVersionSetting(versionToUse);
 		}
 	}
 
 	try {
-		const needsUpdate: boolean = await versionUtils.checkKamelNeedsUpdate(versionToUse);
-		if (needsUpdate) {
-			extension.shareMessageInMainOutputChannel(`Checking to see if Apache Camel K CLI version ${versionToUse} available`);
-		}
+//		if (autoUpgrade) {
+			const needsUpdate: boolean = await versionUtils.checkKamelNeedsUpdate(versionToUse);
+			if (needsUpdate) {
+				extension.shareMessageInMainOutputChannel(`Checking to see if Apache Camel K CLI version ${versionToUse} available`);
+			}
+//		}
 	} catch ( error ) {
 		console.error(error);
 	}
@@ -138,7 +151,8 @@ export async function installKamel(context: vscode.ExtensionContext): Promise<Er
 		throw new Error(msg);
 	}
 
-	const kamelCliFile: string = `camel-k-client-${versionToUse}-${platformString}-64bit.tar.gz`;
+	const kamelCliFile: string = path.parse(kamelUrl).base;
+	//const kamelCliFile: string = `camel-k-client-${versionToUse}-${platformString}-64bit.tar.gz`;
 	const downloadFile: string = path.join(installFolder, binFile);
 	extension.shareMessageInMainOutputChannel(`Downloading kamel cli tool from ${kamelUrl} to ${downloadFile}`);
 
