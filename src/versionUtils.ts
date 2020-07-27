@@ -189,13 +189,13 @@ export async function getDownloadURLForCamelKTag(tag : string, platformStr : str
 	if (res.status === 200) {
 		const latestJSON: any = await res.json();
 		const assetsJSON: any = await latestJSON.assets;
-		assetsJSON.forEach(function(asset:any){
+		for (let asset of assetsJSON) {
 			const aUrl : string = asset.browser_download_url;
 			if (aUrl.includes(`-${platformStr}-`)) {
 				console.log(aUrl);
 				return aUrl;
 			}
-		});
+		}
 		return Promise.reject(`Failed to retrieve latest Apache Camel K version tag from: ${tagURL}`);
 	} else {
 		console.log(`error ${res.status} ${res.statusText}`);
