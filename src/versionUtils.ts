@@ -34,9 +34,14 @@ const LAST_MODIFIED_DATE_OF_DEFAULT_VERSION: string = 'Tue, 09 Jun 2020 12:59:21
 let latestVersionFromOnline: string;
 
 async function testVersionAvailable(versionToUse: string): Promise<boolean> {
-	if (versionToUse) {
-		const kamelUrl = `https://github.com/apache/camel-k/releases/download/${versionToUse}/camel-k-client-${versionToUse}-${platformString}-64bit.tar.gz`;
-		return await pingGithubUrl(kamelUrl);
+	if (platformString && versionToUse) {
+		//const kamelUrl = `https://github.com/apache/camel-k/releases/download/${versionToUse}/camel-k-client-${versionToUse}-${platformString}-64bit.tar.gz`;
+		try {
+			const kamelUrl : string = await getDownloadURLForCamelKTag(versionToUse, platformString);
+			return await pingGithubUrl(kamelUrl);
+		} catch (error) {
+			// ignore
+		}
 	}
 	return false;
 }
@@ -172,7 +177,7 @@ function setVersionAndTellUser(msg: string, newVersion: string) {
 	extension.setRuntimeVersionSetting(newVersion);
 }
 
-export async function getDownloadURLForCamelKTag(tag : string, platformStr : string): Promise<Errorable<string>> {
+export async function getDownloadURLForCamelKTag(tag : string, platformStr : string): Promise<string> {
 	const tagURL: string = `https://api.github.com/repos/apache/camel-k/releases/tags/${tag}`;
 	const headers: string[][] = [];
 	const githubToken: string | undefined = process.env.VSCODE_CAMELK_GITHUB_TOKEN;
@@ -186,14 +191,14 @@ export async function getDownloadURLForCamelKTag(tag : string, platformStr : str
 		const assetsJSON: any = await latestJSON.assets;
 		assetsJSON.forEach(function(asset:any){
 			const aUrl : string = asset.browser_download_url;
-			console.log(aUrl);
 			if (aUrl.includes(`-${platformStr}-`)) {
-				return { succeeded: true, result: aUrl };
+				console.log(aUrl);
+				return aUrl;
 			}
 		});
-		return { succeeded: false, error: [`Failed to retrieve latest Apache Camel K version tag from: ${tagURL}`] };
+		return Promise.reject(`Failed to retrieve latest Apache Camel K version tag from: ${tagURL}`);
 	} else {
 		console.log(`error ${res.status} ${res.statusText}`);
-		return { succeeded: false, error: [`Failed to find Camel K tag {tag} at github: ${res.status} ${res.statusText}`] };
+		return Promise.reject(`Failed to find Camel K tag {tag} at github: ${res.status} ${res.statusText}`);
 	}
 }

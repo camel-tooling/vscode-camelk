@@ -115,27 +115,31 @@ export async function installKamel(context: vscode.ExtensionContext): Promise<Er
 	console.log(`Attempting to download Apache Camel K CLI to ${installFolder}`);
 	mkdirp.sync(installFolder);
 
-	let githubUrl : any;
+	//let kamelUrl `https://github.com/apache/camel-k/releases/download/${versionToUse}/camel-k-client-${versionToUse}-${platformString}-64bit.tar.gz`;
+	let kamelUrl : string = '';
 	if (platformString && versionToUse) {
-		githubUrl = await versionUtils.getDownloadURLForCamelKTag(versionToUse, platformString);
+		try {
+			kamelUrl = await versionUtils.getDownloadURLForCamelKTag(versionToUse, platformString);
+		} catch (error) {
+			extension.shareMessageInMainOutputChannel(error);
+			throw new Error(error);
+		}
 	}
 
-	let kamelUrl : string = `https://github.com/apache/camel-k/releases/download/${versionToUse}/camel-k-client-${versionToUse}-${platformString}-64bit.tar.gz`;
-	if (typeof githubUrl === 'string') {
-		kamelUrl = githubUrl;
-	}
-
-	//const kamelUrl: string = `https://github.com/apache/camel-k/releases/download/${versionToUse}/camel-k-client-${versionToUse}-${platformString}-64bit.tar.gz`;
-	const kamelCliFile: string = `camel-k-client-${versionToUse}-${platformString}-64bit.tar.gz`;
-	const downloadFile: string = path.join(installFolder, binFile);
-
-	const result: boolean = await versionUtils.pingGithubUrl(kamelUrl);
-	if (!result) {
-		var msg = `Camel K CLI Version ${versionToUse} unavailable. Please check the Apache Camel K version specified in VS Code Settings. Inaccessible url: ${kamelUrl}`;
+	var msg = `Camel K CLI Version ${versionToUse} unavailable. Please check the Apache Camel K version specified in VS Code Settings. Inaccessible url: ${kamelUrl}`;
+	if (!kamelUrl && kamelUrl.length === 0) {
 		extension.shareMessageInMainOutputChannel(msg);
 		throw new Error(msg);
 	}
 
+	const result: boolean = await versionUtils.pingGithubUrl(kamelUrl);
+	if (!result) {
+		extension.shareMessageInMainOutputChannel(msg);
+		throw new Error(msg);
+	}
+
+	const kamelCliFile: string = `camel-k-client-${versionToUse}-${platformString}-64bit.tar.gz`;
+	const downloadFile: string = path.join(installFolder, binFile);
 	extension.shareMessageInMainOutputChannel(`Downloading kamel cli tool from ${kamelUrl} to ${downloadFile}`);
 
 	try { 
