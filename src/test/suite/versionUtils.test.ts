@@ -19,7 +19,6 @@
 import * as chai from 'chai';
 import * as sinonChai from 'sinon-chai';
 import * as versionUtils from '../../versionUtils';
-import { fail } from 'assert';
 
 chai.use(sinonChai);
 const should = chai.should();
@@ -47,7 +46,7 @@ suite("ensure version url methods are functioning as expected", () => {
 			const testUrl = await versionUtils.getDownloadURLForCamelKTag(tagName, platformName);
 			should.equal(testUrl, urlToTest);
 		} catch (error) {
-			fail(error);
+			should.fail(error);
 		}
 	}
 
