@@ -195,21 +195,32 @@ export async function getDownloadURLForCamelKTag(tag : string, platformStr : str
 	if (githubToken) {
 		headers.push(['Authorization', `token ${githubToken}`]);
 	}
-	console.log(tagURL);
-	const res: Response = await fetch(tagURL, { headers: headers });
+	const res: Response = await timeout(9000, fetch(tagURL, { headers: headers }));
 	if (res.status === 200) {
 		const latestJSON: any = await res.json();
 		const assetsJSON: any = await latestJSON.assets;
 		for (let asset of assetsJSON) {
 			const aUrl : string = asset.browser_download_url;
 			if (aUrl.includes(`-${platformStr}-`)) {
-				console.log(aUrl);
 				return aUrl;
 			}
 		}
 		return Promise.reject(`Failed to retrieve latest Apache Camel K version tag from: ${tagURL}`);
 	} else {
-		console.log(`error ${res.status} ${res.statusText}`);
 		return Promise.reject(`Failed to find Camel K tag ${tag} at github: ${res.status} ${res.statusText}`);
 	}
 }
+
+/**
+ * Timeout function
+ * @param {Integer} time (miliseconds)
+ * @param {Promise} promise
+ */
+async function timeout(time: number, promise: Promise<any>): Promise<any> {
+	return new Promise<any>( (resolve, reject) => {
+		setTimeout( () => {
+			reject(new Error('Request timed out.'));
+		}, time);
+		promise.then(resolve, reject);
+	});
+} 

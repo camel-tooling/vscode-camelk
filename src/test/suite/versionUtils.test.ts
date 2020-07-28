@@ -16,33 +16,42 @@
  */
 'use strict';
 
-import * as assert from 'assert';
+import * as chai from 'chai';
+import * as sinonChai from 'sinon-chai';
 import * as versionUtils from '../../versionUtils';
 
-suite("ensure version url methods are functioning as expected", function() {
-	test("validate url for existing 1.0.0 version", async function() {
-		validateVersion('1.0.0', 'linux', 'https://github.com/apache/camel-k/releases/download/1.0.0/camel-k-client-1.0.0-linux-64bit.tar.gz');
+chai.use(sinonChai);
+const should = chai.should();
+
+suite("ensure version url methods are functioning as expected", () => {
+
+	test("validate url for existing 1.0.0 version", async () => {
+		await validateVersion('1.0.0', 'linux', 'https://github.com/apache/camel-k/releases/download/1.0.0/camel-k-client-1.0.0-linux-64bit.tar.gz');
 	});
 
-	test("validate url for existing 1.0.1 version", async function() {
-		validateVersion('1.0.1', 'linux', 'https://github.com/apache/camel-k/releases/download/1.0.1/camel-k-client-1.0.1-linux-64bit.tar.gz');
+	test("validate url for existing 1.0.1 version", async () => {
+		await validateVersion('1.0.1', 'linux', 'https://github.com/apache/camel-k/releases/download/1.0.1/camel-k-client-1.0.1-linux-64bit.tar.gz');
 	});
 
-	test("validate url for existing v1.1.0 version", async function() {
-		validateVersion('v1.1.0', 'linux', 'https://github.com/apache/camel-k/releases/download/v1.1.0/camel-k-client-1.1.0-linux-64bit.tar.gz');
+	test("validate url for existing v1.1.0 version", async () => {
+		await validateVersion('v1.1.0', 'linux', 'https://github.com/apache/camel-k/releases/download/v1.1.0/camel-k-client-1.1.0-linux-64bit.tar.gz');
 	});
 
-	test("validate invalid url for xyz1 version", async function() {
-		invalidateVersion('xyz1', 'linux', 'This should definitely fail.');
+	test("validate invalid url for xyz1 version", async () => {
+		await invalidateVersion('xyz1', 'linux');
 	});
 
-	async function validateVersion(tagName : string, platformName : string, urlToTest : string) {
+	async function validateVersion(tagName : string, platformName : string, urlToTest : string): Promise<void> {
 		const testUrl = await versionUtils.getDownloadURLForCamelKTag(tagName, platformName);
-		assert.strictEqual(testUrl, urlToTest);
+		should.equal(testUrl, urlToTest);
 	}
 
-	async function invalidateVersion(tagName : string, platformName : string, urlToTest : string) {
-		const testUrl = await versionUtils.getDownloadURLForCamelKTag(tagName, platformName);
-		assert.notStrictEqual(testUrl, urlToTest);
+	async function invalidateVersion(tagName : string, platformName : string): Promise<void> {
+		try {
+			await versionUtils.getDownloadURLForCamelKTag(tagName, platformName);
+			should.fail(`Downloading invalid Camel-K version (${tagName}) did not fail!`);
+		} catch (error) {
+			should.exist(error);
+		}		
 	}
 });
