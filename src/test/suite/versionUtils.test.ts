@@ -42,8 +42,12 @@ suite("ensure version url methods are functioning as expected", () => {
 	});
 
 	async function validateVersion(tagName : string, platformName : string, urlToTest : string): Promise<void> {
-		const testUrl = await versionUtils.getDownloadURLForCamelKTag(tagName, platformName);
-		should.equal(testUrl, urlToTest);
+		try {
+			const testUrl = await versionUtils.getDownloadURLForCamelKTag(tagName, platformName);
+			should.equal(testUrl, urlToTest);
+		} catch (error) {
+			should.not.exist(error);
+		}
 	}
 
 	async function invalidateVersion(tagName : string, platformName : string): Promise<void> {
