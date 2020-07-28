@@ -88,17 +88,28 @@ function updateStatusBarItem(sbItem : vscode.StatusBarItem, text: string, toolti
 }
 
 export async function installKamel(context: vscode.ExtensionContext): Promise<Errorable<null>> {
-	let versionToUse: string;
+	let versionToUse: string = versionUtils.version;
 	const runtimeVersionSetting: string | undefined = vscode.workspace.getConfiguration().get(config.RUNTIME_VERSION_KEY);
+	const autoUpgrade : boolean = config.getKamelAutoupgradeConfig();
 	if (runtimeVersionSetting && runtimeVersionSetting.toLowerCase() !== versionUtils.version.toLowerCase()) {
-		versionToUse = runtimeVersionSetting;
-	} else {
+		const runtimeVersionAvailable = await versionUtils.testVersionAvailable(runtimeVersionSetting);
+		if (!runtimeVersionAvailable) {
+			const unavailableMsg: string = `Camel K CLI Version ${runtimeVersionSetting} unavailable. Will use default version ${versionUtils.version}`;
+			extension.shareMessageInMainOutputChannel(unavailableMsg);
+			versionToUse = versionUtils.version;
+		} else {
+			versionToUse = runtimeVersionSetting;
+		}
+	} else if (autoUpgrade) {
 		const latestversion: Errorable<string> = await versionUtils.getLatestCamelKVersion();
 		if (failed(latestversion)) {
 			extension.shareMessageInMainOutputChannel(`Cannot retrieve latest available Camel version and none has been specified in settings. Will fall back to use the default ${versionUtils.version}`);
 			versionToUse = versionUtils.version;
 		} else {
 			versionToUse = latestversion.result.trim();
+			extension.shareMessageInMainOutputChannel(`Auto-upgrade is enabled and a new version of the Camel K CLI was discovered. Will use new version ${versionToUse}`);
+			await config.setKamelRuntimeVersionConfig(versionToUse);
+			extension.setRuntimeVersionSetting(versionToUse);
 		}
 	}
 
@@ -115,17 +126,30 @@ export async function installKamel(context: vscode.ExtensionContext): Promise<Er
 	console.log(`Attempting to download Apache Camel K CLI to ${installFolder}`);
 	mkdirp.sync(installFolder);
 
-	const kamelUrl: string = `https://github.com/apache/camel-k/releases/download/${versionToUse}/camel-k-client-${versionToUse}-${platformString}-64bit.tar.gz`;
-	const kamelCliFile: string = `camel-k-client-${versionToUse}-${platformString}-64bit.tar.gz`;
-	const downloadFile: string = path.join(installFolder, binFile);
+	let kamelUrl : string = '';
+	if (platformString && versionToUse) {
+		try {
+			kamelUrl = await versionUtils.getDownloadURLForCamelKTag(versionToUse, platformString);
+		} catch (error) {
+			extension.shareMessageInMainOutputChannel(error);
+			throw new Error(error);
+		}
+	}
 
-	const result: boolean = await versionUtils.pingGithubUrl(kamelUrl);
-	if (!result) {
-		var msg = `Camel K CLI Version ${versionToUse} unavailable. Please check the Apache Camel K version specified in VS Code Settings. Inaccessible url: ${kamelUrl}`;
+	var msg = `Camel K CLI Version ${versionToUse} unavailable. Please check the Apache Camel K version specified in VS Code Settings. Inaccessible url: ${kamelUrl}`;
+	if (!kamelUrl && kamelUrl.length === 0) {
 		extension.shareMessageInMainOutputChannel(msg);
 		throw new Error(msg);
 	}
 
+	const result: boolean = await versionUtils.pingGithubUrl(kamelUrl);
+	if (!result) {
+		extension.shareMessageInMainOutputChannel(msg);
+		throw new Error(msg);
+	}
+
+	const kamelCliFile: string = path.parse(kamelUrl).base;
+	const downloadFile: string = path.join(installFolder, binFile);
 	extension.shareMessageInMainOutputChannel(`Downloading kamel cli tool from ${kamelUrl} to ${downloadFile}`);
 
 	try { 

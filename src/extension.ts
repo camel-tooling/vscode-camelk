@@ -144,8 +144,8 @@ export async function activate(context: vscode.ExtensionContext) {
 		});
 	
 		// create the integration view action -- start new integration
-		let startIntegration = vscode.commands.registerCommand('camelk.startintegration', async (...args:any[]) => { await runTheFile(args);});
-		context.subscriptions.push(startIntegration);
+		let startIntegrationCommand = vscode.commands.registerCommand('camelk.startintegration', async (...args:any[]) => { await runTheFile(args);});
+		context.subscriptions.push(startIntegrationCommand);
 	
 		// add commands to create config-map and secret objects from .properties files
 		configmapsandsecrets.registerCommands();
@@ -302,8 +302,8 @@ function applyStatusBarSettings(): void {
 	showStatusBar = statusBarSetting;
 
 	vscode.workspace.onDidChangeConfiguration(() => {
-		let statusBarSetting = vscode.workspace.getConfiguration().get(config.SHOW_STATUS_BAR_KEY) as boolean;
-		showStatusBar = statusBarSetting;
+		let statusBarSettingHandle = vscode.workspace.getConfiguration().get(config.SHOW_STATUS_BAR_KEY) as boolean;
+		showStatusBar = statusBarSettingHandle;
 		if (!showStatusBar) {
 			hideStatusLine();
 		}
@@ -333,7 +333,6 @@ async function applyDefaultVersionSettings() : Promise<void> {
 			if (runtimeSetting && version.toLowerCase() !== runtimeSetting.toLowerCase()) {
 				await config.setKamelRuntimeVersionConfig(version).then ( () => {
 					runtimeVersionSetting = version;	
-					shareMessageInMainOutputChannel(`Auto-upgrade setting enabled. Updating to default version ${version} of Apache Camel K CLI`);
 				});
 			}
 		} else {

@@ -75,7 +75,7 @@
 					},
 					"camelk.integrations.runtimeVersion": {
 						"type": "string",
-						"description": "Default Apache Camel K Runtime Version",
+						"description": "Default Apache Camel K Runtime Version (equivalent to GitHub tag)",
 						"scope": "window"
 					},
 					"camelk.integrations.autoUpgrade": {
