@@ -35,7 +35,6 @@ let latestVersionFromOnline: string;
 
 export async function testVersionAvailable(versionToUse: string): Promise<boolean> {
 	if (platformString && versionToUse) {
-		//const kamelUrl = `https://github.com/apache/camel-k/releases/download/${versionToUse}/camel-k-client-${versionToUse}-${platformString}-64bit.tar.gz`;
 		try {
 			const kamelUrl : string = await getDownloadURLForCamelKTag(versionToUse, platformString);
 			return await pingGithubUrl(kamelUrl);

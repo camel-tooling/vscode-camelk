@@ -114,12 +114,10 @@ export async function installKamel(context: vscode.ExtensionContext): Promise<Er
 	}
 
 	try {
-//		if (autoUpgrade) {
-			const needsUpdate: boolean = await versionUtils.checkKamelNeedsUpdate(versionToUse);
-			if (needsUpdate) {
-				extension.shareMessageInMainOutputChannel(`Checking to see if Apache Camel K CLI version ${versionToUse} available`);
-			}
-//		}
+		const needsUpdate: boolean = await versionUtils.checkKamelNeedsUpdate(versionToUse);
+		if (needsUpdate) {
+			extension.shareMessageInMainOutputChannel(`Checking to see if Apache Camel K CLI version ${versionToUse} available`);
+		}
 	} catch ( error ) {
 		console.error(error);
 	}
@@ -128,7 +126,6 @@ export async function installKamel(context: vscode.ExtensionContext): Promise<Er
 	console.log(`Attempting to download Apache Camel K CLI to ${installFolder}`);
 	mkdirp.sync(installFolder);
 
-	//let kamelUrl `https://github.com/apache/camel-k/releases/download/${versionToUse}/camel-k-client-${versionToUse}-${platformString}-64bit.tar.gz`;
 	let kamelUrl : string = '';
 	if (platformString && versionToUse) {
 		try {
@@ -152,7 +149,6 @@ export async function installKamel(context: vscode.ExtensionContext): Promise<Er
 	}
 
 	const kamelCliFile: string = path.parse(kamelUrl).base;
-	//const kamelCliFile: string = `camel-k-client-${versionToUse}-${platformString}-64bit.tar.gz`;
 	const downloadFile: string = path.join(installFolder, binFile);
 	extension.shareMessageInMainOutputChannel(`Downloading kamel cli tool from ${kamelUrl} to ${downloadFile}`);
 
