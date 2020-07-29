@@ -105,26 +105,21 @@ export class CamelKNodeProvider implements vscode.TreeDataProvider<TreeNode> {
 		return new Promise<void>( async (resolve, reject) => {
 			extension.setStatusLineMessageAndShow(`Refreshing Apache Camel K Integrations view...`);
 			this.resetList();
-			let inaccessible = false;
 			if (this.retrieveIntegrations) {
-				await installer.isKamelAvailable()
-					.then( async () => {
-						return await Promise.resolve(this.getIntegrationsFromKubectl())
-							.then((output) => {
-								this.processIntegrationList(output);
-							});
-					})
-					.catch( (error) =>  {
-						utils.shareMessage(extension.mainOutputChannel, `Refreshing Apache Camel K Integrations view using kubectl failed. ${error}`);
-						inaccessible = true;
-						reject(error);
-						return;
-					});
+				try {
+					await installer.isKamelAvailable();
+					const output: string = await kubectlutils.getIntegrations();
+					this.processIntegrationList(output);
+				} catch(error) {
+					utils.shareMessage(extension.mainOutputChannel, `Refreshing Apache Camel K Integrations view using kubectl failed. ${error}`);
+					reject(error);
+					return;
+				}
 			}
 			extension.hideStatusLine();
 			this._onDidChangeTreeData.fire(undefined);
-			let newCount = this.treeNodes.length;
-			if (newCount === 0 && !inaccessible) {
+			const newCount: number = this.treeNodes.length;
+			if (newCount === 0) {
 				let namespace : string | undefined = config.getNamespaceconfig();
 				if (namespace) {
 					utils.shareMessage(extension.mainOutputChannel, `Refreshing Apache Camel K Integrations view succeeded, no published integrations available for namespace ${namespace}.`);
@@ -153,23 +148,23 @@ export class CamelKNodeProvider implements vscode.TreeDataProvider<TreeNode> {
 	// process the text-based list we get back from the kubectl command
 	processIntegrationList(output: string): void {
 		if (output) {
-			let lines = output.split('\n');
+			const lines: Array<string> = output.split('\n');
 			for (let entry of lines) {
-				let line = entry.split('  ');
-				let cleanLine = [];
+				const line: Array<string> = entry.split('  ');
+				const cleanLine: Array<string> = new Array<string>();
 				for (var i=0; i < line.length; i++) {
 					if (line[i].trim().length === 0) {
 						continue;
 					}
 					cleanLine.push(line[i].trim());
 				}
-				let firstString : string = cleanLine[0];
+				const firstString: string = cleanLine[0];
 				if (firstString === undefined || firstString.toUpperCase().startsWith('NAME') || firstString.trim().length === 0) {
 					continue;
 				}
-				let integrationName = cleanLine[0];
-				let status = cleanLine[1];
-				let newNode = new TreeNode("string", integrationName, status, vscode.TreeItemCollapsibleState.None);
+				const integrationName: string = cleanLine[0];
+				const status: string = cleanLine[1];
+				const newNode: TreeNode = new TreeNode("string", integrationName, status, vscode.TreeItemCollapsibleState.None);
 				if (!this.doesNodeExist(this.treeNodes, newNode)) {
 					this.addChild(this.treeNodes, newNode, true);
 				}
@@ -181,13 +176,10 @@ export class CamelKNodeProvider implements vscode.TreeDataProvider<TreeNode> {
 	processIntegrationListFromJSON(json : Object): void {
 		if (json) {
 			try {
-				let jsonStringify = JSON.stringify(json);
-				let jsonObject = JSON.parse(jsonStringify);
+				const jsonObject: any = JSON.parse(JSON.stringify(json));
 				for (var i=0; i<jsonObject.items.length;i++) {
-					var integration = jsonObject.items[i];
-					var integrationName = integration.metadata.name;
-					var integrationPhase = integration.status.phase;
-					let newNode = new TreeNode("string", integrationName, integrationPhase, vscode.TreeItemCollapsibleState.None);
+					const integration: any = jsonObject.items[i];
+					const newNode: TreeNode = new TreeNode("string", integration.metadata.name, integration.status.phase, vscode.TreeItemCollapsibleState.None);
 					if (!this.doesNodeExist(this.treeNodes, newNode)) {
 						this.addChild(this.treeNodes, newNode, true);
 					}
@@ -197,12 +189,6 @@ export class CamelKNodeProvider implements vscode.TreeDataProvider<TreeNode> {
 			}
 		}
 	}
-
-	// actually retrieve the list of integrations running in camel k using kubectl
-	async getIntegrationsFromKubectl(): Promise<string> {
-		return await kubectlutils.getIntegrations();
-	}
-
 }
 
 // simple tree node for our integration view
@@ -219,11 +205,12 @@ export class TreeNode extends vscode.TreeItem {
 		super(label, collapsibleState);
 		this.type = type;
 		this.status = status;
+
 		if (CamelKNodeProvider.context) {
 			this.iconPath = TreeNode.getIconForPodStatus(this.status, CamelKNodeProvider.context);
 		}
 
-		let namespace: string = config.getNamespaceconfig() as string;
+		const namespace: string | undefined = config.getNamespaceconfig();
 		if (namespace) {
 			this.tooltip = `Status: ${this.status} \nNamespace: ${namespace}`;
 		} else {
@@ -231,17 +218,16 @@ export class TreeNode extends vscode.TreeItem {
 		}
 	}
 
-	static getIconForPodStatus(status: string, extContext : vscode.ExtensionContext): vscode.Uri | undefined {
-		let newIcon : vscode.Uri | undefined =  undefined;
+	static getIconForPodStatus(status: string, extContext: vscode.ExtensionContext): vscode.Uri | undefined {
 		if (extContext) {
 			if (status && status.toLowerCase().startsWith("running")) {
-				const iconPath = path.join(extContext.extensionPath, "/resources/round-k-transparent-16-running.svg");
-				newIcon = vscode.Uri.file(iconPath);
+				const iconPath: string = path.join(extContext.extensionPath, '/resources/round-k-transparent-16-running.svg');
+				return vscode.Uri.file(iconPath);
 			} else {
-				const iconPath = path.join(extContext.extensionPath, "/resources/round-k-transparent-16-error.svg");
-				newIcon = vscode.Uri.file(iconPath);
+				const iconPath: string = path.join(extContext.extensionPath, '/resources/round-k-transparent-16-error.svg');
+				return vscode.Uri.file(iconPath);
 			}
 		}
-		return newIcon;
+		return undefined;
 	}
 }
