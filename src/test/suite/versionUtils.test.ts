@@ -33,8 +33,8 @@ suite("ensure version url methods are functioning as expected", () => {
 		await validateVersion('1.0.1', 'linux', 'https://github.com/apache/camel-k/releases/download/1.0.1/camel-k-client-1.0.1-linux-64bit.tar.gz');
 	});
 
-	test("validate url for existing v1.1.0 version", async () => {
-		await validateVersion('v1.1.0', 'linux', 'https://github.com/apache/camel-k/releases/download/v1.1.0/camel-k-client-1.1.0-linux-64bit.tar.gz');
+	test("validate url for existing 1.1.0 version", async () => {
+		await validateVersion('1.1.0', 'linux', 'https://github.com/apache/camel-k/releases/download/v1.1.0/camel-k-client-1.1.0-linux-64bit.tar.gz');
 	});
 
 	test("validate invalid url for xyz1 version", async () => {
