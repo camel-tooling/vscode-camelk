@@ -18,7 +18,6 @@
 import * as vscode from 'vscode';
 import {platform} from 'os';
 import {version} from './versionUtils';
-import { isNumber } from 'util';
 
 export const EXTENSION_CONFIG_KEY = "camelk.tools";
 export const KAMEL_PATH_CONFIG_KEY = "camelk.tools.kamel-path";
