@@ -99,6 +99,10 @@ export function isOldTagNaming(tagName: string): boolean {
 	return tagName.startsWith('0.') || tagName.startsWith('1.0.');
 }
 
+export function stripLeadingV(tagName: string): string {
+	return tagName.startsWith('v') ? tagName.substring(1) : tagName;
+}
+
 export async function getLatestCamelKVersion(): Promise<Errorable<string>> {
 	if (latestVersionFromOnline) {
 		return { succeeded: true, result: latestVersionFromOnline };
@@ -114,13 +118,7 @@ export async function getLatestCamelKVersion(): Promise<Errorable<string>> {
 			const latestJSON: any = await res.json();
 			const tagName: any = latestJSON.tag_name;
 			if (tagName) {
-				if (isOldTagNaming(tagName)) {
-					// older tags without leading 'v'
-					latestVersionFromOnline = tagName;
-				} else {
-					// newer tags with leading 'v'
-					latestVersionFromOnline = tagName.substring(1);
-				}
+				latestVersionFromOnline = stripLeadingV(tagName);
 				return { succeeded: true, result: latestVersionFromOnline };
 			} else {
 				return { succeeded: false, error: [`Failed to retrieve latest Apache Camel K version tag from : ${latestURL}`] };
@@ -149,7 +147,7 @@ async function checkKamelCLIVersion(): Promise<string | void> {
 }
 
 export async function handleChangeRuntimeConfiguration() {
-	const runtimeSetting: string | undefined = config.getKamelRuntimeVersionConfig();
+	const runtimeSetting: string = stripLeadingV(config.getKamelRuntimeVersionConfig() as string);
 	const newUpgradeSetting: boolean = config.getKamelAutoupgradeConfig();
 
 	/* 
@@ -179,6 +177,7 @@ export async function handleChangeRuntimeConfiguration() {
 			if (isAvailable) {
 				const msg: string = `Setting for Apache Camel K runtime version has changed to ${runtimeSetting}. Please restart the workspace to refresh the Camel K cli.`;
 				setVersionAndTellUser(msg, runtimeSetting);
+				await config.setKamelRuntimeVersionConfig(runtimeSetting);
 			} else {
 				const msg: string = `Setting for Apache Camel K runtime version changed to invalid version ${runtimeSetting}. Please set the version to a valid runtime version.`;
 				extension.shareMessageInMainOutputChannel(msg);
@@ -188,6 +187,7 @@ export async function handleChangeRuntimeConfiguration() {
 	} else if (runtimeSetting && runtimeSetting.trim().length > 0 && version.toLowerCase() !== runtimeSetting.toLowerCase()) {
 		const msg: string = `Setting for Apache Camel K runtime version has changed to ${runtimeSetting}. Please restart the workspace to refresh the Camel K cli.`;
 		setVersionAndTellUser(msg, runtimeSetting);
+		await config.setKamelRuntimeVersionConfig(runtimeSetting);
 	}
 }
 

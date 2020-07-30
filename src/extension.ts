@@ -171,6 +171,22 @@ export async function activate(context: vscode.ExtensionContext) {
 		updateReferenceLibraries(vscode.window.activeTextEditor, destination);
 	}
 	
+	vscode.workspace.onDidChangeConfiguration(async () => {
+		await handleChangeRuntimeConfiguration();
+		closeLogViewWhenIntegrationRemoved = vscode.workspace.getConfiguration().get(config.REMOVE_LOGVIEW_ON_SHUTDOWN_KEY) as boolean;
+		showStatusBar = vscode.workspace.getConfiguration().get(config.SHOW_STATUS_BAR_KEY) as boolean;
+		if (!showStatusBar) {
+			hideStatusLine();
+		}
+		if (camelKIntegrationsTreeView && camelKIntegrationsTreeView.visible === true) {
+			try {
+				await camelKIntegrationsProvider.refresh();
+			} catch (err) {
+				console.log(err);
+			}
+		}
+	});
+
 	await installAllTutorials(context);
 	
 	return {
@@ -297,19 +313,10 @@ export async function startListeningForServerChanges(): Promise<void> {
 
 function applyStatusBarSettings(): void {
 	showStatusBar = vscode.workspace.getConfiguration().get(config.SHOW_STATUS_BAR_KEY) as boolean;
-	vscode.workspace.onDidChangeConfiguration(() => {
-		showStatusBar = vscode.workspace.getConfiguration().get(config.SHOW_STATUS_BAR_KEY) as boolean;
-		if (!showStatusBar) {
-			hideStatusLine();
-		}
-	});
 }
 
 function applyLogviewSettings(): void {
 	closeLogViewWhenIntegrationRemoved = vscode.workspace.getConfiguration().get(config.REMOVE_LOGVIEW_ON_SHUTDOWN_KEY) as boolean;
-	vscode.workspace.onDidChangeConfiguration(() => {
-		closeLogViewWhenIntegrationRemoved = vscode.workspace.getConfiguration().get(config.REMOVE_LOGVIEW_ON_SHUTDOWN_KEY) as boolean;
-	});
 }
 
 async function applyDefaultVersionSettings() : Promise<void> {
@@ -331,26 +338,10 @@ async function applyDefaultVersionSettings() : Promise<void> {
 			runtimeVersionSetting = runtimeSetting;
 		}
 	}
-	vscode.workspace.onDidChangeConfiguration(async () => {
-		await handleChangeRuntimeConfiguration();
-	});
-}
-
-function refreshIfNamespaceChanges(): void {
-	vscode.workspace.onDidChangeConfiguration(async () => {
-		if (camelKIntegrationsTreeView && camelKIntegrationsTreeView.visible === true) {
-			try {
-				await camelKIntegrationsProvider.refresh();
-			} catch (err) {
-				console.log(err);
-			}
-		}
-	});
 }
 
 function applyUserSettings(): void {
 	applyStatusBarSettings();
-	refreshIfNamespaceChanges();
 	applyLogviewSettings();
 	applyDefaultVersionSettings();
 }
