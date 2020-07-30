@@ -24,7 +24,7 @@ import * as kamelCli from './kamel';
 import { platformString } from './installer';
 import fetch from 'cross-fetch';
 
-export const version: string = 'v1.1.0'; //need to retrieve this if possible, but have a default
+export const version: string = '1.1.0'; //need to retrieve this if possible, but have a default
 
 /*
 * Can be retrieved using `curl -i https://api.github.com/repos/apache/camel-k/releases/latest` and searching for "last-modified" attribute
@@ -95,6 +95,10 @@ export async function pingGithubUrl(urlStr: string): Promise<boolean> {
 	return false;
 }
 
+export function isOldTagNaming(tagName: string): boolean {
+	return tagName.startsWith('0.') || tagName.startsWith('1.0.');
+}
+
 export async function getLatestCamelKVersion(): Promise<Errorable<string>> {
 	if (latestVersionFromOnline) {
 		return { succeeded: true, result: latestVersionFromOnline };
@@ -110,8 +114,14 @@ export async function getLatestCamelKVersion(): Promise<Errorable<string>> {
 			const latestJSON: any = await res.json();
 			const tagName: any = latestJSON.tag_name;
 			if (tagName) {
-				latestVersionFromOnline = tagName;
-				return { succeeded: true, result: tagName };
+				if (isOldTagNaming(tagName)) {
+					// older tags without leading 'v'
+					latestVersionFromOnline = tagName;
+				} else {
+					// newer tags with leading 'v'
+					latestVersionFromOnline = tagName.substring(1);
+				}
+				return { succeeded: true, result: latestVersionFromOnline };
 			} else {
 				return { succeeded: false, error: [`Failed to retrieve latest Apache Camel K version tag from : ${latestURL}`] };
 			}
@@ -187,8 +197,9 @@ function setVersionAndTellUser(msg: string, newVersion: string) {
 	extension.setRuntimeVersionSetting(newVersion);
 }
 
-export async function getDownloadURLForCamelKTag(tag : string, platformStr : string): Promise<string> {
-	const tagURL: string = `https://api.github.com/repos/apache/camel-k/releases/tags/${tag}`;
+export async function getDownloadURLForCamelKTag(camelKVersion : string, platformStr : string): Promise<string> {
+	let tagName: string = isOldTagNaming(camelKVersion) ? camelKVersion : `v${camelKVersion}`;
+	const tagURL: string = `https://api.github.com/repos/apache/camel-k/releases/tags/${tagName}`;
 	const headers: string[][] = [];
 	const githubToken: string | undefined = process.env.VSCODE_CAMELK_GITHUB_TOKEN;
 	if (githubToken) {
@@ -206,7 +217,7 @@ export async function getDownloadURLForCamelKTag(tag : string, platformStr : str
 		}
 		return Promise.reject(`Failed to retrieve latest Apache Camel K version tag from: ${tagURL}`);
 	} else {
-		return Promise.reject(`Failed to find Camel K tag ${tag} at github: ${res.status} ${res.statusText}`);
+		return Promise.reject(`Failed to find Camel K tag ${tagName} at github: ${res.status} ${res.statusText}`);
 	}
 }
 
