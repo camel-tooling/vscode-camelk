@@ -18,6 +18,7 @@
 import * as vscode from 'vscode';
 import {platform} from 'os';
 import {version} from './versionUtils';
+import { isNumber } from 'util';
 
 export const EXTENSION_CONFIG_KEY = "camelk.tools";
 export const KAMEL_PATH_CONFIG_KEY = "camelk.tools.kamel-path";
@@ -160,7 +161,7 @@ export function getKamelRuntimeVersionConfig(): string | undefined {
 
 export async function setKamelRuntimeVersionConfig(value : string) : Promise<void> {
 	const configuration = vscode.workspace.getConfiguration();
-	return await configuration.update(RUNTIME_VERSION_KEY, value, vscode.ConfigurationTarget.Global);
+	return await configuration.update(RUNTIME_VERSION_KEY, value.toLowerCase().startsWith('v') ? value.substring(1) : value, vscode.ConfigurationTarget.Global);
 }
 
 export function getKamelAutoupgradeConfig() : boolean {
