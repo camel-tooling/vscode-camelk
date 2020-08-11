@@ -65,11 +65,11 @@ async function testCompletion(
 	let javaExtension: vscode.Extension<any> | undefined;
 	await waitUntil(() => {
 		javaExtension = vscode.extensions.getExtension('redhat.java');
-		return javaExtension?.isActive && javaExtension?.exports.status === "Started";
+		return javaExtension?.isActive && javaExtension?.exports?.status === "Started";
 	}, JAVA_EXTENSION_READINESS_TIMEOUT).catch(() => {
 		fail(`VS Code Java extension problem not ready in ${JAVA_EXTENSION_READINESS_TIMEOUT}: is defined?`+ javaExtension
 			+ ' is Active?' + javaExtension?.isActive
-			+ ' is started? '+ (javaExtension?.exports.status === "Started"));
+			+ ' is started? '+ (javaExtension?.exports?.status === "Started"));
 	});
 
 	await checkExpectedCompletion(docUri, position, expectedCompletion);
