@@ -1,28 +1,34 @@
-import { EditorView, ExtensionsViewItem } from 'vscode-extension-tester';
-import { Marketplace } from 'vscode-uitests-tooling';
-import { assert } from 'chai';
 import * as pjson from '../../package.json';
+import { assert } from 'chai';
+import { DefaultWait, Marketplace } from 'vscode-uitests-tooling';
+import {
+	EditorView,
+	ExtensionsViewItem,
+	ExtensionsViewSection,
+	SideBarView
+} from 'vscode-extension-tester';
 
 describe('Tooling for Apache Camel K extension', function () {
 
 	describe('Extensions view', function () {
 
-		let marketplace: Marketplace;
+		let section: ExtensionsViewSection;
 		let item: ExtensionsViewItem;
 
 		before(async function () {
 			this.timeout(10000);
-			marketplace = await Marketplace.open();
+			await Marketplace.open();
+			await DefaultWait.sleep(1000);
+			section = await new SideBarView().getContent().getSection('Installed') as ExtensionsViewSection;
 		});
 
 		after(async function () {
-			await marketplace.close();
 			await new EditorView().closeAllEditors();
 		});
 
 		it('Find extension', async function () {
 			this.timeout(10000);
-			item = await marketplace.findExtension(`@installed ${pjson.displayName}`) as ExtensionsViewItem; 
+			item = await section.findItem(`@installed ${pjson.displayName}`) as ExtensionsViewItem;
 		});
 
 		it('Extension is installed', async function () {
@@ -30,7 +36,7 @@ describe('Tooling for Apache Camel K extension', function () {
 			const installed = await item.isInstalled();
 			assert.isTrue(installed);
 		});
-		
+
 		it('Verify author', async function () {
 			this.timeout(5000);
 			const author = await item.getAuthor();
