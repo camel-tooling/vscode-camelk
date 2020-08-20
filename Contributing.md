@@ -8,7 +8,7 @@
     * Wait for PR to be merged
 * Check that someone listed as _submitter_ in Jenkinsfile is available
 * Create a tag
-* Push the tag to vscode-vscode repository, it will trigger a build after few minutes
+* Push the tag to vscode-camelk repository, it will trigger a build after few minutes
 * Check build is working fine on [Travis CI](https://travis-ci.org/camel-tooling/vscode-camelk/)
 * Start build on [Jenkins CI](https://dev-platform-jenkins.rhev-ci-vms.eng.rdu2.redhat.com/view/VS%20Code/job/vscode-camelk-release/) with _publishToMarketPlace_ parameter checked
 * Wait the build is waiting on step _Publish to Marketplace_
@@ -21,6 +21,10 @@
   * Run 'npm install' so that the package-lock.json is updated
   * Push changes in a PR
   * Follow PR until it is approved/merged
+  
+# Next steps after release
+
+Integrate the newly released version of VS Code Camel K in the Eclipse Che registry. See [Contributing.md in Che registry](https://github.com/eclipse/che-plugin-registry/blob/master/v3/plugins/redhat/vscode-camelk/Contributing.md).
 
 # Note about test execution and GitHub API access
 
