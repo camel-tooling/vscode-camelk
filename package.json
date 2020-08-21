@@ -298,7 +298,7 @@
 		"glob": "^7.1.6",
 		"istanbul": "^0.4.5",
 		"mocha": "^8.1.1",
-		"mocha-jenkins-reporter": "^0.4.4",
+		"mocha-jenkins-reporter": "^0.4.5",
 		"nock": "^13.0.4",
 		"remap-istanbul": "^0.13.0",
 		"sinon": "^9.0.3",
