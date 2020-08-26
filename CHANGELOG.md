@@ -4,7 +4,7 @@ All notable changes to the "vscode-camelk" extension will be documented in this 
 
 ## 0.0.17
 
-- Associate Yaml Camel K schema when there is the Camel K modeline
+- Associate Yaml Camel K schema when there is the Camel K modeline. The associated schema is configurable in the settings.
 
 ## 0.0.16
 
