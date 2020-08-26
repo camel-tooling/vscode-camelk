@@ -93,6 +93,11 @@
 								"description": "File path to a kubectl binary."
 							}
 						}
+					},
+					"camelk.yaml.schema": {
+						"type": "string",
+						"default": "https://raw.githubusercontent.com/apache/camel-k-runtime/master/camel-k-loader-yaml/camel-k-loader-yaml/src/generated/resources/camel-yaml-dsl.json",
+						"description": "Yaml Schema applied when Camel K modeline is set. (I.e. file starting with '# camel-k: ')"
 					}
 				}
 			}
