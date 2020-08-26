@@ -21,9 +21,10 @@ import fetch from 'cross-fetch';
 
 const CAMELK_MODELINE_PREFIX = '# camel-k:';
 const CAMELK_SCHEMA_ID = 'camelk';
-const CAMELK_SCHEMA_URI_PREFIX = CAMELK_SCHEMA_ID + '://schema/';
+export const CAMELK_SCHEMA_URI_PREFIX = CAMELK_SCHEMA_ID + '://schema/';
 
-let camelkSchemaCache: string;
+let camelkSchemaCache: string | undefined;
+let configUpdaterRegistered: boolean = false;
 
 export async function registerCamelKSchemaProvider(mainOutputChannel: vscode.OutputChannel): Promise<void> {
 	const yamlExtension: vscode.Extension<any> | undefined = vscode.extensions.getExtension('redhat.vscode-yaml');
@@ -34,20 +35,40 @@ export async function registerCamelKSchemaProvider(mainOutputChannel: vscode.Out
 	} else {
 		mainOutputChannel.appendLine('Yaml extension is not active. There won\'t be automatic completion/validation for Camel K files.');
 	}
+	
+	listenToConfigUpdate(mainOutputChannel);
+}
+
+function listenToConfigUpdate(mainOutputChannel: vscode.OutputChannel) {
+	if (!configUpdaterRegistered) {
+		configUpdaterRegistered = true;
+		vscode.workspace.onDidChangeConfiguration(event => {
+			if (event.affectsConfiguration('camelk.yaml.schema')) {
+				retrieveSchemaAsCache(mainOutputChannel);
+			}
+		});
+	}
 }
 
 async function retrieveSchemaAsCache(mainOutputChannel: vscode.OutputChannel): Promise<string | undefined> {
+	camelkSchemaCache = undefined;
 	try {
-		const res: Response = await fetch(getCamelKSchemaUrl());
-		if(res.status >= 400) {
-			mainOutputChannel.appendLine('Cannot retrieve Camel K schema. '+ res.statusText);
-			return undefined;
-		} else if(camelkSchemaCache === undefined) {
-			camelkSchemaCache = await res.text();
-			return camelkSchemaCache;
+		const schemaUrl: string | undefined = getCamelKSchemaUrl();
+		if (schemaUrl !== undefined) {
+			const res: Response = await fetch(schemaUrl);
+			if (res.status >= 400) {
+				console.log('error fetching: '+ res.statusText);
+				mainOutputChannel.appendLine('Cannot retrieve Camel K schema. ' + res.statusText);
+				return undefined;
+			} else if (camelkSchemaCache === undefined) {
+				camelkSchemaCache = await res.text();
+				return camelkSchemaCache;
+			}
+		} else {
+			mainOutputChannel.appendLine('Camel K schema settings is not configured.');
 		}
-	} catch(err) {
-		mainOutputChannel.appendLine('Cannot retrieve Camel K schema. '+ err);
+	} catch (err) {
+		mainOutputChannel.appendLine('Cannot retrieve Camel K schema. ' + err);
 	}
 }
 
@@ -63,7 +84,7 @@ function requestYamlSchemaUriCallback(resource: string): string | undefined {
 	return undefined;
 }
 
-function requestYamlSchemaContentCallback(uri: string): string | undefined {
+export function requestYamlSchemaContentCallback(uri: string): string | undefined {
 	const parsedUri: vscode.Uri = vscode.Uri.parse(uri);
 	if (parsedUri.scheme !== CAMELK_SCHEMA_ID) {
 		return undefined;
@@ -74,6 +95,6 @@ function requestYamlSchemaContentCallback(uri: string): string | undefined {
 	return camelkSchemaCache;
 }
 
-function getCamelKSchemaUrl(): string {
-	return 'https://raw.githubusercontent.com/apache/camel-k-runtime/master/camel-k-loader-yaml/camel-k-loader-yaml/src/generated/resources/camel-yaml-dsl.json';
+function getCamelKSchemaUrl(): string | undefined {
+	return vscode.workspace.getConfiguration().get('camelk.yaml.schema');
 }
