@@ -33,7 +33,6 @@ const LANGUAGES_WITH_FILENAME_EXTENSIONS = new Map([
 const LANGUAGES = Array.from(LANGUAGES_WITH_FILENAME_EXTENSIONS.keys());
 
 export async function create(...args: any[]) : Promise<void> {
-
 	let language : string | undefined;
 	let workspaceFolder : vscode.WorkspaceFolder | undefined;
 	if (vscode.workspace.workspaceFolders) {
@@ -52,10 +51,9 @@ export async function create(...args: any[]) : Promise<void> {
 	}
 
 	if (!language && !filename) {
-		const selectedLanguage = await vscode.window.showQuickPick(LANGUAGES, {placeHolder:'Please select the language in which the new file will be generated.'});
+		const selectedLanguage: string | undefined = await vscode.window.showQuickPick(LANGUAGES, {placeHolder:'Please select the language in which the new file will be generated.'});
 		if (selectedLanguage) {
-			const selectedWorkspaceFolder = await vscode.window.showWorkspaceFolderPick(
-				{placeHolder: 'Please select the workspace folder in which the new file will be created.'});
+			const selectedWorkspaceFolder: vscode.WorkspaceFolder | undefined = await vscode.window.showWorkspaceFolderPick( {placeHolder: 'Please select the workspace folder in which the new file will be created.'} );
 			if (selectedWorkspaceFolder) {
 				filename = await vscode.window.showInputBox({
 					prompt: 'Please provide a name for the new file (without extension)',
@@ -70,17 +68,17 @@ export async function create(...args: any[]) : Promise<void> {
 	}
 
 	if (filename && language && workspaceFolder) {
-		const kamelExecutor = kamel.create();
+		const kamelExecutor: kamel.Kamel = kamel.create();
 		const newFileFullPath: string = computeFullpath(language, workspaceFolder, filename);
 		await kamelExecutor.invoke(`init "${newFileFullPath}"`);
-		const textDocument = await vscode.workspace.openTextDocument(newFileFullPath);
+		const textDocument: vscode.TextDocument = await vscode.workspace.openTextDocument(newFileFullPath);
 		await vscode.window.showTextDocument(textDocument);
 	}
 }
 
-function computeFullpath(language: string, workspaceFolder: vscode.WorkspaceFolder, filename: string): string {
-	const extension = getFileExtensionForLanguage(language);
-	return path.join(workspaceFolder.uri.fsPath, `${filename}.${extension}`);
+function computeFullpath(language: string, workspaceFolder: vscode.WorkspaceFolder, fileName: string): string {
+	const fileExtension: string = getFileExtensionForLanguage(language);
+	return path.join(workspaceFolder.uri.fsPath, `${fileName}.${fileExtension}`);
 }
 
 export function validateFileName(name: string, language: string, workspaceFolder: vscode.WorkspaceFolder): string | undefined {
@@ -94,7 +92,7 @@ export function validateFileName(name: string, language: string, workspaceFolder
 	if (!validFilename(name)) {
 		return 'The filename is invalid.';
 	}
-	const patternJavaNamingConvention = '[A-Z][a-zA-Z_$0-9]*';
+	const patternJavaNamingConvention: string = '[A-Z][a-zA-Z_$0-9]*';
 	if ((language === 'Java' || language === 'Groovy') && !name.match(patternJavaNamingConvention)) {
 		return `The filename needs to follow the ${language} naming convention. I.e. ${patternJavaNamingConvention}`;
 	}
@@ -102,10 +100,6 @@ export function validateFileName(name: string, language: string, workspaceFolder
 }
 
 function getFileExtensionForLanguage(language: string): string {
-	const extension = LANGUAGES_WITH_FILENAME_EXTENSIONS.get(language);
-	if (extension) {
-		return extension;
-	} else {
-		return 'unknown';
-	}
+	const fileExtension: string | undefined = LANGUAGES_WITH_FILENAME_EXTENSIONS.get(language);
+	return fileExtension ? fileExtension : 'unknown';
 }
