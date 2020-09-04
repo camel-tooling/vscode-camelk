@@ -23,16 +23,16 @@ const waitUntil = require('async-wait-until');
 
 suite('Should do completion in yaml Camel K files without file name pattern', () => {
 	
-	var testVar = test('Completes for second level', async () => {
+	const testSecondLevel = test('Completes for second level', async () => {
 		const docURiTasksJson = getDocUri('camelkwithoutsuffix-withfirstlevel.yaml');
-		assumeNotOnJenkins(testVar);
+		assumeNotOnJenkins(testSecondLevel);
 		const expectedCompletion = { label: 'steps' };
 		await testCompletion(docURiTasksJson, new vscode.Position(2, 4), expectedCompletion);
 	});
 	
-	testVar = test('Completes for first level', async () => {
+	const testFirstLevel = test('Completes for first level', async () => {
 		const docURiTasksJson = getDocUri('camelkwithoutsuffix.yaml');
-		assumeNotOnJenkins(testVar);
+		assumeNotOnJenkins(testFirstLevel);
 		const expectedCompletion = { label: 'from' };
 		await testCompletion(docURiTasksJson, new vscode.Position(1, 2), expectedCompletion);
 	});
