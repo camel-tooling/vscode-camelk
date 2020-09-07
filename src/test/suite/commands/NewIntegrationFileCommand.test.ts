@@ -26,7 +26,6 @@ const os = require('os');
 const waitUntil = require('async-wait-until');
 
 suite('Test command to create an Apache Camel K integration file', function() {
-
 	let showQuickpickStub: sinon.SinonStub;
 	let showInputBoxStub: sinon.SinonStub;
 	let showWorkspaceFolderPickStub: sinon.SinonStub;
@@ -47,41 +46,41 @@ suite('Test command to create an Apache Camel K integration file', function() {
 		}
 	});
 
-	const javaTest = test('Can create a new java integration file', async function() {
+	const javaTest: Mocha.Test = test('Can create a new java integration file', async function() {
 		await testIntegrationFileCreation('TestCreation.java', 'Java', 'TestCreation', javaTest);
 	});
 
-	const xmlTest = test('Can create a new xml integration file', async function() {
+	const xmlTest: Mocha.Test = test('Can create a new xml integration file', async function() {
 		await testIntegrationFileCreation('TestCreation.xml', 'XML', 'TestCreation', xmlTest);
 	});
 
-	const yamlTest = test('Can create a new yaml integration file', async function() {
+	const yamlTest: Mocha.Test = test('Can create a new yaml integration file', async function() {
 		await testIntegrationFileCreation('TestCreation.yaml', 'Yaml', 'TestCreation', yamlTest);
 	});
 
-	const groovyTest = test('Can create a new Groovy integration file', async function() {
+	const groovyTest: Mocha.Test = test('Can create a new Groovy integration file', async function() {
 		await testIntegrationFileCreation('TestCreation.groovy', 'Groovy', 'TestCreation', groovyTest);
 	});
 
-	const kotlinTest = test('Can create a new Kotlin integration file', async function() {
+	const kotlinTest: Mocha.Test = test('Can create a new Kotlin integration file', async function() {
 		await testIntegrationFileCreation('TestCreation.kts', 'Kotlin', 'TestCreation', kotlinTest);
 	});
 
-	const javascriptTest = test('Can create a new JavaScript integration file', async function() {
+	const javascriptTest: Mocha.Test = test('Can create a new JavaScript integration file', async function() {
 		await testIntegrationFileCreation('TestCreation.js', 'JavaScript', 'TestCreation', javascriptTest);
 	});
 
-	const withSpaceTest = test('Can create a new integration file with space', async function() {
+	const withSpaceTest: Mocha.Test = test('Can create a new integration file with space', async function() {
 		await testIntegrationFileCreation('Test Creation with space.xml', 'XML', 'Test Creation with space', withSpaceTest);
 	});
 
-	async function testIntegrationFileCreation(expectedFileNameWithExtension: string, languageToPick: string, providedFilename: string, currentTest: Mocha.Test) {
+	async function testIntegrationFileCreation(expectedFileNameWithExtension: string, languageToPick: string, providedFilename: string, currentTest: Mocha.Test): Promise<void> {
 		if (os.homedir().includes('hudson')) {
 			currentTest.skip();
 		}
 		expect(await vscode.workspace.findFiles(expectedFileNameWithExtension)).to.be.an('array').that.is.empty;
 		showQuickpickStub.onFirstCall().returns(languageToPick);
-		const workspaceFolder = (vscode.workspace.workspaceFolders as vscode.WorkspaceFolder[])[0];
+		const workspaceFolder: vscode.WorkspaceFolder = (vscode.workspace.workspaceFolders as vscode.WorkspaceFolder[])[0];
 		showWorkspaceFolderPickStub.returns(workspaceFolder);
 		showInputBoxStub.onFirstCall().returns(providedFilename);
 
@@ -90,13 +89,13 @@ suite('Test command to create an Apache Camel K integration file', function() {
 		await checkFileCreated(expectedFileNameWithExtension);
 
 		await waitUntil(() => {
-			return vscode.window.activeTextEditor?.document.fileName.endsWith(expectedFileNameWithExtension);
+			return vscode.window.activeTextEditor?.document?.fileName?.endsWith(expectedFileNameWithExtension);
 		}, 5000, `Text editor has not opened for ${providedFilename}`);
 
 		checkContainsCamelKMode(createdFile);
 	}
 
-	function checkContainsCamelKMode(file: vscode.Uri) {
+	function checkContainsCamelKMode(file: vscode.Uri): void {
 		expect(fs.readFileSync(file.fsPath, 'utf-8')).to.include("camel-k");
 	}
 

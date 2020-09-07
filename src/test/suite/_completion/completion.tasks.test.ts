@@ -18,43 +18,40 @@
 
 import * as vscode from 'vscode';
 import { getDocUri, checkExpectedCompletion } from '../completion.util';
+
 const os = require('os');
 
 suite('Should do completion in tasks.json', () => {
-	const docURiTasksJson = getDocUri('tasks.json');
+	const docURiTasksJson: vscode.Uri = getDocUri('tasks.json');
 	
-	var testVar = test('Completes for Camel K template', async () => {
+	var testVar: Mocha.Test = test('Completes for Camel K template', async () => {
 		assumeNotOnJenkins(testVar);
-		const expectedCompletion = { label: 'Camel K basic development mode' };
+		const expectedCompletion: any = { label: 'Camel K basic development mode' };
 		await testCompletion(docURiTasksJson, new vscode.Position(3, 7), expectedCompletion);
 	});
 
-	var testTraits = test('Completes for traits', async () => {
+	var testTraits: Mocha.Test = test('Completes for traits', async () => {
 		assumeNotOnJenkins(testTraits);
-		const expectedCompletion = { label: 'platform', documentation: `The platform trait is a base trait that is used to assign an integration platform to an integration. In case the platform is missing, the trait is allowed to create a default platform. This feature is especially useful in contexts where there's no need to provide a custom configuration for the platform (e.g. on OpenShift the default settings work, since there's an embedded container image registry).` };
+		const expectedCompletion: any = { label: 'platform', documentation: `The platform trait is a base trait that is used to assign an integration platform to an integration. In case the platform is missing, the trait is allowed to create a default platform. This feature is especially useful in contexts where there's no need to provide a custom configuration for the platform (e.g. on OpenShift the default settings work, since there's an embedded container image registry).` };
 		await testCompletion(docURiTasksJson, new vscode.Position(9, 23), expectedCompletion);
 	});
 
-	var testTraitProperties = test('Completes for trait properties', async () => {
+	var testTraitProperties: Mocha.Test = test('Completes for trait properties', async () => {
 		assumeNotOnJenkins(testTraitProperties);
-		const expectedCompletion = { label: 'enabled', insertText: 'enabled=false', documentation: 'Can be used to enable or disable a trait. All traits share this common property.' };
+		const expectedCompletion: any = { label: 'enabled', insertText: 'enabled=false', documentation: 'Can be used to enable or disable a trait. All traits share this common property.' };
 		await testCompletion(docURiTasksJson, new vscode.Position(17, 33), expectedCompletion);
 	});
 
 });
 
-function assumeNotOnJenkins(testVar: Mocha.Test) {
+function assumeNotOnJenkins(testVar: Mocha.Test): void {
 	if (os.homedir().includes('hudson')) {
 		testVar.skip();
 	}
 }
 
-async function testCompletion(
-	docUri: vscode.Uri,
-	position: vscode.Position,
-	expectedCompletion: vscode.CompletionItem
-) {
-	let doc = await vscode.workspace.openTextDocument(docUri);
+async function testCompletion(docUri: vscode.Uri, position: vscode.Position, expectedCompletion: vscode.CompletionItem): Promise<void> {
+	const doc: vscode.TextDocument = await vscode.workspace.openTextDocument(docUri);
 	await vscode.window.showTextDocument(doc);
 	await checkExpectedCompletion(docUri, position, expectedCompletion);
 }

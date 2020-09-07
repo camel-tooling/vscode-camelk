@@ -19,20 +19,21 @@ import * as vscode from 'vscode';
 
 const waitUntil = require('async-wait-until');
 
-const getDocPath = (p: string) => {
+function getDocPath(p: string): string {
 	return path.resolve(__dirname, '../../../../test Fixture with speci@l chars', p);
-};
-export const getDocUri = (p: string) => {
-	return vscode.Uri.file(getDocPath(p));
-};
+}
 
-export async function checkExpectedCompletion(docUri: vscode.Uri, position: vscode.Position, expectedCompletion: vscode.CompletionItem) {
-    let hasExpectedCompletion = false;
-    await waitUntil(() => {
+export function getDocUri(p: string): vscode.Uri {
+	return vscode.Uri.file(getDocPath(p));
+}
+
+export async function checkExpectedCompletion(docUri: vscode.Uri, position: vscode.Position, expectedCompletion: vscode.CompletionItem): Promise<void> {
+    let hasExpectedCompletion: boolean = false;
+    await waitUntil( () => {
         // Executing the command `vscode.executeCompletionItemProvider` to simulate triggering completion
         (vscode.commands.executeCommand('vscode.executeCompletionItemProvider', docUri, position)).then(value => {
-			let actualCompletionList = value as vscode.CompletionList;
-			const completionItemFound = actualCompletionList.items.find(completion => {
+			let actualCompletionList: vscode.CompletionList = value as vscode.CompletionList;
+			const completionItemFound: vscode.CompletionItem | undefined = actualCompletionList.items.find(completion => {
 				return completion.label === expectedCompletion.label
 					&& completion.documentation === expectedCompletion.documentation
 					&& (expectedCompletion.insertText === undefined || completion.insertText === expectedCompletion.insertText);
