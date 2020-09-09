@@ -22,6 +22,7 @@ import * as JavaDependenciesManager from '../../../JavaDependenciesManager';
 import { getDocUri, checkExpectedCompletion } from '../completion.util';
 import { fail } from 'assert';
 import * as Utils from '../Utils';
+const os = require('os');
 
 const waitUntil = require('async-wait-until');
 
@@ -29,17 +30,16 @@ const DOWNLOAD_JAVA_DEPENDENCIES_TIMEOUT = 240000;
 const JAVA_EXTENSION_READINESS_TIMEOUT = 20000;
 const TOTAL_TIMEOUT = DOWNLOAD_JAVA_DEPENDENCIES_TIMEOUT + JAVA_EXTENSION_READINESS_TIMEOUT + 5000;
 
-// TODO: skipped due to FUSETOOLS2-578 and an issue that ONLY shows up on Jenkins
-suite.skip('Should do completion in Camel K standalone files', () => {
-
+// TODO: skipped on jenkins due to FUSETOOLS2-578
+suite('Should do completion in Camel K standalone files', () => {
 	const docUriJava = getDocUri('MyRouteBuilder.java');
 
 	const expectedCompletion = { label: 'from(String uri) : RouteDefinition'};
 
-	test('Completes from method for Java', async () => {
+	var testVar = test('Completes from method for Java', async () => {
+		assumeNotOnJenkins(testVar);
 		await testCompletion(docUriJava, new vscode.Position(5, 11), expectedCompletion);
 	}).timeout(TOTAL_TIMEOUT);
-
 });
 
 async function testCompletion(
@@ -79,5 +79,11 @@ async function testCompletion(
 		const context = Utils.retrieveExtensionContext();
 		const destination = JavaDependenciesManager.destinationFolderForDependencies(context);
 		return destination;
+	}
+}
+
+function assumeNotOnJenkins(testVar: Mocha.Test) {
+	if (os.homedir().includes('hudson')) {
+		testVar.skip();
 	}
 }
