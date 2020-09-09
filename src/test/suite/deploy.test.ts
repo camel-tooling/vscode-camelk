@@ -49,6 +49,10 @@ suite('Check can deploy default examples', () => {
 		if (createdFile && fs.existsSync(createdFile.fsPath)) {
 			fs.unlinkSync(createdFile.fsPath);
 		}
+		const deployedTreeNode = getCamelKIntegrationsProvider().getTreeNodes()[0];
+		if(deployedTreeNode) {
+			vscode.commands.executeCommand('camelk.integrations.remove', deployedTreeNode);
+		}
 	});
 
 	const testJava = test('Check can deploy Java example', async () => {
