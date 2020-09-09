@@ -18,36 +18,30 @@
 
 import * as vscode from 'vscode';
 import { getDocUri, checkExpectedCompletion } from '../completion.util';
-const os = require('os');
+import { skipOnJenkins } from '../Utils';
 
 suite('Should do completion in tasks.json', () => {
 	const docURiTasksJson = getDocUri('tasks.json');
 	
 	var testVar = test('Completes for Camel K template', async () => {
-		assumeNotOnJenkins(testVar);
+		skipOnJenkins(testVar);
 		const expectedCompletion = { label: 'Camel K basic development mode' };
 		await testCompletion(docURiTasksJson, new vscode.Position(3, 7), expectedCompletion);
 	});
 
 	var testTraits = test('Completes for traits', async () => {
-		assumeNotOnJenkins(testTraits);
+		skipOnJenkins(testTraits);
 		const expectedCompletion = { label: 'platform', documentation: `The platform trait is a base trait that is used to assign an integration platform to an integration. In case the platform is missing, the trait is allowed to create a default platform. This feature is especially useful in contexts where there's no need to provide a custom configuration for the platform (e.g. on OpenShift the default settings work, since there's an embedded container image registry).` };
 		await testCompletion(docURiTasksJson, new vscode.Position(9, 23), expectedCompletion);
 	});
 
 	var testTraitProperties = test('Completes for trait properties', async () => {
-		assumeNotOnJenkins(testTraitProperties);
+		skipOnJenkins(testTraitProperties);
 		const expectedCompletion = { label: 'enabled', insertText: 'enabled=false', documentation: 'Can be used to enable or disable a trait. All traits share this common property.' };
 		await testCompletion(docURiTasksJson, new vscode.Position(17, 33), expectedCompletion);
 	});
 
 });
-
-function assumeNotOnJenkins(testVar: Mocha.Test) {
-	if (os.homedir().includes('hudson')) {
-		testVar.skip();
-	}
-}
 
 async function testCompletion(
 	docUri: vscode.Uri,

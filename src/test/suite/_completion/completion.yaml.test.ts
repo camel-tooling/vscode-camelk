@@ -18,32 +18,26 @@
 
 import * as vscode from 'vscode';
 import { getDocUri, checkExpectedCompletion } from '../completion.util';
-const os = require('os');
+import { skipOnJenkins } from '../Utils';
 const waitUntil = require('async-wait-until');
 
 suite('Should do completion in yaml Camel K files without file name pattern', () => {
 	
 	const testSecondLevel = test('Completes for second level', async () => {
 		const docURiTasksJson = getDocUri('camelkwithoutsuffix-withfirstlevel.yaml');
-		assumeNotOnJenkins(testSecondLevel);
+		skipOnJenkins(testSecondLevel);
 		const expectedCompletion = { label: 'steps' };
 		await testCompletion(docURiTasksJson, new vscode.Position(2, 4), expectedCompletion);
 	});
 	
 	const testFirstLevel = test('Completes for first level', async () => {
 		const docURiTasksJson = getDocUri('camelkwithoutsuffix.yaml');
-		assumeNotOnJenkins(testFirstLevel);
+		skipOnJenkins(testFirstLevel);
 		const expectedCompletion = { label: 'from' };
 		await testCompletion(docURiTasksJson, new vscode.Position(1, 2), expectedCompletion);
 	});
 
 });
-
-function assumeNotOnJenkins(testVar: Mocha.Test) {
-	if (os.homedir().includes('hudson')) {
-		testVar.skip();
-	}
-}
 
 async function testCompletion(
 	docUri: vscode.Uri,
