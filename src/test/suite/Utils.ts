@@ -18,7 +18,9 @@
 
 import * as assert from 'assert';
 import * as vscode from 'vscode';
+import os = require('os');
 import { CamelKNodeProvider, TreeNode } from '../../CamelKNodeProvider';
+import { expect } from 'chai';
 
 const waitUntil = require('async-wait-until');
 
@@ -79,4 +81,21 @@ export async function getIntegrationsFromKubectlCliWithWatchTestApi(): Promise<v
 
 function retrieveCamelKExtension(): vscode.Extension<any> | undefined {
 	return vscode.extensions.getExtension('redhat.vscode-camelk');
+}
+
+export async function openCamelKTreeView() {
+	/* To open Tree View, reveal must be used.
+	Consequently, it requires to have at least an element in the tree and that getParent of the TreeNodeProvider is implemented.
+	Given that, we are testing in case there is no connection and so there is no TreeNodes, we are forced to create a fake one.*/
+	const fakeNode = new TreeNode("string", "mockIntegration", "running", vscode.TreeItemCollapsibleState.None);
+	let children = await getCamelKIntegrationsProvider().getChildren();
+	await getCamelKIntegrationsProvider().addChild(children, fakeNode, true);
+	await getCamelKIntegrationsTreeView().reveal(fakeNode);
+	expect(getCamelKIntegrationsTreeView().visible, 'The Tree View of Camel K integration is not visible').to.be.true;
+}
+
+export function skipOnJenkins(testVar: Mocha.Test) {
+	if (os.homedir().includes('hudson')) {
+		testVar.skip();
+	}
 }

@@ -19,9 +19,7 @@
 import { expect } from 'chai';
 import * as fs from 'fs';
 import * as sinon from 'sinon';
-import * as vscode from 'vscode';
 import * as extension from '../../extension';
-import * as CamelKNodeProvider from '../../CamelKNodeProvider';
 import * as Utils from './Utils';
 
 const homedir = require('os').homedir();
@@ -64,7 +62,7 @@ suite("Kubectl integration watcher", function() {
 	});
 	
 	test('Check there is no loop for closing kubectl process with View visible', async function() {
-		await openCamelKTreeView();
+		await Utils.openCamelKTreeView();
 		await sleep(extension.DELAY_RETRY_KUBECTL_CONNECTION);
 		messageStub.resetHistory();
 		await sleep(extension.DELAY_RETRY_KUBECTL_CONNECTION);
@@ -73,7 +71,7 @@ suite("Kubectl integration watcher", function() {
 	
 	test('Check there is only one set of message logged in case of connection error with View visible', async function() {
 		invalidateKubeConfigFileByRenamingIt(kubeconfigFilePath);
-		await openCamelKTreeView();
+		await Utils.openCamelKTreeView();
 		messageStub.resetHistory();
 		await Utils.getIntegrationsFromKubectlCliWithWatchTestApi();
 		checkErrorMessageLogged(messageStub);
@@ -91,17 +89,6 @@ function checkErrorMessageLogged(messageStub: sinon.SinonStub<[string], void>) {
 	expect(messageStub.callCount,
 		`Depending on latency, versions used and environment configuration, one or two messages can be logged. Number of messages logged ${messageStub.callCount}`)
 		.above(0).below(3);
-}
-
-async function openCamelKTreeView() {
-	/* To open Tree View, reveal must be used.
-	Consequently, it requires to have at least an element in the tree and that getParent of the TreeNodeProvider is implemented.
-	Given that, we are testing in case there is no connection and so there is no TreeNodes, we are forced to create a fake one.*/
-	const fakeNode = new CamelKNodeProvider.TreeNode("string", "mockIntegration", "running", vscode.TreeItemCollapsibleState.None);
-	let children = await Utils.getCamelKIntegrationsProvider().getChildren();
-	await Utils.getCamelKIntegrationsProvider().addChild(children, fakeNode, true);
-	await Utils.getCamelKIntegrationsTreeView().reveal(fakeNode);
-	expect(Utils.getCamelKIntegrationsTreeView().visible, 'The Tree View of Camel K integration is not visible').to.be.true;
 }
 
 function sleep(ms = 0) {
