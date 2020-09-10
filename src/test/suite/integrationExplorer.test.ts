@@ -41,6 +41,7 @@ suite('Camel-k Integrations View', () => {
 
 	teardown(() => {
 		sandbox.restore();
+		integrationExplorer.setRetrieveIntegrations(true);
 	});
 
 	test('adding a single child should trigger a refresh', function(done) {
