@@ -52,6 +52,9 @@ suite('Check can deploy default examples', () => {
 		const deployedTreeNode = getCamelKIntegrationsProvider().getTreeNodes()[0];
 		if(deployedTreeNode) {
 			vscode.commands.executeCommand('camelk.integrations.remove', deployedTreeNode);
+			waitUntil(() => {
+				return getCamelKIntegrationsProvider().getTreeNodes().length === 0;
+			});
 		}
 	});
 
@@ -77,17 +80,17 @@ async function checkIntegrationRunning() {
 			return getCamelKIntegrationsProvider().getTreeNodes()[0]?.status === "Running";
 		}, RUNNING_TIMEOUT, 1000);
 	} catch (error) {
-		assert.fail(`The integration has not been marked as Running in Camel K Integration provided view. Current status ${getCamelKIntegrationsProvider().getTreeNodes()[0].status}`);
+		assert.fail(`The integration has not been marked as Running in Camel K Integration provided view. Current status ${getCamelKIntegrationsProvider().getTreeNodes()[0].status} \n${error}`);
 	}
 }
 
 async function checkIntegrationDeployed() {
 	try {
 		await waitUntil(() => {
-			return getCamelKIntegrationsProvider().getTreeNodes().length === 1;
+			return getCamelKIntegrationsProvider().getTreeNodes()?.length === 1;
 		}, DEPLOYED_TIMEOUT, 1000);
 	} catch (error) {
-		assert.fail('No integration has shown up in Camel K Integration provider view. (Nota: it requires that Camel K instance is reachable.)');
+		assert.fail('No integration has shown up in Camel K Integration provider view. (Nota: it requires that Camel K instance is reachable.)\n' + error);
 	}
 }
 
@@ -104,7 +107,7 @@ async function createFile(showQuickpickStub: sinon.SinonStub<any[], any>, showWo
 			return vscode.window.activeTextEditor?.document.fileName.endsWith('TestDeploy.java');
 		}, EDITOR_OPENED_TIMEOUT, 1000);
 	} catch (error) {
-		assert.fail('TestDeploy.java has not been opened in editor.');
+		assert.fail('TestDeploy.java has not been opened in editor. Filename of currently opened editor: '+ vscode.window.activeTextEditor?.document.fileName);
 	}
 	return vscode.window.activeTextEditor?.document.uri;
 }
