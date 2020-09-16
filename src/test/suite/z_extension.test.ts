@@ -17,7 +17,7 @@
 'use strict';
 
 import * as vscode from 'vscode';
-import * as assert from 'assert';
+import {assert} from 'chai';
 import * as kamel from '../../kamel';
 import * as config from '../../config';
 import * as utils from './Utils';
@@ -34,49 +34,34 @@ suite("ensure camelk extension exists and is accessible", function() {
 		await utils.ensureExtensionActivated();
 	}).timeout(ACTIVATION_TIMEOUT + 1000);	
 
-	test('test optional namespace support', function() {
+	test('test that getBaseCmd returned value doesn\'t contain --namespace parameter when no namespace is passed', function() {
 		let cmdStrNoNS : string = kamel.getBaseCmd(`fakepath`,`fakecommand`, undefined);
 		assert.equal(cmdStrNoNS.indexOf('--namespace'), -1);
-
+	});
+	
+	test('test that getBaseCmd returned value contains --namespace parameter when namespace is passed', function() {
 		let cmdStrWithNS : string = kamel.getBaseCmd(`fakepath`,`fakecommand`, 'fakens');
-		assert.equal(cmdStrWithNS.indexOf('--namespace') > 0, true);
-
+		assert.ok(cmdStrWithNS.includes('--namespace'));
 	});
 
 	test('test setting namespace to undefined', async function() {
-		// get NS from config settings
 		const namespace : string | undefined = config.getNamespaceconfig();
-
-		// reset to undefined
 		await config.addNamespaceToConfig(undefined);
 
-		// get NS from config settings
-		const resetNs : string | undefined = config.getNamespaceconfig();
-
-		// by default this should be undefined
-		assert.equal(resetNs, undefined);
-
-		// reset to old value
+		const namespaceConfigValueAfterReset : string | undefined = config.getNamespaceconfig();
+		assert.equal(namespaceConfigValueAfterReset, undefined, 'By default, the namespace config should be undefined');
+		
 		await config.addNamespaceToConfig(namespace);
 	});
 
 	test('test setting namespace to other value', async function() {
-		// get NS from config settings
 		const namespace : string | undefined = config.getNamespaceconfig();
-
-		// get NS from config settings
 		const testNs = 'testing';
-
-		// override namespace
 		await config.addNamespaceToConfig(testNs);
 
-		// re-retrieve namespace, should be test NS we specified
-		const resetNs : string | undefined = config.getNamespaceconfig();
+		const namespaceConfigValueAfterReset : string | undefined = config.getNamespaceconfig();
+		assert.equal(namespaceConfigValueAfterReset, testNs, 'The value specified should be available.');
 
-		// this should be 'testing'
-		assert.equal(resetNs, testNs);
-
-		// reset to old value
 		await config.addNamespaceToConfig(namespace);
 	});	
 
@@ -84,20 +69,17 @@ suite("ensure camelk extension exists and is accessible", function() {
 		await config.setKamelAutoupgradeConfig(true);
 
 		const autoConfigValue = config.getKamelAutoupgradeConfig();
-		assert.equal(autoConfigValue, true);
+		assert.ok(autoConfigValue);
 
 		await config.setKamelAutoupgradeConfig(false);
 		const autoConfigValue2 = config.getKamelAutoupgradeConfig();
-		assert.equal(autoConfigValue2, false);
+		assert.isFalse(autoConfigValue2);
 	});
 
-	test('test can set runtime version setting', async function() {
-
-		// this test should work, but doesn't 
-		
+	test('test can set runtime version setting', async function() {	
 		await config.setKamelAutoupgradeConfig(false);
 		const autoConfigValue2 = config.getKamelAutoupgradeConfig();
-		assert.equal(autoConfigValue2, false);
+		assert.isFalse(autoConfigValue2);
 
 		const invalidVersion = 'invalidVersion';
 		await config.setKamelRuntimeVersionConfig(invalidVersion).then( () => {
