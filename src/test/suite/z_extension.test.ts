@@ -26,23 +26,21 @@ import { ACTIVATION_TIMEOUT } from './Utils';
 suite("ensure camelk extension exists and is accessible", function() {
 	const extensionId = 'redhat.vscode-camelk';
 
-	test('vscode-camelk extension should be present', function(done) {
+	test('vscode-camelk extension should be present', function() {
 		assert.ok(vscode.extensions.getExtension(extensionId));
-		done();
 	});
 
 	test('vscode-camelk extension should activate', async() => {
 		await utils.ensureExtensionActivated();
 	}).timeout(ACTIVATION_TIMEOUT + 1000);	
 
-	test('test optional namespace support', function(done) {
+	test('test optional namespace support', function() {
 		let cmdStrNoNS : string = kamel.getBaseCmd(`fakepath`,`fakecommand`, undefined);
 		assert.equal(cmdStrNoNS.indexOf('--namespace'), -1);
 
 		let cmdStrWithNS : string = kamel.getBaseCmd(`fakepath`,`fakecommand`, 'fakens');
 		assert.equal(cmdStrWithNS.indexOf('--namespace') > 0, true);
 
-		done();
 	});
 
 	test('test setting namespace to undefined', async function() {
