@@ -53,7 +53,7 @@ export async function getNamedListFromKubernetesThenParseList(itemType : string,
 }
 
 export function parseShellResult(output: string) : string[] {
-	const processedList : string[] = [''];
+	const processedList : string[] = [];
 	if (output) {
 		let lines: string[] = output.split('\n');
 		for (const entry of lines) {

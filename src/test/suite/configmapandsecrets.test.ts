@@ -58,7 +58,7 @@ suite("ensure utility methods in configmap and secrets code works as expected", 
 			"NAME                     DATA   AGE\n" + 
 			"something                1      90m\n" +
 			"something-else           1      92m";
-		const expectedResult : string[] = ['', 'something','something-else'];
+		const expectedResult : string[] = ['something','something-else'];
 		let result : string[] = parseShellResult(data);
 		assert.deepEqual(result, expectedResult, `Did not get expected list of names from console shell results`);
 		done();

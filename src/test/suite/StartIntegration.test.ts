@@ -19,18 +19,24 @@
 import * as fs from 'fs';
 import * as sinon from 'sinon';
 import * as vscode from 'vscode';
+import * as config from '../../config';
 import { basicIntegration } from '../../IntegrationUtils';
 import { skipOnJenkins, getCamelKIntegrationsProvider, openCamelKTreeView } from "./Utils";
-import { assert } from 'chai';
+import { assert, expect } from 'chai';
 import waitUntil = require('async-wait-until');
+import { getNamedListFromKubernetesThenParseList } from '../../kubectlutils';
+import * as shelljs from 'shelljs';
+import * as kamel from './../../kamel';
+import * as kubectl from './../../kubectl';
 
-const RUNNING_TIMEOUT: number = 360000;
+const RUNNING_TIMEOUT: number = 720000;
 const DEPLOYED_TIMEOUT: number = 5000;
 const EDITOR_OPENED_TIMEOUT: number = 5000;
 const TOTAL_TIMEOUT: number = RUNNING_TIMEOUT + DEPLOYED_TIMEOUT + EDITOR_OPENED_TIMEOUT;
 
 suite('Check can deploy default examples', () => {
-
+	
+	const EXTRA_NAMESPACE_FOR_TEST: string = 'namespace-for-deployment-test';
 	let showQuickpickStub: sinon.SinonStub;
 	let showInputBoxStub: sinon.SinonStub;
 	let showWorkspaceFolderPickStub: sinon.SinonStub;
@@ -40,6 +46,7 @@ suite('Check can deploy default examples', () => {
 		showQuickpickStub = sinon.stub(vscode.window, 'showQuickPick');
 		showInputBoxStub = sinon.stub(vscode.window, 'showInputBox');
 		showWorkspaceFolderPickStub = sinon.stub(vscode.window, 'showWorkspaceFolderPick');
+		shelljs.config.execPath = shelljs.which('node').toString();
 	});
 
 	teardown(() => {
@@ -56,6 +63,7 @@ suite('Check can deploy default examples', () => {
 				return getCamelKIntegrationsProvider().getTreeNodes().length === 0;
 			});
 		}
+		config.addNamespaceToConfig(undefined);
 	});
 
 	const testJava = test('Check can deploy Java example', async () => {
@@ -70,6 +78,36 @@ suite('Check can deploy default examples', () => {
 
 		await checkIntegrationDeployed();
 		await checkIntegrationRunning();
+	}).timeout(TOTAL_TIMEOUT);
+	
+	const testSpecificNamespace = test('Check can deploy on specific namespace', async () => {
+		skipOnJenkins(testSpecificNamespace);
+		console.log(`${(await kubectl.create().getPath()).replace('\n', '')} create namespace ${EXTRA_NAMESPACE_FOR_TEST}`);
+		const kubectlPath = (await kubectl.create().getPath()).replace('\n', '');
+		const createNamespaceExec = shelljs.exec(`${kubectlPath} create namespace ${EXTRA_NAMESPACE_FOR_TEST}`);
+		assert.equal(createNamespaceExec.stderr, '');
+		waitUntil(()=> {
+			return createNamespaceExec.stdout.includes(`namespace/${EXTRA_NAMESPACE_FOR_TEST} created`);
+		});
+		assert.equal(shelljs.exec(`${(await kamel.create().getPath()).replace('\n', '')} install --namespace=${EXTRA_NAMESPACE_FOR_TEST}`).stdout, `Camel K installed in namespace ${EXTRA_NAMESPACE_FOR_TEST} \n`);
+		createdFile = await createFile(showQuickpickStub, showWorkspaceFolderPickStub, showInputBoxStub);
+		await config.addNamespaceToConfig(EXTRA_NAMESPACE_FOR_TEST);
+
+		await openCamelKTreeView();
+		assert.isEmpty(getCamelKIntegrationsProvider().getTreeNodes());
+
+		showQuickpickStub.onSecondCall().returns(basicIntegration);
+		await vscode.commands.executeCommand('camelk.startintegration');
+
+		await checkIntegrationDeployed();
+		await checkIntegrationRunning();
+		
+		const integrations = await getNamedListFromKubernetesThenParseList('integration', `--namespace=${EXTRA_NAMESPACE_FOR_TEST}`);
+		expect(integrations).to.include('test-deploy');
+		const integrationsOnDefault = await getNamedListFromKubernetesThenParseList('integration', '--namespace=default');
+		assert.isEmpty(integrationsOnDefault);
+		
+		shelljs.exec(`${kubectlPath} delete namespace ${EXTRA_NAMESPACE_FOR_TEST}`);
 	}).timeout(TOTAL_TIMEOUT);
 
 });
