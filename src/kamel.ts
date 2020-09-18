@@ -124,6 +124,7 @@ async function kamelInternalArgs(args: string[], devMode: boolean, namespace: st
 			if (namespace) {
 				args.push(`--namespace=${namespace}`);
 			}
+			console.log(`command called: ${binpath} with arguments ${args}`);
 			let sr : child_process.ChildProcess;
 			if (foldername) {
 				sr = spawn(binpath, args, { cwd : foldername});
