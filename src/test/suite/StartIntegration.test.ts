@@ -71,47 +71,50 @@ suite('Check can deploy default examples', () => {
 		skipOnJenkins(testJava);
 		createdFile = await createFile(showQuickpickStub, showWorkspaceFolderPickStub, showInputBoxStub, 'TestBasicDeploy');
 
-		await openCamelKTreeView();
-		assert.isEmpty(getCamelKIntegrationsProvider().getTreeNodes());
-
-		showQuickpickStub.onSecondCall().returns(basicIntegration);
-		await vscode.commands.executeCommand('camelk.startintegration');
-
-		await checkIntegrationDeployed();
-		await checkIntegrationRunning();
+		await startIntegrationWithBasicCheck(showQuickpickStub);
 	}).timeout(TOTAL_TIMEOUT);
 	
 	const testSpecificNamespace = test('Check can deploy on specific namespace', async () => {
 		skipOnJenkins(testSpecificNamespace);
-		console.log(`${(await kubectl.create().getPath()).replace('\n', '')} create namespace ${EXTRA_NAMESPACE_FOR_TEST}`);
-		const kubectlPath = (await kubectl.create().getPath()).replace('\n', '');
-		const createNamespaceExec = shelljs.exec(`${kubectlPath} create namespace ${EXTRA_NAMESPACE_FOR_TEST}`);
-		assert.equal(createNamespaceExec.stderr, '');
-		waitUntil(()=> {
-			return createNamespaceExec.stdout.includes(`namespace/${EXTRA_NAMESPACE_FOR_TEST} created`);
-		});
-		assert.equal(shelljs.exec(`${(await kamel.create().getPath()).replace('\n', '')} install --namespace=${EXTRA_NAMESPACE_FOR_TEST}`).stdout, `Camel K installed in namespace ${EXTRA_NAMESPACE_FOR_TEST} \n`);
+		await prepareNewNamespaceWithCamelK(EXTRA_NAMESPACE_FOR_TEST);
 		createdFile = await createFile(showQuickpickStub, showWorkspaceFolderPickStub, showInputBoxStub, 'TestDeployInSpecificNamespace');
 		await config.addNamespaceToConfig(EXTRA_NAMESPACE_FOR_TEST);
 
-		await openCamelKTreeView();
-		assert.isEmpty(getCamelKIntegrationsProvider().getTreeNodes());
-
-		showQuickpickStub.onSecondCall().returns(basicIntegration);
-		await vscode.commands.executeCommand('camelk.startintegration');
-
-		await checkIntegrationDeployed();
-		await checkIntegrationRunning();
+		await startIntegrationWithBasicCheck(showQuickpickStub);
+		await checkIntegrationsInDifferentNamespaces(EXTRA_NAMESPACE_FOR_TEST);
 		
-		const integrations = await getNamedListFromKubernetesThenParseList('integration', `--namespace=${EXTRA_NAMESPACE_FOR_TEST}`);
-		expect(integrations).to.include('test-deploy-in-specific-namespace');
-		const integrationsOnDefault = await getNamedListFromKubernetesThenParseList('integration', '--namespace=default');
-		assert.isEmpty(integrationsOnDefault);
-		
-		shelljs.exec(`${kubectlPath} delete namespace ${EXTRA_NAMESPACE_FOR_TEST}`);
+		shelljs.exec(`${await kubectl.create().getPath()} delete namespace ${EXTRA_NAMESPACE_FOR_TEST}`);
 	}).timeout(TOTAL_TIMEOUT);
 
 });
+
+async function checkIntegrationsInDifferentNamespaces(EXTRA_NAMESPACE_FOR_TEST: string) {
+	const integrations = await getNamedListFromKubernetesThenParseList('integration', `--namespace=${EXTRA_NAMESPACE_FOR_TEST}`);
+	expect(integrations).to.include('test-deploy-in-specific-namespace');
+	const integrationsOnDefault = await getNamedListFromKubernetesThenParseList('integration', '--namespace=default');
+	assert.isEmpty(integrationsOnDefault);
+}
+
+async function startIntegrationWithBasicCheck(showQuickpickStub: sinon.SinonStub<any[], any>) {
+	await openCamelKTreeView();
+	assert.isEmpty(getCamelKIntegrationsProvider().getTreeNodes());
+
+	showQuickpickStub.onSecondCall().returns(basicIntegration);
+	await vscode.commands.executeCommand('camelk.startintegration');
+
+	await checkIntegrationDeployed();
+	await checkIntegrationRunning();
+}
+
+async function prepareNewNamespaceWithCamelK(EXTRA_NAMESPACE_FOR_TEST: string) {
+	const kubectlPath = await kubectl.create().getPath();
+	const createNamespaceExec = shelljs.exec(`${kubectlPath} create namespace ${EXTRA_NAMESPACE_FOR_TEST}`);
+	assert.equal(createNamespaceExec.stderr, '');
+	waitUntil(() => {
+		return createNamespaceExec.stdout.includes(`namespace/${EXTRA_NAMESPACE_FOR_TEST} created`);
+	});
+	assert.equal(shelljs.exec(`${await kamel.create().getPath()} install --namespace=${EXTRA_NAMESPACE_FOR_TEST}`).stdout, `Camel K installed in namespace ${EXTRA_NAMESPACE_FOR_TEST} \n`);
+}
 
 async function checkIntegrationRunning() {
 	try {
