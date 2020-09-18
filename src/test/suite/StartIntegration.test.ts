@@ -68,7 +68,7 @@ suite('Check can deploy default examples', () => {
 
 	const testJava = test('Check can deploy Java example', async () => {
 		skipOnJenkins(testJava);
-		createdFile = await createFile(showQuickpickStub, showWorkspaceFolderPickStub, showInputBoxStub);
+		createdFile = await createFile(showQuickpickStub, showWorkspaceFolderPickStub, showInputBoxStub, 'TestBasicDeploy');
 
 		await openCamelKTreeView();
 		assert.isEmpty(getCamelKIntegrationsProvider().getTreeNodes());
@@ -90,7 +90,7 @@ suite('Check can deploy default examples', () => {
 			return createNamespaceExec.stdout.includes(`namespace/${EXTRA_NAMESPACE_FOR_TEST} created`);
 		});
 		assert.equal(shelljs.exec(`${(await kamel.create().getPath()).replace('\n', '')} install --namespace=${EXTRA_NAMESPACE_FOR_TEST}`).stdout, `Camel K installed in namespace ${EXTRA_NAMESPACE_FOR_TEST} \n`);
-		createdFile = await createFile(showQuickpickStub, showWorkspaceFolderPickStub, showInputBoxStub);
+		createdFile = await createFile(showQuickpickStub, showWorkspaceFolderPickStub, showInputBoxStub, 'TestDeployInSpecificNamespace');
 		await config.addNamespaceToConfig(EXTRA_NAMESPACE_FOR_TEST);
 
 		await openCamelKTreeView();
@@ -103,7 +103,7 @@ suite('Check can deploy default examples', () => {
 		await checkIntegrationRunning();
 		
 		const integrations = await getNamedListFromKubernetesThenParseList('integration', `--namespace=${EXTRA_NAMESPACE_FOR_TEST}`);
-		expect(integrations).to.include('test-deploy');
+		expect(integrations).to.include('test-deploy-in-specific-namespace');
 		const integrationsOnDefault = await getNamedListFromKubernetesThenParseList('integration', '--namespace=default');
 		assert.isEmpty(integrationsOnDefault);
 		
@@ -132,20 +132,20 @@ async function checkIntegrationDeployed() {
 	}
 }
 
-async function createFile(showQuickpickStub: sinon.SinonStub<any[], any>, showWorkspaceFolderPickStub: sinon.SinonStub<any[], any>, showInputBoxStub: sinon.SinonStub<any[], any>): Promise<vscode.Uri | undefined>{
+async function createFile(showQuickpickStub: sinon.SinonStub<any[], any>, showWorkspaceFolderPickStub: sinon.SinonStub<any[], any>, showInputBoxStub: sinon.SinonStub<any[], any>, integrationName: string): Promise<vscode.Uri | undefined>{
 	showQuickpickStub.onFirstCall().returns('Java');
 	const workspaceFolder = (vscode.workspace.workspaceFolders as vscode.WorkspaceFolder[])[0];
 	showWorkspaceFolderPickStub.returns(workspaceFolder);
-	showInputBoxStub.onFirstCall().returns('TestDeploy');
+	showInputBoxStub.onFirstCall().returns(integrationName);
 
 	await vscode.commands.executeCommand('camelk.integrations.createNewIntegrationFile');
 
 	try {
 		await waitUntil(() => {
-			return vscode.window.activeTextEditor?.document.fileName.endsWith('TestDeploy.java');
+			return vscode.window.activeTextEditor?.document.fileName.endsWith(integrationName + '.java');
 		}, EDITOR_OPENED_TIMEOUT, 1000);
 	} catch (error) {
-		assert.fail('TestDeploy.java has not been opened in editor. Filename of currently opened editor: '+ vscode.window.activeTextEditor?.document.fileName);
+		assert.fail(integrationName + '.java has not been opened in editor. Filename of currently opened editor: '+ vscode.window.activeTextEditor?.document.fileName);
 	}
 	return vscode.window.activeTextEditor?.document.uri;
 }
