@@ -395,7 +395,6 @@ export function createNewIntegration(integrationFileUri: vscode.Uri, devMode? : 
 					resource,
 					dependencyArray,
 					propertyArray);
-				console.log(`commandString = kamel ${kamelArgs}`);
 				if (devMode && devMode === true) {
 					if (extension.mainOutputChannel) {
 						extension.mainOutputChannel.show();
