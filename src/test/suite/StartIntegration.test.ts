@@ -46,6 +46,7 @@ suite('Check can deploy default examples', () => {
 		showQuickpickStub = sinon.stub(vscode.window, 'showQuickPick');
 		showInputBoxStub = sinon.stub(vscode.window, 'showInputBox');
 		showWorkspaceFolderPickStub = sinon.stub(vscode.window, 'showWorkspaceFolderPick');
+		// Workaround due to bug in shelljs: https://github.com/shelljs/shelljs/issues/704
 		shelljs.config.execPath = shelljs.which('node').toString();
 	});
 
