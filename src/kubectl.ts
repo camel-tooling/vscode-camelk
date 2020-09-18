@@ -39,7 +39,7 @@ class KubectlImpl implements Kubectl {
 	}
 
 	async getPath(): Promise<string> {
-		return (await baseKubectlPath()).replace('\n', '');
+		return await baseKubectlPath();
 	}
 
 	invokeArgs(args: string[], folderName?: string): Promise<child_process.ChildProcess> {
@@ -144,7 +144,7 @@ async function kubectlInternalArgs(args: string[], namespace: string | undefined
 export async function baseKubectlPath(): Promise<string> {
 	const result : shell.FindBinaryResult = await shell.findBinary('kubectl');
 	if (result && result.output && result.err === null) {
-		return result.output;
+		return result.output.replace('\n', '');
 	}
 	const bin: string = config.getActiveKubectlconfig();
 	if (!bin) {

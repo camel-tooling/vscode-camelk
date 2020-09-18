@@ -41,7 +41,7 @@ class KamelImpl implements Kamel {
 	}
 
 	async getPath(): Promise<string> {
-		return (await baseKamelPath()).replace('\n', '');
+		return await baseKamelPath();
 	}
 
 	async invoke(command: string): Promise<string> {
@@ -166,7 +166,7 @@ async function kamelInternalArgs(args: string[], devMode: boolean, namespace: st
 export async function baseKamelPath(): Promise<string> {
 	const result : FindBinaryResult = await findBinary('kamel');
 	if (result && result.output && result.err === null) {
-		return result.output;
+		return result.output.replace('\n', '');
 	}
 	const bin: string = config.getActiveKamelconfig();
 	if (!bin) {
