@@ -173,12 +173,16 @@ export async function activate(context: vscode.ExtensionContext) {
 		updateReferenceLibraries(vscode.window.activeTextEditor, destination);
 	}
 	
-	vscode.workspace.onDidChangeConfiguration(async () => {
+	vscode.workspace.onDidChangeConfiguration(async (event) => {
 		await handleChangeRuntimeConfiguration();
 		closeLogViewWhenIntegrationRemoved = vscode.workspace.getConfiguration().get(config.REMOVE_LOGVIEW_ON_SHUTDOWN_KEY) as boolean;
 		showStatusBar = vscode.workspace.getConfiguration().get(config.SHOW_STATUS_BAR_KEY) as boolean;
 		if (!showStatusBar) {
 			hideStatusLine();
+		}
+		if (event.affectsConfiguration(config.NAMESPACE_KEY)) {
+			runningKubectl?.kill();
+			eventEmitter.emit(restartKubectlWatchEvent);
 		}
 		if (camelKIntegrationsTreeView && camelKIntegrationsTreeView.visible === true) {
 			try {
