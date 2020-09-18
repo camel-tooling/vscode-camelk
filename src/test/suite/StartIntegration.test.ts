@@ -29,7 +29,7 @@ import * as shelljs from 'shelljs';
 import * as kamel from './../../kamel';
 import * as kubectl from './../../kubectl';
 
-const RUNNING_TIMEOUT: number = 720000;
+const RUNNING_TIMEOUT: number = 360000;
 const DEPLOYED_TIMEOUT: number = 5000;
 const EDITOR_OPENED_TIMEOUT: number = 5000;
 const TOTAL_TIMEOUT: number = RUNNING_TIMEOUT + DEPLOYED_TIMEOUT + EDITOR_OPENED_TIMEOUT;
