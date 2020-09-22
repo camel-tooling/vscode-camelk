@@ -19,7 +19,7 @@ import * as path from 'path';
 import * as vscode from 'vscode';
 
 const PREFERENCE_KEY_JAVA_REFERENCED_LIBRARIES = "java.project.referencedLibraries";
-export const CAMEL_VERSION = "3.3.0";
+export const CAMEL_VERSION = "3.5.0";
 
 export function downloadJavaDependencies(context: vscode.ExtensionContext): string {
 	const pomTemplate = context.asAbsolutePath(path.join('resources', 'maven-project', 'pom-to-copy-java-dependencies.xml'));
