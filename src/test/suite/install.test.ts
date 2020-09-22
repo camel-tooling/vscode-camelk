@@ -54,9 +54,9 @@ suite("ensure install methods are functioning as expected", function() {
 		installKubectlSpy.resetHistory();	
 	});
 
-	var testVar = test("ensure cli version checking works correctly", async function() {
+	/*var testVar =*/ test("ensure cli version checking works correctly", async function() {
 		if(!process.env.VSCODE_CAMELK_GITHUB_TOKEN) {
-			testVar.skip();
+			//testVar.skip();
 		}
 
 		await versionUtils.checkKamelNeedsUpdate('bogusversion').then( () => {
