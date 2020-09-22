@@ -16,7 +16,7 @@
  */
 'use strict';
 
-import * as assert from 'assert';
+import {assert} from 'chai';
 import * as config from '../../config';
 import * as fs from 'fs';
 import * as kubectl from '../../kubectl';
@@ -54,29 +54,26 @@ suite("ensure install methods are functioning as expected", function() {
 		installKubectlSpy.resetHistory();	
 	});
 
-	var testVar = test("ensure cli version checking works correctly", async function() {
-		if(!process.env.VSCODE_CAMELK_GITHUB_TOKEN) {
-			testVar.skip();
-		}
+	const testInvalidVersionVar = test("ensure cli version checking works correctly: detect no update needed with unavailable version specified", async function() {
+		skipIfNoGithubTokenAvailable(testInvalidVersionVar);
 
-		await versionUtils.checkKamelNeedsUpdate('bogusversion').then( () => {
-			assert.fail('cli version checking, negative case worked');
-		}).catch( (error) => {
-			assert.ok(error, 'cli version checking, negative case worked');
-		});
+		const needsUpdate: boolean = await versionUtils.checkKamelNeedsUpdate('unavailable-version');
+		assert.isFalse(needsUpdate, 'It is mentioned that there is need of update with an unavailable kamel version.');
+	});
 	
+	const testLatestVersionVar = test("ensure cli version checking works correctly: check latest Camel K version can be retrieved and doesn't need an update", async function() {
+		skipIfNoGithubTokenAvailable(testLatestVersionVar);
+
 		const retrievedVersion = await versionUtils.getLatestCamelKVersion();
 		if (failed(retrievedVersion)) {
 			assert.fail(retrievedVersion.error[0]);
 		}
 		let latestversion = retrievedVersion.result.trim();
 		assert.ok(typeof latestversion === "string" && latestversion, 'unable to retrieve latest version');
-		await versionUtils.checkKamelNeedsUpdate(latestversion).then( (boolVal) => {
-			// should return a false since the versions should match
-			assert.ok(typeof boolVal === "boolean" && !boolVal, 'cli version checking, positive case worked');
-		});
+		const needsUpdate: boolean = await versionUtils.checkKamelNeedsUpdate(latestversion);
+		assert.isFalse(needsUpdate, `Latest retrieved version is ${latestversion}. It is reported that an update is needed. It can be that a new Camel K has been released and the default version has not been updated.`);
 	});
-
+	
 	test("ensure we have access to the kamel cli", function(done) {
 		let kamelPath = config.getActiveKamelconfig();
 		console.log(`kamelPath= ${kamelPath}`);
@@ -94,6 +91,12 @@ suite("ensure install methods are functioning as expected", function() {
 		assert.equal(fs.existsSync(kubectlPath), true);
 	});
 });
+
+function skipIfNoGithubTokenAvailable(testVar: Mocha.Test) {
+	if (!process.env.VSCODE_CAMELK_GITHUB_TOKEN) {
+		testVar.skip();
+	}
+}
 
 function isTestRunningCI() {
 	const homedir = os.homedir();
