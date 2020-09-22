@@ -94,7 +94,7 @@ suite("ensure install methods are functioning as expected", function() {
 
 function skipIfNoGithubTokenAvailable(testVar: Mocha.Test) {
 	if (!process.env.VSCODE_CAMELK_GITHUB_TOKEN) {
-		testVar.skip();
+		//testVar.skip();
 	}
 }
 
