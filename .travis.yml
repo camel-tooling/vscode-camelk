@@ -25,7 +25,7 @@ install:
   - 'vsce package'
 before_script:
   # Download and provide in path kubectl , which is a requirement for using minikube.
-  - curl -Lo kubectl https://storage.googleapis.com/kubernetes-release/release/v1.18.2/bin/linux/amd64/kubectl && chmod +x kubectl && sudo mv kubectl /usr/local/bin/
+  - curl -Lo kubectl https://storage.googleapis.com/kubernetes-release/release/v1.19.0/bin/linux/amd64/kubectl && chmod +x kubectl && sudo mv kubectl /usr/local/bin/
   # Download and provide in path minikube.
   - curl -Lo minikube https://storage.googleapis.com/minikube/releases/v1.9.2/minikube-linux-amd64 && chmod +x minikube && sudo mv minikube /usr/local/bin/
   # Download and provide in path kamel.
@@ -35,7 +35,7 @@ before_script:
   - sudo mv kamel /usr/local/bin/
   - mkdir -p $HOME/.kube $HOME/.minikube
   - touch $KUBECONFIG
-  - sudo minikube start --vm-driver=none --kubernetes-version=v1.18.2
+  - sudo minikube start --vm-driver=none --kubernetes-version=v1.19.0
   - sudo minikube addons enable registry
   - 'sudo chown -R travis: /home/travis/.minikube/'
   - 'kubectl cluster-info'
