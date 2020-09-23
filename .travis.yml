@@ -17,7 +17,7 @@ before_install:
   - 'npm install -g typescript'
   - 'sudo apt-get -qq -y install conntrack'
 install:
-  - 'npm install'
+  - 'npm ci'
   # https://github.com/travis-ci/travis-ci/issues/8813
   - 'rm -f ./node_modules/.bin/which'
   - 'npm run vscode:prepublish'
@@ -53,7 +53,7 @@ after_success:
     fi
 cache:
   directories:
-    - "node_modules"
+    - "$HOME/.npm"
 branches:
   except:
     - /^dependabot.*$/
