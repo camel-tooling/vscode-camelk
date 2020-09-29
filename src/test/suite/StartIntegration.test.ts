@@ -28,6 +28,7 @@ import { getNamedListFromKubernetesThenParseList } from '../../kubectlutils';
 import * as shelljs from 'shelljs';
 import * as kamel from './../../kamel';
 import * as kubectl from './../../kubectl';
+import { LANGUAGES, LANGUAGES_WITH_FILENAME_EXTENSIONS } from '../../commands/NewIntegrationFileCommand';
 
 const RUNNING_TIMEOUT: number = 360000;
 const DEPLOYED_TIMEOUT: number = 5000;
@@ -66,18 +67,22 @@ suite('Check can deploy default examples', () => {
 		}
 		config.addNamespaceToConfig(undefined);
 	});
-
-	const testJava = test('Check can deploy Java example', async () => {
-		skipOnJenkins(testJava);
-		createdFile = await createFile(showQuickpickStub, showWorkspaceFolderPickStub, showInputBoxStub, 'TestBasicDeploy');
-
-		await startIntegrationWithBasicCheck(showQuickpickStub);
-	}).timeout(TOTAL_TIMEOUT);
+	
+	suite('Check basic deployments for each languages', function() {
+		LANGUAGES.forEach(function(language) {
+			const testInProgress = test(`Check can deploy ${language} example`, async() => {
+				skipOnJenkins(testInProgress);
+				createdFile = await createFile(showQuickpickStub, showWorkspaceFolderPickStub, showInputBoxStub, `TestBasic${language}Deploy`, language);
+		
+				await startIntegrationWithBasicCheck(showQuickpickStub);
+			}).timeout(TOTAL_TIMEOUT);
+		});
+	});
 	
 	const testSpecificNamespace = test('Check can deploy on specific namespace', async () => {
 		skipOnJenkins(testSpecificNamespace);
 		await prepareNewNamespaceWithCamelK(EXTRA_NAMESPACE_FOR_TEST);
-		createdFile = await createFile(showQuickpickStub, showWorkspaceFolderPickStub, showInputBoxStub, 'TestDeployInSpecificNamespace');
+		createdFile = await createFile(showQuickpickStub, showWorkspaceFolderPickStub, showInputBoxStub, 'TestDeployInSpecificNamespace', 'Java');
 		await config.addNamespaceToConfig(EXTRA_NAMESPACE_FOR_TEST);
 
 		await startIntegrationWithBasicCheck(showQuickpickStub);
@@ -136,20 +141,25 @@ async function checkIntegrationDeployed() {
 	}
 }
 
-async function createFile(showQuickpickStub: sinon.SinonStub<any[], any>, showWorkspaceFolderPickStub: sinon.SinonStub<any[], any>, showInputBoxStub: sinon.SinonStub<any[], any>, integrationName: string): Promise<vscode.Uri | undefined>{
-	showQuickpickStub.onFirstCall().returns('Java');
+async function createFile(showQuickpickStub: sinon.SinonStub<any[], any>,
+	showWorkspaceFolderPickStub: sinon.SinonStub<any[], any>,
+	showInputBoxStub: sinon.SinonStub<any[], any>,
+	integrationName: string,
+	language: string): Promise<vscode.Uri | undefined>{
+	showQuickpickStub.onFirstCall().returns(language);
 	const workspaceFolder = (vscode.workspace.workspaceFolders as vscode.WorkspaceFolder[])[0];
 	showWorkspaceFolderPickStub.returns(workspaceFolder);
 	showInputBoxStub.onFirstCall().returns(integrationName);
 
 	await vscode.commands.executeCommand('camelk.integrations.createNewIntegrationFile');
+	const fileExtension = LANGUAGES_WITH_FILENAME_EXTENSIONS.get(language);
 
 	try {
 		await waitUntil(() => {
-			return vscode.window.activeTextEditor?.document.fileName.endsWith(integrationName + '.java');
+			return vscode.window.activeTextEditor?.document.fileName.endsWith(`${integrationName}.${fileExtension}`);
 		}, EDITOR_OPENED_TIMEOUT, 1000);
 	} catch (error) {
-		assert.fail(integrationName + '.java has not been opened in editor. Filename of currently opened editor: '+ vscode.window.activeTextEditor?.document.fileName);
+		assert.fail(`${integrationName}.${fileExtension} has not been opened in editor. Filename of currently opened editor: ${vscode.window.activeTextEditor?.document.fileName}`);
 	}
 	return vscode.window.activeTextEditor?.document.uri;
 }

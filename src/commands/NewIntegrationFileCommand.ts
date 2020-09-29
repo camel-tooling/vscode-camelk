@@ -23,14 +23,14 @@ import * as kamel from '../kamel';
 
 const validFilename = require('valid-filename');
 
-const LANGUAGES_WITH_FILENAME_EXTENSIONS = new Map([
+export const LANGUAGES_WITH_FILENAME_EXTENSIONS = new Map([
 	['Java', 'java'],
 	['XML', 'xml'],
 	['Yaml', 'yaml'],
 	['Groovy', 'groovy'],
 	['JavaScript', 'js'],
 	['Kotlin', 'kts']]);
-const LANGUAGES = Array.from(LANGUAGES_WITH_FILENAME_EXTENSIONS.keys());
+export const LANGUAGES = Array.from(LANGUAGES_WITH_FILENAME_EXTENSIONS.keys());
 
 export async function create(...args: any[]) : Promise<void> {
 	let language : string | undefined;
