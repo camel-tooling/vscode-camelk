@@ -32,7 +32,7 @@ node('rhel8'){
 
 	stage('Package') {
         def packageJson = readJSON file: 'package.json'
-        sh "vsce package -o vscode-camelk-${packageJson.version}-${env.BUILD_NUMBER}.vsix"
+        sh "vsce package -o vscode-camelk-${packageJson.version}-${env.BUILD_NUMBER}.vsix --no-yarn"
         sh "npm pack && mv vscode-camelk-${packageJson.version}.tgz vscode-camelk-${packageJson.version}-${env.BUILD_NUMBER}.tgz"
 	}
 
