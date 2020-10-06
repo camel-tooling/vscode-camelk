@@ -20,7 +20,7 @@ import * as fs from 'fs';
 import * as sinon from 'sinon';
 import * as vscode from 'vscode';
 import * as config from '../../config';
-import { basicIntegration } from '../../IntegrationUtils';
+import * as IntegrationUtils from '../../IntegrationUtils';
 import { skipOnJenkins, getCamelKIntegrationsProvider, openCamelKTreeView } from "./Utils";
 import { assert, expect } from 'chai';
 import waitUntil = require('async-wait-until');
@@ -29,6 +29,7 @@ import * as shelljs from 'shelljs';
 import * as kamel from './../../kamel';
 import * as kubectl from './../../kubectl';
 import { LANGUAGES, LANGUAGES_WITH_FILENAME_EXTENSIONS } from '../../commands/NewIntegrationFileCommand';
+import * as CamelKTaskDefinition from '../../task/CamelKTaskDefinition';
 
 const RUNNING_TIMEOUT: number = 360000;
 const DEPLOYED_TIMEOUT: number = 5000;
@@ -79,6 +80,21 @@ suite('Check can deploy default examples', () => {
 		});
 	});
 	
+	const testDeploymentUsingDefaultTask = test('Check can deploy from a task', async() => {
+		skipOnJenkins(testDeploymentUsingDefaultTask);
+		const language = 'Java';
+		createdFile = await createFile(showQuickpickStub, showWorkspaceFolderPickStub, showInputBoxStub, `Test${language}DeployFromTask`, language);
+		await openCamelKTreeView();
+		assert.isEmpty(getCamelKIntegrationsProvider().getTreeNodes());
+		showQuickpickStub.onSecondCall().returns(IntegrationUtils.vscodeTasksIntegration);
+		showQuickpickStub.onThirdCall().returns(CamelKTaskDefinition.NAME_OF_PROVIDED_TASK_TO_DEPLOY_IN_DEV_MODE_FROM_ACTIVE_EDITOR);
+		
+		await vscode.commands.executeCommand('camelk.startintegration');
+
+		await checkIntegrationDeployed();
+		await checkIntegrationRunning();
+	}).timeout(TOTAL_TIMEOUT);
+	
 	const testSpecificNamespace = test('Check can deploy on specific namespace', async () => {
 		skipOnJenkins(testSpecificNamespace);
 		await prepareNewNamespaceWithCamelK(EXTRA_NAMESPACE_FOR_TEST);
@@ -104,7 +120,7 @@ async function startIntegrationWithBasicCheck(showQuickpickStub: sinon.SinonStub
 	await openCamelKTreeView();
 	assert.isEmpty(getCamelKIntegrationsProvider().getTreeNodes());
 
-	showQuickpickStub.onSecondCall().returns(basicIntegration);
+	showQuickpickStub.onSecondCall().returns(IntegrationUtils.basicIntegration);
 	await vscode.commands.executeCommand('camelk.startintegration');
 
 	await checkIntegrationDeployed();
