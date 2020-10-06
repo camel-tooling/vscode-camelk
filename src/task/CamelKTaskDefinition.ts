@@ -16,6 +16,7 @@
  */
 'use strict';
 
+import * as kamel from '../kamel';
 import * as vscode from 'vscode';
 import * as IntegrationUtils from '../IntegrationUtils';
 
@@ -36,7 +37,7 @@ export interface CamelKTaskDefinition extends vscode.TaskDefinition {
 }
 
 export class CamelKTaskProvider implements vscode.TaskProvider {
-
+	
 	private tasks: vscode.Task[] | undefined;
 	static START_CAMELK_TYPE: string = 'camel-k';
 	constructor() { }
@@ -45,12 +46,12 @@ export class CamelKTaskProvider implements vscode.TaskProvider {
 		return this.getTasks();
 	}
 
-	public resolveTask(_task: vscode.Task): vscode.Task | undefined {
+	public async resolveTask(_task: vscode.Task): Promise<vscode.Task | undefined> {
 		const definition: CamelKTaskDefinition = <any>_task.definition;
-		return this.getTask(definition);
+		return await this.getTask(definition);
 	}
 
-	private getTasks(): vscode.Task[] {
+	private async getTasks(): Promise<vscode.Task[]> {
 		if (this.tasks !== undefined) {
 			return this.tasks;
 		}
@@ -61,11 +62,11 @@ export class CamelKTaskProvider implements vscode.TaskProvider {
 			"file": "${file}",
 			"dev": true
 		};
-		this.tasks.push(this.getTask(taskDefinition));
+		this.tasks.push(await this.getTask(taskDefinition));
 		return this.tasks;
 	}
 
-	public getTask(definition: CamelKTaskDefinition): vscode.Task {
+	public async getTask(definition: CamelKTaskDefinition): Promise<vscode.Task> {
 		let args = IntegrationUtils.computeKamelArgs(definition.file,
 			definition.dev,
 			definition.configmap,
@@ -79,7 +80,7 @@ export class CamelKTaskProvider implements vscode.TaskProvider {
 			definition.compression,
 			definition.profile);
 		let argsInlined = args.join(' ');
-		let processExecution = new vscode.ShellExecution(`kamel ${argsInlined}`);
+		let processExecution = new vscode.ShellExecution(`${await kamel.create().getPath()} ${argsInlined}`);
 		let displayName :string;
 		if(definition.label) {
 			displayName = definition.label;
