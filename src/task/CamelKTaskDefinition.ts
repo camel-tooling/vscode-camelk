@@ -58,7 +58,7 @@ export class CamelKTaskProvider implements vscode.TaskProvider {
 		let taskDefinition = {
 			"type": CamelKTaskProvider.START_CAMELK_TYPE,
 			"label": "Start in dev mode Camel K integration opened in active editor",
-			"file": "${file}",
+			"file": "\"${file}\"",
 			"dev": true
 		};
 		this.tasks.push(this.getTask(taskDefinition));
