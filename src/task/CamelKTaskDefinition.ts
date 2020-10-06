@@ -20,6 +20,8 @@ import * as kamel from '../kamel';
 import * as vscode from 'vscode';
 import * as IntegrationUtils from '../IntegrationUtils';
 
+export const NAME_OF_PROVIDED_TASK_TO_DEPLOY_IN_DEV_MODE_FROM_ACTIVE_EDITOR = "Start in dev mode Camel K integration opened in active editor";
+
 export interface CamelKTaskDefinition extends vscode.TaskDefinition {
     
 	configmap?: string;
@@ -58,7 +60,7 @@ export class CamelKTaskProvider implements vscode.TaskProvider {
 		this.tasks = [];
 		let taskDefinition = {
 			"type": CamelKTaskProvider.START_CAMELK_TYPE,
-			"label": "Start in dev mode Camel K integration opened in active editor",
+			"label": NAME_OF_PROVIDED_TASK_TO_DEPLOY_IN_DEV_MODE_FROM_ACTIVE_EDITOR,
 			"file": "\"${file}\"",
 			"dev": true
 		};
