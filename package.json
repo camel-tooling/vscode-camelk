@@ -298,7 +298,7 @@
 		"@types/vscode": "^1.49.0",
 		"async-wait-until": "^1.2.6",
 		"chai": "^4.2.0",
-		"copyfiles": "^2.3.0",
+		"copyfiles": "^2.4.0",
 		"decache": "^4.6.0",
 		"glob": "^7.1.6",
 		"istanbul": "^0.4.5",
