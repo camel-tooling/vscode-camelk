@@ -24,7 +24,9 @@ node('rhel8'){
 	withEnv(['JUNIT_REPORT_PATH=report.xml']) {
         stage('Test') {
     		wrap([$class: 'Xvnc']) {
-    			sh "npm test --silent"
+    			withCredentials([[$class: 'StringBinding', credentialsId: 'vscode-camelk-github-token', variable: 'VSCODE_CAMELK_GITHUB_TOKEN']]) {
+    				sh "npm test --silent"
+    			}
     			junit 'report.xml'
     		}
         }
