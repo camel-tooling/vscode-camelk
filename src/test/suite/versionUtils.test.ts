@@ -40,6 +40,10 @@ suite("ensure version url methods are functioning as expected", () => {
 	test("validate url for existing 1.1.1 version", async () => {
 		await validateVersion('1.1.1', 'linux', 'https://github.com/apache/camel-k/releases/download/v1.1.1/camel-k-client-1.1.1-linux-64bit.tar.gz');
 	});
+	
+	test("validate url for existing 1.2.0 version", async () => {
+		await validateVersion('1.2.0', 'linux', 'https://github.com/apache/camel-k/releases/download/v1.2.0/camel-k-client-1.2.0-linux-64bit.tar.gz');
+	});
 
 	test("validate invalid url for xyz1 version", async () => {
 		await invalidateVersion('xyz1', 'linux');
