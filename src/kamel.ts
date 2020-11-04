@@ -66,7 +66,7 @@ export function create() : Kamel {
 }
 
 export function getBaseCmd(binpath: string, command: string, namespace : string | undefined) : string {
-	let cmd: string = `${binpath} ${command}`;
+	let cmd: string = `"${binpath}" ${command}`;
 	if (namespace) {
 		 cmd += ` --namespace=${namespace}`;
 	}

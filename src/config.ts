@@ -29,11 +29,11 @@ export const REMOVE_LOGVIEW_ON_SHUTDOWN_KEY = "camelk.integrations.closeLogViewW
 export const RUNTIME_VERSION_KEY = "camelk.integrations.runtimeVersion";
 export const AUTOUPGRADE_KEY = "camelk.integrations.autoUpgrade";
 
-export async function addKamelPathToConfig(value: string) : Promise<void> {
+export async function addKamelPathToConfig(value: string | undefined) : Promise<void> {
 	await setConfigValue(KAMEL_PATH_CONFIG_KEY, value);
 }
 
-export async function addKubectlPathToConfig(value: string) : Promise<void> {
+export async function addKubectlPathToConfig(value: string | undefined) : Promise<void> {
 	await setConfigValueForRoot(KUBERNETES_EXTENSION_CONFIG_KEY, KUBECTL_PATH_CONFIG_KEY, value);
 }
 

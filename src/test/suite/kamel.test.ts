@@ -17,10 +17,23 @@
 'use strict';
 
 import * as assert from 'assert';
+import * as config from '../../config';
 import * as installer from '../../installer';
-import * as kubectlutils from '../../kubectlutils';
+import * as kamel from '../../kamel';
+import { expect } from 'chai';
+import path = require('path');
 
 suite("ensure kamel and kubectl are available", function() {
+	
+	let kamelConfigBeforeTest :string;
+	
+	this.beforeEach(function() {
+		kamelConfigBeforeTest = config.getActiveKamelconfig();
+	});
+	
+	this.afterEach(async() => {
+		await config.addKamelPathToConfig(kamelConfigBeforeTest);
+	});
 
     test("ensure can activate kamel cli", function(done) {
 		installer.isKamelAvailable().then( (flag) => {
@@ -36,19 +49,15 @@ suite("ensure kamel and kubectl are available", function() {
 			done();
 		});
 	});
-
-    test("ensure can access the kubectl cli", function(done) {
-		// instead of relying on us activating the kubernetes extension to install kubectl
-		// just rely on the CLI already being installed and active in the target environment
-		kubectlutils.isKubernetesAvailable().then( (flag) => {
-			if (flag) {
-				console.log(`Kubectl is available: ${flag}`);
-				done();
-			}
-		}).catch( (error) => {
-			assert.fail(`Kubectl is not available: ${error}`);
-			done();
-		});
+	
+	test('check kamel can be on path with space', async function() {
+		const kamelWithSpacePath = path.resolve(__dirname, '../../../../test Fixture with speci@l chars/binaries for test with space/kamel');
+		await config.addKamelPathToConfig(kamelWithSpacePath);
+		const kamelExe = kamel.create();
+		const kamelExePath = await kamelExe.getPath();
+		expect(kamelExePath).to.be.equal(kamelWithSpacePath);
+		
+		await kamelExe.invoke('version');
 	});
 
 });
