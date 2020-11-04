@@ -4,6 +4,8 @@ All notable changes to the "vscode-camelk" extension will be documented in this 
 
 ## 0.0.19
 
+- Support space to path of executable kamel and kubectl. Especially useful for user name with space.
+
 ## 0.0.18
 
 - Update default runtime version to v1.2.0

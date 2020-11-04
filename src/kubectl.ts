@@ -60,7 +60,7 @@ async function internalInvokeAsync(command: string, stdin?: string, callback?: (
 	const bin = await baseKubectlPath();
 	if (bin) {
 		const binpath = bin.trim();
-		const cmd = `${binpath} ${command}`;
+		const cmd = `"${binpath}" ${command}`;
 		let sr: shell.ShellResult | undefined;
 		if (stdin) {
 			sr = await exec(cmd, stdin);
