@@ -22,12 +22,11 @@ jobs:
             echo 'export KUBECONFIG=$HOME/.kube/config' >> $BASH_ENV
       - run:
           name: Configure Kamel on Minikube
-          command: |
-            sudo apt-get install apt-transport-https ca-certificates curl gnupg-agent software-properties-common
-            curl -fsSL https://download.docker.com/linux/debian/gpg | sudo apt-key add -
-            sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/debian $(lsb_release -cs) stable"
-            sudo apt-get update            
-            sudo apt-get -qq -y install conntrack iptables docker-ce docker-ce-cli containerd.io systemd    
+          command: |          
+            sudo apt-get -qq -y install conntrack iptables libvirt-clients libvirt-daemon-system qemu-kvm
+            sudo usermod -aG libvirt $(whoami)
+            newgrp libvirt
+            curl -LO https://storage.googleapis.com/minikube/releases/latest/docker-machine-driver-kvm2 && sudo install docker-machine-driver-kvm2 /usr/local/bin/
             # Download and provide in path kubectl , which is a requirement for using minikube.
             curl -Lo kubectl https://storage.googleapis.com/kubernetes-release/release/v1.19.0/bin/linux/amd64/kubectl && chmod +x kubectl && sudo mv kubectl /usr/local/bin/
             # Download and provide in path minikube.
@@ -39,7 +38,7 @@ jobs:
             sudo mv kamel /usr/local/bin/
             mkdir -p $HOME/.kube $HOME/.minikube
             touch $KUBECONFIG
-            sudo minikube start --vm-driver=none --kubernetes-version=v1.19.0
+            sudo minikube start --vm-driver=kvm2 --kubernetes-version=v1.19.0
             sudo minikube addons enable registry
             # sudo chown -R travis: /home/travis/.minikube/
             kubectl cluster-info
