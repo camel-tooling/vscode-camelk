@@ -31,10 +31,11 @@ import * as kubectl from './../../kubectl';
 import { LANGUAGES, LANGUAGES_WITH_FILENAME_EXTENSIONS } from '../../commands/NewIntegrationFileCommand';
 import * as CamelKTaskDefinition from '../../task/CamelKTaskDefinition';
 
-const RUNNING_TIMEOUT: number = 360000;
-const DEPLOYED_TIMEOUT: number = 5000;
+const RUNNING_TIMEOUT: number = 720000;
+const DEPLOYED_TIMEOUT: number = 10000;
+const UNDEPLOY_TIMEOUT: number = 10000;
 const EDITOR_OPENED_TIMEOUT: number = 5000;
-const TOTAL_TIMEOUT: number = RUNNING_TIMEOUT + DEPLOYED_TIMEOUT + EDITOR_OPENED_TIMEOUT;
+const TOTAL_TIMEOUT: number = RUNNING_TIMEOUT + DEPLOYED_TIMEOUT + EDITOR_OPENED_TIMEOUT + UNDEPLOY_TIMEOUT;
 
 suite('Check can deploy default examples', () => {
 	
@@ -64,7 +65,7 @@ suite('Check can deploy default examples', () => {
 			vscode.commands.executeCommand('camelk.integrations.remove', deployedTreeNode);
 			waitUntil(() => {
 				return getCamelKIntegrationsProvider().getTreeNodes().length === 0;
-			});
+			}, UNDEPLOY_TIMEOUT);
 		}
 		config.addNamespaceToConfig(undefined);
 	});
@@ -118,7 +119,10 @@ async function checkIntegrationsInDifferentNamespaces(EXTRA_NAMESPACE_FOR_TEST: 
 
 async function startIntegrationWithBasicCheck(showQuickpickStub: sinon.SinonStub<any[], any>) {
 	await openCamelKTreeView();
-	assert.isEmpty(getCamelKIntegrationsProvider().getTreeNodes());
+	const currentIntegrations = getCamelKIntegrationsProvider().getTreeNodes();
+	assert.isEmpty(
+		currentIntegrations,
+		`It is expected that there is no Integration already deployed but the following are detected ${currentIntegrations.map(treeNode => treeNode.label).join(';')}`);
 
 	showQuickpickStub.onSecondCall().returns(IntegrationUtils.basicIntegration);
 	await vscode.commands.executeCommand('camelk.startintegration');
