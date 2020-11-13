@@ -1,0 +1,102 @@
+version: 2.1
+
+job_default: &job_defaults
+  docker:
+    - image: circleci/node:lts-browsers
+  
+jobs:
+  build:
+    <<: *job_defaults
+    steps:
+      - checkout
+      - restore_cache:
+          key: dependency-cache-{{ checksum "package-lock.json" }}
+      - run:
+          name: Setup Environment Variables
+          command: |
+            echo 'export CHANGE_MINIKUBE_NONE_USER=true' >> $BASH_ENV
+            echo 'export MINIKUBE_WANTUPDATENOTIFICATION=false' >> $BASH_ENV
+            echo 'export MINIKUBE_WANTREPORTERRORPROMPT=false' >> $BASH_ENV
+            echo 'export MINIKUBE_HOME=$HOME' >> $BASH_ENV
+            echo 'export CHANGE_MINIKUBE_NONE_USER=true' >> $BASH_ENV
+            echo 'export KUBECONFIG=$HOME/.kube/config' >> $BASH_ENV
+      - run:
+          name: Configure Kamel on Minikube
+          command: |
+            sudo apt-get -qq -y install conntrack iptables           
+            # Download and provide in path kubectl , which is a requirement for using minikube.
+            curl -Lo kubectl https://storage.googleapis.com/kubernetes-release/release/v1.19.0/bin/linux/amd64/kubectl && chmod +x kubectl && sudo mv kubectl /usr/local/bin/
+            # Download and provide in path minikube.
+            curl -Lo minikube https://storage.googleapis.com/minikube/releases/v1.13.1/minikube-linux-amd64 && chmod +x minikube && sudo mv minikube /usr/local/bin/
+            # Download and provide in path kamel.
+            curl -Lo kamel.tar.gz https://github.com/apache/camel-k/releases/download/v1.2.0/camel-k-client-1.2.0-linux-64bit.tar.gz
+            tar -zxvf kamel.tar.gz
+            chmod +x kamel
+            sudo mv kamel /usr/local/bin/
+            mkdir -p $HOME/.kube $HOME/.minikube
+            touch $KUBECONFIG
+            sudo minikube start --vm-driver=none --kubernetes-version=v1.19.0
+            sudo minikube addons enable registry
+            'sudo chown -R travis: /home/travis/.minikube/'
+            'kubectl cluster-info'
+            'kamel install'
+            # Clean CLI which were used to start the Kubernetes instance
+            sudo rm /usr/local/bin/minikube
+            sudo rm /usr/local/bin/kubectl
+            sudo rm /usr/local/bin/kamel                
+      - run:
+          name: install-vsce
+          command: sudo npm install -g vsce
+      - run:
+          name: npm-ci
+          command: npm ci
+      - run:
+          name: npm-vscode:prepublish
+          command: npm run vscode:prepublish
+      - run:
+          name: vsce-package
+          command: vsce package
+      - run:
+          name: test
+          command: npm test
+      - run:
+          name: test UI
+          command: npm run ui-test
+      - save_cache:
+          key: dependency-cache-{{ checksum "package-lock.json" }}
+          paths:
+            - ~/.npm
+  sonar:
+    <<: *job_defaults
+    steps:
+      - checkout
+      - restore_cache:
+          key: dependency-cache-{{ checksum "package-lock.json" }}
+      - run:
+          name: install-typescript
+          command: sudo npm install -g typescript
+      - run:
+          name: npm-ci
+          command: npm ci
+      - sonarcloud/scan
+      - save_cache:
+          key: dependency-cache-{{ checksum "package-lock.json" }}
+          paths:
+            - ~/.npm
+
+orbs:
+  sonarcloud: sonarsource/sonarcloud@1.0.2
+
+workflows:
+  version: 2
+  vscode-camelk:
+    jobs:
+      - build
+      - sonar:
+          context: sonarcloud
+          filters:
+            branches:
+              only:
+                - master
+          requires:
+            - build
