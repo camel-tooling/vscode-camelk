@@ -23,6 +23,7 @@ jobs:
       - run:
           name: Configure Kamel on Minikube
           command: |          
+            sudo apt-get update -y            
             sudo apt-get -qq -y install conntrack iptables
             # Download and provide in path kubectl , which is a requirement for using minikube.
             curl -Lo kubectl https://storage.googleapis.com/kubernetes-release/release/v1.19.0/bin/linux/amd64/kubectl && chmod +x kubectl && sudo mv kubectl /usr/local/bin/
