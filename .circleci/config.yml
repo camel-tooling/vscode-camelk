@@ -65,6 +65,8 @@ jobs:
           key: dependency-cache-{{ checksum "package-lock.json" }}
           paths:
             - ~/.npm
+      - store_artifacts:
+          path: $HOME/minikube.log
   sonar:
     <<: *job_defaults
     steps:
