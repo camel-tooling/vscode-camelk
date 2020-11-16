@@ -20,26 +20,21 @@ jobs:
             echo 'export MINIKUBE_HOME=$HOME' >> $BASH_ENV
             echo 'export CHANGE_MINIKUBE_NONE_USER=true' >> $BASH_ENV
             echo 'export KUBECONFIG=$HOME/.kube/config' >> $BASH_ENV
+      - minikube-install:
+          version: 1.15.0
+      - minikube-start:
+          version: 1.19.0
       - run:
           name: Configure Kamel on Minikube
           command: |
-            . /etc/os-release
-            echo "deb https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable/xUbuntu_${VERSION_ID}/ /" | sudo tee /etc/apt/sources.list.d/devel:kubic:libcontainers:stable.list
-            curl -L https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable/xUbuntu_${VERSION_ID}/Release.key | sudo apt-key add -
-            sudo apt-get update -y            
-            sudo apt-get -qq -y install conntrack iptables podman
-            # Download and provide in path kubectl , which is a requirement for using minikube.
-            curl -Lo kubectl https://storage.googleapis.com/kubernetes-release/release/v1.19.0/bin/linux/amd64/kubectl && chmod +x kubectl && sudo mv kubectl /usr/local/bin/
-            # Download and provide in path minikube.
-            curl -Lo minikube https://storage.googleapis.com/minikube/releases/v1.15.0/minikube-linux-amd64 && chmod +x minikube && sudo mv minikube /usr/local/bin/
             # Download and provide in path kamel.
             curl -Lo kamel.tar.gz https://github.com/apache/camel-k/releases/download/v1.2.0/camel-k-client-1.2.0-linux-64bit.tar.gz
             tar -zxvf kamel.tar.gz
             chmod +x kamel
             sudo mv kamel /usr/local/bin/
-            mkdir -p $HOME/.kube $HOME/.minikube
-            touch $KUBECONFIG
-            minikube start --vm-driver=podman --kubernetes-version=v1.19.0
+            # mkdir -p $HOME/.kube $HOME/.minikube
+            # touch $KUBECONFIG
+            # minikube start --vm-driver=podman --kubernetes-version=v1.19.0
             minikube addons enable registry
             # sudo chown -R travis: /home/travis/.minikube/
             kubectl cluster-info
@@ -90,6 +85,7 @@ jobs:
 
 orbs:
   sonarcloud: sonarsource/sonarcloud@1.0.2
+  minikube: ccpgames/minikube@0.0.1
 
 workflows:
   version: 2
