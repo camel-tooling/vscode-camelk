@@ -39,8 +39,8 @@ jobs:
             sudo mv kamel /usr/local/bin/
             mkdir -p $HOME/.kube $HOME/.minikube
             touch $KUBECONFIG
-            sudo minikube start --vm-driver=podman --kubernetes-version=v1.19.0
-            sudo minikube addons enable registry
+            minikube start --vm-driver=podman --kubernetes-version=v1.19.0
+            minikube addons enable registry
             # sudo chown -R travis: /home/travis/.minikube/
             kubectl cluster-info
             kamel install
