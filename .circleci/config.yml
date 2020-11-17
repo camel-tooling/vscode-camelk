@@ -1,12 +1,9 @@
 version: 2.1
-
-job_default: &job_defaults
-  docker:
-    - image: cimg/node:lts-browsers
-  
+ 
 jobs:
   build:
-    <<: *job_defaults
+    machine:
+      image: ubuntu-2004:202010-01
     steps:
       - checkout
       - restore_cache:
@@ -67,7 +64,8 @@ jobs:
       - store_artifacts:
           path: /home/circleci/minikube.log
   sonar:
-    <<: *job_defaults
+    docker:
+      - image: cimg/node/lts-browsers
     steps:
       - checkout
       - restore_cache:
