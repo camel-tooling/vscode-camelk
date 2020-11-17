@@ -20,10 +20,12 @@ jobs:
             echo 'export MINIKUBE_HOME=$HOME' >> $BASH_ENV
             echo 'export CHANGE_MINIKUBE_NONE_USER=true' >> $BASH_ENV
             echo 'export KUBECONFIG=$HOME/.kube/config' >> $BASH_ENV
+      - minikube/kubectl-install:
+          version: v1.19.0
       - minikube/minikube-install:
-          version: 1.15.0
+          version: v1.15.0
       - minikube/minikube-start:
-          version: 1.19.0
+          version: v1.19.0
       - run:
           name: Configure Kamel on Minikube
           command: |
