@@ -66,7 +66,7 @@ jobs:
           paths:
             - ~/.npm
       - store_artifacts:
-          path: minikube.log
+          path: /home/circleci/minikube.log
   sonar:
     <<: *job_defaults
     steps:
