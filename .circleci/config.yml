@@ -6,7 +6,8 @@ job_default: &job_defaults
   
 jobs:
   build:
-    <<: *job_defaults
+    machine:
+      image: ubuntu-2004:202010-01
     steps:
       - checkout
       - restore_cache:
