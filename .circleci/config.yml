@@ -42,9 +42,9 @@ jobs:
             echo $CHANGE_MINIKUBE_NONE_USER
             echo $KUBECONFIG
             touch $KUBECONFIG
-            sudo minikube start --vm-driver=docker --kubernetes-version=v1.19.0
+            minikube start --vm-driver=docker --kubernetes-version=v1.19.0
             echo "minikube started"
-            sudo minikube addons enable registry
+            minikube addons enable registry
             echo "minikube addons enabled"
             sudo chown -R circleci: /home/circleci/.minikube/
             kubectl cluster-info dump
