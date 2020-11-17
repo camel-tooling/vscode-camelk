@@ -91,6 +91,10 @@ jobs:
           key: dependency-cache-{{ checksum "package-lock.json" }}
           paths:
             - ~/.npm
+      - store_artifacts:
+          path: /home/circleci/.config/Code/logs
+      - store_artifacts:
+          path: /home/circleci/.config/Code/User/workspaceStorage/
   sonar:
     <<: *job_defaults
     steps:
