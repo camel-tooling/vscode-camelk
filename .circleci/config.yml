@@ -39,7 +39,7 @@ jobs:
             touch $KUBECONFIG
             sudo minikube start --vm-driver=none --kubernetes-version=v1.19.0
             sudo minikube addons enable registry
-            # sudo chown -R travis: /home/travis/.minikube/
+            sudo chown -R circleci: /home/circleci/.minikube/
             kubectl cluster-info
             kamel install
             # Clean CLI which were used to start the Kubernetes instance
