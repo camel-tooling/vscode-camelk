@@ -38,7 +38,7 @@ jobs:
             sudo mv kamel /usr/local/bin/
             echo $HOME
             mkdir -p $HOME/.kube $HOME/.minikube
-            echo "Change minikube user?"
+            echo "Change minikube none user?"
             echo $CHANGE_MINIKUBE_NONE_USER
             echo $KUBECONFIG
             touch $KUBECONFIG
