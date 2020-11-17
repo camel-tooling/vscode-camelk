@@ -23,7 +23,7 @@ jobs:
       - minikube/kubectl-install:
           version: v1.19.0
       - minikube/minikube-install:
-          version: v1.15.0
+          version: v1.15.1
       - minikube/minikube-start:
           version: v1.19.0
       - run:
