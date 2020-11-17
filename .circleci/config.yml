@@ -16,11 +16,9 @@ jobs:
           name: Setup Environment Variables
           command: |
             echo 'export HOME=/home/circleci' >> $BASH_ENV
-            echo 'export CHANGE_MINIKUBE_NONE_USER=true' >> $BASH_ENV
             echo 'export MINIKUBE_WANTUPDATENOTIFICATION=false' >> $BASH_ENV
             echo 'export MINIKUBE_WANTREPORTERRORPROMPT=false' >> $BASH_ENV
             echo 'export MINIKUBE_HOME=$HOME' >> $BASH_ENV
-            echo 'export CHANGE_MINIKUBE_NONE_USER=true' >> $BASH_ENV
             echo 'export KUBECONFIG=$HOME/.kube/config' >> $BASH_ENV
       - run:
           name: Install Node environment
