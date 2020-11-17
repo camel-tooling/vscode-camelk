@@ -20,10 +20,7 @@ jobs:
             echo 'export MINIKUBE_HOME=$HOME' >> $BASH_ENV
             echo 'export CHANGE_MINIKUBE_NONE_USER=true' >> $BASH_ENV
             echo 'export KUBECONFIG=$HOME/.kube/config' >> $BASH_ENV
-      - minikube/minikube-install:
-          version: 1.15.0
-      - minikube/minikube-start:
-          version: 1.19.0
+      - kubernetes/deployment
       - run:
           name: Configure Kamel on Minikube
           command: |
@@ -35,12 +32,12 @@ jobs:
             # mkdir -p $HOME/.kube $HOME/.minikube
             # touch $KUBECONFIG
             # minikube start --vm-driver=podman --kubernetes-version=v1.19.0
-            minikube addons enable registry
+            # minikube addons enable registry
             # sudo chown -R travis: /home/travis/.minikube/
             kubectl cluster-info
             kamel install
             # Clean CLI which were used to start the Kubernetes instance
-            sudo rm /usr/local/bin/minikube
+            # sudo rm /usr/local/bin/minikube
             sudo rm /usr/local/bin/kubectl
             sudo rm /usr/local/bin/kamel                
       - run:
@@ -87,7 +84,7 @@ jobs:
 
 orbs:
   sonarcloud: sonarsource/sonarcloud@1.0.2
-  minikube: ccpgames/minikube@0.0.1
+  kubernetes: circleci/kubernetes@0.11.2
 
 workflows:
   version: 2
