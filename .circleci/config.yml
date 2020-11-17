@@ -25,19 +25,8 @@ jobs:
       - run:
           name: Install Node environment
           command: |
-            # curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.35.3/install.sh | bash
-            # NVM_DIR="$HOME/.nvm"
-            # echo "export NVM_DIR=\"$HOME/.nvm\"" >> $BASH_ENV
-            # echo "[ -s \"$NVM_DIR/nvm.sh\" ] && \. \"$NVM_DIR/nvm.sh\"" >> $BASH_ENV
-            # source $BASH_ENV
-            # nvm version
-            # nvm install lts/*
             curl -sL https://deb.nodesource.com/setup_12.x | sudo -E bash -
             sudo apt-get install -y nodejs
-      - run:
-          name: Install Java
-          command: |
-            java --version
       - run:
           name: Configure Kamel on Minikube
           command: |     
