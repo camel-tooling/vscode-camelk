@@ -38,6 +38,8 @@ jobs:
             sudo mv kamel /usr/local/bin/
             echo $HOME
             mkdir -p $HOME/.kube $HOME/.minikube
+            echo "Change minikube user?"
+            echo $CHANGE_MINIKUBE_NONE_USER
             echo $KUBECONFIG
             touch $KUBECONFIG
             sudo minikube start --vm-driver=none --kubernetes-version=v1.19.0
