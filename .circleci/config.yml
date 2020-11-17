@@ -23,10 +23,19 @@ jobs:
             echo 'export CHANGE_MINIKUBE_NONE_USER=true' >> $BASH_ENV
             echo 'export KUBECONFIG=$HOME/.kube/config' >> $BASH_ENV
       - run:
+          name: Install Node environment
+          command: |
+            curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.35.3/install.sh | bash
+            NVM_DIR="$HOME/.nvm"
+            echo "export NVM_DIR=\"$HOME/.nvm\"" >> $BASH_ENV
+            echo "[ -s \"$NVM_DIR/nvm.sh\" ] && \. \"$NVM_DIR/nvm.sh\"" >> $BASH_ENV
+            source $BASH_ENV
+            nvm install --lts
+      - run:
           name: Configure Kamel on Minikube
-          command: |          
+          command: |     
             sudo apt-get update -y            
-            sudo apt-get -qq -y install conntrack iptables
+            sudo apt-get -qq -y install conntrack iptables 
             # Download and provide in path kubectl , which is a requirement for using minikube.
             curl -Lo kubectl https://storage.googleapis.com/kubernetes-release/release/v1.19.0/bin/linux/amd64/kubectl && chmod +x kubectl && sudo mv kubectl /usr/local/bin/
             # Download and provide in path minikube.
