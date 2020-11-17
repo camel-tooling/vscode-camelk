@@ -57,8 +57,9 @@ async function retrieveSchemaAsCache(mainOutputChannel: vscode.OutputChannel): P
 		if (schemaUrl !== undefined) {
 			const res: Response = await fetch(schemaUrl);
 			if (res.status >= 400) {
-				console.log('error fetching: '+ res.statusText);
-				mainOutputChannel.appendLine('Cannot retrieve Camel K schema. ' + res.statusText);
+				const errorMessage = `Cannot retrieve Camel K schema from url ${schemaUrl} with status text ${res.statusText} and error code ${res.status}`;
+				console.log(errorMessage);
+				mainOutputChannel.appendLine(errorMessage);
 				return undefined;
 			} else if (camelkSchemaCache === undefined) {
 				camelkSchemaCache = await res.text();
