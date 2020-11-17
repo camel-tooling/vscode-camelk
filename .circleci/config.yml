@@ -47,7 +47,7 @@ jobs:
             minikube addons enable registry
             echo "minikube addons enabled"
             sudo chown -R circleci: /home/circleci/.minikube/
-            kubectl cluster-info dump
+            kubectl cluster-info
             kamel install
             # Clean CLI which were used to start the Kubernetes instance
             sudo rm /usr/local/bin/minikube
