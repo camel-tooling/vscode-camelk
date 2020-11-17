@@ -31,7 +31,7 @@ jobs:
             # echo "[ -s \"$NVM_DIR/nvm.sh\" ] && \. \"$NVM_DIR/nvm.sh\"" >> $BASH_ENV
             # source $BASH_ENV
             nvm version
-            nvm install lts/*
+            sudo nvm install lts/*
       - run:
           name: Install Java
           command: |
