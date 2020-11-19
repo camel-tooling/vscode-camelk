@@ -28,29 +28,31 @@ export class CamelKTaskCompletionItemProvider implements vscode.CompletionItemPr
 
 	public async provideCompletionItemsForText(text: string, offset: number, position: vscode.Position): Promise<vscode.CompletionItem[]> {
 		const globalNode = jsonparser.parseTree(text);
-		const node = jsonparser.findNodeAtOffset(globalNode, offset, false);
 		let completions: vscode.CompletionItem[] = [];
-		if (node) {
-			if (this.isInTasksArray(node)) {
-				const completionBasic: vscode.CompletionItem = {
-					label: 'Camel K basic development mode',
-					insertText:
-						`{
+		if(globalNode !== undefined) {
+			const node = jsonparser.findNodeAtOffset(globalNode, offset, false);
+			if (node) {
+				if (this.isInTasksArray(node)) {
+					const completionBasic: vscode.CompletionItem = {
+						label: 'Camel K basic development mode',
+						insertText:
+							`{
     "label": "Start in dev mode Camel K integration opened in active editor",
     "type": "camel-k",
     "dev": true,
     "file": "\${file}",
     "problemMatcher": []
 }`
-				};
-				completions.push(completionBasic);
-			} else if (this.isInTraitsArray(node)) {
-				const traitCompletions: vscode.CompletionItem[] = await TraitManager.provideAvailableTraits();
-				completions = completions.concat(traitCompletions);
-			} else if (this.isInTraitsArrayMember(node)) {
-				const value = node.value as string;
-				const traitpropertyCompletions: vscode.CompletionItem[] = await TraitManager.provideTraitProperties(value.substr(0, value.length - 1), position);
-				completions = completions.concat(traitpropertyCompletions);
+					};
+					completions.push(completionBasic);
+				} else if (this.isInTraitsArray(node)) {
+					const traitCompletions: vscode.CompletionItem[] = await TraitManager.provideAvailableTraits();
+					completions = completions.concat(traitCompletions);
+				} else if (this.isInTraitsArrayMember(node)) {
+					const value = node.value as string;
+					const traitpropertyCompletions: vscode.CompletionItem[] = await TraitManager.provideTraitProperties(value.substr(0, value.length - 1), position);
+					completions = completions.concat(traitpropertyCompletions);
+				}
 			}
 		}
 		return Promise.resolve(completions);
