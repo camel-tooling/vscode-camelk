@@ -26,30 +26,12 @@ jobs:
           name: vsce-package
           command: vsce package
       - run:
-          name: Setup Environment Variables for Minikube
-          command: |
-            echo 'export HOME=/home/circleci' >> $BASH_ENV
-            echo 'export MINIKUBE_WANTUPDATENOTIFICATION=false' >> $BASH_ENV
-            echo 'export MINIKUBE_WANTREPORTERRORPROMPT=false' >> $BASH_ENV
-            echo 'export MINIKUBE_HOME=$HOME' >> $BASH_ENV
-            echo 'export KUBECONFIG=$HOME/.kube/config' >> $BASH_ENV
-      - run:
           name: Configure Minikube
-          command: |               
-            sudo apt-get -qq -y install conntrack iptables 
-            # Download and provide in path kubectl , which is a requirement for using minikube.
-            curl -Lo kubectl https://storage.googleapis.com/kubernetes-release/release/v1.19.0/bin/linux/amd64/kubectl && chmod +x kubectl && sudo mv kubectl /usr/local/bin/
-            # Download and provide in path minikube.
-            curl -Lo minikube https://storage.googleapis.com/minikube/releases/v1.15.1/minikube-linux-amd64 && chmod +x minikube && sudo mv minikube /usr/local/bin/
-            mkdir -p $HOME/.kube $HOME/.minikube
-            touch $KUBECONFIG
+          command: |
+            curl -LO https://storage.googleapis.com/minikube/releases/latest/minikube_latest_amd64.deb
+            sudo dpkg -i minikube_latest_amd64.deb
             minikube start --vm-driver=docker --kubernetes-version=v1.19.0
             minikube addons enable registry
-            sudo chown -R circleci: /home/circleci/.minikube/
-            kubectl cluster-info
-            # Clean CLI which were used to start the Kubernetes instance
-            sudo rm /usr/local/bin/minikube
-            sudo rm /usr/local/bin/kubectl
       - run:
           name: Configure Kamel
           command: |               
