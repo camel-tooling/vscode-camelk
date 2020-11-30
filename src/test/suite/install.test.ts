@@ -100,7 +100,7 @@ function skipIfNoGithubTokenAvailable(testVar: Mocha.Test) {
 
 function isTestRunningCI() {
 	const homedir = os.homedir();
-	return homedir.includes('hudson') || homedir.includes('travis');
+	return homedir.includes('hudson') || homedir.includes('circleci');
 }
 
 async function isKubectlAvailableOnCommandLine() {

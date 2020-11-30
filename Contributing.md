@@ -9,7 +9,7 @@
 * Check that someone listed as _submitter_ in Jenkinsfile is available
 * Create a tag
 * Push the tag to vscode-camelk repository, it will trigger a build after few minutes
-* Check build is working fine on [Travis CI](https://travis-ci.org/camel-tooling/vscode-camelk/)
+* Check build is working fine on [Circle CI](https://app.circleci.com/pipelines/github/camel-tooling/vscode-camelk)
 * Start build on [Jenkins CI](https://dev-platform-jenkins.rhev-ci-vms.eng.rdu2.redhat.com/view/VS%20Code/job/vscode-camelk-release/) with _publishToMarketPlace_ parameter checked
 * Wait the build is waiting on step _Publish to Marketplace_
 * Ensure you are logged in
@@ -28,4 +28,4 @@ Integrate the newly released version of VS Code Camel K in the Eclipse Che regis
 
 # Note about test execution and GitHub API access
 
-Access to GitHub API has a rate limit. This rate limit is lower for unauthenticated requests. On CI, this rate limit was often hit (either Travis or Jenkins). To avoid that, a GitHub token needs to be provided through VSCODE_CAMELK_GITHUB_TOKEN environment variable. This token doesn't require any specific rights.
+Access to GitHub API has a rate limit. This rate limit is lower for unauthenticated requests. On CI, this rate limit was often hit (either Circle CI or Jenkins). To avoid that, a GitHub token needs to be provided through VSCODE_CAMELK_GITHUB_TOKEN environment variable. This token doesn't require any specific rights.
