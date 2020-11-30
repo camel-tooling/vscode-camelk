@@ -75,7 +75,7 @@
 					},
 					"camelk.integrations.runtimeVersion": {
 						"type": "string",
-						"description": "Default Apache Camel K Runtime Version (for example 1.2.0)",
+						"description": "Default Apache Camel K Runtime Version (for example 1.2.1)",
 						"scope": "window"
 					},
 					"camelk.integrations.autoUpgrade": {
