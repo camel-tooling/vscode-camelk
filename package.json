@@ -320,7 +320,7 @@
 		"redhat.vscode-yaml"
 	],
 	"dependencies": {
-		"@types/request-promise": "^4.1.46",
+		"@types/request-promise": "^4.1.47",
 		"@types/shelljs": "^0.8.8",
 		"@types/tmp": "^0.2.0",
 		"child_process": "^1.0.2",
