@@ -102,7 +102,7 @@ export async function activate(context: vscode.ExtensionContext) {
 			}
 			if (selection && selection.label) {
 				setStatusLineMessageAndShow(`Removing Apache Camel K Integration...`);
-				let integrationName : string = selection.label;
+				let integrationName: string = retrieveIntegratioName(selection);
 				let kamelExecutor = kamel.create();
 				utils.shareMessage(mainOutputChannel, 'Removing ' + integrationName + ' via Kamel executable Delete');
 				let args : string[] = ['delete', `${integrationName}`];
@@ -136,7 +136,7 @@ export async function activate(context: vscode.ExtensionContext) {
 			}
 			if (selection && selection.label) {
 				utils.shareMessage(mainOutputChannel, `Retrieving log for running Apache Camel K Integration...`);
-				let integrationName : string = selection.label;
+				let integrationName : string = retrieveIntegratioName(selection);
 				await logUtils.handleLogViaKamelCli(integrationName).catch((error) => {
 					utils.shareMessage(mainOutputChannel, `error: ${error} \n`);
 				});
@@ -212,6 +212,17 @@ export async function activate(context: vscode.ExtensionContext) {
 			return mainOutputChannel;
 		}
 	};
+}
+
+function retrieveIntegratioName(selection: TreeNode) {
+	let integrationNameTreeItem: string | vscode.TreeItemLabel | undefined = selection.label;
+	if (integrationNameTreeItem === undefined) {
+		return "";
+	} else if(typeof integrationNameTreeItem === "string") {
+		return integrationNameTreeItem;
+	} else {
+		return integrationNameTreeItem.label;
+	}
 }
 
 function selectFirstItemInTree() {
