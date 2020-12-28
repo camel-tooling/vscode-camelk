@@ -4,6 +4,8 @@ All notable changes to the "vscode-camelk" extension will be documented in this 
 
 ## 0.0.21
 
+- Update default runtime version to v1.3.1
+
 ## 0.0.20
 
 - Change default of `auto-update` of kamel cli binary from `true` to `false`. It avoids that Camel K regressions are breaking the extension.
