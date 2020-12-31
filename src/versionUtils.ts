@@ -24,13 +24,13 @@ import * as kamelCli from './kamel';
 import { platformString } from './installer';
 import fetch from 'cross-fetch';
 
-export const version: string = '1.3.0'; //need to retrieve this if possible, but have a default
+export const version: string = '1.3.1'; //need to retrieve this if possible, but have a default
 
 /*
 * Can be retrieved using `curl -i https://api.github.com/repos/apache/camel-k/releases/latest` and searching for "last-modified" attribute
 * To be updated when updating the default "version" attribute
 */
-const LAST_MODIFIED_DATE_OF_DEFAULT_VERSION: string = 'Fri, 27 Nov 2020 08:56:01 GMT';
+const LAST_MODIFIED_DATE_OF_DEFAULT_VERSION: string = 'Thu, 04 Jan 2021 15:05:35 GMT';
 let latestVersionFromOnline: string;
 
 export async function testVersionAvailable(versionToUse: string): Promise<boolean> {
