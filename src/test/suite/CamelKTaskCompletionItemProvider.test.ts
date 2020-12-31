@@ -56,7 +56,7 @@ suite("Camel K Task Completion", function () {
     ]
 }`;
 		const res = await new CamelKTaskCompletionItemProvider().provideCompletionItemsForText(contentWithEmptyTrait, 236, new vscode.Position(9,24));
-		expect(res).to.have.lengthOf(29);
+		expect(res).to.have.lengthOf(30);
 		const affinityCompletionItem = res.find(item => item.label === 'affinity');
 		const affinitySnippet = affinityCompletionItem?.insertText as vscode.SnippetString;
 		expect(affinitySnippet.value).equals('"affinity.${1|enabled,pod-affinity,pod-anti-affinity,node-affinity-labels,pod-affinity-labels,pod-anti-affinity-labels|}="');
