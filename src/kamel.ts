@@ -100,16 +100,21 @@ async function kamelInternal(command: string, devMode: boolean, namespace : stri
 					reject(new Error(data));
 				});
 			}
-			sr.on('close', function (exitCode) {
-				const exitCodeAsString: string = exitCode.toString();
+			sr.on('close', function (exitCode, signal) {
 				if(exitCode === 0){
 					if(wholeOutData !== ''){
 						resolve(wholeOutData);
 					} else {
-						resolve(exitCodeAsString);
+						resolve("0");
+					}
+				} else if(exitCode === null) {
+					if (signal === null) {
+						reject("Closed with no exit code and no signal.");
+					} else {
+						reject(signal.toString());
 					}
 				} else {
-					reject(exitCodeAsString);
+					reject(exitCode.toString());
 				}
 			});
 		}
