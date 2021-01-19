@@ -151,6 +151,11 @@
 				"command": "camelk.integrations.createNewIntegrationFile",
 				"title": "Create a new Apache Camel K Integration file",
 				"enablement": "workspaceFolderCount != 0"
+			},
+			{
+				"command": "camelk.classpath.refresh",
+				"title": "Refresh local Java classpath for Camel K standalone file based on current editor. Available with kamel 1.4+.",
+				"enablement": "editorIsOpen && editorLangId == java"
 			}
 		],
 		"menus": {

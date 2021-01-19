@@ -28,7 +28,7 @@ import * as kubectl from './kubectl';
 import * as kamel from './kamel';
 import * as kubectlutils from './kubectlutils';
 import * as config from './config';
-import { initializeJavaDependenciesManager } from './JavaDependenciesManager';
+import { downloadSpecificCamelKJavaDependencies, initializeJavaDependenciesManager } from './JavaDependenciesManager';
 import { CamelKTaskCompletionItemProvider } from './task/CamelKTaskCompletionItemProvider';
 import { CamelKTaskProvider } from './task/CamelKTaskDefinition';
 import { ChildProcess } from 'child_process';
@@ -175,6 +175,7 @@ export async function activate(context: vscode.ExtensionContext) {
 
 		vscode.commands.registerCommand('camelk.integrations.createNewIntegrationFile', async (...args:any[]) => { await NewIntegrationFileCommand.create(args);});
 		vscode.commands.registerCommand('camelk.integrations.selectFirstNode', () => { selectFirstItemInTree();});
+		vscode.commands.registerCommand('camelk.classpath.refresh', async (uri:vscode.Uri) => { await downloadSpecificCamelKJavaDependencies(context, uri, mainOutputChannel)});
 	});
 
 	initializeJavaDependenciesManager(context);
