@@ -30,20 +30,27 @@ const TOTAL_TIMEOUT = DOWNLOAD_JAVA_DEPENDENCIES_TIMEOUT + JAVA_EXTENSION_READIN
 
 // TODO: skipped on jenkins due to FUSETOOLS2-578
 suite('Should do completion in Camel K standalone files', () => {
-	const docUriJava = getDocUri('MyRouteBuilder.java');
-
-	const expectedCompletion = { label: 'from(String uri) : RouteDefinition'};
-
+	
 	var testVar = test('Completes from method for Java', async () => {
+		const docUriJava = getDocUri('MyRouteBuilder.java');
+		const expectedCompletion = { label: 'from(String uri) : RouteDefinition'};
 		Utils.skipOnJenkins(testVar);
-		await testCompletion(docUriJava, new vscode.Position(5, 11), expectedCompletion);
+		await testCompletion(docUriJava, new vscode.Position(5, 11), expectedCompletion, false);
+	}).timeout(TOTAL_TIMEOUT);
+	
+	var testAdditionalDependencies = test('Completes additional dependencies', async () => {
+		const docUriJava = getDocUri('MyRouteBuilderWithAdditionalDependencies.java');
+		const expectedCompletion = { label: 'ArithmeticUtils - org.apache.commons.math3.util'};
+		Utils.skipOnJenkins(testAdditionalDependencies);
+		await testCompletion(docUriJava, new vscode.Position(6, 19), expectedCompletion, true);
 	}).timeout(TOTAL_TIMEOUT);
 });
 
 async function testCompletion(
 	docUri: vscode.Uri,
 	position: vscode.Position,
-	expectedCompletion: vscode.CompletionItem
+	expectedCompletion: vscode.CompletionItem,
+	refreshClasspath: boolean
 ) {
 	await waitUntil(()=> {
 		const destination = retrieveDestination();
@@ -52,7 +59,7 @@ async function testCompletion(
 		const destination = retrieveDestination();
 		let messageForDownloaded: string;
 		if(fs.existsSync(destination)) {
-			messageForDownloaded = `The one that were downloaded are: ${fs.readdirSync(destination).join(';')}`;
+			messageForDownloaded = `The one that were downloaded in ${destination} are: ${fs.readdirSync(destination).join(';')}`;
 		} else {
 			messageForDownloaded = `The destination folder has not been created ${destination}`;
 		}
@@ -61,6 +68,9 @@ async function testCompletion(
 
 	let doc = await vscode.workspace.openTextDocument(docUri);
 	await vscode.window.showTextDocument(doc);
+	if(refreshClasspath) {
+		await vscode.commands.executeCommand('camelk.classpath.refresh', docUri);
+	}
 	let javaExtension: vscode.Extension<any> | undefined;
 	await waitUntil(() => {
 		javaExtension = vscode.extensions.getExtension('redhat.java');
@@ -86,7 +96,6 @@ async function testCompletion(
 
 	function retrieveDestination() {
 		const context = Utils.retrieveExtensionContext();
-		const destination = JavaDependenciesManager.destinationFolderForDependencies(context);
-		return destination;
+		return JavaDependenciesManager.destinationFolderForDependencies(context);
 	}
 }

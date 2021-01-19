@@ -6,9 +6,9 @@
     <version>0.0.1</version>
     <dependencies>
         <dependency>
-            <groupId>org.apache.camel</groupId>
-            <artifactId>camel-core-engine</artifactId>
-            <version>${camelVersion}</version>
+            <groupId>${groupId}</groupId>
+            <artifactId>${artifactId}</artifactId>
+            <version>${version}</version>
         </dependency>
     </dependencies>
     <build>
@@ -24,9 +24,9 @@
                         <configuration>
                             <artifactItems>
                                 <artifactItem>
-                                    <groupId>org.apache.camel</groupId>
-                                    <artifactId>camel-core-engine</artifactId>
-                                    <version>${camelVersion}</version>
+                                    <groupId>${groupId}</groupId>
+                                    <artifactId>${artifactId}</artifactId>
+                                    <version>${version}</version>
                                     <outputDirectory>${project.build.directory}</outputDirectory>
                                 </artifactItem>
                             </artifactItems>

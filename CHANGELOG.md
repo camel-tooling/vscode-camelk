@@ -5,6 +5,12 @@ All notable changes to the "vscode-camelk" extension will be documented in this 
 ## 0.0.24
 
 - Update default runtime version to v1.4.0
+- Provide command to refresh Java classpath. It allows to have dependencies declared as modeline part of classpath.
+  - It requires Camel K 1.4.0
+  - If mistakenly called with Camel K 1.3.2-, need to restart VS Code for basic dependencies to be available again.
+  - It supports modeline dependencies notation from local build. See [apache/camel-k#2213](https://github.com/apache/camel-k/issues/2213)
+  - A single classpath is provided. It means that refresh command needs to be called when switching between Integration file written in Java that does not have the same dependencies.
+  - There is no progress indicator. Please be patient. The first time may take several minutes on a slow network.
 
 ## 0.0.23
 
