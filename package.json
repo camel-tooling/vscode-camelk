@@ -80,7 +80,7 @@
 					},
 					"camelk.integrations.autoUpgrade": {
 						"type": "boolean",
-						"default": true,
+						"default": false,
 						"description": "Automatically upgrade Apache Camel K Runtime CLI when new CLI version is released",
 						"scope": "window"
 					},
