@@ -134,7 +134,7 @@ suite('Test command to create an Apache Camel K integration file', function() {
 
 		await waitUntil(() => {
 			return vscode.window.activeTextEditor?.document.fileName.endsWith(expectedFileNameWithExtension);
-		}, 5000, `Text editor has not opened for ${providedFilename}`);
+		}, 5000);
 
 		checkContainsCamelKMode(createdFile);
 	}
