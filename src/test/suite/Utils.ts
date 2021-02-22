@@ -42,7 +42,7 @@ async function forceActivation(extension: vscode.Extension<any>) {
 	await extension.activate();
 	await waitUntil(() => {
 		return extension.isActive;
-	}, ACTIVATION_TIMEOUT, 'Extension is not active even after calling activate explicitily.');
+	}, ACTIVATION_TIMEOUT);
 }
 
 async function waitInCaseExtensionIsActivating(extension: vscode.Extension<any>) {
