@@ -19,7 +19,7 @@
 import * as vscode from 'vscode';
 import { getDocUri, checkExpectedCompletion } from '../completion.util';
 import { skipOnJenkins } from '../Utils';
-const waitUntil = require('async-wait-until');
+import { waitUntil } from 'async-wait-until';
 
 suite('Should do completion in yaml Camel K files without file name pattern', () => {
 	
