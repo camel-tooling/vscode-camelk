@@ -20,8 +20,7 @@ import * as assert from 'assert';
 import * as vscode from 'vscode';
 import os = require('os');
 import { CamelKNodeProvider, TreeNode } from '../../CamelKNodeProvider';
-
-const waitUntil = require('async-wait-until');
+import { waitUntil } from 'async-wait-until';
 
 const extensionId = 'redhat.vscode-camelk';
 export const ACTIVATION_TIMEOUT = 45000;

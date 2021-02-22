@@ -16,8 +16,7 @@
  */
 import * as path from 'path';
 import * as vscode from 'vscode';
-
-const waitUntil = require('async-wait-until');
+import { waitUntil } from 'async-wait-until';
 
 const getDocPath = (p: string) => {
 	return path.resolve(__dirname, '../../../../test Fixture with speci@l chars', p);

@@ -20,7 +20,7 @@ import * as CamelKSchemaManager from '../../CamelKSchemaManager';
 import * as vscode from 'vscode';
 import { expect } from 'chai';
 import { CAMELK_SCHEMA_URI_PREFIX } from '../../CamelKSchemaManager';
-const waitUntil = require('async-wait-until');
+import { waitUntil } from 'async-wait-until';
 
 const outputChannelForTest: vscode.OutputChannel = vscode.window.createOutputChannel('Test output channel');
 

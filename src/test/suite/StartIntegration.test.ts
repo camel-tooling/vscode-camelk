@@ -23,7 +23,7 @@ import * as config from '../../config';
 import * as IntegrationUtils from '../../IntegrationUtils';
 import { skipOnJenkins, getCamelKIntegrationsProvider, openCamelKTreeView } from "./Utils";
 import { assert, expect } from 'chai';
-import waitUntil = require('async-wait-until');
+import { waitUntil } from 'async-wait-until';
 import { getNamedListFromKubernetesThenParseList } from '../../kubectlutils';
 import * as shelljs from 'shelljs';
 import * as kamel from './../../kamel';

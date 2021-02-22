@@ -22,8 +22,7 @@ import * as JavaDependenciesManager from '../../../JavaDependenciesManager';
 import { getDocUri, checkExpectedCompletion } from '../completion.util';
 import { fail } from 'assert';
 import * as Utils from '../Utils';
-
-const waitUntil = require('async-wait-until');
+import { waitUntil } from 'async-wait-until';
 
 const DOWNLOAD_JAVA_DEPENDENCIES_TIMEOUT = 240000;
 const JAVA_EXTENSION_READINESS_TIMEOUT = 40000;

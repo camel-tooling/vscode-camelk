@@ -21,9 +21,9 @@ import * as fs from 'fs';
 import * as sinon from 'sinon';
 import * as vscode from 'vscode';
 import { fail } from "assert";
+import { waitUntil } from 'async-wait-until';
 
 const os = require('os');
-const waitUntil = require('async-wait-until');
 
 suite('Test command to create an Apache Camel K integration file', function() {
 
