@@ -297,7 +297,7 @@
 		"@types/sinon-chai": "^3.2.5",
 		"@types/vscode": "^1.53.0",
 		"async-wait-until": "^2.0.3",
-		"chai": "^4.3.0",
+		"chai": "^4.3.1",
 		"copyfiles": "^2.4.1",
 		"decache": "^4.6.0",
 		"glob": "^7.1.6",
