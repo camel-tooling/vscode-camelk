@@ -32,7 +32,7 @@
 		"Tool"
 	],
 	"engines": {
-		"vscode": "^1.53.0"
+		"vscode": "^1.54.0"
 	},
 	"categories": [
 		"Other"
@@ -295,7 +295,7 @@
 		"@types/node": "^14.14.31",
 		"@types/sinon": "^9.0.10",
 		"@types/sinon-chai": "^3.2.5",
-		"@types/vscode": "^1.53.0",
+		"@types/vscode": "^1.54.0",
 		"async-wait-until": "^2.0.3",
 		"chai": "^4.3.3",
 		"copyfiles": "^2.4.1",
