@@ -38,6 +38,7 @@ import {checkKamelNeedsUpdate, version, handleChangeRuntimeConfiguration} from '
 import * as NewIntegrationFileCommand from './commands/NewIntegrationFileCommand';
 import * as path from 'path';
 import { registerCamelKSchemaProvider } from './CamelKSchemaManager';
+import { getTelemetryService, TelemetryService } from "@redhat-developer/vscode-redhat-telemetry";
 
 export const DELAY_RETRY_KUBECTL_CONNECTION: number = 1000;
 
@@ -47,6 +48,7 @@ export let camelKIntegrationsProvider: CamelKNodeProvider;
 export let camelKIntegrationsTreeView: vscode.TreeView<TreeNode | undefined>;
 export let closeLogViewWhenIntegrationRemoved: boolean;
 export var runtimeVersionSetting: string | undefined;
+export const telemetryService: Promise<TelemetryService> = getTelemetryService('redhat.vscode-camelk');
 
 const eventEmitter: events.EventEmitter = new events.EventEmitter();
 const restartKubectlWatchEvent: string = 'restartKubectlWatch';
@@ -194,6 +196,8 @@ export async function activate(context: vscode.ExtensionContext) {
 	});
 
 	await installAllTutorials(context);
+	
+	(await telemetryService).sendStartupEvent();
 	
 	return {
 		getStashedContext() : vscode.ExtensionContext {

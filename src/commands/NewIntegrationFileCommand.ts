@@ -16,9 +16,11 @@
  */
 'use strict';
 
+import { TelemetryEvent } from '@redhat-developer/vscode-redhat-telemetry/lib';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as vscode from 'vscode';
+import * as extension from '../extension';
 import * as kamel from '../kamel';
 
 const validFilename = require('valid-filename');
@@ -73,6 +75,16 @@ export async function create(...args: any[]) : Promise<void> {
 		await kamelExecutor.invoke(`init "${newFileFullPath}"`);
 		const textDocument: vscode.TextDocument = await vscode.workspace.openTextDocument(newFileFullPath);
 		await vscode.window.showTextDocument(textDocument);
+		const telemetryService = await extension.telemetryService;
+		const telemetryEvent: TelemetryEvent = {
+			type: 'track',
+			name: 'command',
+			properties: {
+				identifier: 'camelk.integrations.createNewIntegrationFile',
+				language: language
+			}
+		};
+		telemetryService.send(telemetryEvent);
 	}
 }
 
