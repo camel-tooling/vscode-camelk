@@ -2,6 +2,8 @@
 
 All notable changes to the "vscode-camelk" extension will be documented in this file.
 
+## 0.0.23
+
 ## 0.0.22
 
 - Provide opt-in telemetry to gather information on Camel K integration created through provided command and most command ids.
