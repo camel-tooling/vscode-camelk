@@ -38,7 +38,7 @@ import {checkKamelNeedsUpdate, version, handleChangeRuntimeConfiguration} from '
 import * as NewIntegrationFileCommand from './commands/NewIntegrationFileCommand';
 import * as path from 'path';
 import { registerCamelKSchemaProvider } from './CamelKSchemaManager';
-import { getTelemetryServiceInstance } from './Telemetry';
+import * as telemetry from './Telemetry';
 export const DELAY_RETRY_KUBECTL_CONNECTION: number = 1000;
 
 export let mainOutputChannel: vscode.OutputChannel;
@@ -56,6 +56,12 @@ let runningKubectl: ChildProcess | undefined;
 let timestampLastkubectlIntegrationStart: number = 0;
 let stashedContext: vscode.ExtensionContext;
 
+const COMMAND_ID_START_LOG = 'camelk.integrations.log';
+const COMMAND_ID_REFRESH = 'camelk.integrations.refresh';
+
+const COMMAND_ID_REMOVE = 'camelk.integrations.remove';
+const COMMAND_ID_START_INTEGRATION = 'camelk.startintegration';
+const COMMAND_ID_OPEN_OPERATOR_LOG = 'camelk.integrations.openOperatorLog';
 export async function activate(context: vscode.ExtensionContext) {
 	stashedContext = context;
 	camelKIntegrationsProvider = new CamelKNodeProvider(context);
@@ -71,7 +77,7 @@ export async function activate(context: vscode.ExtensionContext) {
 	const tasksJson:vscode.DocumentSelector = { scheme: 'file', language: 'jsonc', pattern: '**/tasks.json' };
 	vscode.languages.registerCompletionItemProvider(tasksJson, new CamelKTaskCompletionItemProvider());
 
-	await installDependencies(context).then ( () => {
+	await installDependencies(context).then ( (): void => {
 		
 		createIntegrationsView();
 
@@ -85,15 +91,16 @@ export async function activate(context: vscode.ExtensionContext) {
 		eventEmitter.on(restartKubectlWatchEvent, watchListener);
 	
 		// create the integration view action -- refresh
-		vscode.commands.registerCommand('camelk.integrations.refresh', () => {
+		vscode.commands.registerCommand(COMMAND_ID_REFRESH, () => {
 			camelKIntegrationsProvider.refresh()
 			.catch( (err) => {
 				console.log(err);
 			});
+			telemetry.sendCommandTracking(COMMAND_ID_REFRESH);
 		});
 	
 		// create the integration view action -- remove
-		vscode.commands.registerCommand('camelk.integrations.remove', async (node: TreeNode) => {
+		vscode.commands.registerCommand(COMMAND_ID_REMOVE, async (node: TreeNode) => {
 			let selection : TreeNode = node;
 			if (!selection) {
 				if (camelKIntegrationsTreeView.selection) {
@@ -123,11 +130,12 @@ export async function activate(context: vscode.ExtensionContext) {
 				.catch( (err) => {
 					console.log(err);
 				});
+				telemetry.sendCommandTracking(COMMAND_ID_REMOVE);
 			}
 		});
 	
 		// create the integration view action -- start log
-		vscode.commands.registerCommand('camelk.integrations.log', async (node: TreeNode) => {
+		vscode.commands.registerCommand(COMMAND_ID_START_LOG, async (node: TreeNode) => {
 			let selection : TreeNode = node;
 			if (!selection) {
 				if (camelKIntegrationsTreeView.selection) {
@@ -140,23 +148,29 @@ export async function activate(context: vscode.ExtensionContext) {
 				await logUtils.handleLogViaKamelCli(integrationName).catch((error) => {
 					utils.shareMessage(mainOutputChannel, `error: ${error} \n`);
 				});
+				telemetry.sendCommandTracking(COMMAND_ID_START_LOG);
 			}
 		});
 	
 		// create the integration view action -- start new integration
-		context.subscriptions.push(vscode.commands.registerCommand('camelk.startintegration', async (...args:any[]) => { await runTheFile(args);}));
+		context.subscriptions.push(vscode.commands.registerCommand(COMMAND_ID_START_INTEGRATION,
+			async (...args:any[]) => {
+				await runTheFile(args);
+				telemetry.sendCommandTracking(COMMAND_ID_START_INTEGRATION);
+			}));
 	
 		// add commands to create config-map and secret objects from .properties files
 		configmapsandsecrets.registerCommands();
 		
 		// create the integration view action -- open operator log
-		vscode.commands.registerCommand('camelk.integrations.openOperatorLog', async () => {
+		vscode.commands.registerCommand(COMMAND_ID_OPEN_OPERATOR_LOG, async () => {
 			utils.shareMessage(mainOutputChannel, `Retrieving log for Apache Camel K Operator...`);
 			try {
 				await logUtils.handleOperatorLog();
 			} catch (err) {
 				utils.shareMessage(mainOutputChannel, `No Apache Camel K Operator available: ${err} \n`);
 			}
+			telemetry.sendCommandTracking(COMMAND_ID_OPEN_OPERATOR_LOG);
 		});
 
 		vscode.commands.registerCommand('camelk.integrations.createNewIntegrationFile', async (...args:any[]) => { await NewIntegrationFileCommand.create(args);});
@@ -195,7 +209,7 @@ export async function activate(context: vscode.ExtensionContext) {
 
 	await installAllTutorials(context);
 	
-	(await getTelemetryServiceInstance()).sendStartupEvent();
+	(await telemetry.getTelemetryServiceInstance()).sendStartupEvent();
 	
 	return {
 		getStashedContext() : vscode.ExtensionContext {
