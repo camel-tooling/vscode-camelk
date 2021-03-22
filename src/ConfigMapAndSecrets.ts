@@ -22,24 +22,33 @@ import * as extension from './extension';
 import * as utils from './CamelKJSONUtils';
 import { isKubernetesAvailable } from './kubectlutils';
 import { ShellResult } from './shell';
+import * as telemetry from './Telemetry';
 
 export const validNameRegex: RegExp = /^[A-Za-z][A-Za-z0-9\-]*(?:[A-Za-z0-9]$){1}/;
+const COMMAND_ID_CREATE_CONFIG_MAP_FROM_FILE = 'camelk.integrations.createconfigmapfromfile';
+const COMMAND_ID_CREATE_CONFIGMAP_FROM_FOLDER = 'camelk.integrations.createconfigmapfromfolder';
+const COMMAND_ID_CREATE_SECRET_FROM_FILE = 'camelk.integrations.createsecretfromfile';
+const COMMAND_ID_CREATE_SECRET_FROM_FOLDER = 'camelk.integrations.createsecretfromfolder';
 
 export function registerCommands(): void {
 	// create the integration view action -- create new configmap from file or folder
-	vscode.commands.registerCommand('camelk.integrations.createconfigmapfromfile', (uri:vscode.Uri) => {
+	vscode.commands.registerCommand(COMMAND_ID_CREATE_CONFIG_MAP_FROM_FILE, (uri:vscode.Uri) => {
 		createConfigMapFromUri(uri);
+		telemetry.sendCommandTracking(COMMAND_ID_CREATE_CONFIG_MAP_FROM_FILE);
 	});
-	vscode.commands.registerCommand('camelk.integrations.createconfigmapfromfolder', (uri:vscode.Uri) => {
+	vscode.commands.registerCommand(COMMAND_ID_CREATE_CONFIGMAP_FROM_FOLDER, (uri:vscode.Uri) => {
 		createConfigMapFromUri(uri);
+		telemetry.sendCommandTracking(COMMAND_ID_CREATE_CONFIGMAP_FROM_FOLDER);
 	});
 
 	// create the integration view action -- create new secret from file or folder
-	vscode.commands.registerCommand('camelk.integrations.createsecretfromfile', (uri:vscode.Uri) => {
+	vscode.commands.registerCommand(COMMAND_ID_CREATE_SECRET_FROM_FILE, (uri:vscode.Uri) => {
 		createSecretFromUri(uri);
+		telemetry.sendCommandTracking(COMMAND_ID_CREATE_SECRET_FROM_FILE);
 	});
-	vscode.commands.registerCommand('camelk.integrations.createsecretfromfolder', (uri:vscode.Uri) => {
+	vscode.commands.registerCommand(COMMAND_ID_CREATE_SECRET_FROM_FOLDER, (uri:vscode.Uri) => {
 		createSecretFromUri(uri);
+		telemetry.sendCommandTracking(COMMAND_ID_CREATE_SECRET_FROM_FOLDER);
 	});
 }
 

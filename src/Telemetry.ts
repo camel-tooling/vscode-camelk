@@ -15,11 +15,22 @@
  * limitations under the License.
  */
 
-import { TelemetryService, getTelemetryService } from "@redhat-developer/vscode-redhat-telemetry/lib";
+import { TelemetryService, getTelemetryService, TelemetryEvent } from '@redhat-developer/vscode-redhat-telemetry/lib';
 
 
 export const telemetryService: Promise<TelemetryService> = getTelemetryService('redhat.vscode-camelk');
 
 export async function getTelemetryServiceInstance(): Promise<TelemetryService> {
     return telemetryService;
+}
+
+export async function sendCommandTracking(commandId: string) {
+	const telemetryEvent: TelemetryEvent = {
+		type: 'track',
+		name: 'command',
+		properties: {
+			identifier: commandId
+		}
+	};
+	(await telemetryService).send(telemetryEvent);
 }

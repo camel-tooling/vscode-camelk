@@ -3,5 +3,6 @@
 ### Usage Data
 
 * when extension is activated
+* when a command from this extension is used, the command id is provided
 * when `Create a new Apache Camel K Integration file` command contributed by extension is executed
     * with the chosen language
