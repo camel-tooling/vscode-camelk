@@ -4,6 +4,8 @@ All notable changes to the "vscode-camelk" extension will be documented in this 
 
 ## 0.0.23
 
+- Update default runtime version to v1.3.2
+
 ## 0.0.22
 
 - Provide opt-in telemetry to gather information on Camel K integration created through provided command and most command ids.
