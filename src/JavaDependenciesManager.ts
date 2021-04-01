@@ -21,9 +21,14 @@ import * as vscode from 'vscode';
 const PREFERENCE_KEY_JAVA_REFERENCED_LIBRARIES = "java.project.referencedLibraries";
 export const CAMEL_VERSION = "3.7.0";
 
-export function downloadJavaDependencies(context: vscode.ExtensionContext): string {
+export async function initializeJavaDependenciesManager(context: vscode.ExtensionContext): Promise<void> {
 	const pomTemplate = context.asAbsolutePath(path.join('resources', 'maven-project', 'pom-to-copy-java-dependencies.xml'));
 	const destination = destinationFolderForDependencies(context);
+	await downloadDependencies(destination, pomTemplate);
+	await initializeJavaSettingManagement(destination);
+}
+
+async function downloadDependencies(destination: string, pomTemplate: string) {
 	fs.mkdirSync(destination, { recursive: true });
 
 	/* provides only camel-core-engine dependencies for now, to improve:
@@ -33,8 +38,17 @@ export function downloadJavaDependencies(context: vscode.ExtensionContext): stri
 		cwd: destination,
 		file: pomTemplate
 	});
-	mvn.execute(['dependency:copy-dependencies'], { 'camelVersion': CAMEL_VERSION, 'outputDirectory': destination });
-	return destination;
+	await mvn.execute(['dependency:copy-dependencies'], { 'camelVersion': CAMEL_VERSION, 'outputDirectory': destination });
+}
+
+async function initializeJavaSettingManagement(destination: string) {
+	vscode.window.onDidChangeActiveTextEditor((editor) => {
+		updateReferenceLibraries(editor, destination);
+	});
+
+	if (vscode.window.activeTextEditor) {
+		updateReferenceLibraries(vscode.window.activeTextEditor, destination);
+	}
 }
 
 export function destinationFolderForDependencies(context: vscode.ExtensionContext) {

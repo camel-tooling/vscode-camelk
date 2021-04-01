@@ -28,7 +28,7 @@ import * as kubectl from './kubectl';
 import * as kamel from './kamel';
 import * as kubectlutils from './kubectlutils';
 import * as config from './config';
-import { downloadJavaDependencies, updateReferenceLibraries } from './JavaDependenciesManager';
+import { initializeJavaDependenciesManager } from './JavaDependenciesManager';
 import { CamelKTaskCompletionItemProvider } from './task/CamelKTaskCompletionItemProvider';
 import { CamelKTaskProvider } from './task/CamelKTaskDefinition';
 import { ChildProcess } from 'child_process';
@@ -177,15 +177,7 @@ export async function activate(context: vscode.ExtensionContext) {
 		vscode.commands.registerCommand('camelk.integrations.selectFirstNode', () => { selectFirstItemInTree();});
 	});
 
-	let destination = downloadJavaDependencies(context);
-	
-	vscode.window.onDidChangeActiveTextEditor((editor) => {
-		updateReferenceLibraries(editor, destination);
-	});
-	
-	if (vscode.window.activeTextEditor) {
-		updateReferenceLibraries(vscode.window.activeTextEditor, destination);
-	}
+	initializeJavaDependenciesManager(context);
 	
 	vscode.workspace.onDidChangeConfiguration(async (event) => {
 		await handleChangeRuntimeConfiguration();
