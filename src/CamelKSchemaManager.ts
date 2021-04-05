@@ -18,7 +18,6 @@
 
 import * as vscode from 'vscode';
 import fetch from 'cross-fetch';
-import { Response } from 'cross-fetch/lib.fetch';
 
 const CAMELK_MODELINE_PREFIX = '# camel-k:';
 const CAMELK_SCHEMA_ID = 'camelk';
