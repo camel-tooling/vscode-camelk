@@ -23,7 +23,6 @@ import * as config from './config';
 import * as kamelCli from './kamel';
 import { platformString } from './installer';
 import fetch from 'cross-fetch';
-import { Response } from 'cross-fetch/lib.fetch';
 
 export const version: string = '1.3.2'; //need to retrieve this if possible, but have a default
 
