@@ -2,6 +2,10 @@ version: 2.1
  
 jobs:
   build:
+    parameters:
+      isInsider:
+        type: boolean
+        default: false
     machine:
       image: ubuntu-2004:202010-01
     steps:
@@ -43,6 +47,14 @@ jobs:
             kamel install
             # Clean CLI which were used to start the Kubernetes instance
             sudo rm /usr/local/bin/kamel
+      - when:
+          condition: <<parameters.isInsider>>
+          steps:
+            - run:
+                name: Set VS Code Insider environment variable for testing
+                command: |
+                  echo 'export VSCODE_VERSION_TEST="insiders"' >> $BASH_ENV
+                  source $BASH_ENV
       - run:
           name: test
           command: npm test
@@ -61,7 +73,9 @@ jobs:
           name: Store VS Code User Workspace storage
       - when:
           condition:
-            equal: [master, << pipeline.git.branch >>]
+            and:
+              - equal: [master, << pipeline.git.branch >>]
+              - not: <<parameters.isInsider>>
           steps:
             - sonarcloud/scan
 
@@ -74,3 +88,14 @@ workflows:
     jobs:
       - build:
           context: sonarcloud
+  Insiders:
+    jobs:
+      - build:
+          isInsider: true
+    triggers:
+      - schedule:
+          cron: "0 0 * * *"
+          filters:
+            branches:
+              only:
+                - master
