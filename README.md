@@ -1,7 +1,7 @@
 [![GitHub tag](https://img.shields.io/github/tag/camel-tooling/vscode-camelk.svg?style=plastic)]()
 [![CircleCI](https://circleci.com/gh/camel-tooling/vscode-camelk.svg?style=shield)](https://circleci.com/gh/camel-tooling/vscode-camelk)
 [![License](https://img.shields.io/badge/license-Apache%202-blue.svg)]()
-[![Gitter](https://img.shields.io/gitter/room/camel-tooling/Lobby.js.svg)](https://gitter.im/camel-tooling/Lobby)
+[![Zulip chat](https://img.shields.io/badge/zulip-join_chat-brightgreen.svg)](https://camel.zulipchat.com/#narrow/stream/258729-camel-tooling)
 
 # Visual Studio extension to support Apache Camel K
 
