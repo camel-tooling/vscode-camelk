@@ -9,7 +9,13 @@ async function main() : Promise<void> {
 		console.log(`extensionDevelopmentPath = ${extensionDevelopmentPath}`);
         const extensionTestsPath : string = path.resolve(__dirname, './suite/index');
 		console.log(`extensionTestsPath = ${extensionTestsPath}`);
-		const vscodeExecutablePath : string = await downloadAndUnzipVSCode('stable');
+		let vscodeExecutablePath : string;
+		const vscodeVersionForTest = process.env.VSCODE_VERSION_TEST;
+		if(vscodeVersionForTest !== undefined){
+			vscodeExecutablePath = await downloadAndUnzipVSCode(vscodeVersionForTest);
+		} else {
+			vscodeExecutablePath = await downloadAndUnzipVSCode('stable');
+		}
 		console.log(`vscodeExecutablePath = ${vscodeExecutablePath}`);
 		const testWorkspace = path.resolve(__dirname, '../../../test Fixture with speci@l chars');
 
