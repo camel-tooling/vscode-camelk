@@ -49,6 +49,10 @@ suite("ensure version url methods are functioning as expected", () => {
 		await validateVersion('1.3.2', 'linux', 'https://github.com/apache/camel-k/releases/download/v1.3.2/camel-k-client-1.3.2-linux-64bit.tar.gz');
 	});
 
+	test("validate url for existing 1.4.0 version", async () => {
+		await validateVersion('1.4.0', 'linux', 'https://github.com/apache/camel-k/releases/download/v1.4.0/camel-k-client-1.4.0-linux-64bit.tar.gz');
+	});
+
 	test("validate invalid url for xyz1 version", async () => {
 		await invalidateVersion('xyz1', 'linux');
 	});
