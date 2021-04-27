@@ -138,7 +138,7 @@ async function prepareNewNamespaceWithCamelK(EXTRA_NAMESPACE_FOR_TEST: string) {
 	waitUntil(() => {
 		return createNamespaceExec.stdout.includes(`namespace/${EXTRA_NAMESPACE_FOR_TEST} created`);
 	});
-	assert.equal(shelljs.exec(`${await kamel.create().getPath()} install --namespace=${EXTRA_NAMESPACE_FOR_TEST}`).stdout, `Camel K installed in namespace ${EXTRA_NAMESPACE_FOR_TEST} \n`);
+	assert.include(shelljs.exec(`${await kamel.create().getPath()} install --namespace=${EXTRA_NAMESPACE_FOR_TEST}`).stdout, `Camel K installed in namespace ${EXTRA_NAMESPACE_FOR_TEST} \n`);
 }
 
 async function checkIntegrationRunning() {

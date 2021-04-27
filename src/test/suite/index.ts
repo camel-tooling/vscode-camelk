@@ -50,7 +50,7 @@ export function run(): Promise<void> {
 	const coverageRunner = loadCoverageRunner(testsRoot);
 
 	return new Promise((c, e) => {
-		glob('**/NewIntegra*.test.js', { cwd: testsRoot }, (err, files) => {
+		glob('**/**.test.js', { cwd: testsRoot }, (err, files) => {
 			if (err) {
 				return e(err);
 			}
