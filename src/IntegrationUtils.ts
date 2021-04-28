@@ -27,6 +27,8 @@ import * as kamel from './kamel';
 import { CamelKTaskProvider, CamelKTaskDefinition } from './task/CamelKTaskDefinition';
 import { isString } from 'util';
 import * as fs from 'fs';
+import { getTelemetryServiceInstance } from './Telemetry';
+import { TelemetryEvent } from '@redhat-developer/vscode-redhat-telemetry/lib';
 
 const validNameRegex = /^[A-Za-z][A-Za-z0-9\-\.]*(?:[A-Za-z0-9]$){1}/;
 const devModeIntegration: string = 'Dev Mode - Apache Camel K Integration in Dev Mode';
@@ -197,22 +199,37 @@ const choiceList = [
 						reject(onrejected);
 						errorEncountered = true;
 					});
+					sendStartIntegrationTelemetryEvent(choice, context);
 					return;
 			}
 
 			if (!errorEncountered) {
-				await createNewIntegration(context, devMode, selectedConfigMap, selectedSecret, selectedResource, selectedProperty, selectedDependency)
-					.then( success => {
-						resolve(success);
-					})
-					.catch(err => {
-						reject(err);
-					});
+				try {
+					const isSuccess = await createNewIntegration(context, devMode, selectedConfigMap, selectedSecret, selectedResource, selectedProperty, selectedDependency);
+					sendStartIntegrationTelemetryEvent(choice, context);
+					resolve(isSuccess);
+				} catch(err) {
+					reject(err);
+				}
 			}
 		} else {
 			reject(new Error('No integration selection made.'));
 		}
 	});
+}
+
+async function sendStartIntegrationTelemetryEvent(choice: string, context: vscode.Uri) {
+	const telemetryService = await getTelemetryServiceInstance();
+	const telemetryEvent: TelemetryEvent = {
+		type: 'track',
+		name: 'command',
+		properties: {
+			identifier: extension.COMMAND_ID_START_INTEGRATION,
+			kind: choice,
+			language: context.fsPath.substring(context.fsPath.lastIndexOf('.') + 1)
+		}
+	};
+	telemetryService.send(telemetryEvent);
 }
 
 async function handleDefinedTask(context: vscode.Uri) {
