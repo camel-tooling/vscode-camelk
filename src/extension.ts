@@ -60,7 +60,7 @@ const COMMAND_ID_START_LOG = 'camelk.integrations.log';
 const COMMAND_ID_REFRESH = 'camelk.integrations.refresh';
 
 const COMMAND_ID_REMOVE = 'camelk.integrations.remove';
-const COMMAND_ID_START_INTEGRATION = 'camelk.startintegration';
+export const COMMAND_ID_START_INTEGRATION = 'camelk.startintegration';
 const COMMAND_ID_OPEN_OPERATOR_LOG = 'camelk.integrations.openOperatorLog';
 export async function activate(context: vscode.ExtensionContext) {
 	stashedContext = context;
@@ -156,7 +156,6 @@ export async function activate(context: vscode.ExtensionContext) {
 		context.subscriptions.push(vscode.commands.registerCommand(COMMAND_ID_START_INTEGRATION,
 			async (...args:any[]) => {
 				await runTheFile(args);
-				telemetry.sendCommandTracking(COMMAND_ID_START_INTEGRATION);
 			}));
 	
 		// add commands to create config-map and secret objects from .properties files

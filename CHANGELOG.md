@@ -11,6 +11,7 @@ All notable changes to the "vscode-camelk" extension will be documented in this 
   - It supports modeline dependencies notation from local build. See [apache/camel-k#2213](https://github.com/apache/camel-k/issues/2213)
   - A single classpath is provided. It means that refresh command needs to be called when switching between Integration file written in Java that does not have the same dependencies.
   - There is no progress indicator. Please be patient. The first time may take several minutes on a slow network.
+- Provide telemetry information when using `Start Apache Camel K integration` command about language of the file deployed and the kind of deployment used (basic, dev, ...)
 
 ## 0.0.23
 

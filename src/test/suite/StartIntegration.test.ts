@@ -26,10 +26,13 @@ import { assert, expect } from 'chai';
 import { waitUntil } from 'async-wait-until';
 import { getNamedListFromKubernetesThenParseList } from '../../kubectlutils';
 import * as shelljs from 'shelljs';
+import * as extension from '../../extension';
 import * as kamel from './../../kamel';
 import * as kubectl from './../../kubectl';
 import { LANGUAGES, LANGUAGES_WITH_FILENAME_EXTENSIONS } from '../../commands/NewIntegrationFileCommand';
 import * as CamelKTaskDefinition from '../../task/CamelKTaskDefinition';
+import { getTelemetryServiceInstance } from '../../Telemetry';
+import { TelemetryEvent } from '@redhat-developer/vscode-redhat-telemetry/lib';
 
 const RUNNING_TIMEOUT: number = 720000;
 const DEPLOYED_TIMEOUT: number = 10000;
@@ -44,13 +47,15 @@ suite('Check can deploy default examples', () => {
 	let showInputBoxStub: sinon.SinonStub;
 	let showWorkspaceFolderPickStub: sinon.SinonStub;
 	let createdFile: vscode.Uri | undefined;
+	let telemetrySpy: sinon.SinonSpy;
 
-	setup(() => {
+	setup(async() => {
 		showQuickpickStub = sinon.stub(vscode.window, 'showQuickPick');
 		showInputBoxStub = sinon.stub(vscode.window, 'showInputBox');
 		showWorkspaceFolderPickStub = sinon.stub(vscode.window, 'showWorkspaceFolderPick');
 		// Workaround due to bug in shelljs: https://github.com/shelljs/shelljs/issues/704
 		shelljs.config.execPath = shelljs.which('node').toString();
+		telemetrySpy = sinon.spy(await getTelemetryServiceInstance(), 'send');
 	});
 
 	teardown(() => {
@@ -68,6 +73,7 @@ suite('Check can deploy default examples', () => {
 			}, UNDEPLOY_TIMEOUT);
 		}
 		config.addNamespaceToConfig(undefined);
+		telemetrySpy.restore();
 	});
 	
 	suite('Check basic deployments for each languages', function() {
@@ -75,8 +81,10 @@ suite('Check can deploy default examples', () => {
 			const testInProgress = test(`Check can deploy ${language} example`, async() => {
 				skipOnJenkins(testInProgress);
 				createdFile = await createFile(showQuickpickStub, showWorkspaceFolderPickStub, showInputBoxStub, `TestBasic${language}Deploy`, language);
-		
-				await startIntegrationWithBasicCheck(showQuickpickStub);
+				
+				await startIntegrationWithBasicCheck(showQuickpickStub, telemetrySpy);
+				const extensionFile = LANGUAGES_WITH_FILENAME_EXTENSIONS.get(language);
+				checkTelemetry(telemetrySpy, extensionFile ? extensionFile : "");
 			}).timeout(TOTAL_TIMEOUT);
 		});
 	});
@@ -102,7 +110,7 @@ suite('Check can deploy default examples', () => {
 		createdFile = await createFile(showQuickpickStub, showWorkspaceFolderPickStub, showInputBoxStub, 'TestDeployInSpecificNamespace', 'Java');
 		await config.addNamespaceToConfig(EXTRA_NAMESPACE_FOR_TEST);
 
-		await startIntegrationWithBasicCheck(showQuickpickStub);
+		await startIntegrationWithBasicCheck(showQuickpickStub, telemetrySpy);
 		await checkIntegrationsInDifferentNamespaces(EXTRA_NAMESPACE_FOR_TEST);
 		
 		shelljs.exec(`${await kubectl.create().getPath()} delete namespace ${EXTRA_NAMESPACE_FOR_TEST}`);
@@ -117,7 +125,7 @@ async function checkIntegrationsInDifferentNamespaces(EXTRA_NAMESPACE_FOR_TEST: 
 	assert.isEmpty(integrationsOnDefault);
 }
 
-async function startIntegrationWithBasicCheck(showQuickpickStub: sinon.SinonStub<any[], any>) {
+async function startIntegrationWithBasicCheck(showQuickpickStub: sinon.SinonStub<any[], any>, telemetrySpy: sinon.SinonSpy) {
 	await openCamelKTreeView();
 	const currentIntegrations = getCamelKIntegrationsProvider().getTreeNodes();
 	assert.isEmpty(
@@ -125,6 +133,7 @@ async function startIntegrationWithBasicCheck(showQuickpickStub: sinon.SinonStub
 		`It is expected that there is no Integration already deployed but the following are detected ${currentIntegrations.map(treeNode => treeNode.label).join(';')}`);
 
 	showQuickpickStub.onSecondCall().returns(IntegrationUtils.basicIntegration);
+	telemetrySpy.resetHistory();
 	await vscode.commands.executeCommand('camelk.startintegration');
 
 	await checkIntegrationDeployed();
@@ -182,4 +191,12 @@ async function createFile(showQuickpickStub: sinon.SinonStub<any[], any>,
 		assert.fail(`${integrationName}.${fileExtension} has not been opened in editor. Filename of currently opened editor: ${vscode.window.activeTextEditor?.document.fileName}`);
 	}
 	return vscode.window.activeTextEditor?.document.uri;
+}
+
+function checkTelemetry(telemetrySpy: sinon.SinonSpy<any[], any>, languageExtension: string) {
+	expect(telemetrySpy.calledOnce, `telemetry expected to be called once but was called ${telemetrySpy.callCount}`).true;
+	const actualEvent: TelemetryEvent = telemetrySpy.getCall(0).args[0];
+	expect(actualEvent.name).to.be.equal('command');
+	expect(actualEvent.properties.identifier).to.be.equal(extension.COMMAND_ID_START_INTEGRATION);
+	expect(actualEvent.properties.language).to.be.equal(languageExtension);
 }
