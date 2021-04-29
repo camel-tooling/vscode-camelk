@@ -36,7 +36,7 @@ import { TelemetryEvent } from '@redhat-developer/vscode-redhat-telemetry/lib';
 
 const RUNNING_TIMEOUT: number = 720000;
 const DEPLOYED_TIMEOUT: number = 10000;
-const UNDEPLOY_TIMEOUT: number = 10000;
+const UNDEPLOY_TIMEOUT: number = 20000;
 const EDITOR_OPENED_TIMEOUT: number = 5000;
 const TOTAL_TIMEOUT: number = RUNNING_TIMEOUT + DEPLOYED_TIMEOUT + EDITOR_OPENED_TIMEOUT + UNDEPLOY_TIMEOUT;
 
@@ -68,9 +68,13 @@ suite('Check can deploy default examples', () => {
 		const deployedTreeNode = getCamelKIntegrationsProvider().getTreeNodes()[0];
 		if(deployedTreeNode) {
 			await vscode.commands.executeCommand('camelk.integrations.remove', deployedTreeNode);
-			await waitUntil(() => {
-				return getCamelKIntegrationsProvider().getTreeNodes().length === 0;
-			}, UNDEPLOY_TIMEOUT);
+			try {
+				await waitUntil(() => {
+					return getCamelKIntegrationsProvider().getTreeNodes().length === 0;
+				}, UNDEPLOY_TIMEOUT);
+			} catch(error) {
+				throw new Error(`Undeployment has still not been finished or the Tree view has not been rereshed.`);
+			}
 		}
 		await config.addNamespaceToConfig(undefined);
 		telemetrySpy.restore();
