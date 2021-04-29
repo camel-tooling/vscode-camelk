@@ -98,7 +98,7 @@ suite('Check can deploy default examples', () => {
 		showQuickpickStub.onSecondCall().returns(IntegrationUtils.vscodeTasksIntegration);
 		showQuickpickStub.onThirdCall().returns(CamelKTaskDefinition.NAME_OF_PROVIDED_TASK_TO_DEPLOY_IN_DEV_MODE_FROM_ACTIVE_EDITOR);
 		
-		await vscode.commands.executeCommand('camelk.startintegration');
+	 	await vscode.commands.executeCommand('camelk.startintegration');
 
 		await checkIntegrationDeployed();
 		await checkIntegrationRunning();
@@ -194,9 +194,21 @@ async function createFile(showQuickpickStub: sinon.SinonStub<any[], any>,
 }
 
 function checkTelemetry(telemetrySpy: sinon.SinonSpy<any[], any>, languageExtension: string) {
-	expect(telemetrySpy.calledOnce, `telemetry expected to be called once but was called ${telemetrySpy.callCount}`).true;
+	expect(telemetrySpy.calledOnce, `telemetry expected to be called once but was called ${telemetrySpy.callCount}.\n${getTelemetryCallsContent(telemetrySpy)}`).true;
 	const actualEvent: TelemetryEvent = telemetrySpy.getCall(0).args[0];
 	expect(actualEvent.name).to.be.equal('command');
 	expect(actualEvent.properties.identifier).to.be.equal(extension.COMMAND_ID_START_INTEGRATION);
 	expect(actualEvent.properties.language).to.be.equal(languageExtension);
+}
+function getTelemetryCallsContent(telemetrySpy: sinon.SinonSpy<any[], any>): string {
+	let res = '';
+	telemetrySpy.getCalls().forEach(call => {
+		call.args.forEach(telemetryEvent => {
+			res += telemetryEvent.name + ';'
+				+ 'identifier: '+ telemetryEvent.properties.identifier + ';'
+				+ 'language: '+ telemetryEvent.properties.language + ';'
+				+ 'kind: ' + telemetryEvent.properties.kind  + '\n';
+		});
+	});
+	return res;
 }
