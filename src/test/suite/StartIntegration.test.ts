@@ -58,7 +58,7 @@ suite('Check can deploy default examples', () => {
 		telemetrySpy = sinon.spy(await getTelemetryServiceInstance(), 'send');
 	});
 
-	teardown(() => {
+	teardown(async () => {
 		showQuickpickStub.restore();
 		showInputBoxStub.restore();
 		showWorkspaceFolderPickStub.restore();
@@ -67,12 +67,12 @@ suite('Check can deploy default examples', () => {
 		}
 		const deployedTreeNode = getCamelKIntegrationsProvider().getTreeNodes()[0];
 		if(deployedTreeNode) {
-			vscode.commands.executeCommand('camelk.integrations.remove', deployedTreeNode);
-			waitUntil(() => {
+			await vscode.commands.executeCommand('camelk.integrations.remove', deployedTreeNode);
+			await waitUntil(() => {
 				return getCamelKIntegrationsProvider().getTreeNodes().length === 0;
 			}, UNDEPLOY_TIMEOUT);
 		}
-		config.addNamespaceToConfig(undefined);
+		await config.addNamespaceToConfig(undefined);
 		telemetrySpy.restore();
 	});
 	
