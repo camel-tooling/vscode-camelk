@@ -26,18 +26,30 @@ export const getDocUri = (p: string) => {
 };
 
 export async function checkExpectedCompletion(docUri: vscode.Uri, position: vscode.Position, expectedCompletion: vscode.CompletionItem) {
-    let hasExpectedCompletion = false;
-    await waitUntil(() => {
-        // Executing the command `vscode.executeCompletionItemProvider` to simulate triggering completion
-        (vscode.commands.executeCommand('vscode.executeCompletionItemProvider', docUri, position)).then(value => {
-			let actualCompletionList = value as vscode.CompletionList;
-			const completionItemFound = actualCompletionList.items.find(completion => {
-				return completion.label === expectedCompletion.label
-					&& completion.documentation === expectedCompletion.documentation
-					&& (expectedCompletion.insertText === undefined || completion.insertText === expectedCompletion.insertText);
+	let hasExpectedCompletion = false;
+	let lastCompletionList : vscode.CompletionList | undefined;
+	try {
+		await waitUntil(() => {
+			// Executing the command `vscode.executeCompletionItemProvider` to simulate triggering completion
+			(vscode.commands.executeCommand('vscode.executeCompletionItemProvider', docUri, position)).then(value => {
+				let actualCompletionList = value as vscode.CompletionList;
+				lastCompletionList = actualCompletionList;
+				const completionItemFound = actualCompletionList.items.find(completion => {
+					return completion.label === expectedCompletion.label
+						&& completion.documentation === expectedCompletion.documentation
+						&& (expectedCompletion.insertText === undefined || completion.insertText === expectedCompletion.insertText);
+				});
+				hasExpectedCompletion = completionItemFound !== undefined;
 			});
-            hasExpectedCompletion = completionItemFound !== undefined;
-        });
-        return hasExpectedCompletion;
-    }, 10000, 500);
+			return hasExpectedCompletion;
+		}, 10000, 500);
+	} catch (err) {
+		let errorMessage = '';
+		if(lastCompletionList) {
+			lastCompletionList.items.forEach(completion => {
+				errorMessage += completion.label + '\n';
+			});
+		}
+		throw new Error(`${err}\nCannot found expected completion "${expectedCompletion.label}" in the list of completions:\n${errorMessage}`);
+	}
 }
