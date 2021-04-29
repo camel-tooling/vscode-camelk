@@ -59,9 +59,9 @@ async function testCompletion(
 		const destination = retrieveDestination();
 		let messageForDownloaded: string;
 		if(fs.existsSync(destination)) {
-			messageForDownloaded = `The one that were downloaded in ${destination} are: ${fs.readdirSync(destination).join(';')}`;
+			messageForDownloaded = `The dependencies that were downloaded in ${destination} are: ${fs.readdirSync(destination).join(';')}`;
 		} else {
-			messageForDownloaded = `The destination folder has not been created ${destination}`;
+			messageForDownloaded = `The destination folder has not been created ${destination}.`;
 		}
 		fail(`Camel Java dependencies not downloaded in reasonable time (${DOWNLOAD_JAVA_DEPENDENCIES_TIMEOUT}). ${messageForDownloaded}`);
 	});
