@@ -123,7 +123,11 @@ async function cleanDeployedIntegration() {
 				return getCamelKIntegrationsProvider().getTreeNodes().length === 0;
 			}, UNDEPLOY_TIMEOUT);
 		} catch (error) {
-			throw new Error(`Undeployment has still not been finished or the Tree view has not been refreshed.`);
+			console.log('Error while trying to undeploy, try to print more information on the running integrations:');
+			console.log(`${await kamel.create().invoke('get integration')}`);
+			console.log(`on the log of integration named ${deployedTreeNode.label}:`);
+			console.log(`${await kamel.create().invoke('log ' + deployedTreeNode.label)}`);
+			throw new Error(`Undeployment has still not been finished or the Tree view has not been refreshed.\n${error}`);
 		}
 	} else {
 		console.log('No deployed integration detected in Camel K Integration view.');
