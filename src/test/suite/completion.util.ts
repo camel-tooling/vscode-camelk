@@ -50,6 +50,6 @@ export async function checkExpectedCompletion(docUri: vscode.Uri, position: vsco
 				errorMessage += completion.label + '\n';
 			});
 		}
-		throw new Error(`${err}\nCannot found expected completion "${expectedCompletion.label}" in the list of completions:\n${errorMessage}`);
+		throw new Error(`${err}\nCannot find expected completion "${expectedCompletion.label}" in the list of completions:\n${errorMessage}`);
 	}
 }
