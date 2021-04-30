@@ -38,8 +38,9 @@ import { TreeNode } from '../../CamelKNodeProvider';
 const RUNNING_TIMEOUT: number = 720000;
 const DEPLOYED_TIMEOUT: number = 10000;
 const UNDEPLOY_TIMEOUT: number = 20000;
+const PROVIDER_POPULATED_TIMEOUT: number = 20000;
 const EDITOR_OPENED_TIMEOUT: number = 5000;
-const TOTAL_TIMEOUT: number = RUNNING_TIMEOUT + DEPLOYED_TIMEOUT + EDITOR_OPENED_TIMEOUT + UNDEPLOY_TIMEOUT;
+const TOTAL_TIMEOUT: number = RUNNING_TIMEOUT + DEPLOYED_TIMEOUT + EDITOR_OPENED_TIMEOUT + UNDEPLOY_TIMEOUT + PROVIDER_POPULATED_TIMEOUT;
 
 suite('Check can deploy default examples', () => {
 	
@@ -136,7 +137,7 @@ async function retrieveDeployedTreeNode() {
 			const treeNodes = getCamelKIntegrationsProvider().getTreeNodes();
 			deployedTreeNode = treeNodes[0];
 			return treeNodes.length !== 0;
-		}, UNDEPLOY_TIMEOUT);
+		}, PROVIDER_POPULATED_TIMEOUT);
 	} catch (err) {
 		console.log('No Integration found in Camel K Integration provider of the view.');
 	}
