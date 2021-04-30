@@ -112,24 +112,25 @@ export async function activate(context: vscode.ExtensionContext) {
 				let integrationName: string = retrieveIntegratioName(selection);
 				let kamelExecutor = kamel.create();
 				utils.shareMessage(mainOutputChannel, 'Removing ' + integrationName + ' via Kamel executable Delete');
-				let args : string[] = ['delete', `${integrationName}`];
-				await kamelExecutor.invokeArgs(args)
-					.then( /* empty for now but here in case we need it */ )
-					.catch( (error) => {
-						utils.shareMessage(mainOutputChannel, `exec error: ${error}`);
-				});
-				await integrationutils.killChildProcessForIntegration(integrationName).then( (boolResult) => {
-					console.log(`Removed the child process running in the background for ${integrationName}: ${boolResult}`);
-				}).catch( (err) => {
+				try {
+					await kamelExecutor.invoke(`delete ${integrationName}`);
+				} catch(error) {
+					utils.shareMessage(mainOutputChannel, `exec error: ${error}`);
+				}
+				try {
+					const isKilled = await integrationutils.killChildProcessForIntegration(integrationName);
+					console.log(`Removed the child process running in the background for ${integrationName}: ${isKilled}`);
+				} catch(err) {
 					console.log(err);
-				});
+				}
 				await removeIntegrationLogView(integrationName);
 				// TODO: we need to look into closing the log view when the integration is stopped
 				hideStatusLine();
-				await camelKIntegrationsProvider.refresh()
-				.catch( (err) => {
+				try {
+					await camelKIntegrationsProvider.refresh();
+				} catch (err) {
 					console.log(err);
-				});
+				}
 				telemetry.sendCommandTracking(COMMAND_ID_REMOVE);
 			}
 		});
