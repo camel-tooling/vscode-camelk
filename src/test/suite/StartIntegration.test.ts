@@ -194,7 +194,7 @@ async function createFile(showQuickpickStub: sinon.SinonStub<any[], any>,
 }
 
 function checkTelemetry(telemetrySpy: sinon.SinonSpy<any[], any>, languageExtension: string) {
-	expect(telemetrySpy.calledOnce, `telemetry expected to be called once but was called ${telemetrySpy.callCount}.\n${getTelemetryCallsContent(telemetrySpy)}`).true;
+	expect(telemetrySpy.calledOnce, `telemetry expected to be called once but was called ${telemetrySpy.callCount} time(s).\n${getTelemetryCallsContent(telemetrySpy)}`).true;
 	const actualEvent: TelemetryEvent = telemetrySpy.getCall(0).args[0];
 	expect(actualEvent.name).to.be.equal('command');
 	expect(actualEvent.properties.identifier).to.be.equal(extension.COMMAND_ID_START_INTEGRATION);
