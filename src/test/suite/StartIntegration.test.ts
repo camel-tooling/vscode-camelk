@@ -33,6 +33,7 @@ import { LANGUAGES, LANGUAGES_WITH_FILENAME_EXTENSIONS } from '../../commands/Ne
 import * as CamelKTaskDefinition from '../../task/CamelKTaskDefinition';
 import { getTelemetryServiceInstance } from '../../Telemetry';
 import { TelemetryEvent } from '@redhat-developer/vscode-redhat-telemetry/lib';
+import { TreeNode } from '../../CamelKNodeProvider';
 
 const RUNNING_TIMEOUT: number = 720000;
 const DEPLOYED_TIMEOUT: number = 10000;
@@ -65,21 +66,7 @@ suite('Check can deploy default examples', () => {
 		if (createdFile && fs.existsSync(createdFile.fsPath)) {
 			fs.unlinkSync(createdFile.fsPath);
 		}
-		const treeNodes = getCamelKIntegrationsProvider().getTreeNodes();
-		console.log(`Number of elements detected in the Integration View provider: ${treeNodes.length}`);
-		const deployedTreeNode = treeNodes[0];
-		if(deployedTreeNode) {
-			await vscode.commands.executeCommand('camelk.integrations.remove', deployedTreeNode);
-			try {
-				await waitUntil(() => {
-					return getCamelKIntegrationsProvider().getTreeNodes().length === 0;
-				}, UNDEPLOY_TIMEOUT);
-			} catch(error) {
-				throw new Error(`Undeployment has still not been finished or the Tree view has not been refreshed.`);
-			}
-		} else {
-			console.log('No deployed integration detected in Camel K Integration view.');
-		}
+		await cleanDeployedIntegration();
 		await config.addNamespaceToConfig(undefined);
 		telemetrySpy.restore();
 	});
@@ -125,6 +112,36 @@ suite('Check can deploy default examples', () => {
 	}).timeout(TOTAL_TIMEOUT);
 
 });
+
+async function cleanDeployedIntegration() {
+	let deployedTreeNode: TreeNode | undefined = await retrieveDeployedTreeNode();
+	if (deployedTreeNode) {
+		await vscode.commands.executeCommand('camelk.integrations.remove', deployedTreeNode);
+		try {
+			await waitUntil(() => {
+				return getCamelKIntegrationsProvider().getTreeNodes().length === 0;
+			}, UNDEPLOY_TIMEOUT);
+		} catch (error) {
+			throw new Error(`Undeployment has still not been finished or the Tree view has not been refreshed.`);
+		}
+	} else {
+		console.log('No deployed integration detected in Camel K Integration view.');
+	}
+}
+
+async function retrieveDeployedTreeNode() {
+	let deployedTreeNode: TreeNode | undefined;
+	try {
+		await waitUntil(() => {
+			const treeNodes = getCamelKIntegrationsProvider().getTreeNodes();
+			deployedTreeNode = treeNodes[0];
+			return treeNodes.length !== 0;
+		}, UNDEPLOY_TIMEOUT);
+	} catch (err) {
+		console.log('No Integration found in Camel K Integration provider of the view.');
+	}
+	return deployedTreeNode;
+}
 
 async function checkIntegrationsInDifferentNamespaces(EXTRA_NAMESPACE_FOR_TEST: string) {
 	const integrations = await getNamedListFromKubernetesThenParseList('integration', `--namespace=${EXTRA_NAMESPACE_FOR_TEST}`);
