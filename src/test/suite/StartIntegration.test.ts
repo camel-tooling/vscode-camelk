@@ -123,7 +123,7 @@ async function cleanDeployedIntegration() {
 				return getCamelKIntegrationsProvider().getTreeNodes().length === 0;
 			}, UNDEPLOY_TIMEOUT);
 		} catch (error) {
-			console.log('Error while trying to undeploy, try to print more information on the running integrations:');
+			console.log('Error while trying to remove deployed integration:');
 			console.log(`${await kamel.create().invoke('get integration')}`);
 			console.log(`on the log of integration named ${deployedTreeNode.label}:`);
 			console.log(`${await kamel.create().invoke('log ' + deployedTreeNode.label)}`);
