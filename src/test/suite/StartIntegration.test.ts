@@ -65,7 +65,9 @@ suite('Check can deploy default examples', () => {
 		if (createdFile && fs.existsSync(createdFile.fsPath)) {
 			fs.unlinkSync(createdFile.fsPath);
 		}
-		const deployedTreeNode = getCamelKIntegrationsProvider().getTreeNodes()[0];
+		const treeNodes = getCamelKIntegrationsProvider().getTreeNodes();
+		console.log(`Number of elements detected in the Integration View provider: ${treeNodes.length}`);
+		const deployedTreeNode = treeNodes[0];
 		if(deployedTreeNode) {
 			await vscode.commands.executeCommand('camelk.integrations.remove', deployedTreeNode);
 			try {
