@@ -73,8 +73,10 @@ suite('Check can deploy default examples', () => {
 					return getCamelKIntegrationsProvider().getTreeNodes().length === 0;
 				}, UNDEPLOY_TIMEOUT);
 			} catch(error) {
-				throw new Error(`Undeployment has still not been finished or the Tree view has not been rereshed.`);
+				throw new Error(`Undeployment has still not been finished or the Tree view has not been refreshed.`);
 			}
+		} else {
+			console.log('No deployed integration detected in Camel K Integration view.');
 		}
 		await config.addNamespaceToConfig(undefined);
 		telemetrySpy.restore();
