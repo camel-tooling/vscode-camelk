@@ -30,7 +30,8 @@ import * as kubectlutils from './kubectlutils';
 import * as config from './config';
 import { downloadSpecificCamelKJavaDependencies, initializeJavaDependenciesManager } from './JavaDependenciesManager';
 import { CamelKTaskCompletionItemProvider } from './task/CamelKTaskCompletionItemProvider';
-import { CamelKTaskProvider } from './task/CamelKTaskDefinition';
+import { CamelKDebugTaskProvider } from './task/CamelKDebugTaskDefinition';
+import { CamelKRunTaskProvider } from './task/CamelKRunTaskDefinition';
 import { ChildProcess } from 'child_process';
 import { LogsPanel } from './logsWebview';
 import * as logUtils from './logUtils';
@@ -73,7 +74,8 @@ export async function activate(context: vscode.ExtensionContext) {
 	myStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 100);
 	context.subscriptions.push(myStatusBarItem);
 	
-	vscode.tasks.registerTaskProvider(CamelKTaskProvider.START_CAMELK_TYPE, new CamelKTaskProvider());
+	vscode.tasks.registerTaskProvider(CamelKRunTaskProvider.START_CAMELK_TYPE, new CamelKRunTaskProvider());
+	vscode.tasks.registerTaskProvider(CamelKDebugTaskProvider.DEBUG_CAMELK_TYPE, new CamelKDebugTaskProvider());
 	const tasksJson:vscode.DocumentSelector = { scheme: 'file', language: 'jsonc', pattern: '**/tasks.json' };
 	vscode.languages.registerCompletionItemProvider(tasksJson, new CamelKTaskCompletionItemProvider());
 

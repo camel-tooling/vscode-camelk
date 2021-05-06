@@ -269,6 +269,31 @@
 						"uniqueItems": true
 					}
 				}
+			},
+			{
+				"type": "camel-k-debug",
+				"required": ["integrationName"],
+				"properties": {
+					"integrationName": {
+						"type": "string",
+						"description": "The name of the integration to debug. The integration must be deployed. The name is displayed in the Apache Camel K Integrations tree view."
+					},
+					"port": {
+						"type": "integer",
+						"description": "Local port to use for port-forwarding (default 5005)",
+						"default": 5005
+					},
+					"remotePort": {
+						"type": "integer",
+						"description": "Remote port to use for port-forwarding (default 5005)",
+						"default": 5005
+					},
+					"suspend": {
+						"type": "boolean",
+						"description": "Suspend the integration on startup, to let the debugger attach from the beginning (default true)",
+						"default": true
+					}
+				}
 			}
 		],
 		"views": {

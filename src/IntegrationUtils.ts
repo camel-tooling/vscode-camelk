@@ -24,7 +24,7 @@ import * as child_process from 'child_process';
 import { getConfigMaps, getSecrets } from './kubectlutils';
 import * as k8s from 'vscode-kubernetes-tools-api';
 import * as kamel from './kamel';
-import { CamelKTaskProvider, CamelKTaskDefinition } from './task/CamelKTaskDefinition';
+import { CamelKRunTaskProvider, CamelKRunTaskDefinition } from './task/CamelKRunTaskDefinition';
 import { isString } from 'util';
 import * as fs from 'fs';
 import { getTelemetryServiceInstance } from './Telemetry';
@@ -233,9 +233,9 @@ async function sendStartIntegrationTelemetryEvent(choice: string, context: vscod
 }
 
 async function handleDefinedTask(context: vscode.Uri) {
-	let allCamelKTasks = await vscode.tasks.fetchTasks({type: CamelKTaskProvider.START_CAMELK_TYPE});
+	let allCamelKTasks = await vscode.tasks.fetchTasks({type: CamelKRunTaskProvider.START_CAMELK_TYPE});
 	let filteredCamelKTasks = allCamelKTasks.filter(task => {
-		let camelTaskDefinition = task.definition as CamelKTaskDefinition;
+		let camelTaskDefinition = task.definition as CamelKRunTaskDefinition;
 		let file = camelTaskDefinition.file;
 		return file && (isAVariable(file) || isTheExactFile(file, context));
 	});

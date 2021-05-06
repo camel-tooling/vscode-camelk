@@ -30,7 +30,7 @@ import * as extension from '../../extension';
 import * as kamel from './../../kamel';
 import * as kubectl from './../../kubectl';
 import { LANGUAGES, LANGUAGES_WITH_FILENAME_EXTENSIONS } from '../../commands/NewIntegrationFileCommand';
-import * as CamelKTaskDefinition from '../../task/CamelKTaskDefinition';
+import * as CamelKRunTaskDefinition from '../../task/CamelKRunTaskDefinition';
 import { getTelemetryServiceInstance } from '../../Telemetry';
 import { TelemetryEvent } from '@redhat-developer/vscode-redhat-telemetry/lib';
 import { TreeNode } from '../../CamelKNodeProvider';
@@ -92,7 +92,7 @@ suite('Check can deploy default examples', () => {
 		await openCamelKTreeView();
 		assert.isEmpty(getCamelKIntegrationsProvider().getTreeNodes());
 		showQuickpickStub.onSecondCall().returns(IntegrationUtils.vscodeTasksIntegration);
-		showQuickpickStub.onThirdCall().returns(CamelKTaskDefinition.NAME_OF_PROVIDED_TASK_TO_DEPLOY_IN_DEV_MODE_FROM_ACTIVE_EDITOR);
+		showQuickpickStub.onThirdCall().returns(CamelKRunTaskDefinition.NAME_OF_PROVIDED_TASK_TO_DEPLOY_IN_DEV_MODE_FROM_ACTIVE_EDITOR);
 		
 	 	await vscode.commands.executeCommand('camelk.startintegration');
 

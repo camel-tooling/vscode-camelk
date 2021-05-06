@@ -16,143 +16,143 @@
  */
 'use strict';
 
-import { CamelKTaskDefinition, CamelKTaskProvider } from "../../task/CamelKTaskDefinition";
+import { CamelKRunTaskDefinition, CamelKRunTaskProvider } from "../../task/CamelKRunTaskDefinition";
 import { ShellExecution } from "vscode";
 import { assert } from "chai";
 
-suite("Camel K Task definition", function() {
+suite("Camel K Run Task definition", function() {
 
     test("ensure include configmap", async() => {
-        let def: CamelKTaskDefinition = {
+        let def: CamelKRunTaskDefinition = {
             "file" : "dummyFileValue.xml",
             "configmap": "aDummyConfigMapId",
-            "type": CamelKTaskProvider.START_CAMELK_TYPE
+            "type": CamelKRunTaskProvider.START_CAMELK_TYPE
         };
-        const task = await new CamelKTaskProvider().getTask(def);
+        const task = await new CamelKRunTaskProvider().getRunTask(def);
         let execution = task.execution as ShellExecution;
         assert.include(execution.commandLine, '--configmap=aDummyConfigMapId');
     });
 
     test("ensure include compression flag", async() => {
-		let def: CamelKTaskDefinition = {
+		let def: CamelKRunTaskDefinition = {
             "file" : "dummyFileValue.xml",
             "compression": true,
-            "type": CamelKTaskProvider.START_CAMELK_TYPE
+            "type": CamelKRunTaskProvider.START_CAMELK_TYPE
         };
-        const task = await new CamelKTaskProvider().getTask(def);
+        const task = await new CamelKRunTaskProvider().getRunTask(def);
         let execution = task.execution as ShellExecution;
         assert.include(execution.commandLine, '--compression');
     });
 
     test("ensure include dependencies", async() => {
-		let def: CamelKTaskDefinition = {
+		let def: CamelKRunTaskDefinition = {
             "file" : "dummyFileValue.xml",
             "dependencies": ["camel.mina2", "mvn:com.google.guava:guava:26.0-jre"],
-            "type": CamelKTaskProvider.START_CAMELK_TYPE
+            "type": CamelKRunTaskProvider.START_CAMELK_TYPE
         };
-        const task = await new CamelKTaskProvider().getTask(def);
+        const task = await new CamelKRunTaskProvider().getRunTask(def);
         let execution = task.execution as ShellExecution;
         assert.include(execution.commandLine, '--dependency=camel.mina2');
         assert.include(execution.commandLine, '--dependency=mvn:com.google.guava:guava:26.0-jre');
     });
 
     test("ensure include dev flag", async() => {
-		let def: CamelKTaskDefinition = {
+		let def: CamelKRunTaskDefinition = {
             "file" : "dummyFileValue.xml",
             "dev": true,
-            "type": CamelKTaskProvider.START_CAMELK_TYPE
+            "type": CamelKRunTaskProvider.START_CAMELK_TYPE
         };
-        const task = await new CamelKTaskProvider().getTask(def);
+        const task = await new CamelKRunTaskProvider().getRunTask(def);
         let execution = task.execution as ShellExecution;
         assert.include(execution.commandLine, '--dev');
     });
 
     test("ensure include Environment variables", async() => {
-		let def: CamelKTaskDefinition = {
+		let def: CamelKRunTaskDefinition = {
             "file" : "dummyFileValue.xml",
             "environmentVariables": ["MY_ENV=value", "MY_ENV2=value2"],
-            "type": CamelKTaskProvider.START_CAMELK_TYPE
+            "type": CamelKRunTaskProvider.START_CAMELK_TYPE
         };
-        const task = await new CamelKTaskProvider().getTask(def);
+        const task = await new CamelKRunTaskProvider().getRunTask(def);
         let execution = task.execution as ShellExecution;
         assert.include(execution.commandLine, '-e MY_ENV=value');
         assert.include(execution.commandLine, '-e MY_ENV2=value2');
     });
 
     test("ensure include target file", async() => {
-		let def: CamelKTaskDefinition = {
+		let def: CamelKRunTaskDefinition = {
             "file" : "dummyFileValue.xml",
-            "type": CamelKTaskProvider.START_CAMELK_TYPE
+            "type": CamelKRunTaskProvider.START_CAMELK_TYPE
         };
-        const task = await new CamelKTaskProvider().getTask(def);
+        const task = await new CamelKRunTaskProvider().getRunTask(def);
         let execution = task.execution as ShellExecution;
         assert.include(execution.commandLine, 'dummyFileValue.xml');
     });
 
     test("ensure include profile", async() => {
-		let def: CamelKTaskDefinition = {
+		let def: CamelKRunTaskDefinition = {
             "file" : "dummyFileValue.xml",
             "profile": "adummyprofile",
-            "type": CamelKTaskProvider.START_CAMELK_TYPE
+            "type": CamelKRunTaskProvider.START_CAMELK_TYPE
         };
-        const task = await new CamelKTaskProvider().getTask(def);
+        const task = await new CamelKRunTaskProvider().getRunTask(def);
         let execution = task.execution as ShellExecution;
         assert.include(execution.commandLine, '--profile=adummyprofile');
     });
 
     test("ensure include properties", async() => {
-        let def: CamelKTaskDefinition = {
+        let def: CamelKRunTaskDefinition = {
             "file" : "dummyFileValue.xml",
             "properties": ["prop1=value1", "prop2=value2"],
-            "type": CamelKTaskProvider.START_CAMELK_TYPE
+            "type": CamelKRunTaskProvider.START_CAMELK_TYPE
         };
-        const task = await new CamelKTaskProvider().getTask(def);
+        const task = await new CamelKRunTaskProvider().getRunTask(def);
         let execution = task.execution as ShellExecution;
         assert.include(execution.commandLine, '-p prop1=value1');
         assert.include(execution.commandLine, '-p prop2=value2');
     });
 
     test("ensure include resource", async() => {
-		let def: CamelKTaskDefinition = {
+		let def: CamelKRunTaskDefinition = {
             "file" : "dummyFileValue.xml",
             "resource": "adummyresource",
-            "type": CamelKTaskProvider.START_CAMELK_TYPE
+            "type": CamelKRunTaskProvider.START_CAMELK_TYPE
         };
-        const task = await new CamelKTaskProvider().getTask(def);
+        const task = await new CamelKRunTaskProvider().getRunTask(def);
         let execution = task.execution as ShellExecution;
         assert.include(execution.commandLine, '--resource="adummyresource"');
     });
 
     test("ensure include secret", async() => {
-		let def: CamelKTaskDefinition = {
+		let def: CamelKRunTaskDefinition = {
             "file" : "dummyFileValue.xml",
             "secret": "adummysecret",
-            "type": CamelKTaskProvider.START_CAMELK_TYPE
+            "type": CamelKRunTaskProvider.START_CAMELK_TYPE
         };
-        const task = await new CamelKTaskProvider().getTask(def);
+        const task = await new CamelKRunTaskProvider().getRunTask(def);
         let execution = task.execution as ShellExecution;
         assert.include(execution.commandLine, '--secret=adummysecret');
     });
     
     test("ensure include traits", async() => {
-        let def: CamelKTaskDefinition = {
+        let def: CamelKRunTaskDefinition = {
             "file" : "dummyFileValue.xml",
             "traits": ["camel.enabled=true", "camel.runtime-version=3.0.0"],
-            "type": CamelKTaskProvider.START_CAMELK_TYPE
+            "type": CamelKRunTaskProvider.START_CAMELK_TYPE
         };
-        const task = await new CamelKTaskProvider().getTask(def);
+        const task = await new CamelKRunTaskProvider().getRunTask(def);
         let execution = task.execution as ShellExecution;
         assert.include(execution.commandLine, '-t camel.enabled=true');
         assert.include(execution.commandLine, '-t camel.runtime-version=3.0.0');
     });
     
     test("ensure include volumes", async() => {
-        let def: CamelKTaskDefinition = {
+        let def: CamelKRunTaskDefinition = {
             "file" : "dummyFileValue.xml",
             "volumes": ["pvcname:/container/path", "pvcname:/container/path2"],
-            "type": CamelKTaskProvider.START_CAMELK_TYPE
+            "type": CamelKRunTaskProvider.START_CAMELK_TYPE
         };
-        const task = await new CamelKTaskProvider().getTask(def);
+        const task = await new CamelKRunTaskProvider().getRunTask(def);
         let execution = task.execution as ShellExecution;
         assert.include(execution.commandLine, '-v pvcname:/container/path');
         assert.include(execution.commandLine, '-v pvcname:/container/path2');

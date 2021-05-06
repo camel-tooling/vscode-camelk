@@ -22,7 +22,7 @@ import * as IntegrationUtils from '../IntegrationUtils';
 
 export const NAME_OF_PROVIDED_TASK_TO_DEPLOY_IN_DEV_MODE_FROM_ACTIVE_EDITOR = "Start in dev mode Camel K integration opened in active editor";
 
-export interface CamelKTaskDefinition extends vscode.TaskDefinition {
+export interface CamelKRunTaskDefinition extends vscode.TaskDefinition {
     
 	configmap?: string;
 	compression?: boolean;
@@ -38,7 +38,7 @@ export interface CamelKTaskDefinition extends vscode.TaskDefinition {
 	volumes?: Array<string>;
 }
 
-export class CamelKTaskProvider implements vscode.TaskProvider {
+export class CamelKRunTaskProvider implements vscode.TaskProvider {
 	
 	private tasks: vscode.Task[] | undefined;
 	static START_CAMELK_TYPE: string = 'camel-k';
@@ -49,8 +49,8 @@ export class CamelKTaskProvider implements vscode.TaskProvider {
 	}
 
 	public async resolveTask(_task: vscode.Task): Promise<vscode.Task | undefined> {
-		const definition: CamelKTaskDefinition = <any>_task.definition;
-		return await this.getTask(definition);
+		const definition: CamelKRunTaskDefinition = <any>_task.definition;
+		return await this.getRunTask(definition);
 	}
 
 	private async getTasks(): Promise<vscode.Task[]> {
@@ -58,17 +58,17 @@ export class CamelKTaskProvider implements vscode.TaskProvider {
 			return this.tasks;
 		}
 		this.tasks = [];
-		let taskDefinition = {
-			"type": CamelKTaskProvider.START_CAMELK_TYPE,
+		let startTaskDefinition = {
+			"type": CamelKRunTaskProvider.START_CAMELK_TYPE,
 			"label": NAME_OF_PROVIDED_TASK_TO_DEPLOY_IN_DEV_MODE_FROM_ACTIVE_EDITOR,
 			"file": "\"${file}\"",
 			"dev": true
 		};
-		this.tasks.push(await this.getTask(taskDefinition));
+		this.tasks.push(await this.getRunTask(startTaskDefinition));		
 		return this.tasks;
 	}
-
-	public async getTask(definition: CamelKTaskDefinition): Promise<vscode.Task> {
+	
+	public async getRunTask(definition: CamelKRunTaskDefinition): Promise<vscode.Task> {
 		let args = IntegrationUtils.computeKamelArgs(definition.file,
 			definition.dev,
 			definition.configmap,
@@ -92,7 +92,7 @@ export class CamelKTaskProvider implements vscode.TaskProvider {
 		return new vscode.Task(definition,
 			vscode.TaskScope.Workspace,
 			displayName,
-			CamelKTaskProvider.START_CAMELK_TYPE,
+			CamelKRunTaskProvider.START_CAMELK_TYPE,
 			processExecution);
 	}
 }
