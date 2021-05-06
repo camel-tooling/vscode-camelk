@@ -46,7 +46,7 @@ export class CamelKDebugTaskProvider implements vscode.TaskProvider {
 			return this.tasks;
 		}
 		this.tasks = [];
-		let debugTaskDefinition = {
+		const debugTaskDefinition = {
 			"type": CamelKDebugTaskProvider.DEBUG_CAMELK_TYPE,
 			"integrationName": "" 
 		};
@@ -55,7 +55,7 @@ export class CamelKDebugTaskProvider implements vscode.TaskProvider {
 		return this.tasks;
 	}
 	
-	async getDebugTask(definition: CamelKDebugTaskDefinition): Promise<vscode.Task> {
+	public async getDebugTask(definition: CamelKDebugTaskDefinition): Promise<vscode.Task> {
 		const commandLine = await computeKamelDebugCommandLine(definition);
 		const processExecution = new vscode.ShellExecution(commandLine, {});
 		let displayName :string;

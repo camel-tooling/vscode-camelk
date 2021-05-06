@@ -272,7 +272,9 @@
 			},
 			{
 				"type": "camel-k-debug",
-				"required": ["integrationName"],
+				"required": [
+					"integrationName"
+				],
 				"properties": {
 					"integrationName": {
 						"type": "string",
