@@ -1,0 +1,12 @@
+{
+	"version": "0.2.0",
+	"configurations": [
+		{
+			"type": "java",
+			"name": "Attach Java Process to port 5005",
+			"request": "attach",
+			"hostName": "localhost",
+			"port": 5005
+		}
+	]
+}
