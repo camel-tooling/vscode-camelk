@@ -98,8 +98,7 @@ async function createCamelKDebugTask() {
 		"type": CamelKDebugTaskProvider.DEBUG_CAMELK_TYPE,
 		"integrationName": "test-java-debug"
 	};
-	const debugActivationTask = await new CamelKDebugTaskProvider().getDebugTask(debugTaskDefinition);
-	return debugActivationTask;
+	return await new CamelKDebugTaskProvider().getDebugTask(debugTaskDefinition);
 }
 
 async function checkJavaDebugConnection() {
