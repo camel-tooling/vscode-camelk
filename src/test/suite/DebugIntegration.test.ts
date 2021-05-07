@@ -68,7 +68,9 @@ suite('Check can debug default Java example', () => {
 		if(debugConfigurationTaskExecution) {
 			debugConfigurationTaskExecution.terminate();
 		}
-		vscode.debug.stopDebugging();
+		console.log('Stop all debugging session');
+		await vscode.debug.stopDebugging();
+		console.log('All debugging sessions stopped');
 	});
 	
 	const testInProgress = test(`Check can debug Java example`, async() => {
@@ -102,12 +104,15 @@ async function createCamelKDebugTask() {
 }
 
 async function checkJavaDebugConnection() {
+	console.log('Start checking Java debug connection is working');
 	const workspaceFolderList = vscode.workspace.workspaceFolders;
 	if (workspaceFolderList) {
+		console.log(`Start debugging in this folder: ${workspaceFolderList[0].uri.fsPath}`);
 		assert.isTrue(await vscode.debug.startDebugging(workspaceFolderList[0], "Attach Java Process to port 5005"));
 	} else {
 		fail('Missing a workspace folder');
 	}
+	console.log('Checked that Java debug connection is working');
 }
 
 async function checkDebugPortReportedAsReady() {
