@@ -118,7 +118,7 @@ async function checkDebugPortReportedAsReady() {
 				currentTerminalContent = content;
 			});
 			return currentTerminalContent.includes('Listening for transport dt_socket at address: 5005');
-		}, 10000, 1000);
+		}, 30000, 1000);
 	} catch (error) {
 		console.log('latest content retrieved:\n' + currentTerminalContent);
 		throw error;
