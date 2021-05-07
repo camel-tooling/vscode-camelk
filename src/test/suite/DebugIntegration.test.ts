@@ -28,7 +28,6 @@ import { cleanDeployedIntegration, createFile, startIntegrationWithBasicCheck, c
 import { CamelKDebugTaskProvider } from '../../task/CamelKDebugTaskDefinition';
 import { waitUntil } from 'async-wait-until';
 import { fail } from 'assert';
-import { assert } from 'chai';
 
 export const RUNNING_TIMEOUT: number = 720000;
 export const DEPLOYED_TIMEOUT: number = 10000;
@@ -108,7 +107,40 @@ async function checkJavaDebugConnection() {
 	const workspaceFolderList = vscode.workspace.workspaceFolders;
 	if (workspaceFolderList) {
 		console.log(`Start debugging in this folder: ${workspaceFolderList[0].uri.fsPath}`);
-		assert.isTrue(await vscode.debug.startDebugging(workspaceFolderList[0], "Attach Java Process to port 5005"));
+		vscode.debug.registerDebugAdapterTrackerFactory('*', {
+			createDebugAdapterTracker: () => ({
+				onError: error => {
+					console.log(error);
+					fail('Error with the Debug session');
+				},
+				onDidSendMessage: message => {
+					console.log(message);
+				},
+				onWillStartSession: () => {
+					console.log('Will start debug session');
+				},
+				onExit: () => {
+					console.log('Exit debug session')
+				},
+				onWillStopSession: () => {
+					console.log('Will stop debug session');
+				},
+				onWillReceiveMessage: () => {
+					console.log('Will receive message for debug session');
+				}
+				
+			})
+		});
+		//assert.isTrue(await vscode.debug.startDebugging(workspaceFolderList[0], "Attach Java Process to port 5005"));
+		vscode.debug.startDebugging(workspaceFolderList[0], "Attach Java Process to port 5005")
+		try {
+			await waitUntil(() => {
+				const activeDebugSession = vscode.debug.activeDebugSession;
+				return activeDebugSession !== undefined;
+			});
+		} catch (error) {
+			fail(`Cannot have an actievdebug session ${error}`)
+		}
 	} else {
 		fail('Missing a workspace folder');
 	}
