@@ -57,6 +57,7 @@ jobs:
                   source $BASH_ENV
       - run:
           name: test
+          no_output_timeout: 15m
           command: npm test
       - when:
           condition:
