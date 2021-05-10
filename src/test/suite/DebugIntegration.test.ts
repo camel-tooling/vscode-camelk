@@ -20,7 +20,8 @@ import * as fs from 'fs';
 import * as sinon from 'sinon';
 import * as vscode from 'vscode';
 import * as config from '../../config';
-import { skipOnJenkins } from "./Utils";
+import * as extension from '../../extension';
+import * as Utils from "./Utils";
 import * as shelljs from 'shelljs';
 import { LANGUAGES_WITH_FILENAME_EXTENSIONS } from '../../commands/NewIntegrationFileCommand';
 import { getTelemetryServiceInstance } from '../../Telemetry';
@@ -71,8 +72,8 @@ suite('Check can debug default Java example', () => {
 		await vscode.debug.stopDebugging();
 	});
 	
-	const testInProgress = test(`Check can debug Java example`, async() => {
-		skipOnJenkins(testInProgress);
+	const testUsingTasks = test(`Check can debug Java example using VS Code tasks`, async() => {
+		Utils.skipOnJenkins(testUsingTasks);
 		createdFile = await createAndDeployIntegration(createdFile, showQuickpickStub, showWorkspaceFolderPickStub, showInputBoxStub, telemetrySpy);
 		const debugActivationTask = await createCamelKDebugTask();
 		
@@ -80,6 +81,21 @@ suite('Check can debug default Java example', () => {
 		
 		await checkDebugPortReportedAsReady();
 		await checkJavaDebugConnection();
+	}).timeout(TOTAL_TIMEOUT);
+	
+	const testUsingContextualMenu = test(`Check can debug Java example using contextual menu in Integration view`, async() => {
+		Utils.skipOnJenkins(testUsingContextualMenu);
+		createdFile = await createAndDeployIntegration(createdFile, showQuickpickStub, showWorkspaceFolderPickStub, showInputBoxStub, telemetrySpy);
+		
+		await vscode.commands.executeCommand(extension.COMMAND_ID_START_JAVA_DEBUG, Utils.getCamelKIntegrationsProvider().getTreeNodes()[0]);
+		
+		try {
+			await waitUntil(() => {
+				return vscode.debug.activeDebugSession?.name === `Attach Java debugger to Camel K integration test-java-debug`;
+			}, 20000, 1000);
+		} catch(error) {
+			throw new Error(`Java debugger was not attached ${error}`);
+		}
 	}).timeout(TOTAL_TIMEOUT);
 	
 });
