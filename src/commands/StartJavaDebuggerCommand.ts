@@ -42,8 +42,9 @@ export async function start(integrationItem: TreeNode): Promise<void> {
 		if (!debuggerLaunched && isListeningFromTransportMessageSent && messageData.includes('Forwarding from')) {
 			const workspaceFolderList = vscode.workspace.workspaceFolders;
 			if (workspaceFolderList) {
+				const debugConfigurationName = `Attach Java debugger to Camel K integration ${integrationName} on port ${port}`;
 				const debugConfiguration: vscode.DebugConfiguration = {
-					name: `Attach Java debugger to Camel K integration ${integrationName} on port ${port}`,
+					name: debugConfigurationName,
 					type: 'java',
 					request: 'attach',
 					// TODO: To improve to support remote debug. How to determine host more precisely?
@@ -51,6 +52,22 @@ export async function start(integrationItem: TreeNode): Promise<void> {
 					port: +port
 				};
 				debuggerLaunched = true;
+				vscode.debug.registerDebugAdapterTrackerFactory('*', {
+					createDebugAdapterTracker(session: vscode.DebugSession) {
+						return {
+							onWillStopSession:() => {
+								if(debugConfigurationName === session.name) {
+									childProcess.kill();
+								}
+							},
+							onExit: (code, signal) => {
+								if(debugConfigurationName === session.name) {
+									childProcess.kill(code);
+								}
+							}
+						};
+					}
+				});
 				vscode.debug.startDebugging(workspaceFolderList[0], debugConfiguration);
 			}
 		}
