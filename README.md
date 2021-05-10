@@ -209,7 +209,7 @@ For more information about configuration with ConfigMaps or Secrets, see [Config
 After you publish a new integration, it appears in the **Apache Camel K Integrations** view in the Side Bar of the Explorer activity:
 
 ![Apache Camel K Integrations view](images/camelk-integration-view.jpg)
-redhat.java
+
 When you add or remove file-based integrations in the Explorer view, it automatically refreshes the list.
 
 **Note:** Refreshing the view sometimes is delayed as pods start. You might need to wait a few seconds. Optionally, to manually refresh the list, click the **Refresh** button.
