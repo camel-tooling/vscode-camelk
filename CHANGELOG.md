@@ -4,7 +4,7 @@ All notable changes to the "vscode-camelk" extension will be documented in this 
 
 ## 0.0.25
 
-
+- Provide specific `camel-k-debug`  VS Code tasks
 
 ## 0.0.24
 

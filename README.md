@@ -18,6 +18,7 @@ In order to use our **Tooling for Apache Camel K** extension for VS Code, you mu
 * An instance of Apache Camel K running on a Kubernetes or an OpenShift cluster that is  accessible from your system on your network. You must also have Minikube (or the Kubernetes CLI) installed. See the Apache Camel K installation page for details: (https://camel.apache.org/camel-k/latest/installation/installation.html). 
 * Microsoft VS Code installed. You can get the most recent version from (https://code.visualstudio.com/) for your chosen operating system.
 * To benefit from Java Language completion on standalone files, [VS Code Language support for java](https://marketplace.visualstudio.com/items?itemName=redhat.java) needs to be installed.
+* To benefit from Java debug on standalone files, [VS Code Debugger for Java](https://marketplace.visualstudio.com/items?itemName=vscjava.vscode-java-debug) needs to be installed.
 
 ## Installing the extension
 
@@ -208,7 +209,7 @@ For more information about configuration with ConfigMaps or Secrets, see [Config
 After you publish a new integration, it appears in the **Apache Camel K Integrations** view in the Side Bar of the Explorer activity:
 
 ![Apache Camel K Integrations view](images/camelk-integration-view.jpg)
-
+redhat.java
 When you add or remove file-based integrations in the Explorer view, it automatically refreshes the list.
 
 **Note:** Refreshing the view sometimes is delayed as pods start. You might need to wait a few seconds. Optionally, to manually refresh the list, click the **Refresh** button.
@@ -262,7 +263,7 @@ Note: By default, `Auto-scroll` is checked and new entries in the log will autom
 
 ## Java language support
 
-To benefit from Java Language completion on standalone files, [VS Code Language support for java](https://marketplace.visualstudio.com/items?itemName=redhat.java) needs to be installed. An invisble project is created with a default classpath.
+To benefit from Java Language completion on standalone files, [VS Code Language support for java](https://marketplace.visualstudio.com/items?itemName=redhat.java) needs to be installed. An invisible project is created with a default classpath.
 
 The command `Refresh local Java classpath for Camel K standalone file based on current editor. Available with kamel 1.4+.` allows to have specfic dependencies of the opened Integration part of the classpath. For isntance, specific dependencies can be decalred as modeline.
 
@@ -272,6 +273,8 @@ Be aware of the following limitations:
   - It supports modeline dependencies notation from local build. See [apache/camel-k#2213](https://github.com/apache/camel-k/issues/2213)
   - A single classpath is provided. It means that refresh command needs to be called when switching between Integration file written in Java that does not have the same dependencies.
   - There is no progress indicator. Please be patient. The first time may take several minutes on a slow network.
+  
+To benefit from Java debug on standalone files, [VS Code Debugger for Java](https://marketplace.visualstudio.com/items?itemName=vscjava.vscode-java-debug) needs to be installed. To leverage it, you need to start an integration, then launch a `camel-k-debug` VS Code tasks and then to launch a `java` attach in debug VS Code tasks.
 
 ## Apache Camel K Extension Settings
 
