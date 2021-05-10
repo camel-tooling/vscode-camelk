@@ -22,6 +22,7 @@ async function main() : Promise<void> {
 		const cliPath: string = resolveCliPathFromVSCodeExecutablePath(vscodeExecutablePath);
 		installExtraExtension(cliPath, 'ms-kubernetes-tools.vscode-kubernetes-tools');
 		installExtraExtension(cliPath, 'redhat.java');
+		installExtraExtension(cliPath, 'vscjava.vscode-java-debug');
 		installExtraExtension(cliPath, 'redhat.vscode-commons');
 
 		await runTests({ vscodeExecutablePath, extensionDevelopmentPath, extensionTestsPath, launchArgs: [testWorkspace] });
