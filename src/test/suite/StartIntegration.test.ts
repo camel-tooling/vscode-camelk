@@ -76,7 +76,7 @@ suite('Check can deploy default examples', () => {
 				skipOnJenkins(testInProgress);
 				createdFile = await createFile(showQuickpickStub, showWorkspaceFolderPickStub, showInputBoxStub, `TestBasic${language}Deploy`, language);
 				
-				await startIntegrationWithBasicCheck(showQuickpickStub, telemetrySpy);
+				await startIntegrationWithBasicCheck(showQuickpickStub, telemetrySpy, 0);
 				const extensionFile = LANGUAGES_WITH_FILENAME_EXTENSIONS.get(language);
 				checkTelemetry(telemetrySpy, extensionFile ? extensionFile : "");
 			}).timeout(TOTAL_TIMEOUT);
@@ -94,8 +94,8 @@ suite('Check can deploy default examples', () => {
 		
 	 	await vscode.commands.executeCommand('camelk.startintegration');
 
-		await checkIntegrationDeployed();
-		await checkIntegrationRunning();
+		await checkIntegrationDeployed(1);
+		await checkIntegrationRunning(0);
 	}).timeout(TOTAL_TIMEOUT);
 	
 	const testSpecificNamespace = test('Check can deploy on specific namespace', async () => {
@@ -104,7 +104,7 @@ suite('Check can deploy default examples', () => {
 		createdFile = await createFile(showQuickpickStub, showWorkspaceFolderPickStub, showInputBoxStub, 'TestDeployInSpecificNamespace', 'Java');
 		await config.addNamespaceToConfig(EXTRA_NAMESPACE_FOR_TEST);
 
-		await startIntegrationWithBasicCheck(showQuickpickStub, telemetrySpy);
+		await startIntegrationWithBasicCheck(showQuickpickStub, telemetrySpy, 0);
 		await checkIntegrationsInDifferentNamespaces(EXTRA_NAMESPACE_FOR_TEST);
 		
 		shelljs.exec(`${await kubectl.create().getPath()} delete namespace ${EXTRA_NAMESPACE_FOR_TEST}`);

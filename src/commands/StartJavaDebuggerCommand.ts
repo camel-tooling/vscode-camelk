@@ -34,16 +34,19 @@ export async function start(integrationItem: TreeNode): Promise<void> {
 	kamelArgs.push(`${port}`);
 	const childProcess = await kamelExecutor.invokeArgs(kamelArgs);
 	let debuggerLaunched = false;
+	let isListeningFromTransportMessageSent = false;
 	childProcess.stdout?.on('data', function (data) {
 		const messageData: string = `${data}`;
-		if (!debuggerLaunched && messageData.includes('Listening for transport dt_socket at address:')) {
+		console.log(messageData);
+		isListeningFromTransportMessageSent ||= messageData.includes('Listening for transport dt_socket at address:');
+		if (!debuggerLaunched && isListeningFromTransportMessageSent && messageData.includes('Forwarding from')) {
 			const workspaceFolderList = vscode.workspace.workspaceFolders;
 			if (workspaceFolderList) {
 				const debugConfiguration: vscode.DebugConfiguration = {
 					name: `Attach Java debugger to Camel K integration ${integrationName} on port ${port}`,
 					type: 'java',
 					request: 'attach',
-					// TODO: how to determine host more precisely?
+					// TODO: To improve to support remote debug. How to determine host more precisely?
 					hostName: 'localhost',
 					port: +port
 				};
@@ -52,7 +55,6 @@ export async function start(integrationItem: TreeNode): Promise<void> {
 			}
 		}
 	});
-	//TODO: delete child process when disconnecting? When undeploying? How?
 }
 
 async function retrieveFreeLocalPort(): Promise<number> {
