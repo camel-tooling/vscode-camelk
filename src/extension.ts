@@ -28,6 +28,7 @@ import * as kubectl from './kubectl';
 import * as kamel from './kamel';
 import * as kubectlutils from './kubectlutils';
 import * as config from './config';
+import * as StartJavaDebuggerCommand from './commands/StartJavaDebuggerCommand'
 import { downloadSpecificCamelKJavaDependencies, initializeJavaDependenciesManager } from './JavaDependenciesManager';
 import { CamelKTaskCompletionItemProvider } from './task/CamelKTaskCompletionItemProvider';
 import { CamelKDebugTaskProvider } from './task/CamelKDebugTaskDefinition';
@@ -63,6 +64,7 @@ const COMMAND_ID_REFRESH = 'camelk.integrations.refresh';
 const COMMAND_ID_REMOVE = 'camelk.integrations.remove';
 export const COMMAND_ID_START_INTEGRATION = 'camelk.startintegration';
 const COMMAND_ID_OPEN_OPERATOR_LOG = 'camelk.integrations.openOperatorLog';
+export const COMMAND_ID_START_JAVA_DEBUG = 'camelk.integrations.debug.java';
 export async function activate(context: vscode.ExtensionContext) {
 	stashedContext = context;
 	camelKIntegrationsProvider = new CamelKNodeProvider(context);
@@ -178,6 +180,10 @@ export async function activate(context: vscode.ExtensionContext) {
 		vscode.commands.registerCommand('camelk.integrations.createNewIntegrationFile', async (...args:any[]) => { await NewIntegrationFileCommand.create(args);});
 		vscode.commands.registerCommand('camelk.integrations.selectFirstNode', () => { selectFirstItemInTree();});
 		vscode.commands.registerCommand('camelk.classpath.refresh', async (uri:vscode.Uri) => { await downloadSpecificCamelKJavaDependencies(context, uri, mainOutputChannel)});
+		vscode.commands.registerCommand(COMMAND_ID_START_JAVA_DEBUG, async (integrationItem: TreeNode) => {
+			await StartJavaDebuggerCommand.start(integrationItem);
+			telemetry.sendCommandTracking(COMMAND_ID_START_JAVA_DEBUG);
+		});
 	});
 
 	initializeJavaDependenciesManager(context);
