@@ -44,6 +44,7 @@ suite('Check can debug default Java example', () => {
 	let showInputBoxStub: sinon.SinonStub;
 	let showWorkspaceFolderPickStub: sinon.SinonStub;
 	let createdFile: vscode.Uri | undefined;
+	let secondCreatedFile: vscode.Uri | undefined;
 	let telemetrySpy: sinon.SinonSpy;
 	let debugConfigurationTaskExecution: vscode.TaskExecution | undefined;
 
@@ -60,9 +61,8 @@ suite('Check can debug default Java example', () => {
 		showQuickpickStub.restore();
 		showInputBoxStub.restore();
 		showWorkspaceFolderPickStub.restore();
-		if (createdFile && fs.existsSync(createdFile.fsPath)) {
-			fs.unlinkSync(createdFile.fsPath);
-		}
+		cleanFile(createdFile);
+		cleanFile(secondCreatedFile);
 		await cleanDeployedIntegration();
 		await config.addNamespaceToConfig(undefined);
 		telemetrySpy.restore();
@@ -74,7 +74,7 @@ suite('Check can debug default Java example', () => {
 	
 	const testUsingTasks = test(`Check can debug Java example using VS Code tasks`, async() => {
 		Utils.skipOnJenkins(testUsingTasks);
-		createdFile = await createAndDeployIntegration(createdFile, showQuickpickStub, showWorkspaceFolderPickStub, showInputBoxStub, telemetrySpy);
+		createdFile = await createAndDeployIntegration(createdFile, showQuickpickStub, showWorkspaceFolderPickStub, showInputBoxStub, telemetrySpy, 'Task');
 		const debugActivationTask = await createCamelKDebugTask();
 		
 		debugConfigurationTaskExecution = await vscode.tasks.executeTask(debugActivationTask);
@@ -85,24 +85,56 @@ suite('Check can debug default Java example', () => {
 	
 	const testUsingContextualMenu = test(`Check can debug Java example using contextual menu in Integration view`, async() => {
 		Utils.skipOnJenkins(testUsingContextualMenu);
-		createdFile = await createAndDeployIntegration(createdFile, showQuickpickStub, showWorkspaceFolderPickStub, showInputBoxStub, telemetrySpy);
+		createdFile = await createAndDeployIntegration(createdFile, showQuickpickStub, showWorkspaceFolderPickStub, showInputBoxStub, telemetrySpy, 'ContextualMenu');
 		
 		await vscode.commands.executeCommand(extension.COMMAND_ID_START_JAVA_DEBUG, Utils.getCamelKIntegrationsProvider().getTreeNodes()[0]);
 		
 		try {
 			await waitUntil(() => {
-				return vscode.debug.activeDebugSession?.name === `Attach Java debugger to Camel K integration test-java-debug`;
+				return vscode.debug.activeDebugSession?.name === `Attach Java debugger to Camel K integration test-java-debug-contextual-menu on port 5005`;
 			}, 20000, 1000);
 		} catch(error) {
 			throw new Error(`Java debugger was not attached ${error}`);
 		}
 	}).timeout(TOTAL_TIMEOUT);
 	
+	const testTwoDebugSessionUsingContextualMenu = test(`Check can debug Java 2 examples using contextual menu in Integration view`, async() => {
+		Utils.skipOnJenkins(testTwoDebugSessionUsingContextualMenu);
+		createdFile = await createAndDeployIntegration(createdFile, showQuickpickStub, showWorkspaceFolderPickStub, showInputBoxStub, telemetrySpy, 'First');
+		secondCreatedFile = await createAndDeployIntegration(secondCreatedFile, showQuickpickStub, showWorkspaceFolderPickStub, showInputBoxStub, telemetrySpy, 'Second');
+		
+		await vscode.commands.executeCommand(extension.COMMAND_ID_START_JAVA_DEBUG, Utils.getCamelKIntegrationsProvider().getTreeNodes()[0]);
+		
+		try {
+			await waitUntil(() => {
+				return vscode.debug.activeDebugSession?.name === `Attach Java debugger to Camel K integration test-java-debug-first on port 5005`;
+			}, 20000, 1000);
+		} catch(error) {
+			throw new Error(`Java debugger was not attached for test-java-debug-first ${error}`);
+		}
+		
+		await vscode.commands.executeCommand(extension.COMMAND_ID_START_JAVA_DEBUG, Utils.getCamelKIntegrationsProvider().getTreeNodes()[1]);
+		
+		try {
+			await waitUntil(() => {
+				return vscode.debug.activeDebugSession?.name === `Attach Java debugger to Camel K integration test-java-debug-second on port 5006`;
+			}, 20000, 1000);
+		} catch(error) {
+			throw new Error(`Java debugger was not attached test-java-debug-second ${error}`);
+		}
+	}).timeout(TOTAL_TIMEOUT);
+	
 });
 
-async function createAndDeployIntegration(createdFile: vscode.Uri | undefined, showQuickpickStub: sinon.SinonStub<any[], any>, showWorkspaceFolderPickStub: sinon.SinonStub<any[], any>, showInputBoxStub: sinon.SinonStub<any[], any>, telemetrySpy: sinon.SinonSpy<any[], any>) {
+function cleanFile(file: vscode.Uri | undefined) {
+	if (file && fs.existsSync(file.fsPath)) {
+		fs.unlinkSync(file.fsPath);
+	}
+}
+
+async function createAndDeployIntegration(createdFile: vscode.Uri | undefined, showQuickpickStub: sinon.SinonStub<any[], any>, showWorkspaceFolderPickStub: sinon.SinonStub<any[], any>, showInputBoxStub: sinon.SinonStub<any[], any>, telemetrySpy: sinon.SinonSpy<any[], any>, suffix: string) {
 	const language = 'Java';
-	createdFile = await createFile(showQuickpickStub, showWorkspaceFolderPickStub, showInputBoxStub, `Test${language}Debug`, language);
+	createdFile = await createFile(showQuickpickStub, showWorkspaceFolderPickStub, showInputBoxStub, `Test${language}Debug${suffix}`, language);
 	await startIntegrationWithBasicCheck(showQuickpickStub, telemetrySpy);
 	const extensionFile = LANGUAGES_WITH_FILENAME_EXTENSIONS.get(language);
 	checkTelemetry(telemetrySpy, extensionFile ? extensionFile : "");
@@ -112,7 +144,7 @@ async function createAndDeployIntegration(createdFile: vscode.Uri | undefined, s
 async function createCamelKDebugTask() {
 	const debugTaskDefinition = {
 		"type": CamelKDebugTaskProvider.DEBUG_CAMELK_TYPE,
-		"integrationName": "test-java-debug"
+		"integrationName": "test-java-debug-task"
 	};
 	return await new CamelKDebugTaskProvider().getDebugTask(debugTaskDefinition);
 }

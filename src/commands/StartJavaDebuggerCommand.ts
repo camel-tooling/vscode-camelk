@@ -16,9 +16,12 @@
  */
 'use strict';
 
+import * as detect from 'detect-port';
 import * as vscode from 'vscode';
 import * as kamel from '../kamel';
 import { TreeNode } from "../CamelKNodeProvider";
+
+const DEFAULT_DEBUG_PORT = 5005;
 
 export async function start(integrationItem: TreeNode): Promise<void> {
 	const kamelExecutor: kamel.Kamel = kamel.create();
@@ -26,7 +29,9 @@ export async function start(integrationItem: TreeNode): Promise<void> {
 	kamelArgs.push('debug');
 	const integrationName = integrationItem.label as string;
 	kamelArgs.push(integrationName);
-	//TODO: improve by searching for a free port
+	const port = await retrieveFreeLocalPort();
+	kamelArgs.push(`--port`);
+	kamelArgs.push(`${port}`);
 	const childProcess = await kamelExecutor.invokeArgs(kamelArgs);
 	let debuggerLaunched = false;
 	childProcess.stdout?.on('data', function (data) {
@@ -35,12 +40,12 @@ export async function start(integrationItem: TreeNode): Promise<void> {
 			const workspaceFolderList = vscode.workspace.workspaceFolders;
 			if (workspaceFolderList) {
 				const debugConfiguration: vscode.DebugConfiguration = {
-					name: `Attach Java debugger to Camel K integration ${integrationName}`,
+					name: `Attach Java debugger to Camel K integration ${integrationName} on port ${port}`,
 					type: 'java',
 					request: 'attach',
 					// TODO: how to determine host more precisely?
 					hostName: 'localhost',
-					port: 5005
+					port: +port
 				};
 				debuggerLaunched = true;
 				vscode.debug.startDebugging(workspaceFolderList[0], debugConfiguration);
@@ -48,4 +53,8 @@ export async function start(integrationItem: TreeNode): Promise<void> {
 		}
 	});
 	//TODO: delete child process when disconnecting? When undeploying? How?
+}
+
+async function retrieveFreeLocalPort(): Promise<number> {
+	return detect(DEFAULT_DEBUG_PORT);
 }
