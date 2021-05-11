@@ -48,7 +48,6 @@ export async function start(integrationItem: TreeNode): Promise<void> {
 					name: debugConfigurationName,
 					type: 'java',
 					request: 'attach',
-					// TODO: To improve to support remote debug. How to determine host more precisely?
 					hostName: 'localhost',
 					port: +port
 				};
