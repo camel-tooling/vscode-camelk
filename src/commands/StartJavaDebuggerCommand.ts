@@ -38,7 +38,6 @@ export async function start(integrationItem: TreeNode): Promise<void> {
 	let isForwardingFrommessageSent = false; 
 	childProcess.stdout?.on('data', function (data) {
 		const messageData: string = `${data}`;
-		console.log(messageData);
 		isListeningFromTransportMessageSent ||= messageData.includes('Listening for transport dt_socket at address:');
 		isForwardingFrommessageSent ||= messageData.includes('Forwarding from');
 		if (!debuggerLaunched && isListeningFromTransportMessageSent && isForwardingFrommessageSent) {
@@ -54,7 +53,7 @@ export async function start(integrationItem: TreeNode): Promise<void> {
 					port: +port
 				};
 				debuggerLaunched = true;
-				vscode.debug.registerDebugAdapterTrackerFactory('*', {
+				const disposable = vscode.debug.registerDebugAdapterTrackerFactory('*', {
 					createDebugAdapterTracker(session: vscode.DebugSession) {
 						return {
 							onWillStopSession:() => {
@@ -65,6 +64,7 @@ export async function start(integrationItem: TreeNode): Promise<void> {
 							onExit: (code, signal) => {
 								if(debugConfigurationName === session.name) {
 									childProcess.kill(code);
+									disposable.dispose();
 								}
 							}
 						};
