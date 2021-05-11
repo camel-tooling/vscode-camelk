@@ -36,7 +36,7 @@ suite("Kubectl integration watcher", function() {
 		await sleep(extension.DELAY_RETRY_KUBECTL_CONNECTION);
 	});
 
-	this.beforeEach(async () => {
+	this.beforeEach(() => {
 		sandbox = sinon.createSandbox();
 		refreshStub = sandbox.stub(Utils.getCamelKIntegrationsProvider(), 'refresh');
 		messageStub = sandbox.stub(Utils.getCamelKMainOutputChannel(), 'append');
