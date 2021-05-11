@@ -35,11 +35,13 @@ export async function start(integrationItem: TreeNode): Promise<void> {
 	const childProcess = await kamelExecutor.invokeArgs(kamelArgs);
 	let debuggerLaunched = false;
 	let isListeningFromTransportMessageSent = false;
+	let isForwardingFrommessageSent = false; 
 	childProcess.stdout?.on('data', function (data) {
 		const messageData: string = `${data}`;
 		console.log(messageData);
 		isListeningFromTransportMessageSent ||= messageData.includes('Listening for transport dt_socket at address:');
-		if (!debuggerLaunched && isListeningFromTransportMessageSent && messageData.includes('Forwarding from')) {
+		isForwardingFrommessageSent ||= messageData.includes('Forwarding from');
+		if (!debuggerLaunched && isListeningFromTransportMessageSent && isForwardingFrommessageSent) {
 			const workspaceFolderList = vscode.workspace.workspaceFolders;
 			if (workspaceFolderList) {
 				const debugConfigurationName = `Attach Java debugger to Camel K integration ${integrationName} on port ${port}`;
