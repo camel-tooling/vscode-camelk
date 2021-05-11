@@ -5,7 +5,7 @@ All notable changes to the "vscode-camelk" extension will be documented in this 
 ## 0.0.25
 
 - Debugging:
-  - Provide right-click menu in Integration view to attach a Java debugger. It requires to be launched on localhost.
+  - Provide right-click menu in Integration view to attach a Java debugger
   - Provide specific `camel-k-debug`  VS Code tasks
 
 ## 0.0.24
