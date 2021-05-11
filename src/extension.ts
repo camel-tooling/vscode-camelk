@@ -177,7 +177,16 @@ export async function activate(context: vscode.ExtensionContext) {
 
 		vscode.commands.registerCommand('camelk.integrations.createNewIntegrationFile', async (...args:any[]) => { await NewIntegrationFileCommand.create(args);});
 		vscode.commands.registerCommand('camelk.integrations.selectFirstNode', () => { selectFirstItemInTree();});
-		vscode.commands.registerCommand('camelk.classpath.refresh', async (uri:vscode.Uri) => { await downloadSpecificCamelKJavaDependencies(context, uri, mainOutputChannel)});
+		vscode.commands.registerCommand('camelk.classpath.refresh', (uri:vscode.Uri) => {
+			vscode.window.withProgress({
+				location: vscode.ProgressLocation.Notification,
+				title: "Setting up dependencies for the Camel K integration file...",
+				cancellable: false
+			}, async (progress) => {
+				progress.report({ increment: -1 });
+				return downloadSpecificCamelKJavaDependencies(context, uri, mainOutputChannel);
+			});
+		});
 	});
 
 	initializeJavaDependenciesManager(context);
