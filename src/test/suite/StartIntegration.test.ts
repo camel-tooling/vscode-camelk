@@ -65,7 +65,7 @@ suite('Check can deploy default examples', () => {
 		if (createdFile && fs.existsSync(createdFile.fsPath)) {
 			fs.unlinkSync(createdFile.fsPath);
 		}
-		await cleanDeployedIntegration();
+		await cleanDeployedIntegration(telemetrySpy);
 		await config.addNamespaceToConfig(undefined);
 		telemetrySpy.restore();
 	});

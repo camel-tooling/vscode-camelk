@@ -28,15 +28,16 @@ import { TelemetryEvent } from '@redhat-developer/vscode-redhat-telemetry/lib';
 import { TreeNode } from '../../../CamelKNodeProvider';
 import { UNDEPLOY_TIMEOUT, PROVIDER_POPULATED_TIMEOUT, RUNNING_TIMEOUT, DEPLOYED_TIMEOUT, EDITOR_OPENED_TIMEOUT } from '../StartIntegration.test';
 
-export async function cleanDeployedIntegration() {
+export async function cleanDeployedIntegration(telemetrySpy: sinon.SinonSpy) {
 	let deployedTreeNodes: TreeNode[] | undefined = await retrieveDeployedTreeNodes();
 	if (deployedTreeNodes) {
+		telemetrySpy.resetHistory();
 		deployedTreeNodes.forEach(deployedTreeNode => {
 			vscode.commands.executeCommand('camelk.integrations.remove', deployedTreeNode);
 		});
 		try {
 			await waitUntil(() => {
-				return getCamelKIntegrationsProvider().getTreeNodes().length === 0;
+				return getCamelKIntegrationsProvider().getTreeNodes().length === 0 && telemetrySpy.callCount === deployedTreeNodes?.length;
 			}, UNDEPLOY_TIMEOUT);
 		} catch (error) {
 			console.log('Error while trying to remove deployed integrations, it remains:');

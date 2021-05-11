@@ -64,7 +64,7 @@ suite('Check can debug default Java example', () => {
 		showWorkspaceFolderPickStub.restore();
 		cleanFile(createdFile);
 		cleanFile(secondCreatedFile);
-		await cleanDeployedIntegration();
+		await cleanDeployedIntegration(telemetrySpy);
 		await config.addNamespaceToConfig(undefined);
 		telemetrySpy.restore();
 		if(debugConfigurationTaskExecution) {
