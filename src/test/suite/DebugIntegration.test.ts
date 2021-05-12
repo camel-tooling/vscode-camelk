@@ -25,7 +25,7 @@ import * as Utils from "./Utils";
 import * as shelljs from 'shelljs';
 import { LANGUAGES_WITH_FILENAME_EXTENSIONS } from '../../commands/NewIntegrationFileCommand';
 import { getTelemetryServiceInstance } from '../../Telemetry';
-import { cleanDeployedIntegration, createFile, startIntegrationWithBasicCheck, checkTelemetry} from './Utils/DeployTestUtil';
+import { cleanDeployedIntegration, createFile, startIntegrationWithBasicCheck, checkTelemetry, retrieveDeployedTreeNodes} from './Utils/DeployTestUtil';
 import { CamelKDebugTaskProvider } from '../../task/CamelKDebugTaskDefinition';
 import { waitUntil } from 'async-wait-until';
 import { fail } from 'assert';
@@ -88,7 +88,7 @@ suite('Check can debug default Java example', () => {
 		Utils.skipOnJenkins(testUsingContextualMenu);
 		createdFile = await createAndDeployIntegration(createdFile, showQuickpickStub, showWorkspaceFolderPickStub, showInputBoxStub, telemetrySpy, 'ContextualMenu', 0);
 		
-		await vscode.commands.executeCommand(extension.COMMAND_ID_START_JAVA_DEBUG, Utils.getCamelKIntegrationsProvider().getTreeNodes()[0]);
+		await vscode.commands.executeCommand(extension.COMMAND_ID_START_JAVA_DEBUG, (await retrieveDeployedTreeNodes())[0]);
 		
 		await checkActiveDebugSessionAutomaticallyCreated('test-java-debug-contextual-menu', 5005);
 	}).timeout(TOTAL_TIMEOUT);
@@ -99,14 +99,14 @@ suite('Check can debug default Java example', () => {
 		await vscode.commands.executeCommand('workbench.action.closeActiveEditor');
 		secondCreatedFile = await createAndDeployIntegration(secondCreatedFile, showQuickpickStub, showWorkspaceFolderPickStub, showInputBoxStub, telemetrySpy, 'Second', 1);
 		
-		await vscode.commands.executeCommand(extension.COMMAND_ID_START_JAVA_DEBUG, Utils.getCamelKIntegrationsProvider().getTreeNodes()[0]);
+		await vscode.commands.executeCommand(extension.COMMAND_ID_START_JAVA_DEBUG, (await retrieveDeployedTreeNodes())[0]);
 		await checkActiveDebugSessionAutomaticallyCreated('test-java-debug-first', 5005);
 		
 		let isSessionStarted = false;
 		vscode.debug.onDidStartDebugSession(debugSession => {
 			isSessionStarted ||= debugSession.name === `Attach Java debugger to Camel K integration test-java-debug-second on port 5006`;
-		});	
-		await vscode.commands.executeCommand(extension.COMMAND_ID_START_JAVA_DEBUG, Utils.getCamelKIntegrationsProvider().getTreeNodes()[1]);
+		});
+		await vscode.commands.executeCommand(extension.COMMAND_ID_START_JAVA_DEBUG, (await retrieveDeployedTreeNodes(2))[1]);
 		try {
 			await waitUntil(() => {
 				return isSessionStarted;

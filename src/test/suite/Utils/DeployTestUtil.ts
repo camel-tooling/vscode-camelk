@@ -49,15 +49,15 @@ export async function cleanDeployedIntegration(telemetrySpy: sinon.SinonSpy) {
 	}
 }
 
-async function retrieveDeployedTreeNodes(): Promise<TreeNode[]> {
+export async function retrieveDeployedTreeNodes(minimalExpectedTreeNode =1): Promise<TreeNode[]> {
 	let deployedTreeNodes: TreeNode[] = [];
 	try {
 		await waitUntil(() => {
 			deployedTreeNodes = getCamelKIntegrationsProvider().getTreeNodes();
-			return deployedTreeNodes.length !== 0;
+			return deployedTreeNodes.length >= minimalExpectedTreeNode;
 		}, PROVIDER_POPULATED_TIMEOUT);
 	} catch (err) {
-		console.log('No Integration found in Camel K Integration provider of the view.');
+		console.log(`Less than ${minimalExpectedTreeNode} Integration found in Camel K Integration provider of the view.`);
 	}
 	return deployedTreeNodes;
 }
