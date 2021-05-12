@@ -96,11 +96,11 @@ export async function pingGithubUrl(urlStr: string): Promise<boolean> {
 }
 
 export function isOldTagNaming(tagName: string): boolean {
-	return tagName.startsWith('0.') || tagName.startsWith('1.0.');
+	return tagName?.startsWith('0.') || tagName?.startsWith('1.0.');
 }
 
 export function stripLeadingV(tagName: string): string {
-	return tagName.startsWith('v') ? tagName.substring(1) : tagName;
+	return tagName?.toLowerCase().startsWith('v') ? tagName.substring(1) : tagName;
 }
 
 export async function getLatestCamelKVersion(): Promise<Errorable<string>> {
@@ -147,7 +147,7 @@ async function checkKamelCLIVersion(): Promise<string | void> {
 }
 
 export async function handleChangeRuntimeConfiguration() {
-	const runtimeSetting: string = stripLeadingV(config.getKamelRuntimeVersionConfig() as string);
+	const runtimeSetting: string | undefined = config.getKamelRuntimeVersionConfig();
 	const newUpgradeSetting: boolean = config.getKamelAutoupgradeConfig();
 
 	/* 
