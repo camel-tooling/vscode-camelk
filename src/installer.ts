@@ -50,13 +50,15 @@ export async function isKubernetesAvailable(): Promise<boolean> {
 }
 
 async function downloadAndExtract(link : string, dlFilename: string, installFolder : string, extractFlag : boolean) : Promise<boolean> {
-	const myStatusBarItem: vscode.StatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 100);
-	const downloadSettings: any = {
-		filename: `${dlFilename}`,
-		extract: extractFlag,
-	};
-	extension.mainOutputChannel.appendLine('Downloading from: ' + link);
-	await download(link, installFolder, downloadSettings)
+	return new Promise<boolean> ( (resolve, reject) => {
+		const myStatusBarItem: vscode.StatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 100);
+		const downloadSettings: any = {
+			filename: `${dlFilename}`,
+			extract: extractFlag,
+		};
+		extension.mainOutputChannel.appendLine('Downloading from: ' + link);
+
+		download(link, installFolder, downloadSettings)
 		.on('response', (response) => {
 			extension.mainOutputChannel.appendLine(`Bytes to transfer: ${response.headers['content-length']}`);
 		}).on('downloadProgress', (progress) => {
@@ -68,13 +70,14 @@ async function downloadAndExtract(link : string, dlFilename: string, installFold
 		}).then(() => {
 			extension.mainOutputChannel.appendLine(`Downloaded ${dlFilename}.`);
 			myStatusBarItem.dispose();
-			return true;
+			resolve(true);
 		}).catch((error) => {
 			console.log(error);
+			reject(error);
 		}).finally( () => {
 			myStatusBarItem.dispose();
 		});
-	return false;
+	});
 }
 
 function updateStatusBarItem(sbItem : vscode.StatusBarItem, text: string, tooltip : string): void {
