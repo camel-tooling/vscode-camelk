@@ -150,13 +150,13 @@ export class CamelKNodeProvider implements vscode.TreeDataProvider<TreeNode> {
 		if (output) {
 			const lines: Array<string> = output.split('\n');
 			for (let entry of lines) {
-				const line: Array<string> = entry.split('  ');
+				const spaceSplittedLine: Array<string> = entry.split('  ');
 				const cleanLine: Array<string> = new Array<string>();
-				for (var i=0; i < line.length; i++) {
-					if (line[i].trim().length === 0) {
+				for (let integration of spaceSplittedLine) {
+					if (integration.trim().length === 0) {
 						continue;
 					}
-					cleanLine.push(line[i].trim());
+					cleanLine.push(integration.trim());
 				}
 				const firstString: string = cleanLine[0];
 				if (firstString === undefined || firstString.toUpperCase().startsWith('NAME') || firstString.trim().length === 0) {
@@ -177,8 +177,7 @@ export class CamelKNodeProvider implements vscode.TreeDataProvider<TreeNode> {
 		if (json) {
 			try {
 				const jsonObject: any = JSON.parse(JSON.stringify(json));
-				for (var i=0; i<jsonObject.items.length;i++) {
-					const integration: any = jsonObject.items[i];
+				for (let integration of jsonObject.items) {
 					const newNode: TreeNode = new TreeNode("string", integration.metadata.name, integration.status.phase, vscode.TreeItemCollapsibleState.None);
 					if (!this.doesNodeExist(this.treeNodes, newNode)) {
 						this.addChild(this.treeNodes, newNode, true);

@@ -57,13 +57,13 @@ export function parseShellResult(output: string) : string[] {
 	if (output) {
 		let lines: string[] = output.split('\n');
 		for (const entry of lines) {
-			const line: string[] = entry.split('  ');
+			const spaceSplittedLine: string[] = entry.split('  ');
 			const cleanLine = [];
-			for (var i=0; i < line.length; i++) {
-				if (line[i].trim().length === 0) {
+			for (let value of spaceSplittedLine) {
+				if (value.trim().length === 0) {
 					continue;
 				}
-				cleanLine.push(line[i].trim());
+				cleanLine.push(value.trim());
 			}
 			const firstString : string = cleanLine[0];
 			if (firstString === undefined || firstString.toUpperCase().startsWith('NAME') || firstString.trim().length === 0) {
