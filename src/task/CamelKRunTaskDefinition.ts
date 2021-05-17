@@ -50,7 +50,7 @@ export class CamelKRunTaskProvider implements vscode.TaskProvider {
 
 	public async resolveTask(_task: vscode.Task): Promise<vscode.Task | undefined> {
 		const definition: CamelKRunTaskDefinition = <any>_task.definition;
-		return await this.getRunTask(definition);
+		return this.getRunTask(definition);
 	}
 
 	private async getTasks(): Promise<vscode.Task[]> {

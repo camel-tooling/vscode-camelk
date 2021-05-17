@@ -80,27 +80,27 @@ export function parseShellResult(output: string) : string[] {
 export async function getConfigMaps(): Promise<string[]> {
 	const namespace: string | undefined = config.getNamespaceconfig();
 	if (namespace) {
-		return await getNamedListFromKubernetesThenParseList('configmap', `--namespace=${namespace}`);
+		return getNamedListFromKubernetesThenParseList('configmap', `--namespace=${namespace}`);
 	} else {
-		return await getNamedListFromKubernetesThenParseList('configmap');
+		return getNamedListFromKubernetesThenParseList('configmap');
 	}
 }
 
 export async function getSecrets(): Promise<string[]> {
 	const namespace: string | undefined = config.getNamespaceconfig();
 	if (namespace) {
-		return await getNamedListFromKubernetesThenParseList('secret', `--namespace=${namespace}`);
+		return getNamedListFromKubernetesThenParseList('secret', `--namespace=${namespace}`);
 	} else {
-		return await getNamedListFromKubernetesThenParseList('secret');
+		return getNamedListFromKubernetesThenParseList('secret');
 	}
 }
 
 export async function getIntegrations(): Promise<string> {
 	const namespace: string | undefined = config.getNamespaceconfig();
 	if (namespace) {
-		return await getNamedListFromKubernetes('integration', `--namespace=${namespace}`);
+		return getNamedListFromKubernetes('integration', `--namespace=${namespace}`);
 	} else {
-		return await getNamedListFromKubernetes('integration');
+		return getNamedListFromKubernetes('integration');
 	}
 }
 
