@@ -38,7 +38,7 @@ export class CamelKDebugTaskProvider implements vscode.TaskProvider {
 
 	public async resolveTask(_task: vscode.Task): Promise<vscode.Task | undefined> {
 		const definition: CamelKDebugTaskDefinition = <any>_task.definition;
-		return await this.getDebugTask(definition);
+		return this.getDebugTask(definition);
 	}
 
 	private async getTasks(): Promise<vscode.Task[]> {

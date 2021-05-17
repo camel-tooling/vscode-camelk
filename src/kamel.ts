@@ -41,7 +41,7 @@ class KamelImpl implements Kamel {
 	}
 
 	async getPath(): Promise<string> {
-		return await baseKamelPath();
+		return baseKamelPath();
 	}
 
 	async invoke(command: string): Promise<string> {

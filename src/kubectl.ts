@@ -39,7 +39,7 @@ class KubectlImpl implements Kubectl {
 	}
 
 	async getPath(): Promise<string> {
-		return await baseKubectlPath();
+		return baseKubectlPath();
 	}
 
 	invokeArgs(args: string[], folderName?: string): Promise<child_process.ChildProcess> {

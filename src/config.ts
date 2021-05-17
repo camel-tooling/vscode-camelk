@@ -160,7 +160,7 @@ export function getKamelRuntimeVersionConfig(): string | undefined {
 
 export async function setKamelRuntimeVersionConfig(value : string) : Promise<void> {
 	const configuration = vscode.workspace.getConfiguration();
-	return await configuration.update(RUNTIME_VERSION_KEY, stripLeadingV(value), vscode.ConfigurationTarget.Global);
+	return configuration.update(RUNTIME_VERSION_KEY, stripLeadingV(value), vscode.ConfigurationTarget.Global);
 }
 
 export function getKamelAutoupgradeConfig() : boolean {
@@ -171,5 +171,5 @@ export function getKamelAutoupgradeConfig() : boolean {
 // for testing purposes 
 export async function setKamelAutoupgradeConfig(value : boolean) : Promise<void> {
 	const configuration = vscode.workspace.getConfiguration();
-	return await configuration.update(AUTOUPGRADE_KEY, value, vscode.ConfigurationTarget.Global);
+	return configuration.update(AUTOUPGRADE_KEY, value, vscode.ConfigurationTarget.Global);
 }
