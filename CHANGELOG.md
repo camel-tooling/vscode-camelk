@@ -2,6 +2,10 @@
 
 All notable changes to the "vscode-camelk" extension will be documented in this file.
 
+## 0.0.26
+
+
+
 ## 0.0.25
 
 - Debugging:
