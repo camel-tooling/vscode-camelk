@@ -21,8 +21,9 @@ import * as extension from './extension';
 import { Errorable, failed } from './errorable';
 import * as config from './config';
 import * as kamelCli from './kamel';
-import { platformString } from './installer';
+import { platform } from './installer';
 import fetch from 'cross-fetch';
+import { Platform } from './shell';
 
 export const version: string = '1.4.0'; //need to retrieve this if possible, but have a default
 
@@ -34,9 +35,9 @@ const LAST_MODIFIED_DATE_OF_DEFAULT_VERSION: string = 'Tue, 20 Apr 2021 11:25:24
 let latestVersionFromOnline: string;
 
 export async function testVersionAvailable(versionToUse: string): Promise<boolean> {
-	if (platformString && versionToUse) {
+	if (platform && versionToUse) {
 		try {
-			const kamelUrl : string = await getDownloadURLForCamelKTag(versionToUse, platformString);
+			const kamelUrl : string = await getDownloadURLForCamelKTag(versionToUse, platform);
 			return await pingGithubUrl(kamelUrl);
 		} catch (error) {
 			// ignore
@@ -197,8 +198,21 @@ function setVersionAndTellUser(msg: string, newVersion: string) {
 	extension.setRuntimeVersionSetting(newVersion);
 }
 
-export async function getDownloadURLForCamelKTag(camelKVersion : string, platformStr : string): Promise<string> {
-	let tagName: string = isOldTagNaming(camelKVersion) ? camelKVersion : `v${camelKVersion}`;
+function toKamelOsString(platform: Platform | undefined): string | undefined {
+	switch (platform) {
+		case Platform.WINDOWS:
+			return 'windows';
+		case Platform.LINUX:
+			return 'linux';
+		case Platform.MACOS:
+			return 'mac';
+	}
+	return undefined;
+}
+
+export async function getDownloadURLForCamelKTag(camelKVersion : string, platform : Platform): Promise<string> {
+	const platformStr = toKamelOsString(platform);
+	const tagName: string = isOldTagNaming(camelKVersion) ? camelKVersion : `v${camelKVersion}`;
 	const tagURL: string = `https://api.github.com/repos/apache/camel-k/releases/tags/${tagName}`;
 	const headers: string[][] = [];
 	const githubToken: string | undefined = process.env.VSCODE_CAMELK_GITHUB_TOKEN;
