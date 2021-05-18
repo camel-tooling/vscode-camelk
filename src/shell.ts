@@ -23,6 +23,12 @@ const WINDOWS: string = 'win32';
 const MACOS : string = 'darwin';
 const LINUX : string = 'linux';
 
+export enum Platform {
+    WINDOWS,
+    MACOS,
+    LINUX
+}
+
 export interface FindBinaryResult {
 	err: number | null;
 	output: string;
@@ -51,10 +57,10 @@ export function isUnix(): boolean {
     return (process.platform === LINUX);
 }
 
-export function getPlatform() : string | undefined {
-    if (isWindows()) { return WINDOWS; }
-    if (isMacOS()) { return MACOS; }
-    if (isUnix()) { return LINUX; }
+export function getPlatform() : Platform | undefined {
+    if (isWindows()) { return Platform.WINDOWS; }
+    if (isMacOS()) { return Platform.MACOS; }
+    if (isUnix()) { return Platform.LINUX; }
     return undefined;
 }
 

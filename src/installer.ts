@@ -31,7 +31,7 @@ import * as mkdirp from 'mkdirp';
 
 export const kamel = 'kamel';
 export const kamel_windows = 'kamel.exe';
-export const platformString = shell.getPlatform(); // looks for windows, mac, linux
+export const platform = shell.getPlatform();
 const binFile: string = (!shell.isWindows()) ? kamel : kamel_windows;
 
 export async function isKamelAvailable() : Promise<boolean> {
@@ -130,9 +130,9 @@ export async function installKamel(context: vscode.ExtensionContext): Promise<Er
 	mkdirp.sync(installFolder);
 
 	let kamelUrl : string = '';
-	if (platformString && versionToUse) {
+	if (platform && versionToUse) {
 		try {
-			kamelUrl = await versionUtils.getDownloadURLForCamelKTag(versionToUse, platformString);
+			kamelUrl = await versionUtils.getDownloadURLForCamelKTag(versionToUse, platform);
 		} catch (error) {
 			extension.shareMessageInMainOutputChannel(error);
 			throw new Error(error);
@@ -190,15 +190,22 @@ function getKubectlInstallFolder(tool: string): string {
 	return path.join(shell.home(), `.vs-kubernetes/tools/${tool}`);
 }
 
+function toKubectlOsString(platform: shell.Platform | undefined): string | undefined {
+	switch (platform) {
+		case shell.Platform.WINDOWS:
+			return 'windows';
+		case shell.Platform.LINUX:
+			return 'linux';
+		case shell.Platform.MACOS:
+			return 'darwin';
+	}
+	return undefined;
+}
+
 export async function installKubectl(context: vscode.ExtensionContext): Promise<Errorable<null>> {
 	const tool: string = 'kubectl';
 	const executable: string = (shell.isUnix() || shell.isMacOS()) ? tool : `${tool}.exe`;
-	const os: string | undefined = shell.getPlatform();
-	let osString: string | undefined = os; // user looks for strings windows, darwin, linux
-	if (osString === 'win32') {
-		osString = 'windows';
-	}
-
+	const osString = toKubectlOsString(platform);
 	const version: Errorable<string> = await getStableKubectlVersion();
 	if (failed(version)) {
 		return { succeeded: false, error: version.error };
