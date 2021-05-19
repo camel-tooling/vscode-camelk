@@ -338,7 +338,7 @@
 		"@types/sinon": "^10.0.0",
 		"@types/sinon-chai": "^3.2.5",
 		"@types/vscode": "^1.56.0",
-		"async-wait-until": "^2.0.5",
+		"async-wait-until": "^2.0.7",
 		"chai": "^4.3.4",
 		"copyfiles": "^2.4.1",
 		"decache": "^4.6.0",
