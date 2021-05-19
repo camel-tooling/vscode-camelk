@@ -25,7 +25,6 @@ import { getConfigMaps, getSecrets } from './kubectlutils';
 import * as k8s from 'vscode-kubernetes-tools-api';
 import * as kamel from './kamel';
 import { CamelKRunTaskProvider, CamelKRunTaskDefinition } from './task/CamelKRunTaskDefinition';
-import { isString } from 'util';
 import * as fs from 'fs';
 import { getTelemetryServiceInstance } from './Telemetry';
 import { TelemetryEvent } from '@redhat-developer/vscode-redhat-telemetry/lib';
@@ -82,7 +81,7 @@ const choiceList = [
 
 				if (innerArgs3.length > 1) {
 					let value = innerArgs3[1];
-					if (isString(value)) {
+					if (typeof value === 'string') {
 						inChoice = value;
 					}
 				}
