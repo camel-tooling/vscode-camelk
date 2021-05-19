@@ -14,20 +14,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { spawn} from "child_process";
-import * as child_process from "child_process";
 import * as config from './config';
 import * as shell from './shell';
 import * as utils from './CamelKJSONUtils';
 import * as extension from './extension';
 import * as path from 'path';
-import { ChildProcess } from "child_process";
+import { ChildProcess, spawn } from 'child_process';
 import * as shelljs from 'shelljs';
 
 export interface Kubectl {
 	namespace: string | undefined;
 	getPath() : Promise<string>;
-	invokeArgs(args: string[], folderName?: string): Promise<child_process.ChildProcess>;
+	invokeArgs(args: string[], folderName?: string): Promise<ChildProcess>;
 	setNamespace(value: string): void;
 	invokeAsync(command: string, stdin?: string, callback?: (proc: ChildProcess) => void): Promise<shell.ShellResult | undefined>;
 }
@@ -42,7 +40,7 @@ class KubectlImpl implements Kubectl {
 		return baseKubectlPath();
 	}
 
-	invokeArgs(args: string[], folderName?: string): Promise<child_process.ChildProcess> {
+	invokeArgs(args: string[], folderName?: string): Promise<ChildProcess> {
 		return kubectlInternalArgs(args, this.namespace, folderName);
 	}
 
@@ -105,7 +103,7 @@ export function create() : Kubectl {
 	return new KubectlImpl();
 }
 
-async function kubectlInternalArgs(args: string[], namespace: string | undefined, foldername?: string): Promise<child_process.ChildProcess> {
+async function kubectlInternalArgs(args: string[], namespace: string | undefined, foldername?: string): Promise<ChildProcess> {
 	return new Promise( async (resolve, reject) => {
 		const bin : string = await baseKubectlPath();
 		if (bin) {
@@ -113,7 +111,7 @@ async function kubectlInternalArgs(args: string[], namespace: string | undefined
 			if (namespace) {
 				args.push(`--namespace=${namespace}`);
 			}
-			let sr : child_process.ChildProcess;
+			let sr : ChildProcess;
 			if (foldername) {
 				sr = spawn(binpath, args, { cwd : foldername});
 			} else {

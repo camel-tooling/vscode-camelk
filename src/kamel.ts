@@ -15,7 +15,6 @@
  * limitations under the License.
  */
 import { exec, spawn, ChildProcess} from "child_process";
-import * as child_process from "child_process";
 import * as config from './config';
 import * as utils from './CamelKJSONUtils';
 import * as extension from './extension';
@@ -28,7 +27,7 @@ export interface Kamel {
 	namespace: string | undefined;
 	getPath() : Promise<string>;
 	invoke(command: string): Promise<string>;
-	invokeArgs(args: string[], folderName?: string): Promise<child_process.ChildProcess>;
+	invokeArgs(args: string[], folderName?: string): Promise<ChildProcess>;
 	setDevMode(flag: boolean): void;
 	setNamespace(value: string): void;
 }
@@ -48,7 +47,7 @@ class KamelImpl implements Kamel {
 		return kamelInternal(command, this.devMode, this.namespace);
 	}
 
-	invokeArgs(args: string[], folderName?: string): Promise<child_process.ChildProcess> {
+	invokeArgs(args: string[], folderName?: string): Promise<ChildProcess> {
 		return kamelInternalArgs(args, this.devMode, this.namespace, folderName);
 	}
 
@@ -121,8 +120,8 @@ async function kamelInternal(command: string, devMode: boolean, namespace : stri
 	});
 }
 
-async function kamelInternalArgs(args: string[], devMode: boolean, namespace: string | undefined, foldername?: string): Promise<child_process.ChildProcess> {
-	return new Promise<child_process.ChildProcess>(async (resolve, reject) => {
+async function kamelInternalArgs(args: string[], devMode: boolean, namespace: string | undefined, foldername?: string): Promise<ChildProcess> {
+	return new Promise<ChildProcess>(async (resolve, reject) => {
 		const bin: string = await baseKamelPath();
 		if (bin) {
 			const binpath: string = bin.trim();
@@ -130,7 +129,7 @@ async function kamelInternalArgs(args: string[], devMode: boolean, namespace: st
 				args.push(`--namespace=${namespace}`);
 			}
 			console.log(`command called: ${binpath} with arguments ${args}`);
-			let sr : child_process.ChildProcess;
+			let sr : ChildProcess;
 			if (foldername) {
 				sr = spawn(binpath, args, { cwd : foldername});
 			} else {
