@@ -62,9 +62,13 @@ async function downloadAndExtract(link : string, dlFilename: string, installFold
 		.on('response', (response) => {
 			extension.mainOutputChannel.appendLine(`Bytes to transfer: ${response.headers['content-length']}`);
 		}).on('downloadProgress', (progress) => {
-			const incr: number = progress.total > 0 ? Math.floor(progress.transferred / progress.total * 100) : 0;
-			const percent: number = Math.round(incr);
-			const message: string = `Download progress: ${progress.transferred} / ${progress.total} (${percent}%)`;
+			let totalMessagePart: string;
+			if(progress.total != null) {
+				totalMessagePart = `${progress.total}`;
+			} else {
+				totalMessagePart = `unknown`;
+			}
+			const message: string = `Download progress: ${progress.transferred} / ${totalMessagePart} (${Math.round(progress.percent * 100)}%)`;
 			const tooltip: string = `Download progress for ${dlFilename}`;
 			updateStatusBarItem(myStatusBarItem, message, tooltip);
 		}).then(() => {
