@@ -218,6 +218,12 @@
 					"group": "3_debuggroup@2",
 					"when": "view == camelk.integrations"
 				}
+			],
+			"commandPalette": [
+				{
+					"command": "camelk.integrations.debug.java",
+					"when": "never"
+				}
 			]
 		},
 		"taskDefinitions": [
