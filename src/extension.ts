@@ -38,7 +38,6 @@ import { LogsPanel } from './logsWebview';
 import * as logUtils from './logUtils';
 import {checkKamelNeedsUpdate, version, handleChangeRuntimeConfiguration} from './versionUtils';
 import * as NewIntegrationFileCommand from './commands/NewIntegrationFileCommand';
-import * as path from 'path';
 import { registerCamelKSchemaProvider } from './CamelKSchemaManager';
 import * as telemetry from './Telemetry';
 export const DELAY_RETRY_KUBECTL_CONNECTION: number = 1000;
@@ -494,11 +493,10 @@ async function registerTutorialWithDidact(context: vscode.ExtensionContext, name
 		const didactExt: any = vscode.extensions.getExtension(extensionId);
 		if (didactExt) {
 			const commandId: string = 'vscode.didact.register';
-			const tutorialPath: string = path.join(context.extensionPath, extpath);
-			const tutorialUri: vscode.Uri = vscode.Uri.parse(`file://${tutorialPath}`);
+			const tutorialUri: vscode.Uri = vscode.Uri.file(context.asAbsolutePath(extpath));
 
 			// then pass name, uri, and category
-			await vscode.commands.executeCommand(commandId,	name, tutorialUri, category);
+			await vscode.commands.executeCommand(commandId,	name, tutorialUri.fsPath, category);
 		}
 	} catch (error) {
 		console.log(error);
