@@ -36,7 +36,7 @@ suite('Test Camel K Schema Manager', function () {
 
 	test('Default works', async () => {
 		const schema: string | undefined = await CamelKSchemaManager.requestYamlSchemaContentCallback(CAMELK_SCHEMA_URI_PREFIX);
-		expect(schema).to.contains('org.apache.camel.k.loader.yaml.parser.FromStepParser$Definition');
+		expect(schema).to.contains('org.apache.camel.model.FromDefinition');
 	});
 
 	test('Return no schema for not Camel K files', async () => {
