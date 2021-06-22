@@ -47,39 +47,44 @@ export async function testVersionAvailable(versionToUse: string): Promise<boolea
 }
 
 export async function checkKamelNeedsUpdate(versionToUse?: string): Promise<boolean> {
-	const runtimeVersionSetting = vscode.workspace.getConfiguration().get(config.RUNTIME_VERSION_KEY) as string;
-	if (versionToUse) {
-		const passedVersionAvailable = await testVersionAvailable(versionToUse);
-		if (!passedVersionAvailable) {
-			const msg: string = `Camel K CLI Version ${versionToUse} unavailable.`;
-			extension.shareMessageInMainOutputChannel(msg);
-			return false;
+	const runtimeVersionSetting = config.getKamelRuntimeVersionConfig();
+	const autoUpgradeSetting: boolean | undefined = config.getKamelAutoupgradeConfig();
+	const kamelCliToolsPathSetting: string | undefined = config.getActiveKamelconfig();
+	
+	if (autoUpgradeSetting || kamelCliToolsPathSetting === undefined) {
+		if (versionToUse) {
+			const passedVersionAvailable = await testVersionAvailable(versionToUse);
+			if (!passedVersionAvailable) {
+				const msg: string = `Camel K CLI Version ${versionToUse} unavailable.`;
+				extension.shareMessageInMainOutputChannel(msg);
+				return false;
+			}
+		} else if (!versionToUse) {
+			const latestversion = await getLatestCamelKVersion();
+			if (failed(latestversion)) {
+				console.error(latestversion.error);
+				return true;
+			}
+			versionToUse = latestversion.result.trim();
 		}
-	} else if (!versionToUse) {
-		const latestversion = await getLatestCamelKVersion();
-		if (failed(latestversion)) {
-			console.error(latestversion.error);
-			return true;
-		}
-		versionToUse = latestversion.result.trim();
-	}
 
-	if (runtimeVersionSetting && runtimeVersionSetting.toLowerCase() !== versionToUse.toLowerCase()) {
-		const runtimeVersionAvailable = await testVersionAvailable(runtimeVersionSetting);
-		if (!runtimeVersionAvailable) {
-			versionToUse = version;
-		} else {
-			versionToUse = runtimeVersionSetting;
+		if (runtimeVersionSetting && runtimeVersionSetting.toLowerCase() !== versionToUse.toLowerCase()) {
+			const runtimeVersionAvailable = await testVersionAvailable(runtimeVersionSetting);
+			if (!runtimeVersionAvailable) {
+				versionToUse = version;
+			} else {
+				versionToUse = runtimeVersionSetting;
+			}
 		}
-	}
 
-	if (versionToUse) {
-		const currentVersion: string | void = await checkKamelCLIVersion();
-		if (currentVersion) {
-			return versionToUse.toLowerCase() !== currentVersion.toLowerCase();
-		} else {
-			return true;
-		}		
+		if (versionToUse) {
+			const currentVersion: string | void = await checkKamelCLIVersion();
+			if (currentVersion) {
+				return versionToUse.toLowerCase() !== currentVersion.toLowerCase();
+			} else {
+				return true;
+			}
+		}
 	}
 	return false;
 }
