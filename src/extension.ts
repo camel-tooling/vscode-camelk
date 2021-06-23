@@ -210,6 +210,7 @@ export async function activate(context: vscode.ExtensionContext) {
 
 	await installAllTutorials(context);
 	
+	await telemetry.registerTelemetryService(context);
 	(await telemetry.getTelemetryServiceInstance()).sendStartupEvent();
 	
 	return {
