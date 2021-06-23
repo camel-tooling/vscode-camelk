@@ -15,10 +15,15 @@
  * limitations under the License.
  */
 
-import { TelemetryService, getTelemetryService, TelemetryEvent } from '@redhat-developer/vscode-redhat-telemetry/lib';
+import { TelemetryEvent, getRedHatService, TelemetryService } from '@redhat-developer/vscode-redhat-telemetry/lib';
+import { ExtensionContext } from 'vscode';
 
 
-export const telemetryService: Promise<TelemetryService> = getTelemetryService('redhat.vscode-camelk');
+export let telemetryService: Promise<TelemetryService>;
+
+export async function registerTelemetryService(context: ExtensionContext) {
+	telemetryService = (await getRedHatService(context)).getTelemetryService();
+}
 
 export async function getTelemetryServiceInstance(): Promise<TelemetryService> {
     return telemetryService;
