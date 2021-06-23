@@ -16,3 +16,4 @@ test-resources
 coverconfig.json
 coverage
 *.vsix
+.test-extensions

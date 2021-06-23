@@ -6,3 +6,4 @@ node_modules
 test-resources
 coverage
 test Fixture with speci@l chars/.vscode/settings.json
+.test-extensions
