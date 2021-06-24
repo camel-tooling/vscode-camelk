@@ -11,7 +11,11 @@ jobs:
     steps:
       - checkout
       - restore_cache:
+          name: Restore npm cache
           key: dependency-cache-{{ checksum "package-lock.json" }}
+      - restore_cache:
+          name: Restore minikube cache
+          key: minikube-cache-{{ checksum ".circleci/config.yml" }}
       - run:
           name: Install Node environment
           command: |
@@ -72,9 +76,15 @@ jobs:
                 name: test UI on Insider
                 command: npm run ui-test-insiders
       - save_cache:
+          name: Save npm cache
           key: dependency-cache-{{ checksum "package-lock.json" }}
           paths:
             - ~/.npm
+      - save_cache:
+          name: Save minikube cache
+          key: minikube-cache-{{ checksum ".circleci/config.yml" }}
+          paths:
+            - ~/.minikube/cache
       - store_artifacts:
           path: /home/circleci/.config/Code/logs
           name: Store VS Code logs
