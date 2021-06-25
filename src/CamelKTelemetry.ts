@@ -15,27 +15,29 @@
  * limitations under the License.
  */
 
-import { TelemetryEvent, getRedHatService, TelemetryService } from '@redhat-developer/vscode-redhat-telemetry/lib';
-import { ExtensionContext } from 'vscode';
+import { TelemetryEvent, TelemetryService } from '@redhat-developer/vscode-redhat-telemetry/lib';
 
-
-export let telemetryService: Promise<TelemetryService>;
-
-export async function registerTelemetryService(context: ExtensionContext) {
-	telemetryService = (await getRedHatService(context)).getTelemetryService();
+export class CamelKTelemetry {
+	
+	private telemetryService: Promise<TelemetryService>;
+	
+	public constructor(telemetryService: Promise<TelemetryService>) {
+		this.telemetryService = telemetryService;
+	}
+	
+	public async getTelemetryServiceInstance(): Promise<TelemetryService> {
+		return this.telemetryService;
+	}
+	
+	public async sendCommandTracking(commandId: string) {
+		const telemetryEvent: TelemetryEvent = {
+			type: 'track',
+			name: 'command',
+			properties: {
+				identifier: commandId
+			}
+		};
+		(await this.telemetryService).send(telemetryEvent);
+	}
 }
 
-export async function getTelemetryServiceInstance(): Promise<TelemetryService> {
-    return telemetryService;
-}
-
-export async function sendCommandTracking(commandId: string) {
-	const telemetryEvent: TelemetryEvent = {
-		type: 'track',
-		name: 'command',
-		properties: {
-			identifier: commandId
-		}
-	};
-	(await telemetryService).send(telemetryEvent);
-}

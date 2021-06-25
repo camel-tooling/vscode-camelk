@@ -39,7 +39,8 @@ import * as logUtils from './logUtils';
 import {checkKamelNeedsUpdate, version, handleChangeRuntimeConfiguration} from './versionUtils';
 import * as NewIntegrationFileCommand from './commands/NewIntegrationFileCommand';
 import { registerCamelKSchemaProvider } from './CamelKSchemaManager';
-import * as telemetry from './Telemetry';
+import { getRedHatService } from '@redhat-developer/vscode-redhat-telemetry/lib';
+import { CamelKTelemetry } from './CamelKTelemetry';
 export const DELAY_RETRY_KUBECTL_CONNECTION: number = 1000;
 
 export let mainOutputChannel: vscode.OutputChannel;
@@ -56,6 +57,7 @@ let showStatusBar: boolean;
 let runningKubectl: ChildProcess | undefined;
 let timestampLastkubectlIntegrationStart: number = 0;
 let stashedContext: vscode.ExtensionContext;
+let camelKTelemetry: CamelKTelemetry;
 
 const COMMAND_ID_START_LOG = 'camelk.integrations.log';
 const COMMAND_ID_REFRESH = 'camelk.integrations.refresh';
@@ -66,6 +68,7 @@ const COMMAND_ID_OPEN_OPERATOR_LOG = 'camelk.integrations.openOperatorLog';
 export const COMMAND_ID_START_JAVA_DEBUG = 'camelk.integrations.debug.java';
 export async function activate(context: vscode.ExtensionContext) {
 	stashedContext = context;
+	camelKTelemetry = new CamelKTelemetry((await getRedHatService(context)).getTelemetryService());
 	camelKIntegrationsProvider = new CamelKNodeProvider(context);
 
 	applyUserSettings();
@@ -100,7 +103,7 @@ export async function activate(context: vscode.ExtensionContext) {
 			.catch( (err) => {
 				console.log(err);
 			});
-			telemetry.sendCommandTracking(COMMAND_ID_REFRESH);
+			camelKTelemetry.sendCommandTracking(COMMAND_ID_REFRESH);
 		});
 	
 		// create the integration view action -- remove
@@ -135,7 +138,7 @@ export async function activate(context: vscode.ExtensionContext) {
 				} catch (err) {
 					console.log(err);
 				}
-				telemetry.sendCommandTracking(COMMAND_ID_REMOVE);
+				camelKTelemetry.sendCommandTracking(COMMAND_ID_REMOVE);
 			}
 		});
 	
@@ -153,7 +156,7 @@ export async function activate(context: vscode.ExtensionContext) {
 				await logUtils.handleLogViaKamelCli(integrationName).catch((error) => {
 					utils.shareMessage(mainOutputChannel, `error: ${error} \n`);
 				});
-				telemetry.sendCommandTracking(COMMAND_ID_START_LOG);
+				camelKTelemetry.sendCommandTracking(COMMAND_ID_START_LOG);
 			}
 		});
 	
@@ -174,7 +177,7 @@ export async function activate(context: vscode.ExtensionContext) {
 			} catch (err) {
 				utils.shareMessage(mainOutputChannel, `No Apache Camel K Operator available: ${err} \n`);
 			}
-			telemetry.sendCommandTracking(COMMAND_ID_OPEN_OPERATOR_LOG);
+			camelKTelemetry.sendCommandTracking(COMMAND_ID_OPEN_OPERATOR_LOG);
 		});
 
 		vscode.commands.registerCommand('camelk.integrations.createNewIntegrationFile', async (...args:any[]) => { await NewIntegrationFileCommand.create(args);});
@@ -182,7 +185,7 @@ export async function activate(context: vscode.ExtensionContext) {
 		vscode.commands.registerCommand('camelk.classpath.refresh', async (uri:vscode.Uri) => { await downloadSpecificCamelKJavaDependencies(context, uri, mainOutputChannel)});
 		vscode.commands.registerCommand(COMMAND_ID_START_JAVA_DEBUG, async (integrationItem: TreeNode) => {
 			await StartJavaDebuggerCommand.start(integrationItem);
-			telemetry.sendCommandTracking(COMMAND_ID_START_JAVA_DEBUG);
+			camelKTelemetry.sendCommandTracking(COMMAND_ID_START_JAVA_DEBUG);
 		});
 	});
 
@@ -207,25 +210,46 @@ export async function activate(context: vscode.ExtensionContext) {
 			}
 		}
 	});
-	
-	await telemetry.registerTelemetryService(context);
-	(await telemetry.getTelemetryServiceInstance()).sendStartupEvent();
+
+
+	(await camelKTelemetry.getTelemetryServiceInstance()).sendStartupEvent();
 	
 	return {
+		/**
+		 * Used for testing purpose
+		 */
 		getStashedContext() : vscode.ExtensionContext {
 			return stashedContext;
 		},
+		/**
+		 * Used for testing purpose
+		 */
 		getCamelKIntegrationsProvider(): CamelKNodeProvider {
 			return camelKIntegrationsProvider;
 		},
+		/**
+		 * Used for testing purpose
+		 */
 		getCamelKIntegrationsTreeView(): vscode.TreeView<TreeNode | undefined>{
 			return camelKIntegrationsTreeView;
 		},
+		/**
+		 * Used for testing purpose
+		 */
 		getIntegrationsFromKubectlCliWithWatchTestApi(): Promise<void> {
 			return getIntegrationsFromKubectlCliWithWatch();
 		},
+		/**
+		 * Used for testing purpose
+		 */
 		getMainOutputChannel(): vscode.OutputChannel {
 			return mainOutputChannel;
+		},
+		/**
+		 * Used for testing purpose
+		 */
+		getTelemetry(): CamelKTelemetry {
+			return camelKTelemetry;
 		}
 	};
 }
@@ -448,6 +472,10 @@ export function shareMessageInMainOutputChannel(msg: string) {
 // for testing purposes only
 export function getStashedContext() : vscode.ExtensionContext {
 	return stashedContext;
+}
+
+export function getTelemetry(): CamelKTelemetry {
+	return camelKTelemetry;
 }
 
 async function removeIntegrationLogView(integrationName: string) : Promise<void> {

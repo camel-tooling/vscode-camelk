@@ -24,7 +24,6 @@ import * as extension from '../../extension';
 import * as Utils from "./Utils";
 import * as shelljs from 'shelljs';
 import { LANGUAGES_WITH_FILENAME_EXTENSIONS } from '../../commands/NewIntegrationFileCommand';
-import { getTelemetryServiceInstance } from '../../Telemetry';
 import { cleanDeployedIntegration, createFile, startIntegrationWithBasicCheck, checkTelemetry, retrieveDeployedTreeNodes} from './Utils/DeployTestUtil';
 import { CamelKDebugTaskProvider } from '../../task/CamelKDebugTaskDefinition';
 import { waitUntil } from 'async-wait-until';
@@ -54,7 +53,7 @@ suite('Check can debug default Java example', () => {
 		showWorkspaceFolderPickStub = sinon.stub(vscode.window, 'showWorkspaceFolderPick');
 		// Workaround due to bug in shelljs: https://github.com/shelljs/shelljs/issues/704
 		shelljs.config.execPath = shelljs.which('node').toString();
-		telemetrySpy = sinon.spy(await getTelemetryServiceInstance(), 'send');
+		telemetrySpy = sinon.spy(await(await Utils.getTelemetry()).getTelemetryServiceInstance(), 'send');
 		debugConfigurationTaskExecution = undefined;
 	});
 

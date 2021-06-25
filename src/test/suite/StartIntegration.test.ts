@@ -26,11 +26,11 @@ import { assert, expect } from 'chai';
 import { waitUntil } from 'async-wait-until';
 import { getNamedListFromKubernetesThenParseList } from '../../kubectlutils';
 import * as shelljs from 'shelljs';
+import * as Utils from './Utils';
 import * as kamel from './../../kamel';
 import * as kubectl from './../../kubectl';
 import { LANGUAGES, LANGUAGES_WITH_FILENAME_EXTENSIONS } from '../../commands/NewIntegrationFileCommand';
 import * as CamelKRunTaskDefinition from '../../task/CamelKRunTaskDefinition';
-import { getTelemetryServiceInstance } from '../../Telemetry';
 import { cleanDeployedIntegration, createFile, startIntegrationWithBasicCheck, checkTelemetry, checkIntegrationDeployed, checkIntegrationRunning } from './Utils/DeployTestUtil';
 
 export const RUNNING_TIMEOUT: number = 720000;
@@ -57,7 +57,7 @@ suite('Check can deploy default examples', () => {
 		showWorkspaceFolderPickStub = sinon.stub(vscode.window, 'showWorkspaceFolderPick');
 		// Workaround due to bug in shelljs: https://github.com/shelljs/shelljs/issues/704
 		shelljs.config.execPath = shelljs.which('node').toString();
-		telemetrySpy = sinon.spy(await getTelemetryServiceInstance(), 'send');
+		telemetrySpy = sinon.spy(await(await Utils.getTelemetry()).getTelemetryServiceInstance(), 'send');
 	});
 
 	teardown(async () => {

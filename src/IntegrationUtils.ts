@@ -26,7 +26,6 @@ import * as k8s from 'vscode-kubernetes-tools-api';
 import * as kamel from './kamel';
 import { CamelKRunTaskProvider, CamelKRunTaskDefinition } from './task/CamelKRunTaskDefinition';
 import * as fs from 'fs';
-import { getTelemetryServiceInstance } from './Telemetry';
 import { TelemetryEvent } from '@redhat-developer/vscode-redhat-telemetry/lib';
 
 const validNameRegex = /^[A-Za-z][A-Za-z0-9\-\.]*(?:[A-Za-z0-9]$){1}/;
@@ -218,7 +217,7 @@ const choiceList = [
 }
 
 async function sendStartIntegrationTelemetryEvent(choice: string, context: vscode.Uri) {
-	const telemetryService = await getTelemetryServiceInstance();
+	const telemetryService = await extension.getTelemetry().getTelemetryServiceInstance();
 	const telemetryEvent: TelemetryEvent = {
 		type: 'track',
 		name: 'command',

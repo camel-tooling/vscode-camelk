@@ -21,6 +21,7 @@ import * as vscode from 'vscode';
 import os = require('os');
 import { CamelKNodeProvider, TreeNode } from '../../CamelKNodeProvider';
 import { waitUntil } from 'async-wait-until';
+import { CamelKTelemetry } from '../../CamelKTelemetry';
 
 const extensionId = 'redhat.vscode-camelk';
 export const ACTIVATION_TIMEOUT = 45000;
@@ -75,6 +76,11 @@ export function getCamelKIntegrationsTreeView(): vscode.TreeView<TreeNode | unde
 export async function getIntegrationsFromKubectlCliWithWatchTestApi(): Promise<void> {
 	const extension = retrieveCamelKExtension();
 	return extension?.exports.getIntegrationsFromKubectlCliWithWatchTestApi();
+}
+
+export async function getTelemetry(): Promise<CamelKTelemetry> {
+	const extension = retrieveCamelKExtension();
+	return extension?.exports.getTelemetry();
 }
 
 function retrieveCamelKExtension(): vscode.Extension<any> | undefined {

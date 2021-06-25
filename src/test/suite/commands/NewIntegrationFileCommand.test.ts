@@ -17,13 +17,13 @@
 'use strict';
 
 import { expect } from "chai";
+import * as Utils from './../Utils';
 import * as fs from 'fs';
 import * as sinon from 'sinon';
 import * as vscode from 'vscode';
 import { fail } from "assert";
 import { waitUntil } from 'async-wait-until';
 import { TelemetryEvent } from '@redhat-developer/vscode-redhat-telemetry/lib';
-import { getTelemetryServiceInstance } from "../../../Telemetry";
 
 const os = require('os');
 
@@ -36,10 +36,11 @@ suite('Test command to create an Apache Camel K integration file', function() {
 	let createdFile: vscode.Uri;
 
 	setup(async () => {
+		Utils.ensureExtensionActivated();
 		showQuickpickStub = sinon.stub(vscode.window, 'showQuickPick');
 		showInputBoxStub = sinon.stub(vscode.window, 'showInputBox');
 		showWorkspaceFolderPickStub = sinon.stub(vscode.window, 'showWorkspaceFolderPick');
-		telemetrySpy = sinon.spy(await getTelemetryServiceInstance(), 'send');
+		telemetrySpy = sinon.spy(await(await Utils.getTelemetry()).getTelemetryServiceInstance(), 'send');
 	});
 
 	teardown(async () => {
