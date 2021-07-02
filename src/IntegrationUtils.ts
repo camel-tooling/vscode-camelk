@@ -31,7 +31,7 @@ import { TelemetryEvent } from '@redhat-developer/vscode-redhat-telemetry/lib';
 
 const validNameRegex = /^[A-Za-z][A-Za-z0-9\-\.]*(?:[A-Za-z0-9]$){1}/;
 const devModeIntegration: string = 'Dev Mode - Apache Camel K Integration in Dev Mode';
-export const basicIntegration: string = 'Basic - Apache Camel K Integration (no ConfigMap or Secret)';
+export const basicIntegration: string = 'Basic - Apache Camel K Integration without extra options';
 const configMapIntegration: string = 'ConfigMap - Apache Camel K Integration with Kubernetes ConfigMap';
 const secretIntegration: string = 'Secret - Apache Camel K Integration with Kubernetes Secret';
 const resourceIntegration: string = 'Resource - Apache Camel K Integration with Resource file';

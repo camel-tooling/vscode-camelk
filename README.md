@@ -86,7 +86,7 @@ You can start a new Camel K integration with or without additional options such 
 
     In “Dev Mode,” all output is directed to the Apache Camel K output channel, including startup tasks. In addition, when you update the integration file, the integration is re-deployed automatically for easier development and debugging. For more information about Dev Mode, see [Running in Dev Mode](https://camel.apache.org/camel-k/latest/running/dev-mode.html) in the Apache Camel-K documentation.
 
-* **Basic - Apache Camel K Integration (no ConfigMap or Secret)**
+* **Basic - Apache Camel K Integration**
 
     The "Basic" option starts the file as a new integration to deploy the integration to the running Kubernetes system.
 
