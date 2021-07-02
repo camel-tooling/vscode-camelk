@@ -98,6 +98,27 @@ suite('Check can deploy default examples', () => {
 		await checkIntegrationRunning(0);
 	}).timeout(TOTAL_TIMEOUT);
 	
+	const testDeploymentWithConfigMap = test('Check can deploy with a configmap', async() => {
+		skipOnJenkins(testDeploymentWithConfigMap);
+		const language = 'Java';
+		createdFile = await createFile(showQuickpickStub, showWorkspaceFolderPickStub, showInputBoxStub, `Test${language}DeployWithConfigMap`, language);
+		const kubectlPath = await kubectl.create().getPath();
+		const confimapName = 'my-configmap';
+		createConfigMap(kubectlPath, confimapName);
+		
+		await openCamelKTreeView();
+		assert.isEmpty(getCamelKIntegrationsProvider().getTreeNodes());
+		showQuickpickStub.onSecondCall().returns(IntegrationUtils.configMapIntegration);
+		showQuickpickStub.onThirdCall().returns(confimapName);
+		
+	 	await vscode.commands.executeCommand('camelk.startintegration');
+
+		await checkIntegrationDeployed(1);
+		await checkIntegrationRunning(0);
+		
+		shelljs.exec(`${kubectlPath} delete configmap ${confimapName}`);
+	}).timeout(TOTAL_TIMEOUT);
+	
 	const testSpecificNamespace = test('Check can deploy on specific namespace', async () => {
 		skipOnJenkins(testSpecificNamespace);
 		await prepareNewNamespaceWithCamelK(EXTRA_NAMESPACE_FOR_TEST);
@@ -111,6 +132,14 @@ suite('Check can deploy default examples', () => {
 	}).timeout(TOTAL_TIMEOUT);
 
 });
+
+function createConfigMap(kubectlPath: string, confimapName: string) {
+	const createNamespaceExec = shelljs.exec(`${kubectlPath} create configmap ${confimapName} --from-literal=dummykey=dummyvalue`);
+	assert.equal(createNamespaceExec.stderr, '');
+	waitUntil(() => {
+		return createNamespaceExec.stdout.includes(`configmap/${confimapName} created`);
+	});
+}
 
 async function checkIntegrationsInDifferentNamespaces(EXTRA_NAMESPACE_FOR_TEST: string) {
 	const integrations = await getNamedListFromKubernetesThenParseList('integration', `--namespace=${EXTRA_NAMESPACE_FOR_TEST}`);
