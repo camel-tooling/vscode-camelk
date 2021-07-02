@@ -32,7 +32,7 @@ import { TelemetryEvent } from '@redhat-developer/vscode-redhat-telemetry/lib';
 const validNameRegex = /^[A-Za-z][A-Za-z0-9\-\.]*(?:[A-Za-z0-9]$){1}/;
 const devModeIntegration: string = 'Dev Mode - Apache Camel K Integration in Dev Mode';
 export const basicIntegration: string = 'Basic - Apache Camel K Integration without extra options';
-const configMapIntegration: string = 'ConfigMap - Apache Camel K Integration with Kubernetes ConfigMap';
+export const configMapIntegration: string = 'ConfigMap - Apache Camel K Integration with Kubernetes ConfigMap';
 const secretIntegration: string = 'Secret - Apache Camel K Integration with Kubernetes Secret';
 const resourceIntegration: string = 'Resource - Apache Camel K Integration with Resource file';
 const propertyIntegration: string = 'Property - Apache Camel K Integration with Property';
@@ -265,17 +265,14 @@ async function handleDefinedTask(context: vscode.Uri) {
 
 function getSelectedConfigMap(): Promise<string | undefined> {
 	return new Promise <string | undefined>( async (resolve, reject) => {
-		await getConfigMaps()
-			.then( (configMaps) => {
-				vscode.window.showQuickPick(configMaps, {
+		const configMaps: string[] = await getConfigMaps();
+		if(configMaps.length === 0) {
+			reject(`No ConfigMap available.`);
+		}
+		return resolve(await vscode.window.showQuickPick(configMaps, {
 					placeHolder: 'Select an available Kubernetes ConfigMap or ESC to cancel'
-				}).then ( (selectedConfigMap) => {
-					resolve(selectedConfigMap);
-				});
-			}).catch ( (error) => {
-				reject(new Error(`No ConfigMaps available: ${error}`));
-			});
-		});
+				}));
+	});
 }
 
 function getSelectedSecret(): Promise<string | undefined> {
