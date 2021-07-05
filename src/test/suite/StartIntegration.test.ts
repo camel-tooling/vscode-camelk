@@ -116,6 +116,8 @@ suite('Check can deploy default examples', () => {
 		await checkIntegrationDeployed(1);
 		await checkIntegrationRunning(0);
 		
+		await checkConfigMapAvailableForDeployedIntegration();
+		
 		shelljs.exec(`${kubectlPath} delete configmap ${confimapName}`);
 	}).timeout(TOTAL_TIMEOUT);
 	
@@ -132,6 +134,13 @@ suite('Check can deploy default examples', () => {
 	}).timeout(TOTAL_TIMEOUT);
 
 });
+
+async function checkConfigMapAvailableForDeployedIntegration() {
+	const describeShell = shelljs.exec(`${await kamel.create().getPath()} describe integration test-java-deploy-with-config-map`);
+	const description: string = describeShell.stdout;
+	const lineReturnAndSpaces: RegExp = /\r?\n|\r|\s/g;
+	expect(description.replace(lineReturnAndSpaces, '')).includes('Configuration:Type:configmapValue:my-configmap');
+}
 
 function createConfigMap(kubectlPath: string, confimapName: string) {
 	const createNamespaceExec = shelljs.exec(`${kubectlPath} create configmap ${confimapName} --from-literal=dummykey=dummyvalue`);
