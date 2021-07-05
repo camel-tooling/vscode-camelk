@@ -33,7 +33,7 @@ const validNameRegex = /^[A-Za-z][A-Za-z0-9\-\.]*(?:[A-Za-z0-9]$){1}/;
 const devModeIntegration: string = 'Dev Mode - Apache Camel K Integration in Dev Mode';
 export const basicIntegration: string = 'Basic - Apache Camel K Integration without extra options';
 export const configMapIntegration: string = 'ConfigMap - Apache Camel K Integration with Kubernetes ConfigMap';
-const secretIntegration: string = 'Secret - Apache Camel K Integration with Kubernetes Secret';
+export const secretIntegration: string = 'Secret - Apache Camel K Integration with Kubernetes Secret';
 const resourceIntegration: string = 'Resource - Apache Camel K Integration with Resource file';
 const propertyIntegration: string = 'Property - Apache Camel K Integration with Property';
 const dependencyIntegration: string = 'Dependencies - Apache Camel K Integration with Explicit Dependencies';
@@ -277,17 +277,14 @@ function getSelectedConfigMap(): Promise<string | undefined> {
 
 function getSelectedSecret(): Promise<string | undefined> {
 	return new Promise<string | undefined>( async (resolve, reject) => {
-		await getSecrets()
-			.then( (secrets) => {
-				vscode.window.showQuickPick(secrets, {
+		const secrets: string[] = await getSecrets();
+		if(secrets.length === 0) {
+			reject(new Error(`No Secrets available`));
+		}
+		return resolve(vscode.window.showQuickPick(secrets, {
 					placeHolder: 'Select an available Kubernetes Secret or ESC to cancel'
-				}).then ( (selectedSecret) => {
-					resolve(selectedSecret);
-				});
-			}).catch ( (error) => {
-				reject(new Error(`No Secrets available: ${error}`));
-			});
-		});
+				}));
+	});
 }
 
 function getSelectedResource(): Promise<string> {
