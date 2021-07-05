@@ -119,6 +119,27 @@ suite('Check can deploy default examples', () => {
 		shelljs.exec(`${kubectlPath} delete configmap ${confimapName}`);
 	}).timeout(TOTAL_TIMEOUT);
 	
+	const testDeploymentWithSecret = test('Check can deploy with a secret', async() => {
+		skipOnJenkins(testDeploymentWithSecret);
+		const language = 'Java';
+		createdFile = await createFile(showQuickpickStub, showWorkspaceFolderPickStub, showInputBoxStub, `Test${language}DeployWithSecret`, language);
+		const kubectlPath = await kubectl.create().getPath();
+		const secretName = 'my-secret';
+		createSecret(kubectlPath, secretName);
+		
+		await openCamelKTreeView();
+		assert.isEmpty(getCamelKIntegrationsProvider().getTreeNodes());
+		showQuickpickStub.onSecondCall().returns(IntegrationUtils.secretIntegration);
+		showQuickpickStub.onThirdCall().returns(secretName);
+		
+	 	await vscode.commands.executeCommand('camelk.startintegration');
+
+		await checkIntegrationDeployed(1);
+		await checkIntegrationRunning(0);
+		
+		shelljs.exec(`${kubectlPath} delete secret ${secretName}`);
+	}).timeout(TOTAL_TIMEOUT);
+	
 	const testSpecificNamespace = test('Check can deploy on specific namespace', async () => {
 		skipOnJenkins(testSpecificNamespace);
 		await prepareNewNamespaceWithCamelK(EXTRA_NAMESPACE_FOR_TEST);
@@ -138,6 +159,14 @@ function createConfigMap(kubectlPath: string, confimapName: string) {
 	assert.equal(createNamespaceExec.stderr, '');
 	waitUntil(() => {
 		return createNamespaceExec.stdout.includes(`configmap/${confimapName} created`);
+	});
+}
+
+function createSecret(kubectlPath: string, confimapName: string) {
+	const createNamespaceExec = shelljs.exec(`${kubectlPath} create secret generic ${confimapName} --from-literal=dummykey=dummyvalue`);
+	assert.equal(createNamespaceExec.stderr, '');
+	waitUntil(() => {
+		return createNamespaceExec.stdout.includes(`secret/${confimapName} created`);
 	});
 }
 
