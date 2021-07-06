@@ -34,13 +34,13 @@ const devModeIntegration: string = 'Dev Mode - Apache Camel K Integration in Dev
 export const basicIntegration: string = 'Basic - Apache Camel K Integration without extra options';
 export const configMapIntegration: string = 'ConfigMap - Apache Camel K Integration with Kubernetes ConfigMap';
 export const secretIntegration: string = 'Secret - Apache Camel K Integration with Kubernetes Secret';
-const resourceIntegration: string = 'Resource - Apache Camel K Integration with Resource file';
+export const resourceIntegration: string = 'Resource - Apache Camel K Integration with Resource file';
 export const propertyIntegration: string = 'Property - Apache Camel K Integration with Property';
 const dependencyIntegration: string = 'Dependencies - Apache Camel K Integration with Explicit Dependencies';
 export const vscodeTasksIntegration: string = 'Use a predefined Task - useful for multi-attributes deployment';
 
 const ResourceOptions: vscode.OpenDialogOptions = {
-	canSelectMany: true,
+	canSelectMany: false,
 	openLabel: 'Open Resource File(s)',
 	filters: {
 		'Text files': ['txt'],
@@ -289,20 +289,13 @@ function getSelectedSecret(): Promise<string | undefined> {
 
 function getSelectedResource(): Promise<string> {
 	return new Promise<string> ( async (resolve, reject) => {
-		let returnedResources: string = '';
-		const fileUri = await vscode.window.showOpenDialog(ResourceOptions);
-		if (fileUri === undefined || fileUri.length === 0) {
-			reject(new Error("No Resource file(s) specified."));
+		const fileUris = await vscode.window.showOpenDialog(ResourceOptions);
+		if (fileUris === undefined || fileUris.length === 0) {
+			reject(new Error('No Resource file(s) specified.'));
+		} else if(fileUris.length >= 2) {
+			reject(new Error('A single Resource file at a time is currently supported'));
 		} else {
-			fileUri.forEach(selectedFile => {
-				if (returnedResources.trim().length > 0) {
-					// add a separator
-					returnedResources += ` `;
-				}
-				const uriStr = path.normalize(selectedFile.path);
-				returnedResources += `${uriStr}`;
-			});
-			resolve(returnedResources);
+			resolve(path.normalize(fileUris[0].path));
 		}
 	});
 }
@@ -461,12 +454,7 @@ export function computeKamelArgs(absoluteRoot: string,
 		kamelArgs.push(`--profile=${profile}`);
 	}
 	if (resource && resource.trim().length > 0) {
-		let resourceArray = resource.split(' ');
-		if (resourceArray && resourceArray.length > 0) {
-			resourceArray.forEach(res => {
-				kamelArgs.push(`--resource="${res}"`);
-			});
-		}
+		kamelArgs.push(`--resource=${resource}`);
 	}
 	if (dependencyArray && dependencyArray.length > 0) {
 		dependencyArray.forEach(dependency => {
