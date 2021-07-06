@@ -40,6 +40,8 @@ export const PROVIDER_POPULATED_TIMEOUT: number = 20000;
 export const EDITOR_OPENED_TIMEOUT: number = 5000;
 const TOTAL_TIMEOUT: number = RUNNING_TIMEOUT + DEPLOYED_TIMEOUT + EDITOR_OPENED_TIMEOUT + UNDEPLOY_TIMEOUT + PROVIDER_POPULATED_TIMEOUT;
 
+const lineReturnAndSpaces: RegExp = /\r?\n|\r|\s/g;
+
 suite('Check can deploy default examples', () => {
 	
 	const EXTRA_NAMESPACE_FOR_TEST: string = 'namespace-for-deployment-test';
@@ -142,6 +144,27 @@ suite('Check can deploy default examples', () => {
 		shelljs.exec(`${kubectlPath} delete secret ${secretName}`);
 	}).timeout(TOTAL_TIMEOUT);
 	
+	const testDeploymentWithproperty = test('Check can deploy with a property', async() => {
+		skipOnJenkins(testDeploymentWithproperty);
+		const language = 'Java';
+		createdFile = await createFile(showQuickpickStub, showWorkspaceFolderPickStub, showInputBoxStub, `Test${language}DeployWithProperty`, language);
+		
+		await openCamelKTreeView();
+		assert.isEmpty(getCamelKIntegrationsProvider().getTreeNodes());
+		showQuickpickStub.onSecondCall().returns(IntegrationUtils.propertyIntegration);
+		showInputBoxStub.onSecondCall().returns('propertyKey');
+		showInputBoxStub.onThirdCall().returns('myValueKey');
+		showQuickpickStub.onThirdCall().returns("No");
+		
+	 	await vscode.commands.executeCommand('camelk.startintegration');
+
+		await checkIntegrationDeployed(1);
+		await checkIntegrationRunning(0);
+		
+		await checkPropertyAvailableAvailableForDeployedIntegration();
+		
+	}).timeout(TOTAL_TIMEOUT);
+	
 	const testSpecificNamespace = test('Check can deploy on specific namespace', async () => {
 		skipOnJenkins(testSpecificNamespace);
 		await prepareNewNamespaceWithCamelK(EXTRA_NAMESPACE_FOR_TEST);
@@ -159,8 +182,13 @@ suite('Check can deploy default examples', () => {
 async function checkConfigMapAvailableForDeployedIntegration() {
 	const describeShell = shelljs.exec(`${await kamel.create().getPath()} describe integration test-java-deploy-with-config-map`);
 	const description: string = describeShell.stdout;
-	const lineReturnAndSpaces: RegExp = /\r?\n|\r|\s/g;
 	expect(description.replace(lineReturnAndSpaces, '')).includes('Configuration:Type:configmapValue:my-configmap');
+}
+
+async function checkPropertyAvailableAvailableForDeployedIntegration() {
+	const describeShell = shelljs.exec(`${await kamel.create().getPath()} describe integration test-java-deploy-with-property`);
+	const description: string = describeShell.stdout;
+	expect(description.replace(lineReturnAndSpaces, '')).includes('Configuration:Type:propertyValue:propertyKey=myValueKey');
 }
 
 function createConfigMap(kubectlPath: string, confimapName: string) {
