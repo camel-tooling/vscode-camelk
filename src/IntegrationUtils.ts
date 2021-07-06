@@ -323,7 +323,8 @@ function getSelectedProperties(): Promise<string[]> {
 				});
 				if (propValue) {
 					propValue = propValue.replace(/"/g, '\\"');
-					let newProperty = `${propName}="${propValue}"`;
+					console.log(propValue);
+					let newProperty = `${propName}=${propValue}`;
 
 					const moreProperties: string | undefined = await vscode.window.showQuickPick(['No', 'Yes'], {
 						placeHolder: 'Are there more properties?',

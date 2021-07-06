@@ -153,7 +153,7 @@ suite('Check can deploy default examples', () => {
 		assert.isEmpty(getCamelKIntegrationsProvider().getTreeNodes());
 		showQuickpickStub.onSecondCall().returns(IntegrationUtils.propertyIntegration);
 		showInputBoxStub.onSecondCall().returns('propertyKey');
-		showInputBoxStub.onThirdCall().returns('myValueKey');
+		showInputBoxStub.onThirdCall().returns('my Value');
 		showQuickpickStub.onThirdCall().returns("No");
 		
 	 	await vscode.commands.executeCommand('camelk.startintegration');
@@ -188,7 +188,8 @@ async function checkConfigMapAvailableForDeployedIntegration() {
 async function checkPropertyAvailableAvailableForDeployedIntegration() {
 	const describeShell = shelljs.exec(`${await kamel.create().getPath()} describe integration test-java-deploy-with-property`);
 	const description: string = describeShell.stdout;
-	expect(description.replace(lineReturnAndSpaces, '')).includes('Configuration:Type:propertyValue:propertyKey=myValueKey');
+	expect(description).includes('propertyKey=my Value');
+	expect(description.replace(lineReturnAndSpaces, '')).includes('Configuration:Type:propertyValue:propertyKey=myValue');
 }
 
 function createConfigMap(kubectlPath: string, confimapName: string) {
