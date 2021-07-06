@@ -35,7 +35,7 @@ export const basicIntegration: string = 'Basic - Apache Camel K Integration with
 export const configMapIntegration: string = 'ConfigMap - Apache Camel K Integration with Kubernetes ConfigMap';
 export const secretIntegration: string = 'Secret - Apache Camel K Integration with Kubernetes Secret';
 const resourceIntegration: string = 'Resource - Apache Camel K Integration with Resource file';
-const propertyIntegration: string = 'Property - Apache Camel K Integration with Property';
+export const propertyIntegration: string = 'Property - Apache Camel K Integration with Property';
 const dependencyIntegration: string = 'Dependencies - Apache Camel K Integration with Explicit Dependencies';
 export const vscodeTasksIntegration: string = 'Use a predefined Task - useful for multi-attributes deployment';
 
@@ -313,44 +313,40 @@ function getSelectedProperties(): Promise<string[]> {
 		let returnedProperties : string[] = [];
 
 		while (hasMoreProperties) {
-			let newProperty: string;
-			await vscode.window.showInputBox({
+			const propName: string | undefined = await vscode.window.showInputBox({
 				placeHolder: 'Specify the property name',
 				validateInput: validateName
-			}).then ( async (propName) => {
-				if (propName) {
-					await vscode.window.showInputBox({
-						placeHolder: 'Specify the property value'
-					}).then ( async (propValue) => {
-						if (propValue) {
-							propValue = propValue.replace(/"/g, '\\"');
-							newProperty = `${propName}="${propValue}"`;
+			});
+			if (propName) {
+				let propValue: string | undefined = await vscode.window.showInputBox({
+					placeHolder: 'Specify the property value'
+				});
+				if (propValue) {
+					propValue = propValue.replace(/"/g, '\\"');
+					let newProperty = `${propName}="${propValue}"`;
 
-							await vscode.window.showQuickPick( ['No', 'Yes'], {
-								placeHolder: 'Are there more properties?',
-								canPickMany : false	}).then( (answer) => {
-									if (!answer) {
-										hasMoreProperties = false;
-										reject(new Error(`No Property answer given`));
-									} else {
-										returnedProperties.push(newProperty);
-										if (answer && answer.toLowerCase() === 'no') {
-											hasMoreProperties = false;
-											resolve(returnedProperties);
-										}
-									}
-								});
-
-						} else {
-							hasMoreProperties = false;
-							reject(new Error(`No Property Value provided`));
-						}
+					const moreProperties: string | undefined = await vscode.window.showQuickPick(['No', 'Yes'], {
+						placeHolder: 'Are there more properties?',
+						canPickMany: false
 					});
+					if (!moreProperties) {
+						hasMoreProperties = false;
+						reject(new Error(`No Property answer given`));
+					} else {
+						returnedProperties.push(newProperty);
+						if (moreProperties && moreProperties.toLowerCase() === 'no') {
+							hasMoreProperties = false;
+							resolve(returnedProperties);
+						}
+					}
 				} else {
 					hasMoreProperties = false;
-					reject(new Error(`No Property Name provided`));
+					reject(new Error(`No Property Value provided`));
 				}
-			});
+			} else {
+				hasMoreProperties = false;
+				reject(new Error(`No Property Name provided`));
+			}
 		}
 	});
 }
