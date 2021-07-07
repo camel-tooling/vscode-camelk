@@ -112,15 +112,16 @@ suite("Camel K Run Task definition", function() {
         assert.include(execution.commandLine, '-p prop2=value2');
     });
 
-    test("ensure include resource", async() => {
+    test("ensure include resources", async() => {
 		let def: CamelKRunTaskDefinition = {
             "file" : "dummyFileValue.xml",
-            "resource": "adummyresource.txt",
+            "resources": ["adummyresource1.txt", "adummyresource2.txt"],
             "type": CamelKRunTaskProvider.START_CAMELK_TYPE
         };
         const task = await new CamelKRunTaskProvider().getRunTask(def);
         let execution = task.execution as ShellExecution;
-        assert.include(execution.commandLine, '--resource=adummyresource.txt');
+        assert.include(execution.commandLine, '--resource=adummyresource1.txt');
+        assert.include(execution.commandLine, '--resource=adummyresource2.txt');
     });
 
     test("ensure include secret", async() => {
