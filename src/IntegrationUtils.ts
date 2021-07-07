@@ -40,7 +40,7 @@ const dependencyIntegration: string = 'Dependencies - Apache Camel K Integration
 export const vscodeTasksIntegration: string = 'Use a predefined Task - useful for multi-attributes deployment';
 
 const ResourceOptions: vscode.OpenDialogOptions = {
-	canSelectMany: false,
+	canSelectMany: true,
 	openLabel: 'Open Resource File(s)',
 	filters: {
 		'Text files': ['txt'],
@@ -153,7 +153,7 @@ const choiceList = [
 					});
 					break;
 				case resourceIntegration:
-					await getSelectedResource().then( (selection) => {
+					await getSelectedResources().then( (selection) => {
 						selectedResource = selection;
 						if (selectedResource === undefined) {
 							reject (new Error('No Resource selected.'));
@@ -287,15 +287,13 @@ function getSelectedSecret(): Promise<string | undefined> {
 	});
 }
 
-function getSelectedResource(): Promise<string> {
-	return new Promise<string> ( async (resolve, reject) => {
+function getSelectedResources(): Promise<string[]> {
+	return new Promise<string[]> ( async (resolve, reject) => {
 		const fileUris = await vscode.window.showOpenDialog(ResourceOptions);
 		if (fileUris === undefined || fileUris.length === 0) {
 			reject(new Error('No Resource file(s) specified.'));
-		} else if(fileUris.length >= 2) {
-			reject(new Error('A single Resource file at a time is currently supported'));
 		} else {
-			resolve(path.normalize(fileUris[0].path));
+			resolve(fileUris.map(fileUri => path.normalize(fileUri.path)));
 		}
 	});
 }
@@ -378,7 +376,7 @@ function getSelectedDependencies(): Promise<string[]> {
 }
 
 // use command-line "kamel" utility to start a new integration
-export function createNewIntegration(integrationFileUri: vscode.Uri, devMode? : boolean, configmap? : string, secret? : string, resource? : string, propertyArray? : string[], dependencyArray? : string[]): Promise<boolean> {
+export function createNewIntegration(integrationFileUri: vscode.Uri, devMode? : boolean, configmap? : string, secret? : string, resourceArray? : string[], propertyArray? : string[], dependencyArray? : string[]): Promise<boolean> {
 	return new Promise( async (resolve, reject) => {
 		let filename = integrationFileUri.fsPath;
 		let foldername = path.dirname(filename);
@@ -392,7 +390,7 @@ export function createNewIntegration(integrationFileUri: vscode.Uri, devMode? : 
 					devMode,
 					configmap,
 					secret,
-					resource,
+					resourceArray,
 					dependencyArray,
 					propertyArray);
 				if (devMode && devMode === true) {
@@ -427,7 +425,7 @@ export function computeKamelArgs(absoluteRoot: string,
 		devMode: boolean | undefined,
 		configmap: string | undefined,
 		secret: string | undefined,
-		resource: string | undefined,
+		resourceArray: string[] | undefined,
 		dependencyArray: string[] | undefined,
 		propertyArray: string[] | undefined,
 		traitsArray?: string[] | undefined,
@@ -453,8 +451,10 @@ export function computeKamelArgs(absoluteRoot: string,
 	if (profile && profile.trim().length > 0) {
 		kamelArgs.push(`--profile=${profile}`);
 	}
-	if (resource && resource.trim().length > 0) {
-		kamelArgs.push(`--resource=${resource}`);
+	if (resourceArray && resourceArray.length > 0) {
+		resourceArray.forEach(resource => {
+			kamelArgs.push(`--resource=${resource}`);
+		});
 	}
 	if (dependencyArray && dependencyArray.length > 0) {
 		dependencyArray.forEach(dependency => {

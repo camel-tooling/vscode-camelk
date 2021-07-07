@@ -269,9 +269,10 @@
 						"format": "<akey>=<avalue>",
 						"uniqueItems": true
 					},
-					"resource": {
-						"type": "string",
-						"description": "Additional resource."
+					"resources": {
+						"type": "array",
+						"description": "List of additional resources.",
+						"uniqueItems": true
 					},
 					"traits": {
 						"type": "array",
