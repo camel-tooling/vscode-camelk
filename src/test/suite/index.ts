@@ -31,7 +31,7 @@ function loadCoverageRunner(testsRoot: string): CoverageRunner | undefined {
 	const coverConfigPath = path.join(testsRoot, '..', '..', '..', 'coverconfig.json');
 	if (!process.env.VST_DISABLE_COVERAGE && fs.existsSync(coverConfigPath)) {
 		coverageRunner = new CoverageRunner(JSON.parse(fs.readFileSync(coverConfigPath, 'utf-8')) as TestRunnerOptions, testsRoot);
-		coverageRunner.setupCoverage();
+		//coverageRunner.setupCoverage();
 		return coverageRunner;
 	}
 }

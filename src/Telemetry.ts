@@ -20,6 +20,8 @@ import * as vscode from 'vscode';
 
 
 export let telemetryService: Promise<TelemetryService>;
+console.log('Running through Telemetry.ts');
+
 
 export async function initializeTelemetry(context: vscode.ExtensionContext) {
 	telemetryService = (await getRedHatService(context)).getTelemetryService();
