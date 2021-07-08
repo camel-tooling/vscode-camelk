@@ -365,8 +365,7 @@
 	},
 	"extensionDependencies": [
 		"ms-kubernetes-tools.vscode-kubernetes-tools",
-		"redhat.vscode-yaml",
-		"redhat.vscode-commons"
+		"redhat.vscode-yaml"
 	],
 	"dependencies": {
 		"@redhat-developer/vscode-redhat-telemetry": "^0.1.1",
