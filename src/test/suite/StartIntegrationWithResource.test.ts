@@ -72,7 +72,7 @@ suite('Check can deploy with resource', () => {
 	const testDeploymentWithResource = test('Check can deploy with a single resource', async() => {
 		skipOnJenkins(testDeploymentWithResource);
 		const resource = tmp.fileSync({ prefix: "simple" });
-		createdFile = await testDeployWithResource(resource, showQuickpickStub, showWorkspaceFolderPickStub, showInputBoxStub, showOpenDialogStub);
+		createdFile = await testDeployWithResources([resource], showQuickpickStub, showWorkspaceFolderPickStub, showInputBoxStub, showOpenDialogStub);
 	}).timeout(TOTAL_TIMEOUT);
 	
 	const testDeploymentWithResourceInPathWithSpace = test('Check can deploy with a single resource with space in path', async() => {
@@ -80,35 +80,42 @@ suite('Check can deploy with resource', () => {
 		const dir = tmp.dirSync({prefix: "with a space"}).name;
 		const resource = tmp.fileSync({ dir: dir, prefix: "simpleWithParentFolderHavingSpace" });
 		expect(resource.name).includes(' ');
-		createdFile = await testDeployWithResource(resource, showQuickpickStub, showWorkspaceFolderPickStub, showInputBoxStub, showOpenDialogStub);
+		createdFile = await testDeployWithResources([resource], showQuickpickStub, showWorkspaceFolderPickStub, showInputBoxStub, showOpenDialogStub);
+	}).timeout(TOTAL_TIMEOUT);
+	
+	const testDeploymentWithSeveralResources = test('Check can deploy with several resources', async() => {
+		skipOnJenkins(testDeploymentWithSeveralResources);
+		const resource1 = tmp.fileSync({ prefix: "simple1" });
+		const resource2 = tmp.fileSync({ prefix: "simple2" });
+		createdFile = await testDeployWithResources([resource1, resource2], showQuickpickStub, showWorkspaceFolderPickStub, showInputBoxStub, showOpenDialogStub);
 	}).timeout(TOTAL_TIMEOUT);
 	
 });
 
-async function testDeployWithResource(resource: tmp.FileResult, showQuickpickStub: sinon.SinonStub<any[], any>, showWorkspaceFolderPickStub: sinon.SinonStub<any[], any>, showInputBoxStub: sinon.SinonStub<any[], any>, showOpenDialogStub: sinon.SinonStub<any[], any>) {
-	const uriOfResource = vscode.Uri.file(resource.name);
-	const uris: vscode.Uri[] = [uriOfResource];
+async function testDeployWithResources(resources: tmp.FileResult[], showQuickpickStub: sinon.SinonStub<any[], any>, showWorkspaceFolderPickStub: sinon.SinonStub<any[], any>, showInputBoxStub: sinon.SinonStub<any[], any>, showOpenDialogStub: sinon.SinonStub<any[], any>) {
+	const uriOfResources = resources.map(resource => {return vscode.Uri.file(resource.name);});
 	const language = 'Java';
-	let createdFile: vscode.Uri | undefined = await createFile(showQuickpickStub, showWorkspaceFolderPickStub, showInputBoxStub, `Test${language}DeployWithASingleResource`, language);
+	let createdFile: vscode.Uri | undefined = await createFile(showQuickpickStub, showWorkspaceFolderPickStub, showInputBoxStub, `Test${language}DeployWithResources`, language);
 
 	await openCamelKTreeView();
 	assert.isEmpty(getCamelKIntegrationsProvider().getTreeNodes());
 	showQuickpickStub.onSecondCall().returns(IntegrationUtils.resourceIntegration);
-	showOpenDialogStub.onFirstCall().returns(uris);
+	showOpenDialogStub.onFirstCall().returns(uriOfResources);
 
 	await vscode.commands.executeCommand('camelk.startintegration');
 
 	await checkIntegrationDeployed(1);
 	await checkIntegrationRunning(0);
 
-	const filename = uriOfResource.fsPath.substring(uriOfResource.fsPath.lastIndexOf('/') + 1);
-	await checkResourceAvailableForDeployedIntegration(filename);
+	const filenames = uriOfResources.map(uriOfResource => uriOfResource.fsPath.substring(uriOfResource.fsPath.lastIndexOf('/') + 1));
+	await checkResourcesAvailableForDeployedIntegration(filenames);
 	return createdFile;
 }
 
-async function checkResourceAvailableForDeployedIntegration(fileName: string) {
-	const describeShell = shelljs.exec(`${await kamel.create().getPath()} describe integration test-java-deploy-with-a-single-resource`);
+async function checkResourcesAvailableForDeployedIntegration(fileNames: string[]) {
+	const describeShell = shelljs.exec(`${await kamel.create().getPath()} describe integration test-java-deploy-with-resources`);
 	const description: string = describeShell.stdout;
 	const lineReturnAndSpaces: RegExp = /\r?\n|\r|\s/g;
-	expect(description.replace(lineReturnAndSpaces, '')).includes(`Resources:Content:Name:${fileName}Type:data`);
+	const textForResourceDescription = fileNames.map(fileName => {return `Content:Name:${fileName}Type:data`;}).join('');
+	expect(description.replace(lineReturnAndSpaces, '')).includes(`Resources:${textForResourceDescription}`);
 }

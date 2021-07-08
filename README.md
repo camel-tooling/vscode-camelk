@@ -90,13 +90,13 @@ You can start a new Camel K integration with or without additional options such 
 
     The "Basic" option starts the file as a new integration to deploy the integration to the running Kubernetes system.
 
-* **ConfigMap - Apache Camel K Integration with Kubernetes ConfigMap**
+* **ConfigMap - Apache Camel K Integration with Kubernetes ConfigMap as runtime configuration**
 
     Select a ConfigMap from a list of the published ConfigMaps in your current Kubernetes system. For example:
 
     ![Start Apache Camel K Integration - ConfigMap list](images/kubernetes-configmap-list.jpg)
 
-* **Secret - Apache Camel K Integration with Kubernetes Secret**
+* **Secret - Apache Camel K Integration with Kubernetes Secret as runtime configuration**
 
     Select a Secret from a list of the published Secrets in your current Kubernetes system. For more information about configuration with ConfigMaps or Secrets, see [Configuration via ConfigMap or Secret](https://camel.apache.org/camel-k/latest/configuration/configmap-secret.html) in the Apache Camel K documentation.
 
