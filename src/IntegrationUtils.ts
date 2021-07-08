@@ -32,8 +32,8 @@ import { TelemetryEvent } from '@redhat-developer/vscode-redhat-telemetry/lib';
 const validNameRegex = /^[A-Za-z][A-Za-z0-9\-\.]*(?:[A-Za-z0-9]$){1}/;
 const devModeIntegration: string = 'Dev Mode - Apache Camel K Integration in Dev Mode';
 export const basicIntegration: string = 'Basic - Apache Camel K Integration without extra options';
-export const configMapIntegration: string = 'ConfigMap - Apache Camel K Integration with Kubernetes ConfigMap';
-export const secretIntegration: string = 'Secret - Apache Camel K Integration with Kubernetes Secret';
+export const configMapIntegration: string = 'ConfigMap - Apache Camel K Integration with Kubernetes ConfigMap as runtime configuration';
+export const secretIntegration: string = 'Secret - Apache Camel K Integration with Kubernetes Secret as runtime configuration';
 export const resourceIntegration: string = 'Resource - Apache Camel K Integration with Resource file';
 export const propertyIntegration: string = 'Property - Apache Camel K Integration with Property';
 const dependencyIntegration: string = 'Dependencies - Apache Camel K Integration with Explicit Dependencies';
@@ -443,17 +443,17 @@ export function computeKamelArgs(absoluteRoot: string,
 		kamelArgs.push('--compression');
 	}
 	if (configmap && configmap.trim().length > 0) {
-		kamelArgs.push(`--configmap=${configmap}`);
+		kamelArgs.push(`--config=configmap:${configmap}`);
 	}
 	if (secret && secret.trim().length > 0) {
-		kamelArgs.push(`--secret=${secret}`);
+		kamelArgs.push(`--config=secret:${secret}`);
 	}
 	if (profile && profile.trim().length > 0) {
 		kamelArgs.push(`--profile=${profile}`);
 	}
 	if (resourceArray && resourceArray.length > 0) {
 		resourceArray.forEach(resource => {
-			kamelArgs.push(`--resource=${resource}`);
+			kamelArgs.push(`--resource=file:${resource}`);
 		});
 	}
 	if (dependencyArray && dependencyArray.length > 0) {

@@ -30,7 +30,7 @@ suite("Camel K Run Task definition", function() {
         };
         const task = await new CamelKRunTaskProvider().getRunTask(def);
         let execution = task.execution as ShellExecution;
-        assert.include(execution.commandLine, '--configmap=aDummyConfigMapId');
+        assert.include(execution.commandLine, '--config=configmap:aDummyConfigMapId');
     });
 
     test("ensure include compression flag", async() => {
@@ -120,8 +120,8 @@ suite("Camel K Run Task definition", function() {
         };
         const task = await new CamelKRunTaskProvider().getRunTask(def);
         let execution = task.execution as ShellExecution;
-        assert.include(execution.commandLine, '--resource=adummyresource1.txt');
-        assert.include(execution.commandLine, '--resource=adummyresource2.txt');
+        assert.include(execution.commandLine, '--resource=file:adummyresource1.txt');
+        assert.include(execution.commandLine, '--resource=file:adummyresource2.txt');
     });
 
     test("ensure include secret", async() => {
@@ -132,7 +132,7 @@ suite("Camel K Run Task definition", function() {
         };
         const task = await new CamelKRunTaskProvider().getRunTask(def);
         let execution = task.execution as ShellExecution;
-        assert.include(execution.commandLine, '--secret=adummysecret');
+        assert.include(execution.commandLine, '--config=secret:adummysecret');
     });
     
     test("ensure include traits", async() => {

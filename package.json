@@ -239,7 +239,7 @@
 					},
 					"configmap": {
 						"type": "string",
-						"description": "Configmap key which needs to be already deployed."
+						"description": "Configmap key. The configmap is added as runtime configuration."
 					},
 					"dependencies": {
 						"type": "array",
@@ -273,6 +273,10 @@
 						"type": "array",
 						"description": "List of additional resources.",
 						"uniqueItems": true
+					},
+					"secret": {
+						"type": "string",
+						"description": "Secret key. The secret is added as runtime configuration."
 					},
 					"traits": {
 						"type": "array",
