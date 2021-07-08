@@ -337,7 +337,7 @@
 		"@types/download": "^8.0.1",
 		"@types/glob": "^7.1.4",
 		"@types/istanbul": "^0.4.30",
-		"@types/mkdirp": "^1.0.1",
+		"@types/mkdirp": "^1.0.2",
 		"@types/mocha": "^8.2.3",
 		"@types/nock": "^11.1.0",
 		"@types/node": "^16.0.0",
