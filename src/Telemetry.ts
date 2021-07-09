@@ -25,9 +25,11 @@ console.log('Running through Telemetry.ts');
 
 export async function initializeTelemetry(context: vscode.ExtensionContext) {
 	telemetryService = (await getRedHatService(context)).getTelemetryService();
+	console.log('Telemetry initialiazed');
 }
 
 export async function getTelemetryServiceInstance(): Promise<TelemetryService> {
+	console.log('attempt to retrieve telemetry service instance');
     return telemetryService;
 }
 
