@@ -65,6 +65,7 @@ export const COMMAND_ID_START_INTEGRATION = 'camelk.startintegration';
 const COMMAND_ID_OPEN_OPERATOR_LOG = 'camelk.integrations.openOperatorLog';
 export const COMMAND_ID_START_JAVA_DEBUG = 'camelk.integrations.debug.java';
 export async function activate(context: vscode.ExtensionContext) {
+	console.log('Activate VS Code Camel K');
 	stashedContext = context;
 	await telemetry.initializeTelemetry(context);
 	camelKIntegrationsProvider = new CamelKNodeProvider(context);
@@ -213,7 +214,7 @@ export async function activate(context: vscode.ExtensionContext) {
 	
 	return {
 		getStashedContext() : vscode.ExtensionContext {
-			return stashedContext;
+			return stashedContext;Will initialize Telemetry
 		},
 		getCamelKIntegrationsProvider(): CamelKNodeProvider {
 			return camelKIntegrationsProvider;
