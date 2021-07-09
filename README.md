@@ -3,6 +3,8 @@
 [![License](https://img.shields.io/badge/license-Apache%202-blue.svg)]()
 [![Zulip chat](https://img.shields.io/badge/zulip-join_chat-brightgreen.svg)](https://camel.zulipchat.com/#narrow/stream/258729-camel-tooling)
 
+dummy change to test 1.58.0
+
 # Visual Studio extension to support Apache Camel K
 
 First, what is Apache Camel K? According to its Github Readme, “Apache Camel K is a lightweight integration platform, born on Kubernetes, with serverless superpowers.” Essentially Camel K enables developers to run integrations on Kubernetes or OpenShift clusters which enables them to get Camel-based integration solutions up and running very quickly! 
