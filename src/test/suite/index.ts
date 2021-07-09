@@ -47,7 +47,7 @@ const mocha = new Mocha({
 export function run(): Promise<void> {
 	const testsRoot = path.resolve(__dirname, '..');
 	console.log(`testsRoot = ${testsRoot}`);
-	const coverageRunner = loadCoverageRunner(testsRoot);
+	//const coverageRunner = loadCoverageRunner(testsRoot);
 
 	return new Promise((c, e) => {
 		glob('**/**.test.js', { cwd: testsRoot }, (err, files) => {
@@ -68,7 +68,7 @@ export function run(): Promise<void> {
 					} else {
 						c();
 					}
-				}).on('end', () => coverageRunner && coverageRunner.reportCoverage());
+				})/*.on('end', () => coverageRunner && coverageRunner.reportCoverage())*/;
 			} catch (innererr) {
 				e(innererr);
 			}
