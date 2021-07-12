@@ -214,7 +214,7 @@ export async function activate(context: vscode.ExtensionContext) {
 	
 	return {
 		getStashedContext() : vscode.ExtensionContext {
-			return stashedContext;Will initialize Telemetry
+			return stashedContext;
 		},
 		getCamelKIntegrationsProvider(): CamelKNodeProvider {
 			return camelKIntegrationsProvider;
