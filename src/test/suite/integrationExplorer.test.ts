@@ -16,6 +16,7 @@
  */
 import * as vscode from 'vscode';
 import * as chai from 'chai';
+import * as extension from '../../extension';
 import * as CamelKNodeProvider from '../../CamelKNodeProvider';
 import * as sinon from 'sinon';
 import * as sinonChai from 'sinon-chai';
@@ -35,7 +36,7 @@ suite('Camel-k Integrations View', () => {
 	setup(() => {
 		Utils.ensureExtensionActivated();
 		sandbox = sinon.createSandbox();
-		integrationExplorer = Utils.getCamelKIntegrationsProvider();
+		integrationExplorer = extension.camelKIntegrationsProvider;
 		integrationExplorer.setRetrieveIntegrations(false);
 	});
 
@@ -81,7 +82,7 @@ suite('Camel-k Integrations View', () => {
 });
 
 function checkIConForPodStatus(status: string) {
-	const context = Utils.retrieveExtensionContext();
+	const context = extension.getStashedContext();
 	let iconPath = CamelKNodeProvider.TreeNode.getIconForPodStatus(status, context);
 	assert.notEqual(iconPath, undefined);
 	if (iconPath) {

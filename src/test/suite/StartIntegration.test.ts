@@ -16,12 +16,13 @@
  */
 'use strict';
 
+import * as extension from '../../extension';
 import * as fs from 'fs';
 import * as sinon from 'sinon';
 import * as vscode from 'vscode';
 import * as config from '../../config';
 import * as IntegrationUtils from '../../IntegrationUtils';
-import { skipOnJenkins, getCamelKIntegrationsProvider, openCamelKTreeView } from "./Utils";
+import { skipOnJenkins, openCamelKTreeView } from "./Utils";
 import { assert, expect } from 'chai';
 import { waitUntil } from 'async-wait-until';
 import { getNamedListFromKubernetesThenParseList } from '../../kubectlutils';
@@ -90,7 +91,7 @@ suite('Check can deploy default examples', () => {
 		const language = 'Java';
 		createdFile = await createFile(showQuickpickStub, showWorkspaceFolderPickStub, showInputBoxStub, `Test${language}DeployFromTask`, language);
 		await openCamelKTreeView();
-		assert.isEmpty(getCamelKIntegrationsProvider().getTreeNodes());
+		assert.isEmpty(extension.camelKIntegrationsProvider.getTreeNodes());
 		showQuickpickStub.onSecondCall().returns(IntegrationUtils.vscodeTasksIntegration);
 		showQuickpickStub.onThirdCall().returns(CamelKRunTaskDefinition.NAME_OF_PROVIDED_TASK_TO_DEPLOY_IN_DEV_MODE_FROM_ACTIVE_EDITOR);
 		
@@ -109,7 +110,7 @@ suite('Check can deploy default examples', () => {
 		createConfigMap(kubectlPath, confimapName);
 		
 		await openCamelKTreeView();
-		assert.isEmpty(getCamelKIntegrationsProvider().getTreeNodes());
+		assert.isEmpty(extension.camelKIntegrationsProvider.getTreeNodes());
 		showQuickpickStub.onSecondCall().returns(IntegrationUtils.configMapIntegration);
 		showQuickpickStub.onThirdCall().returns(confimapName);
 		
@@ -132,7 +133,7 @@ suite('Check can deploy default examples', () => {
 		createSecret(kubectlPath, secretName);
 		
 		await openCamelKTreeView();
-		assert.isEmpty(getCamelKIntegrationsProvider().getTreeNodes());
+		assert.isEmpty(extension.camelKIntegrationsProvider.getTreeNodes());
 		showQuickpickStub.onSecondCall().returns(IntegrationUtils.secretIntegration);
 		showQuickpickStub.onThirdCall().returns(secretName);
 		
@@ -150,7 +151,7 @@ suite('Check can deploy default examples', () => {
 		createdFile = await createFile(showQuickpickStub, showWorkspaceFolderPickStub, showInputBoxStub, `Test${language}DeployWithProperty`, language);
 		
 		await openCamelKTreeView();
-		assert.isEmpty(getCamelKIntegrationsProvider().getTreeNodes());
+		assert.isEmpty(extension.camelKIntegrationsProvider.getTreeNodes());
 		showQuickpickStub.onSecondCall().returns(IntegrationUtils.propertyIntegration);
 		showInputBoxStub.onSecondCall().returns('propertyKey');
 		showInputBoxStub.onThirdCall().returns('my Value');
