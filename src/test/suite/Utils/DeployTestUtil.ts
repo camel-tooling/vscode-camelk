@@ -18,7 +18,7 @@
 import * as sinon from 'sinon';
 import * as vscode from 'vscode';
 import * as IntegrationUtils from '../../../IntegrationUtils';
-import { getCamelKIntegrationsProvider, openCamelKTreeView } from "../Utils";
+import { openCamelKTreeView } from "../Utils";
 import { assert, expect } from 'chai';
 import { waitUntil } from 'async-wait-until';
 import * as extension from '../../../extension';
@@ -37,7 +37,7 @@ export async function cleanDeployedIntegration(telemetrySpy: sinon.SinonSpy) {
 		});
 		try {
 			await waitUntil(() => {
-				return getCamelKIntegrationsProvider().getTreeNodes().length === 0 && telemetrySpy.callCount === deployedTreeNodes?.length;
+				return extension.camelKIntegrationsProvider.getTreeNodes().length === 0 && telemetrySpy.callCount === deployedTreeNodes?.length;
 			}, UNDEPLOY_TIMEOUT);
 		} catch (error) {
 			console.log('Error while trying to remove deployed integrations, it remains:');
@@ -53,7 +53,7 @@ export async function retrieveDeployedTreeNodes(minimalExpectedTreeNode =1): Pro
 	let deployedTreeNodes: TreeNode[] = [];
 	try {
 		await waitUntil(() => {
-			deployedTreeNodes = getCamelKIntegrationsProvider().getTreeNodes();
+			deployedTreeNodes = extension.camelKIntegrationsProvider.getTreeNodes();
 			return deployedTreeNodes.length >= minimalExpectedTreeNode;
 		}, PROVIDER_POPULATED_TIMEOUT);
 	} catch (err) {
@@ -66,10 +66,10 @@ export async function startIntegrationWithBasicCheck(showQuickpickStub: sinon.Si
 	await openCamelKTreeView();
 	try {
 		await waitUntil(() => {
-			return getCamelKIntegrationsProvider().getTreeNodes().length === alreadyDeployedIntegration;
+			return extension.camelKIntegrationsProvider.getTreeNodes().length === alreadyDeployedIntegration;
 		});
 	} catch(error) {
-		const currentIntegrations = getCamelKIntegrationsProvider().getTreeNodes();
+		const currentIntegrations = extension.camelKIntegrationsProvider.getTreeNodes();
 		assert.equal(
 			currentIntegrations.length,
 			alreadyDeployedIntegration,
@@ -86,17 +86,17 @@ export async function startIntegrationWithBasicCheck(showQuickpickStub: sinon.Si
 export async function checkIntegrationRunning(indexOfNewDeployedIntegration :number) {
 	try {
 		await waitUntil(() => {
-			return getCamelKIntegrationsProvider().getTreeNodes()[indexOfNewDeployedIntegration]?.status === "Running";
+			return extension.camelKIntegrationsProvider.getTreeNodes()[indexOfNewDeployedIntegration]?.status === "Running";
 		}, RUNNING_TIMEOUT, 1000);
 	} catch (error) {
-		assert.fail(`The integration has not been marked as Running in Camel K Integration provided view. Current status ${getCamelKIntegrationsProvider().getTreeNodes()[0].status} \n${error}`);
+		assert.fail(`The integration has not been marked as Running in Camel K Integration provided view. Current status ${extension.camelKIntegrationsProvider.getTreeNodes()[0].status} \n${error}`);
 	}
 }
 
 export async function checkIntegrationDeployed(expectedDeployedIntegration :number) {
 	try {
 		await waitUntil(() => {
-			return getCamelKIntegrationsProvider().getTreeNodes()?.length === expectedDeployedIntegration;
+			return extension.camelKIntegrationsProvider.getTreeNodes()?.length === expectedDeployedIntegration;
 		}, DEPLOYED_TIMEOUT, 1000);
 	} catch (error) {
 		assert.fail('No integration has shown up in Camel K Integration provider view. (Nota: it requires that Camel K instance is reachable.)\n' + error);

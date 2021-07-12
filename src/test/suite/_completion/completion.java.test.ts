@@ -16,6 +16,7 @@
  */
 'use strict';
 
+import * as extension from '../../../extension';
 import * as fs from 'fs';
 import * as vscode from 'vscode';
 import * as JavaDependenciesManager from '../../../JavaDependenciesManager';
@@ -95,7 +96,7 @@ async function testCompletion(
 	await checkExpectedCompletion(docUri, position, expectedCompletion);
 
 	function retrieveDestination() {
-		const context = Utils.retrieveExtensionContext();
+		const context = extension.getStashedContext();
 		return JavaDependenciesManager.destinationFolderForDependencies(context);
 	}
 }

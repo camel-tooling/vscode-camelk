@@ -38,8 +38,8 @@ suite("Kubectl integration watcher", function() {
 
 	this.beforeEach(() => {
 		sandbox = sinon.createSandbox();
-		refreshStub = sandbox.stub(Utils.getCamelKIntegrationsProvider(), 'refresh');
-		messageStub = sandbox.stub(Utils.getCamelKMainOutputChannel(), 'append');
+		refreshStub = sandbox.stub(extension.camelKIntegrationsProvider, 'refresh');
+		messageStub = sandbox.stub(extension.mainOutputChannel, 'append');
 	});
 	
 	this.afterEach(() => {
@@ -58,7 +58,7 @@ suite("Kubectl integration watcher", function() {
 	
 	test('Check there is one set of message logged in case of connection error', async function() {
 		invalidateKubeConfigFileByRenamingIt(kubeconfigFilePath);
-		await Utils.getIntegrationsFromKubectlCliWithWatchTestApi();
+		await extension.getIntegrationsFromKubectlCliWithWatch();
 		checkErrorMessageLogged(messageStub);
 	});
 	
@@ -74,7 +74,7 @@ suite("Kubectl integration watcher", function() {
 		invalidateKubeConfigFileByRenamingIt(kubeconfigFilePath);
 		await Utils.openCamelKTreeView();
 		messageStub.resetHistory();
-		await Utils.getIntegrationsFromKubectlCliWithWatchTestApi();
+		await extension.getIntegrationsFromKubectlCliWithWatch();
 		checkErrorMessageLogged(messageStub);
 	});
 	
