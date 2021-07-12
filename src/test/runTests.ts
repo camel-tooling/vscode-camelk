@@ -14,7 +14,8 @@ async function main() : Promise<void> {
 		if(vscodeVersionForTest !== undefined){
 			vscodeExecutablePath = await downloadAndUnzipVSCode(vscodeVersionForTest);
 		} else {
-			vscodeExecutablePath = await downloadAndUnzipVSCode('stable');
+			// FIXME: using previous version to workaround https://github.com/microsoft/vscode/issues/126636
+			vscodeExecutablePath = await downloadAndUnzipVSCode('1.57.1');
 		}
 		console.log(`vscodeExecutablePath = ${vscodeExecutablePath}`);
 		const testWorkspace = path.resolve(__dirname, '../../../test Fixture with speci@l chars');
