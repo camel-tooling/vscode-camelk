@@ -10,11 +10,11 @@
 // to report the results back to the caller. When the tests are finished, return
 // a possible error to the callback or null if none.
 
-import * as fs from 'fs';
+//import * as fs from 'fs';
 import * as path from 'path';
 import * as Mocha from 'mocha';
 import * as glob from 'glob';
-import { TestRunnerOptions, CoverageRunner } from './../coverage';
+//import { TestRunnerOptions, CoverageRunner } from './../coverage';
 
 // Linux: prevent a weird NPE when mocha on Linux requires the window size from the TTY
 // Since we are not running in a tty environment, we just implement the method statically
@@ -26,15 +26,15 @@ if (!tty.getWindowSize) {
 	};
 }
 
-function loadCoverageRunner(testsRoot: string): CoverageRunner | undefined {
-	let coverageRunner: CoverageRunner;
-	const coverConfigPath = path.join(testsRoot, '..', '..', '..', 'coverconfig.json');
-	if (!process.env.VST_DISABLE_COVERAGE && fs.existsSync(coverConfigPath)) {
-		coverageRunner = new CoverageRunner(JSON.parse(fs.readFileSync(coverConfigPath, 'utf-8')) as TestRunnerOptions, testsRoot);
-		//coverageRunner.setupCoverage();
-		return coverageRunner;
-	}
-}
+// function loadCoverageRunner(testsRoot: string): CoverageRunner | undefined {
+// 	let coverageRunner: CoverageRunner;
+// 	const coverConfigPath = path.join(testsRoot, '..', '..', '..', 'coverconfig.json');
+// 	if (!process.env.VST_DISABLE_COVERAGE && fs.existsSync(coverConfigPath)) {
+// 		coverageRunner = new CoverageRunner(JSON.parse(fs.readFileSync(coverConfigPath, 'utf-8')) as TestRunnerOptions, testsRoot);
+// 		//coverageRunner.setupCoverage();
+// 		return coverageRunner;
+// 	}
+// }
 
 // Create the mocha test
 const mocha = new Mocha({
