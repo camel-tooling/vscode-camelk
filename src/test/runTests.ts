@@ -14,8 +14,7 @@ async function main() : Promise<void> {
 		if(vscodeVersionForTest !== undefined){
 			vscodeExecutablePath = await downloadAndUnzipVSCode(vscodeVersionForTest);
 		} else {
-			// FIXME: using previous version to workaround https://github.com/microsoft/vscode/issues/126636
-			vscodeExecutablePath = await downloadAndUnzipVSCode('1.57.1');
+			vscodeExecutablePath = await downloadAndUnzipVSCode('stable');
 		}
 		console.log(`vscodeExecutablePath = ${vscodeExecutablePath}`);
 		const testWorkspace = path.resolve(__dirname, '../../../test Fixture with speci@l chars');
@@ -25,7 +24,7 @@ async function main() : Promise<void> {
 		installExtraExtension(cliPath, 'redhat.java');
 		installExtraExtension(cliPath, 'vscjava.vscode-java-debug');
 
-		await runTests({ vscodeExecutablePath, extensionDevelopmentPath, extensionTestsPath, launchArgs: [testWorkspace] });
+		await runTests({ vscodeExecutablePath, extensionDevelopmentPath, extensionTestsPath, launchArgs: [testWorkspace, '--disable-workspace-trust'] });
 
 	} catch (err) {
 		console.error('Failed to run tests' + err);
