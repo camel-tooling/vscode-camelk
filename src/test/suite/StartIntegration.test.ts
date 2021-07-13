@@ -188,7 +188,7 @@ async function checkConfigMapAvailableForDeployedIntegration() {
 async function checkPropertyAvailableAvailableForDeployedIntegration() {
 	const describeShell = shelljs.exec(`${await kamel.create().getPath()} describe integration test-java-deploy-with-property`);
 	const description: string = describeShell.stdout;
-	expect(description).includes('propertyKey=my Value');
+	expect(description).includes('propertyKey = my Value');
 	expect(description.replace(lineReturnAndSpaces, '')).includes('Configuration:Type:propertyValue:propertyKey=myValue');
 }
 
