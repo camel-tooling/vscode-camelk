@@ -209,24 +209,6 @@ export async function activate(context: vscode.ExtensionContext) {
 	});
 	
 	(await telemetry.getTelemetryServiceInstance()).sendStartupEvent();
-	
-	return {
-		getStashedContext() : vscode.ExtensionContext {
-			return stashedContext;
-		},
-		getCamelKIntegrationsProvider(): CamelKNodeProvider {
-			return camelKIntegrationsProvider;
-		},
-		getCamelKIntegrationsTreeView(): vscode.TreeView<TreeNode | undefined>{
-			return camelKIntegrationsTreeView;
-		},
-		getIntegrationsFromKubectlCliWithWatchTestApi(): Promise<void> {
-			return getIntegrationsFromKubectlCliWithWatch();
-		},
-		getMainOutputChannel(): vscode.OutputChannel {
-			return mainOutputChannel;
-		}
-	};
 }
 
 function retrieveIntegratioName(selection: TreeNode) {

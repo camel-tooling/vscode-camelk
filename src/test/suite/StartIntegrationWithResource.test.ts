@@ -16,12 +16,13 @@
  */
 'use strict';
 
+import * as extension from '../../extension';
 import * as fs from 'fs';
 import * as sinon from 'sinon';
 import * as vscode from 'vscode';
 import * as config from '../../config';
 import * as IntegrationUtils from '../../IntegrationUtils';
-import { skipOnJenkins, getCamelKIntegrationsProvider, openCamelKTreeView } from "./Utils";
+import { skipOnJenkins, openCamelKTreeView } from "./Utils";
 import { assert, expect } from 'chai';
 import * as shelljs from 'shelljs';
 import * as kamel from '../../kamel';
@@ -98,7 +99,7 @@ async function testDeployWithResources(resources: tmp.FileResult[], showQuickpic
 	let createdFile: vscode.Uri | undefined = await createFile(showQuickpickStub, showWorkspaceFolderPickStub, showInputBoxStub, `Test${language}DeployWithResources`, language);
 
 	await openCamelKTreeView();
-	assert.isEmpty(getCamelKIntegrationsProvider().getTreeNodes());
+	assert.isEmpty(extension.camelKIntegrationsProvider.getTreeNodes());
 	showQuickpickStub.onSecondCall().returns(IntegrationUtils.resourceIntegration);
 	showOpenDialogStub.onFirstCall().returns(uriOfResources);
 
