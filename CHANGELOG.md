@@ -6,6 +6,7 @@ All notable changes to the "vscode-camelk" extension will be documented in this 
 
 - Adapt Didact tutorial registration to VS Code Didact 0.4.0 updated API
 - Update default runtime version to v1.5.0
+- Provide CodeLens to refresh classpath dependencies on Camel K Java files containing a Camel K modeline
 - `resource` has been replaced by `resources` to allow providing several of them in Camel K VS Code Tasks
 
 ## 0.0.25

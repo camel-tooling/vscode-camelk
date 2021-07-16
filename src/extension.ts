@@ -40,6 +40,7 @@ import {checkKamelNeedsUpdate, version, handleChangeRuntimeConfiguration} from '
 import * as NewIntegrationFileCommand from './commands/NewIntegrationFileCommand';
 import { registerCamelKSchemaProvider } from './CamelKSchemaManager';
 import * as telemetry from './Telemetry';
+import { ClasspathRefreshCodeLensProvider } from './codelenses/ClasspathRefreshCodeLensProvider';
 export const DELAY_RETRY_KUBECTL_CONNECTION: number = 1000;
 
 export let mainOutputChannel: vscode.OutputChannel;
@@ -64,6 +65,8 @@ const COMMAND_ID_REMOVE = 'camelk.integrations.remove';
 export const COMMAND_ID_START_INTEGRATION = 'camelk.startintegration';
 const COMMAND_ID_OPEN_OPERATOR_LOG = 'camelk.integrations.openOperatorLog';
 export const COMMAND_ID_START_JAVA_DEBUG = 'camelk.integrations.debug.java';
+export const COMMAND_ID_CLASSPATH_REFRESH = 'camelk.classpath.refresh';
+
 export async function activate(context: vscode.ExtensionContext) {
 	stashedContext = context;
 	await telemetry.initializeTelemetry(context);
@@ -180,7 +183,12 @@ export async function activate(context: vscode.ExtensionContext) {
 
 		vscode.commands.registerCommand('camelk.integrations.createNewIntegrationFile', async (...args:any[]) => { await NewIntegrationFileCommand.create(args);});
 		vscode.commands.registerCommand('camelk.integrations.selectFirstNode', () => { selectFirstItemInTree();});
-		vscode.commands.registerCommand('camelk.classpath.refresh', async (uri:vscode.Uri) => { await downloadSpecificCamelKJavaDependencies(context, uri, mainOutputChannel)});
+		vscode.commands.registerCommand(COMMAND_ID_CLASSPATH_REFRESH, async (uri:vscode.Uri) => { await downloadSpecificCamelKJavaDependencies(context, uri, mainOutputChannel)});
+		const docSelector: vscode.DocumentSelector = {
+			language: 'java',
+			scheme: 'file',
+		  }
+		vscode.languages.registerCodeLensProvider(docSelector, new ClasspathRefreshCodeLensProvider());
 		vscode.commands.registerCommand(COMMAND_ID_START_JAVA_DEBUG, async (integrationItem: TreeNode) => {
 			await StartJavaDebuggerCommand.start(integrationItem);
 			telemetry.sendCommandTracking(COMMAND_ID_START_JAVA_DEBUG);
