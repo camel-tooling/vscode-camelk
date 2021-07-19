@@ -113,9 +113,9 @@ async function kubectlInternalArgs(args: string[], namespace: string | undefined
 			}
 			let sr : ChildProcess;
 			if (foldername) {
-				sr = spawn(binpath, args, { cwd : foldername});
+				sr = spawn(`"${binpath}"`, args, { cwd : foldername});
 			} else {
-				sr = spawn(binpath, args);
+				sr = spawn(`"${binpath}"`, args);
 			}
 			if (sr) {
 				if (sr.stdout) {
