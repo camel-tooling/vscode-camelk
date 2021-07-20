@@ -31,7 +31,7 @@ import { getDocUri } from "../completion.util";
 		});
 		
 		const codeLenses = await new ClasspathRefreshCodeLensProvider().provideCodeLenses(documentWithModeline);
-		checkCodeLens(codeLenses);
+		checkCodeLens(codeLenses as vscode.CodeLens[]);
 	 });
 	 
 	 test("No codelenses without camel-k modeline", async() => {
@@ -52,15 +52,16 @@ import { getDocUri } from "../completion.util";
 		
 		const codeLenses: vscode.CodeLens[] | undefined = await vscode.commands.executeCommand('vscode.executeCodeLensProvider', docUriJava);
 		
-		checkCodeLens(codeLenses);
+		checkCodeLens(codeLenses as vscode.CodeLens[]);
 	});
 
  });
 
-function checkCodeLens(codeLenses: vscode.CodeLens[] | null | undefined) {
-	assert.isNotNull(codeLenses);
-	expect(codeLenses as vscode.CodeLens[]).has.length(1);
-	const codeLens: vscode.CodeLens = (codeLenses as vscode.CodeLens[])[0];
+function checkCodeLens(codeLenses: vscode.CodeLens[]) {
+	const classpathRefreshCodeLenses = codeLenses.filter(codelens => {
+		return codelens.command?.command === extension.COMMAND_ID_CLASSPATH_REFRESH;
+	});
+	expect(classpathRefreshCodeLenses).has.length(1);
+	const codeLens: vscode.CodeLens = classpathRefreshCodeLenses[0];
 	expect(codeLens.isResolved).to.be.true;
-	expect(codeLens.command?.command).to.be.equal(extension.COMMAND_ID_CLASSPATH_REFRESH);
 }

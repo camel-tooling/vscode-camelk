@@ -73,6 +73,8 @@ You can start a new Camel K integration with or without additional options such 
 * Yaml (*.yaml) (Experimental)
 
     For more information about supported languages, see [Languages](https://camel.apache.org/camel-k/latest/languages/languages.html) in the Apache Camel-K documentation.
+	
+    Note: `Start` CodeLens can also be used at the top of the editor of opened Camel K files.
 
 2. In the popup menu, select **Start Apache Camel K Integration**. 
 
