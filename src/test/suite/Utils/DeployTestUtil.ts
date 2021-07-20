@@ -27,6 +27,7 @@ import { LANGUAGES_WITH_FILENAME_EXTENSIONS } from '../../../commands/NewIntegra
 import { TelemetryEvent } from '@redhat-developer/vscode-redhat-telemetry/lib';
 import { TreeNode } from '../../../CamelKNodeProvider';
 import { UNDEPLOY_TIMEOUT, PROVIDER_POPULATED_TIMEOUT, RUNNING_TIMEOUT, DEPLOYED_TIMEOUT, EDITOR_OPENED_TIMEOUT } from '../StartIntegration.test';
+import { checkCodelensForOpenedDocument } from '../codelenses/StartIntegrationCodeLens.test';
 
 export async function cleanDeployedIntegration(telemetrySpy: sinon.SinonSpy) {
 	let deployedTreeNodes: TreeNode[] | undefined = await retrieveDeployedTreeNodes();
@@ -123,7 +124,11 @@ export async function createFile(showQuickpickStub: sinon.SinonStub<any[], any>,
 	} catch (error) {
 		assert.fail(`${integrationName}.${fileExtension} has not been opened in editor. Filename of currently opened editor: ${vscode.window.activeTextEditor?.document.fileName}`);
 	}
-	return vscode.window.activeTextEditor?.document.uri;
+	const uri = vscode.window.activeTextEditor?.document.uri;
+	
+	await checkCodelensForOpenedDocument(uri as vscode.Uri);
+	
+	return uri;
 }
 
 export function checkTelemetry(telemetrySpy: sinon.SinonSpy<any[], any>, languageExtension: string) {

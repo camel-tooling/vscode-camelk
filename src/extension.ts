@@ -41,6 +41,7 @@ import * as NewIntegrationFileCommand from './commands/NewIntegrationFileCommand
 import { registerCamelKSchemaProvider } from './CamelKSchemaManager';
 import * as telemetry from './Telemetry';
 import { ClasspathRefreshCodeLensProvider } from './codelenses/ClasspathRefreshCodeLensProvider';
+import { StartIntegrationCodeLensProvider } from './codelenses/StartIntegrationCodeLensProvider';
 export const DELAY_RETRY_KUBECTL_CONNECTION: number = 1000;
 
 export let mainOutputChannel: vscode.OutputChannel;
@@ -166,6 +167,10 @@ export async function activate(context: vscode.ExtensionContext) {
 			async (...args:any[]) => {
 				await runTheFile(args);
 			}));
+		const docSelectorForPhysicalFiles: vscode.DocumentSelector = {
+				scheme: 'file'
+			}
+		vscode.languages.registerCodeLensProvider(docSelectorForPhysicalFiles, new StartIntegrationCodeLensProvider());
 	
 		// add commands to create config-map and secret objects from .properties files
 		configmapsandsecrets.registerCommands();
@@ -187,7 +192,7 @@ export async function activate(context: vscode.ExtensionContext) {
 		const docSelector: vscode.DocumentSelector = {
 			language: 'java',
 			scheme: 'file',
-		  }
+		}
 		vscode.languages.registerCodeLensProvider(docSelector, new ClasspathRefreshCodeLensProvider());
 		vscode.commands.registerCommand(COMMAND_ID_START_JAVA_DEBUG, async (integrationItem: TreeNode) => {
 			await StartJavaDebuggerCommand.start(integrationItem);
