@@ -2,6 +2,8 @@
 
 All notable changes to the "vscode-camelk" extension will be documented in this file.
 
+## 0.0.27
+
 ## 0.0.26
 
 - Adapt Didact tutorial registration to VS Code Didact 0.4.0 updated API
