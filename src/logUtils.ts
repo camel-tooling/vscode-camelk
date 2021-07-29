@@ -26,6 +26,8 @@ import * as config from './config';
 import * as kubectlutils from './kubectlutils';
 import { window } from 'vscode';
 
+const stripAnsi = require('strip-ansi');
+
 function getCurrentNamespace() : string {
 	let ns: string = `default`;
 	const currentNs: string | undefined = config.getNamespaceconfig();
@@ -53,12 +55,12 @@ export async function handleLogViaKamelCli(integrationName: string) : Promise<vo
 			proc.stdout.on('data', async (data: string) => {
 				if (data.length > 0) {
 					var buf = Buffer.from(data);
-					var text = buf.toString();
+					var text = stripAnsi(buf.toString());
 					if (text.indexOf(`Received hang up - stopping the main instance`) !== -1 && !closeLogViewWhenIntegrationRemoved) {
 						const title: string = panel.getTitle();
 						updateLogViewTitleToStopped(panel, title);
 					}
-					panel.addContent(buf.toString());
+					panel.addContent(text);
 				}
 			});
 		}

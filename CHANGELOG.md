@@ -4,6 +4,8 @@ All notable changes to the "vscode-camelk" extension will be documented in this 
 
 ## 0.0.27
 
+- Strip ANSI from kamel log to improve display in log view which doesn't support it
+
 ## 0.0.26
 
 - Adapt Didact tutorial registration to VS Code Didact 0.4.0 updated API
