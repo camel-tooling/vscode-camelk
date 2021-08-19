@@ -25,8 +25,7 @@ import * as kubectl from './kubectl';
 import * as config from './config';
 import * as kubectlutils from './kubectlutils';
 import { window } from 'vscode';
-
-const stripAnsi = require('strip-ansi');
+import stripAnsi from 'strip-ansi';
 
 function getCurrentNamespace() : string {
 	let ns: string = `default`;
