@@ -359,7 +359,7 @@
 		"sinon": "^11.1.2",
 		"sinon-chai": "^3.7.0",
 		"tslint": "^6.1.3",
-		"typescript": "^4.3.5",
+		"typescript": "^4.4.2",
 		"vscode-extension-tester": "^4.2.0",
 		"vscode-extension-tester-native": "^3.0.2",
 		"vscode-test": "^1.6.1",
