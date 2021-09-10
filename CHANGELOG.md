@@ -5,6 +5,7 @@ All notable changes to the "vscode-camelk" extension will be documented in this 
 ## 0.0.27
 
 - Strip ANSI from kamel log to improve display in log view which doesn't support it
+- Update default runtime version to v1.6.0
 
 ## 0.0.26
 
