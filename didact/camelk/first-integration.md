@@ -94,4 +94,4 @@ While we are running in `Dev Mode`, all our logged output goes to the main `Apac
 
 For more about **Apache Camel K**, [check out the project documentation](https://camel.apache.org/camel-k/latest/index.html).
 
-For more about what the **Tooling for Apache Camel K** extension has to offer in VS Code, [check out the readme](https://github.com/camel-tooling/vscode-camelk/blob/master/README.md)
+For more about what the **Tooling for Apache Camel K** extension has to offer in VS Code, [check out the readme](https://github.com/camel-tooling/vscode-camelk/blob/main/README.md)

@@ -87,7 +87,7 @@ jobs:
       - when:
           condition:
             and:
-              - equal: [master, << pipeline.git.branch >>]
+              - equal: [main, << pipeline.git.branch >>]
               - not: <<parameters.isInsider>>
           steps:
             - sonarcloud/scan
@@ -111,4 +111,4 @@ workflows:
           filters:
             branches:
               only:
-                - master
+                - main
