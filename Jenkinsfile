@@ -3,7 +3,8 @@
 node('rhel8'){
 	stage('Checkout repo') {
 		deleteDir()
-		git url: 'https://github.com/camel-tooling/vscode-camelk.git'
+		git url: 'https://github.com/camel-tooling/vscode-camelk.git',
+		    branch: 'main'
 	}
 
 	stage('Install requirements') {
