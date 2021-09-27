@@ -82,7 +82,7 @@ export class CamelKRunTaskProvider implements vscode.TaskProvider {
 			definition.compression,
 			definition.profile);
 		let argsInlined = args.join(' ');
-		let processExecution = new vscode.ShellExecution(`${await kamel.create().getPath()} ${argsInlined}`);
+		let processExecution = new vscode.ShellExecution(`"${await kamel.create().getPath()}" ${argsInlined}`);
 		let displayName :string;
 		if(definition.label) {
 			displayName = definition.label;

@@ -74,7 +74,7 @@ export class CamelKDebugTaskProvider implements vscode.TaskProvider {
 
 async function computeKamelDebugCommandLine(definition: CamelKDebugTaskDefinition) {
 	//TODO: put some logic to determine the integration name based on a provided file? it will allow something more dynamic.
-	let commandLine = `${await kamel.create().getPath()} debug ${definition.integrationName}`;
+	let commandLine = `"${await kamel.create().getPath()}" debug ${definition.integrationName}`;
 	if (definition.port) {
 		commandLine += ` --port ${definition.port}`;
 	}
