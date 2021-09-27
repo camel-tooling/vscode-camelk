@@ -121,7 +121,7 @@ suite('Check can deploy default examples', () => {
 		
 		await checkConfigMapAvailableForDeployedIntegration();
 		
-		shelljs.exec(`${kubectlPath} delete configmap ${confimapName}`);
+		shelljs.exec(`"${kubectlPath}" delete configmap ${confimapName}`);
 	}).timeout(TOTAL_TIMEOUT);
 	
 	const testDeploymentWithSecret = test('Check can deploy with a secret', async() => {
@@ -142,7 +142,7 @@ suite('Check can deploy default examples', () => {
 		await checkIntegrationDeployed(1);
 		await checkIntegrationRunning(0);
 		
-		shelljs.exec(`${kubectlPath} delete secret ${secretName}`);
+		shelljs.exec(`"${kubectlPath}" delete secret ${secretName}`);
 	}).timeout(TOTAL_TIMEOUT);
 	
 	const testDeploymentWithproperty = test('Check can deploy with a property', async() => {
@@ -175,7 +175,7 @@ suite('Check can deploy default examples', () => {
 		await startIntegrationWithBasicCheck(showQuickpickStub, telemetrySpy, 0);
 		await checkIntegrationsInDifferentNamespaces(EXTRA_NAMESPACE_FOR_TEST);
 		
-		shelljs.exec(`${await kubectl.create().getPath()} delete namespace ${EXTRA_NAMESPACE_FOR_TEST}`);
+		shelljs.exec(`"${await kubectl.create().getPath()}" delete namespace ${EXTRA_NAMESPACE_FOR_TEST}`);
 	}).timeout(TOTAL_TIMEOUT);
 
 });
@@ -223,5 +223,5 @@ async function prepareNewNamespaceWithCamelK(EXTRA_NAMESPACE_FOR_TEST: string) {
 	waitUntil(() => {
 		return createNamespaceExec.stdout.includes(`namespace/${EXTRA_NAMESPACE_FOR_TEST} created`);
 	});
-	assert.include(shelljs.exec(`${await kamel.create().getPath()} install --namespace=${EXTRA_NAMESPACE_FOR_TEST}`).stdout, `Camel K installed in namespace ${EXTRA_NAMESPACE_FOR_TEST} \n`);
+	assert.include(shelljs.exec(`"${await kamel.create().getPath()}" install --namespace=${EXTRA_NAMESPACE_FOR_TEST}`).stdout, `Camel K installed in namespace ${EXTRA_NAMESPACE_FOR_TEST} \n`);
 }

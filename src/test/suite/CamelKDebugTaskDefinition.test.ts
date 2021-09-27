@@ -40,7 +40,7 @@ suite("Camel K Debug Task definition", function() {
         };
         const task = await new CamelKDebugTaskProvider().getDebugTask(def);
         const execution = task.execution as ShellExecution;
-		assert.include(execution.commandLine, 'kamel debug demo');
+		assert.include(execution.commandLine, 'kamel" debug demo');
         assert.include(execution.commandLine, ' --port 3000');
     });
 	
@@ -52,7 +52,7 @@ suite("Camel K Debug Task definition", function() {
         };
         const task = await new CamelKDebugTaskProvider().getDebugTask(def);
         const execution = task.execution as ShellExecution;
-		assert.include(execution.commandLine, 'kamel debug demo');
+		assert.include(execution.commandLine, 'kamel" debug demo');
         assert.include(execution.commandLine, ' --remote-port 4000');
     });
 	
@@ -64,7 +64,7 @@ suite("Camel K Debug Task definition", function() {
         };
         const task = await new CamelKDebugTaskProvider().getDebugTask(def);
         const execution = task.execution as ShellExecution;
-		assert.include(execution.commandLine, 'kamel debug demo');
+		assert.include(execution.commandLine, 'kamel" debug demo');
         assert.include(execution.commandLine, ' --suspend false');
     });
 
