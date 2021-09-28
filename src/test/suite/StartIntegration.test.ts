@@ -181,20 +181,20 @@ suite('Check can deploy default examples', () => {
 });
 
 async function checkConfigMapAvailableForDeployedIntegration() {
-	const describeShell = shelljs.exec(`${await kamel.create().getPath()} describe integration test-java-deploy-with-config-map`);
+	const describeShell = shelljs.exec(`"${await kamel.create().getPath()}" describe integration test-java-deploy-with-config-map`);
 	const description: string = describeShell.stdout;
 	expect(description.replace(lineReturnAndSpaces, '')).includes('Configuration:Type:configmapValue:my-configmap');
 }
 
 async function checkPropertyAvailableAvailableForDeployedIntegration() {
-	const describeShell = shelljs.exec(`${await kamel.create().getPath()} describe integration test-java-deploy-with-property`);
+	const describeShell = shelljs.exec(`"${await kamel.create().getPath()}" describe integration test-java-deploy-with-property`);
 	const description: string = describeShell.stdout;
 	expect(description).includes('propertyKey = my Value');
 	expect(description.replace(lineReturnAndSpaces, '')).includes('Configuration:Type:propertyValue:propertyKey=myValue');
 }
 
 function createConfigMap(kubectlPath: string, confimapName: string) {
-	const createNamespaceExec = shelljs.exec(`${kubectlPath} create configmap ${confimapName} --from-literal=dummykey=dummyvalue`);
+	const createNamespaceExec = shelljs.exec(`"${kubectlPath}" create configmap ${confimapName} --from-literal=dummykey=dummyvalue`);
 	assert.equal(createNamespaceExec.stderr, '');
 	waitUntil(() => {
 		return createNamespaceExec.stdout.includes(`configmap/${confimapName} created`);
@@ -202,7 +202,7 @@ function createConfigMap(kubectlPath: string, confimapName: string) {
 }
 
 function createSecret(kubectlPath: string, confimapName: string) {
-	const createNamespaceExec = shelljs.exec(`${kubectlPath} create secret generic ${confimapName} --from-literal=dummykey=dummyvalue`);
+	const createNamespaceExec = shelljs.exec(`"${kubectlPath}" create secret generic ${confimapName} --from-literal=dummykey=dummyvalue`);
 	assert.equal(createNamespaceExec.stderr, '');
 	waitUntil(() => {
 		return createNamespaceExec.stdout.includes(`secret/${confimapName} created`);
@@ -218,7 +218,7 @@ async function checkIntegrationsInDifferentNamespaces(EXTRA_NAMESPACE_FOR_TEST: 
 
 async function prepareNewNamespaceWithCamelK(EXTRA_NAMESPACE_FOR_TEST: string) {
 	const kubectlPath = await kubectl.create().getPath();
-	const createNamespaceExec = shelljs.exec(`${kubectlPath} create namespace ${EXTRA_NAMESPACE_FOR_TEST}`);
+	const createNamespaceExec = shelljs.exec(`"${kubectlPath}" create namespace ${EXTRA_NAMESPACE_FOR_TEST}`);
 	assert.equal(createNamespaceExec.stderr, '');
 	waitUntil(() => {
 		return createNamespaceExec.stdout.includes(`namespace/${EXTRA_NAMESPACE_FOR_TEST} created`);
