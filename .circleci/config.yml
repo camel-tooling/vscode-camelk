@@ -13,10 +13,10 @@ jobs:
       - restore_cache:
           key: dependency-cache-{{ checksum "package-lock.json" }}
       - run:
-          name: Install Node environment
+          name: Setup Node environment
           command: |
-            curl -sL https://deb.nodesource.com/setup_12.x | sudo -E bash -
-            sudo apt-get install -y nodejs
+            sudo nvm install lts/fermium
+            sudo nvm use lts/fermium
       - run:
           name: install-vsce
           command: |
