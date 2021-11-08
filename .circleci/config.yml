@@ -19,7 +19,12 @@ jobs:
             sudo apt-get install -y nodejs
       - run:
           name: install-vsce
-          command: sudo npm install -g vsce
+          command: |
+            echo $PATH
+            echo 'export PATH=$HOME/.local/bin:$PATH' >> $BASH_ENV
+            source $BASH_ENV
+            npm install --prefix=$HOME/.local -g vsce
+            vsce --version
       - run:
           name: npm-ci
           command: npm ci
