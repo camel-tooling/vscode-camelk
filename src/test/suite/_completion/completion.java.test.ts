@@ -97,6 +97,6 @@ async function testCompletion(
 
 	function retrieveDestination() {
 		const context = extension.getStashedContext();
-		return JavaDependenciesManager.destinationFolderForDependencies(context);
+		return context !== undefined ? JavaDependenciesManager.destinationFolderForDependencies(context) : '';
 	}
 }
