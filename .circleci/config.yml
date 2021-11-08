@@ -23,7 +23,7 @@ jobs:
             echo $PATH
             echo 'export PATH=$HOME/.local/bin:$PATH' >> $BASH_ENV
             source $BASH_ENV
-            npm install --prefix=$HOME/.local -g vsce
+            npm install --prefix=$HOME/.local -g vsce@1.103.1
             vsce --version
       - run:
           name: npm-ci
