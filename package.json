@@ -346,7 +346,7 @@
 		"@types/nock": "^11.1.0",
 		"@types/node": "^16.11.11",
 		"@types/sinon": "^10.0.6",
-		"@types/sinon-chai": "^3.2.5",
+		"@types/sinon-chai": "^3.2.6",
 		"@types/vscode": "^1.57.0",
 		"async-wait-until": "^2.0.9",
 		"chai": "^4.3.4",
