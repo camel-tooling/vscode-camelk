@@ -29,7 +29,8 @@
 		"Camel-K",
 		"camelk",
 		"kamel",
-		"Tool"
+		"Tool",
+		"Camel Yaml"
 	],
 	"engines": {
 		"vscode": "^1.57.0"
