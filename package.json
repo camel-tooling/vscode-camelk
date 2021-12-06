@@ -3,7 +3,7 @@
 	"displayName": "Tooling for Apache Camel K by Red Hat",
 	"description": "VS Code support for Apache Camel K functionality",
 	"license": "Apache-2.0",
-	"version": "0.0.28",
+	"version": "0.0.29",
 	"publisher": "redhat",
 	"icon": "icons/icon128.png",
 	"preview": true,
