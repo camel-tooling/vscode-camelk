@@ -339,7 +339,7 @@
 		"ui-test-insiders": "npm run compile && node out/src/ui-test/uitest_runner.js -t insider"
 	},
 	"devDependencies": {
-		"@types/chai": "^4.2.22",
+		"@types/chai": "^4.3.0",
 		"@types/download": "^8.0.1",
 		"@types/glob": "^7.2.0",
 		"@types/mkdirp": "^1.0.2",
