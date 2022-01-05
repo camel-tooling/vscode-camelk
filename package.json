@@ -349,7 +349,7 @@
 		"@types/sinon": "^10.0.6",
 		"@types/sinon-chai": "^3.2.8",
 		"@types/vscode": "^1.57.0",
-		"async-wait-until": "^2.0.9",
+		"async-wait-until": "^2.0.12",
 		"chai": "^4.3.4",
 		"copyfiles": "^2.4.1",
 		"decache": "^4.6.1",
@@ -364,7 +364,7 @@
 		"vscode-extension-tester": "^4.2.3",
 		"vscode-extension-tester-native": "^3.0.2",
 		"vscode-test": "^1.6.1",
-		"vscode-uitests-tooling": "^2.2.0"
+		"vscode-uitests-tooling": "^2.2.1"
 	},
 	"extensionDependencies": [
 		"ms-kubernetes-tools.vscode-kubernetes-tools",
