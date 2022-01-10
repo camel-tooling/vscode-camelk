@@ -31,11 +31,11 @@ import { waitUntil } from 'async-wait-until';
 import { fail } from 'assert';
 import { assert } from 'chai';
 
-export const RUNNING_TIMEOUT: number = 720000;
-export const DEPLOYED_TIMEOUT: number = 10000;
-export const UNDEPLOY_TIMEOUT: number = 20000;
-export const PROVIDER_POPULATED_TIMEOUT: number = 20000;
-export const EDITOR_OPENED_TIMEOUT: number = 5000;
+export const RUNNING_TIMEOUT = 720000;
+export const DEPLOYED_TIMEOUT = 10000;
+export const UNDEPLOY_TIMEOUT = 20000;
+export const PROVIDER_POPULATED_TIMEOUT = 20000;
+export const EDITOR_OPENED_TIMEOUT = 5000;
 const TOTAL_TIMEOUT: number = RUNNING_TIMEOUT + DEPLOYED_TIMEOUT + EDITOR_OPENED_TIMEOUT + UNDEPLOY_TIMEOUT + PROVIDER_POPULATED_TIMEOUT;
 
 suite('Check can debug default Java example', () => {

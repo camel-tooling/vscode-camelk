@@ -31,10 +31,10 @@ const os = require('os');
 
 suite("ensure install methods are functioning as expected", function() {
 
-	let installKubectlSpy  = sinon.spy(installer, 'installKubectl');
+	const installKubectlSpy  = sinon.spy(installer, 'installKubectl');
 
 	test("install Camel K and Kubernetes CLIs on activation", async function() {
-		let extension = await Utils.ensureExtensionActivated();
+		const extension = await Utils.ensureExtensionActivated();
 
 		installKubectlSpy.resetHistory();	
 
@@ -68,14 +68,14 @@ suite("ensure install methods are functioning as expected", function() {
 		if (failed(retrievedVersion)) {
 			assert.fail(retrievedVersion.error[0]);
 		}
-		let latestversion = retrievedVersion.result.trim();
+		const latestversion = retrievedVersion.result.trim();
 		assert.ok(typeof latestversion === "string" && latestversion, 'unable to retrieve latest version');
 		const needsUpdate: boolean = await versionUtils.checkKamelNeedsUpdate(latestversion);
 		assert.isFalse(needsUpdate, `Latest retrieved version is ${latestversion}. It is reported that an update is needed. It can be that a new Camel K has been released and the default version has not been updated.`);
 	});
 	
 	test("ensure we have access to the kamel cli", function(done) {
-		let kamelPath = config.getActiveKamelconfig();
+		const kamelPath = config.getActiveKamelconfig();
 		console.log(`kamelPath= ${kamelPath}`);
 		assert.equal(fs.existsSync(kamelPath), true);
 		done();
@@ -86,7 +86,7 @@ suite("ensure install methods are functioning as expected", function() {
 			kubectlTest.skip();
 		}
 
-		let kubectlPath = await kubectl.baseKubectlPath();
+		const kubectlPath = await kubectl.baseKubectlPath();
 		console.log(`kubectlPath= ${kubectlPath}`);
 		assert.equal(fs.existsSync(kubectlPath), true);
 	});

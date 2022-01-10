@@ -30,7 +30,7 @@ import { UNDEPLOY_TIMEOUT, PROVIDER_POPULATED_TIMEOUT, RUNNING_TIMEOUT, DEPLOYED
 import { checkCodelensForOpenedDocument } from '../codelenses/StartIntegrationCodeLens.test';
 
 export async function cleanDeployedIntegration(telemetrySpy: sinon.SinonSpy) {
-	let deployedTreeNodes: TreeNode[] | undefined = await retrieveDeployedTreeNodes();
+	const deployedTreeNodes: TreeNode[] | undefined = await retrieveDeployedTreeNodes();
 	if (deployedTreeNodes) {
 		telemetrySpy.resetHistory();
 		deployedTreeNodes.forEach(deployedTreeNode => {

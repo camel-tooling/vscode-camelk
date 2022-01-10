@@ -24,7 +24,7 @@ const CAMELK_SCHEMA_ID = 'camelk';
 export const CAMELK_SCHEMA_URI_PREFIX = CAMELK_SCHEMA_ID + '://schema/';
 
 let camelkSchemaCache: string | undefined;
-let configUpdaterRegistered: boolean = false;
+let configUpdaterRegistered = false;
 
 export async function registerCamelKSchemaProvider(mainOutputChannel: vscode.OutputChannel): Promise<void> {
 	const yamlExtension: vscode.Extension<any> | undefined = vscode.extensions.getExtension('redhat.vscode-yaml');

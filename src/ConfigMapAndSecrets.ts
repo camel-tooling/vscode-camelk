@@ -24,10 +24,10 @@ import { isKubernetesAvailable } from './kubectlutils';
 import { ShellResult } from './shell';
 import * as telemetry from './Telemetry';
 
-export const validNameRegex: RegExp = /^[A-Za-z][A-Za-z0-9\-]*(?:[A-Za-z0-9]$){1}/;
+export const validNameRegex = /^[A-Za-z][A-Za-z0-9-]*(?:[A-Za-z0-9]$){1}/;
 const COMMAND_ID_CREATE_CONFIG_MAP_FROM_FILE = 'camelk.integrations.createconfigmapfromfile';
 const COMMAND_ID_CREATE_CONFIGMAP_FROM_FOLDER = 'camelk.integrations.createconfigmapfromfolder';
-const COMMAND_ID_CREATE_SECRET_FROM_FILE = 'camelk.integrations.createsecretfromfile';
+const COMMAND_ID_CREATE_SECRET_FROM_FILE = 'camelk.intevargrations.createsecretfromfile';
 const COMMAND_ID_CREATE_SECRET_FROM_FOLDER = 'camelk.integrations.createsecretfromfolder';
 
 export function registerCommands(): void {

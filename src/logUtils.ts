@@ -29,7 +29,7 @@ import { window } from 'vscode';
 const stripAnsi = require('strip-ansi');
 
 function getCurrentNamespace() : string {
-	let ns: string = `default`;
+	let ns = `default`;
 	const currentNs: string | undefined = config.getNamespaceconfig();
 	if (currentNs) {
 		ns = currentNs;
@@ -46,7 +46,7 @@ export async function handleLogViaKamelCli(integrationName: string) : Promise<vo
 		containers: undefined,
 		containersQueryPath: `.spec`
 	};
-	const cresource: string = `${resource.namespace}/${resource.kindName}`;
+	const cresource = `${resource.namespace}/${resource.kindName}`;
 	const args : string[] = ['log', `${integrationName}`];
 	try { 
 		const proc: ChildProcess = await kamelExecutor.invokeArgs(args);
@@ -54,8 +54,8 @@ export async function handleLogViaKamelCli(integrationName: string) : Promise<vo
 		if (proc && proc.stdout) {
 			proc.stdout.on('data', async (data: string) => {
 				if (data.length > 0) {
-					var buf = Buffer.from(data);
-					var text = stripAnsi(buf.toString());
+					const buf = Buffer.from(data);
+					const text = stripAnsi(buf.toString());
 					if (text.indexOf(`Received hang up - stopping the main instance`) !== -1 && !closeLogViewWhenIntegrationRemoved) {
 						const title: string = panel.getTitle();
 						updateLogViewTitleToStopped(panel, title);
@@ -78,7 +78,7 @@ export async function handleLogViaKubectlCli(podName: string) : Promise<string |
 		containers: undefined,
 		containersQueryPath: `.spec`
 	};
-	const cresource: string = `${resource.namespace}/${resource.kindName}`;
+	const cresource = `${resource.namespace}/${resource.kindName}`;
 	const args : string[] = ['logs', `-f`, `${podName}`];
 	try {
 		const proc: ChildProcess = await kubectlExe.invokeArgs(args);
@@ -109,7 +109,7 @@ export async function handleLogViaKubectlCli(podName: string) : Promise<string |
 }
 
 export async function handleOperatorLog() : Promise<void> {
-	const operatorName: string = `camel-k-operator`;
+	const operatorName = `camel-k-operator`;
 	const podNames: string[] = await kubectlutils.getNamedPodsFromKubectl(operatorName);
 	await handleLogViaKubectlCli(podNames[0]);
 }
@@ -135,7 +135,7 @@ export function removeIntegrationLogView(integrationName: string) : void {
 export function updateLogViewTitleToStopped(panel: LogsPanel, title: string) {
 	if (panel && title) {
 		// make sure we only show the log as stopped once 
-		const stoppedString: string = `[Integration stopped]`;
+		const stoppedString = `[Integration stopped]`;
 		const boolHasIntegrationStopped = title.indexOf(stoppedString) !== -1;
 		if (!boolHasIntegrationStopped) {
 			panel.updateTitle(title + ` ` + stoppedString);
@@ -147,7 +147,7 @@ export function updateLogViewTitleToStopped(panel: LogsPanel, title: string) {
 
 export async function getIntegrationsListFromKamel(integrationName? : string) : Promise<string> {
 	const kamelExecutor: kamel.Kamel = kamel.create();
-	let cmdLine: string = `get`;
+	let cmdLine = `get`;
 	if (integrationName) {
 		cmdLine += integrationName;
 	}

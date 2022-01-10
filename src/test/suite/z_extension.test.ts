@@ -35,12 +35,12 @@ suite("ensure camelk extension exists and is accessible", function() {
 	}).timeout(ACTIVATION_TIMEOUT + 1000);	
 
 	test('test that getBaseCmd returned value doesn\'t contain --namespace parameter when no namespace is passed', function() {
-		let cmdStrNoNS : string = kamel.getBaseCmd(`fakepath`,`fakecommand`, undefined);
+		const cmdStrNoNS : string = kamel.getBaseCmd(`fakepath`,`fakecommand`, undefined);
 		assert.equal(cmdStrNoNS.indexOf('--namespace'), -1);
 	});
 	
 	test('test that getBaseCmd returned value contains --namespace parameter when namespace is passed', function() {
-		let cmdStrWithNS : string = kamel.getBaseCmd(`fakepath`,`fakecommand`, 'fakens');
+		const cmdStrWithNS : string = kamel.getBaseCmd(`fakepath`,`fakecommand`, 'fakens');
 		assert.ok(cmdStrWithNS.includes('--namespace'));
 	});
 

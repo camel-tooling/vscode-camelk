@@ -55,11 +55,11 @@ export async function getNamedListFromKubernetesThenParseList(itemType : string,
 export function parseShellResult(output: string) : string[] {
 	const processedList : string[] = [];
 	if (output) {
-		let lines: string[] = output.split('\n');
+		const lines: string[] = output.split('\n');
 		for (const entry of lines) {
 			const spaceSplittedLine: string[] = entry.split('  ');
 			const cleanLine = [];
-			for (let value of spaceSplittedLine) {
+			for (const value of spaceSplittedLine) {
 				if (value.trim().length === 0) {
 					continue;
 				}
@@ -106,11 +106,11 @@ export async function getIntegrations(): Promise<string> {
 
 export async function getPodsFromKubectlCli() : Promise<string> {
 	const kubectl: k8s.API<k8s.KubectlV1> = await k8s.extension.kubectl.v1;
-	const cmd: string = `get pods`;
+	const cmd = `get pods`;
 	if (kubectl && kubectl.available) {
 		const result: k8s.KubectlV1.ShellResult | undefined = await kubectl.api.invokeCommand(cmd);
 		if (!result || result.code !== 0) {
-			let error: string = `Unable to invoke kubectl to retrieve pod information`;
+			let error = `Unable to invoke kubectl to retrieve pod information`;
 			if (result && result.stderr) {
 				error = result.stderr;
 			}
@@ -148,10 +148,10 @@ export async function getKubernetesVersion(): Promise<string | undefined> {
 }
 
 export async function getNamedPodsFromKubectl(podNameRoot : string): Promise<string[]> {
-	let outArray : string[] = [];
+	const outArray : string[] = [];
 	try {
 		const allPods: string = await getPodsFromKubectlCli();
-		let podArray = parseShellResult(allPods);
+		const podArray = parseShellResult(allPods);
 		for (const podName of podArray) {
 			if (podName.startsWith(podNameRoot)) {
 				outArray.push(podName);

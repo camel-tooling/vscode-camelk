@@ -149,7 +149,7 @@ function updateReferenceLibrariesForConfigKey(text: string, refLibrariesConfig: 
 }
 
 function removeCamelKFromReferencedlibraries(refLibrariesConfig: string[], camelKReferencedLibrariesPattern: string, configuration: vscode.WorkspaceConfiguration, configurationKey: string) {
-    for (var i = 0; i < refLibrariesConfig.length; i++) {
+    for (let i = 0; i < refLibrariesConfig.length; i++) {
         if (refLibrariesConfig[i] === camelKReferencedLibrariesPattern) {
             refLibrariesConfig.splice(i, 1);
         }

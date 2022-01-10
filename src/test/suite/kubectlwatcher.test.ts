@@ -28,7 +28,7 @@ suite("Kubectl integration watcher", function() {
 	let messageStub: sinon.SinonStub<[string], void>;
 	let refreshStub: sinon.SinonStub<[], Promise<void>>;
 	let sandbox: sinon.SinonSandbox;
-	let kubeconfigFilePath : string = homedir + '/.kube/config';
+	const kubeconfigFilePath : string = homedir + '/.kube/config';
 	
 	this.beforeAll(async () => {
 		this.timeout(60000);

@@ -33,15 +33,15 @@ import * as child_process from 'child_process';
 
 suite("ensure that the upstream kubernetes.go sanitize in camel-k have not changed since we checked last", function() {
 
-	var fileName : string = 'sanitize.go';
-	var url = 'https://raw.githubusercontent.com/apache/camel-k/master/pkg/util/kubernetes/sanitize.go';
+	const fileName  = 'sanitize.go';
+	const url = 'https://raw.githubusercontent.com/apache/camel-k/master/pkg/util/kubernetes/sanitize.go';
 	
 	test("test to see if the sanitize.go file has changed since we stashed it", function(done) {
-		var goPath = retrieveSanitizeFileFromUpstream(fileName, url);
-		let stashedFile = path.join(__dirname, '../../../src/test/suite/sanitize.go.saved');
+		const goPath = retrieveSanitizeFileFromUpstream(fileName, url);
+		const stashedFile = path.join(__dirname, '../../../src/test/suite/sanitize.go.saved');
 
-		var str1 = fs.readFileSync(goPath, 'utf-8');
-		var str2 = fs.readFileSync(stashedFile, 'utf-8');
+		const str1 = fs.readFileSync(goPath, 'utf-8');
+		let str2 = fs.readFileSync(stashedFile, 'utf-8');
 		str2 = replaceCarriageReturns(str1);
 
 		assert.equal(fs.existsSync(goPath), true);
@@ -50,15 +50,15 @@ suite("ensure that the upstream kubernetes.go sanitize in camel-k have not chang
 	});
 });
 
-var replaceCarriageReturns = function(str:string) {
-	var regxp = /\r\n/g;
+const replaceCarriageReturns = function(str:string) {
+	const regxp = /\r\n/g;
 	str = str.replace(regxp, " ");
 	return str;
 }
 
 function retrieveSanitizeFileFromUpstream(fileName: string, url: string) {
-	var goPath = path.join(fs.realpathSync(os.tmpdir()), fileName);
-	let commandString = `curl -o ${fileName} -L ${url}`;
+	const goPath = path.join(fs.realpathSync(os.tmpdir()), fileName);
+	const commandString = `curl -o ${fileName} -L ${url}`;
 	console.log(goPath);
 	console.log(commandString);
 	child_process.execSync(commandString, { cwd: os.tmpdir() });

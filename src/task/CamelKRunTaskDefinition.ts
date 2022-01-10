@@ -41,8 +41,8 @@ export interface CamelKRunTaskDefinition extends vscode.TaskDefinition {
 export class CamelKRunTaskProvider implements vscode.TaskProvider {
 	
 	private tasks: vscode.Task[] | undefined;
-	static START_CAMELK_TYPE: string = 'camel-k';
-	constructor() { }
+	static START_CAMELK_TYPE = 'camel-k';
+	constructor() { /* Intentional Empty contructor */}
 
 	public async provideTasks(): Promise<vscode.Task[]> {
 		return this.getTasks();
@@ -58,7 +58,7 @@ export class CamelKRunTaskProvider implements vscode.TaskProvider {
 			return this.tasks;
 		}
 		this.tasks = [];
-		let startTaskDefinition = {
+		const startTaskDefinition = {
 			"type": CamelKRunTaskProvider.START_CAMELK_TYPE,
 			"label": NAME_OF_PROVIDED_TASK_TO_DEPLOY_IN_DEV_MODE_FROM_ACTIVE_EDITOR,
 			"file": "\"${file}\"",
@@ -69,7 +69,7 @@ export class CamelKRunTaskProvider implements vscode.TaskProvider {
 	}
 	
 	public async getRunTask(definition: CamelKRunTaskDefinition): Promise<vscode.Task> {
-		let args = IntegrationUtils.computeKamelArgs(definition.file,
+		const args = IntegrationUtils.computeKamelArgs(definition.file,
 			definition.dev,
 			definition.configmap,
 			definition.secret,
@@ -81,8 +81,8 @@ export class CamelKRunTaskProvider implements vscode.TaskProvider {
 			definition.volumes,
 			definition.compression,
 			definition.profile);
-		let argsInlined = args.join(' ');
-		let processExecution = new vscode.ShellExecution(`"${await kamel.create().getPath()}" ${argsInlined}`);
+		const argsInlined = args.join(' ');
+		const processExecution = new vscode.ShellExecution(`"${await kamel.create().getPath()}" ${argsInlined}`);
 		let displayName :string;
 		if(definition.label) {
 			displayName = definition.label;

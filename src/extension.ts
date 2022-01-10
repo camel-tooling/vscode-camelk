@@ -42,21 +42,21 @@ import { registerCamelKSchemaProvider } from './CamelKSchemaManager';
 import * as telemetry from './Telemetry';
 import { ClasspathRefreshCodeLensProvider } from './codelenses/ClasspathRefreshCodeLensProvider';
 import { StartIntegrationCodeLensProvider } from './codelenses/StartIntegrationCodeLensProvider';
-export const DELAY_RETRY_KUBECTL_CONNECTION: number = 1000;
+export const DELAY_RETRY_KUBECTL_CONNECTION = 1000;
 
 export let mainOutputChannel: vscode.OutputChannel;
 export let myStatusBarItem: vscode.StatusBarItem;
 export let camelKIntegrationsProvider: CamelKNodeProvider;
 export let camelKIntegrationsTreeView: vscode.TreeView<TreeNode | undefined>;
 export let closeLogViewWhenIntegrationRemoved: boolean;
-export var runtimeVersionSetting: string | undefined;
+export let runtimeVersionSetting: string | undefined;
 
 const eventEmitter: events.EventEmitter = new events.EventEmitter();
-const restartKubectlWatchEvent: string = 'restartKubectlWatch';
+const restartKubectlWatchEvent = 'restartKubectlWatch';
 
 let showStatusBar: boolean;
 let runningKubectl: ChildProcess | undefined;
-let timestampLastkubectlIntegrationStart: number = 0;
+let timestampLastkubectlIntegrationStart = 0;
 let stashedContext: vscode.ExtensionContext;
 
 const COMMAND_ID_START_LOG = 'camelk.integrations.log';
@@ -94,7 +94,7 @@ export async function activate(context: vscode.ExtensionContext) {
 		startListeningForServerChanges();
 	
 		// Listener to handle auto-refresh of view - kubectl times out, so we simply restart the watch when it does
-		var watchListener = function restartKubectlListenerOnEvent() {
+		const watchListener = function restartKubectlListenerOnEvent() {
 			startListeningForServerChanges();
 		};
 		eventEmitter.on(restartKubectlWatchEvent, watchListener);
@@ -118,8 +118,8 @@ export async function activate(context: vscode.ExtensionContext) {
 			}
 			if (selection && selection.label) {
 				setStatusLineMessageAndShow(`Removing Apache Camel K Integration...`);
-				let integrationName: string = retrieveIntegratioName(selection);
-				let kamelExecutor = kamel.create();
+				const integrationName: string = retrieveIntegratioName(selection);
+				const kamelExecutor = kamel.create();
 				utils.shareMessage(mainOutputChannel, 'Removing ' + integrationName + ' via Kamel executable Delete');
 				try {
 					await kamelExecutor.invoke(`delete ${integrationName}`);
@@ -154,7 +154,7 @@ export async function activate(context: vscode.ExtensionContext) {
 			}
 			if (selection && selection.label) {
 				utils.shareMessage(mainOutputChannel, `Retrieving log for running Apache Camel K Integration...`);
-				let integrationName : string = retrieveIntegratioName(selection);
+				const integrationName : string = retrieveIntegratioName(selection);
 				await logUtils.handleLogViaKamelCli(integrationName).catch((error) => {
 					utils.shareMessage(mainOutputChannel, `error: ${error} \n`);
 				});
@@ -226,7 +226,7 @@ export async function activate(context: vscode.ExtensionContext) {
 }
 
 function retrieveIntegratioName(selection: TreeNode) {
-	let integrationNameTreeItem: string | vscode.TreeItemLabel | undefined = selection.label;
+	const integrationNameTreeItem: string | vscode.TreeItemLabel | undefined = selection.label;
 	if (integrationNameTreeItem === undefined) {
 		return "";
 	} else if(typeof integrationNameTreeItem === "string") {
@@ -237,9 +237,9 @@ function retrieveIntegratioName(selection: TreeNode) {
 }
 
 function selectFirstItemInTree() {
-	let nodes = camelKIntegrationsProvider.getTreeNodes();
+	const nodes = camelKIntegrationsProvider.getTreeNodes();
 	if (nodes && nodes.length > 0) {
-		let firstNode = nodes[0];
+		const firstNode = nodes[0];
 		camelKIntegrationsTreeView.reveal(firstNode, {select:true});
 	}
 }
@@ -395,7 +395,7 @@ function createIntegrationsView(): void {
 }
 
 export async function installDependencies(context: vscode.ExtensionContext) {
-	let gotKamel : boolean = false;
+	let gotKamel  = false;
 	try {
 		const response: boolean = await checkKamelNeedsUpdate();
 		gotKamel = !response; 
@@ -404,7 +404,7 @@ export async function installDependencies(context: vscode.ExtensionContext) {
 		console.log(`Error when checking for kamel version: ${error}`);
 	}
 
-	let gotKubernetes : boolean = false;
+	let gotKubernetes  = false;
 	try {
 		const kubectlCliVersion: string | undefined = await kubectlutils.getKubernetesVersion();
 		if (kubectlCliVersion) {
@@ -448,14 +448,14 @@ export function getStashedContext() : vscode.ExtensionContext {
 async function removeIntegrationLogView(integrationName: string) : Promise<void> {
 	if (closeLogViewWhenIntegrationRemoved) {
 		LogsPanel.currentPanels.forEach((value : LogsPanel) => {
-			var title = value.getTitle();
+			const title = value.getTitle();
 			if (title.indexOf(integrationName) >= 0) {
 				value.disposeView();
 			}
 		});
 	} else {
 		LogsPanel.currentPanels.forEach((value : LogsPanel) => {
-			var title = value.getTitle();
+			const title = value.getTitle();
 			if (title.indexOf(integrationName) >= 0) {
 				logUtils.updateLogViewTitleToStopped(value, title);
 			}
@@ -476,7 +476,7 @@ async function installAllTutorials(context : vscode.ExtensionContext) {
 			}
 		]
 	};
-	for (let tutorial of tutorialList.tutorials) {
+	for (const tutorial of tutorialList.tutorials) {
 		await registerTutorialWithDidact(context, tutorial.name, tutorial.extpath, tutorial.category);
 	}
 }
@@ -484,10 +484,10 @@ async function installAllTutorials(context : vscode.ExtensionContext) {
 async function registerTutorialWithDidact(context: vscode.ExtensionContext, name : string, extpath : string, category : string) {
 	try {
 		// test to ensure didact is available 
-		const extensionId: string = 'redhat.vscode-didact';
+		const extensionId = 'redhat.vscode-didact';
 		const didactExt: any = vscode.extensions.getExtension(extensionId);
 		if (didactExt) {
-			const commandId: string = 'vscode.didact.register';
+			const commandId = 'vscode.didact.register';
 			const tutorialUri: vscode.Uri = vscode.Uri.file(context.asAbsolutePath(extpath));
 
 			// then pass name, file system path, and category

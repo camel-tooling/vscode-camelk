@@ -36,7 +36,7 @@ const binFile: string = (!shell.isWindows()) ? kamel : kamel_windows;
 
 export async function isKamelAvailable() : Promise<boolean> {
 	try { 
-		let kamelLocal = kamelCli.create();
+		const kamelLocal = kamelCli.create();
 		const rtnValue: string = await kamelLocal.invoke('--help');
 		return rtnValue.startsWith('Apache Camel K');
 	} catch (error) {
@@ -68,8 +68,8 @@ async function downloadAndExtract(link : string, dlFilename: string, installFold
 			} else {
 				totalMessagePart = `unknown`;
 			}
-			const message: string = `Download progress: ${progress.transferred} / ${totalMessagePart} (${Math.round(progress.percent * 100)}%)`;
-			const tooltip: string = `Download progress for ${dlFilename}`;
+			const message = `Download progress: ${progress.transferred} / ${totalMessagePart} (${Math.round(progress.percent * 100)}%)`;
+			const tooltip = `Download progress for ${dlFilename}`;
 			updateStatusBarItem(myStatusBarItem, message, tooltip);
 		}).then(() => {
 			extension.mainOutputChannel.appendLine(`Downloaded ${dlFilename}.`);
@@ -101,7 +101,7 @@ export async function installKamel(context: vscode.ExtensionContext): Promise<Er
 	if (runtimeVersionSetting && runtimeVersionSetting.toLowerCase() !== versionUtils.version.toLowerCase()) {
 		const runtimeVersionAvailable = await versionUtils.testVersionAvailable(runtimeVersionSetting);
 		if (!runtimeVersionAvailable) {
-			const unavailableMsg: string = `Camel K CLI Version ${runtimeVersionSetting} unavailable. Will use default version ${versionUtils.version}`;
+			const unavailableMsg = `Camel K CLI Version ${runtimeVersionSetting} unavailable. Will use default version ${versionUtils.version}`;
 			extension.shareMessageInMainOutputChannel(unavailableMsg);
 			versionToUse = versionUtils.version;
 		} else {
@@ -133,7 +133,7 @@ export async function installKamel(context: vscode.ExtensionContext): Promise<Er
 	console.log(`Attempting to download Apache Camel K CLI to ${installFolder}`);
 	mkdirp.sync(installFolder);
 
-	let kamelUrl : string = '';
+	let kamelUrl  = '';
 	if (platform && versionToUse) {
 		try {
 			kamelUrl = await versionUtils.getDownloadURLForCamelKTag(versionToUse, platform);
@@ -143,7 +143,7 @@ export async function installKamel(context: vscode.ExtensionContext): Promise<Er
 		}
 	}
 
-	var msg = `Camel K CLI Version ${versionToUse} unavailable. Please check the Apache Camel K version specified in VS Code Settings. Inaccessible url: ${kamelUrl}`;
+	const msg = `Camel K CLI Version ${versionToUse} unavailable. Please check the Apache Camel K version specified in VS Code Settings. Inaccessible url: ${kamelUrl}`;
 	if (!kamelUrl && kamelUrl.length === 0) {
 		extension.shareMessageInMainOutputChannel(msg);
 		throw new Error(msg);
@@ -166,7 +166,7 @@ export async function installKamel(context: vscode.ExtensionContext): Promise<Er
 			if (shell.isUnix()) {
 				fs.chmodSync(downloadFile, '0700');
 			}
-	 		await config.addKamelPathToConfig(downloadFile);
+			await config.addKamelPathToConfig(downloadFile);
 		}
 	} catch( error ) {
 		console.log(error);
@@ -207,7 +207,7 @@ function toKubectlOsString(platform: shell.Platform | undefined): string | undef
 }
 
 export async function installKubectl(context: vscode.ExtensionContext): Promise<Errorable<null>> {
-	const tool: string = 'kubectl';
+	const tool = 'kubectl';
 	const executable: string = (shell.isUnix() || shell.isMacOS()) ? tool : `${tool}.exe`;
 	const osString = toKubectlOsString(platform);
 	const version: Errorable<string> = await getStableKubectlVersion();
@@ -219,7 +219,7 @@ export async function installKubectl(context: vscode.ExtensionContext): Promise<
 	console.log(`Downloading Kubernetes CLI to ${installFolder}`);
 	mkdirp.sync(installFolder);
 
-	const kubectlUrl: string = `https://storage.googleapis.com/kubernetes-release/release/${version.result.trim()}/bin/${osString}/amd64/${executable}`;
+	const kubectlUrl = `https://storage.googleapis.com/kubernetes-release/release/${version.result.trim()}/bin/${osString}/amd64/${executable}`;
 	const downloadFile: string = path.join(installFolder, executable);
 
 	extension.shareMessageInMainOutputChannel(`Downloading Kubernetes cli tool from ${kubectlUrl} to ${downloadFile}`);
