@@ -45,7 +45,7 @@ export async function create(...args: any[]) : Promise<void> {
 
 	// for didact use, we expect two arguments -- filename and language
 	if (args && args.length > 0 && Array.isArray(args[0])) {
-		let innerArgs1 : any[] = args[0];
+		const innerArgs1 : any[] = args[0];
 		if (innerArgs1[0] && innerArgs1[1]) {
 			filename = innerArgs1[0];
 			language = innerArgs1[1];
@@ -97,14 +97,14 @@ export function validateFileName(name: string, language: string, workspaceFolder
 	if (!name) {
 		return 'Please provide a name for the new file (without extension)';
 	}
-	let newFilePotentialFullPath: string = computeFullpath(language, workspaceFolder, name);
+	const newFilePotentialFullPath: string = computeFullpath(language, workspaceFolder, name);
 	if (fs.existsSync(newFilePotentialFullPath)) {
 		return 'There is already a file with the same name. Please choose a different name.';
 	}
 	if (!validFilename(name)) {
 		return 'The filename is invalid.';
 	}
-	const patternJavaNamingConvention: string = '[A-Z][a-zA-Z_$0-9]*';
+	const patternJavaNamingConvention = '[A-Z][a-zA-Z_$0-9]*';
 	if ((language === 'Java' || language === 'Groovy') && !name.match(patternJavaNamingConvention)) {
 		return `The filename needs to follow the ${language} naming convention. I.e. ${patternJavaNamingConvention}`;
 	}

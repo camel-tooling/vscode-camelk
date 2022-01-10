@@ -28,7 +28,7 @@ export class CamelKNodeProvider implements vscode.TreeDataProvider<TreeNode> {
 	readonly onDidChangeTreeData: vscode.Event<TreeNode | undefined> = this._onDidChangeTreeData.event;
 
 	protected treeNodes: TreeNode[] = [];
-	protected retrieveIntegrations : boolean = true;
+	protected retrieveIntegrations  = true;
 
 	static context : vscode.ExtensionContext | undefined;
 
@@ -62,7 +62,7 @@ export class CamelKNodeProvider implements vscode.TreeDataProvider<TreeNode> {
 	}
 
 	// add a child to the list of nodes
-	public addChild(oldNodes: TreeNode[] = this.treeNodes, newNode: TreeNode, disableRefresh : boolean = false ): Promise<TreeNode[]> {
+	public addChild(oldNodes: TreeNode[] = this.treeNodes, newNode: TreeNode, disableRefresh  = false ): Promise<TreeNode[]> {
 		return new Promise<TreeNode[]>( async (resolve, reject) => {
 			if (oldNodes) {
 				oldNodes.push(newNode);
@@ -80,7 +80,7 @@ export class CamelKNodeProvider implements vscode.TreeDataProvider<TreeNode> {
 	}
 
 	// This method isn't used by the view currently, but is here to facilitate testing
-	public removeChild(oldNodes: TreeNode[] = this.treeNodes, oldNode: TreeNode, disableRefresh : boolean = false ): Promise<TreeNode[]> {
+	public removeChild(oldNodes: TreeNode[] = this.treeNodes, oldNode: TreeNode, disableRefresh  = false ): Promise<TreeNode[]> {
 		return new Promise<TreeNode[]>( async (resolve, reject) => {
 			if (oldNodes) {
 				const index = oldNodes.indexOf(oldNode);
@@ -120,7 +120,7 @@ export class CamelKNodeProvider implements vscode.TreeDataProvider<TreeNode> {
 			this._onDidChangeTreeData.fire(undefined);
 			const newCount: number = this.treeNodes.length;
 			if (newCount === 0) {
-				let namespace : string | undefined = config.getNamespaceconfig();
+				const namespace : string | undefined = config.getNamespaceconfig();
 				if (namespace) {
 					utils.shareMessage(extension.mainOutputChannel, `Refreshing Apache Camel K Integrations view succeeded, no published integrations available for namespace ${namespace}.`);
 				} else {
@@ -137,7 +137,7 @@ export class CamelKNodeProvider implements vscode.TreeDataProvider<TreeNode> {
 	}
 
 	doesNodeExist(oldNodes: TreeNode[], newNode: TreeNode): boolean {
-		for (let node of oldNodes) {
+		for (const node of oldNodes) {
 			if (node.label === newNode.label) {
 				return true;
 			}
@@ -149,10 +149,10 @@ export class CamelKNodeProvider implements vscode.TreeDataProvider<TreeNode> {
 	processIntegrationList(output: string): void {
 		if (output) {
 			const lines: Array<string> = output.split('\n');
-			for (let entry of lines) {
+			for (const entry of lines) {
 				const spaceSplittedLine: Array<string> = entry.split('  ');
 				const cleanLine: Array<string> = new Array<string>();
-				for (let integration of spaceSplittedLine) {
+				for (const integration of spaceSplittedLine) {
 					if (integration.trim().length === 0) {
 						continue;
 					}
@@ -173,11 +173,11 @@ export class CamelKNodeProvider implements vscode.TreeDataProvider<TreeNode> {
 	}
 
 	// process the JSON we get back from the kube rest API
-	processIntegrationListFromJSON(json : Object): void {
+	processIntegrationListFromJSON(json : unknown): void {
 		if (json) {
 			try {
 				const jsonObject: any = JSON.parse(JSON.stringify(json));
-				for (let integration of jsonObject.items) {
+				for (const integration of jsonObject.items) {
 					const newNode: TreeNode = new TreeNode("string", integration.metadata.name, integration.status.phase, vscode.TreeItemCollapsibleState.None);
 					if (!this.doesNodeExist(this.treeNodes, newNode)) {
 						this.addChild(this.treeNodes, newNode, true);

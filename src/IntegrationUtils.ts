@@ -29,15 +29,15 @@ import * as fs from 'fs';
 import { getTelemetryServiceInstance } from './Telemetry';
 import { TelemetryEvent } from '@redhat-developer/vscode-redhat-telemetry/lib';
 
-const validNameRegex = /^[A-Za-z][A-Za-z0-9\-\.]*(?:[A-Za-z0-9]$){1}/;
-const devModeIntegration: string = 'Dev Mode - Apache Camel K Integration in Dev Mode';
-export const basicIntegration: string = 'Basic - Apache Camel K Integration without extra options';
-export const configMapIntegration: string = 'ConfigMap - Apache Camel K Integration with Kubernetes ConfigMap as Runtime Configuration';
-export const secretIntegration: string = 'Secret - Apache Camel K Integration with Kubernetes Secret as Runtime Configuration';
-export const resourceIntegration: string = 'Resource - Apache Camel K Integration with Resource file';
-export const propertyIntegration: string = 'Property - Apache Camel K Integration with Property';
-const dependencyIntegration: string = 'Dependencies - Apache Camel K Integration with Explicit Dependencies';
-export const vscodeTasksIntegration: string = 'Use a predefined Task - useful for multi-attributes deployment';
+const validNameRegex = /^[A-Za-z][A-Za-z0-9\-.]*(?:[A-Za-z0-9]$){1}/;
+const devModeIntegration = 'Dev Mode - Apache Camel K Integration in Dev Mode';
+export const basicIntegration = 'Basic - Apache Camel K Integration without extra options';
+export const configMapIntegration = 'ConfigMap - Apache Camel K Integration with Kubernetes ConfigMap as Runtime Configuration';
+export const secretIntegration = 'Secret - Apache Camel K Integration with Kubernetes Secret as Runtime Configuration';
+export const resourceIntegration = 'Resource - Apache Camel K Integration with Resource file';
+export const propertyIntegration = 'Property - Apache Camel K Integration with Property';
+const dependencyIntegration = 'Dependencies - Apache Camel K Integration with Explicit Dependencies';
+export const vscodeTasksIntegration = 'Use a predefined Task - useful for multi-attributes deployment';
 
 const ResourceOptions: vscode.OpenDialogOptions = {
 	canSelectMany: true,
@@ -73,14 +73,14 @@ const choiceList = [
 				context = args[0];
 				inChoice = undefined;
 			} else if (Array.isArray(args[0])) {
-				let innerArgs1 : any[] = args[0];
-				let innerArgs2 : any[] = innerArgs1[0];
-				let innerArgs3 : any[] = innerArgs2[0];
+				const innerArgs1 : any[] = args[0];
+				const innerArgs2 : any[] = innerArgs1[0];
+				const innerArgs3 : any[] = innerArgs2[0];
 				context = innerArgs3[0] as vscode.Uri;
 				inChoice = undefined;
 
 				if (innerArgs3.length > 1) {
-					let value = innerArgs3[1];
+					const value = innerArgs3[1];
 					if (typeof value === 'string') {
 						inChoice = value;
 					}
@@ -90,17 +90,17 @@ const choiceList = [
 		if (!context) {
 			// with no arguments, try working with the selected file
 			try {
-				let currentFile = await getCurrentFileSelectionPath();
+				const currentFile = await getCurrentFileSelectionPath();
 
 				// validate that the file is in fact a file we might be interested in
 				const regex = /\.(groovy|java|xml|js|kts|yaml)$/g;
 				if (currentFile.fsPath.match(regex)) {
 					context = currentFile;
 				}
-			 } catch (error) {
+			} catch (error) {
 				reject('No arguments provided to start integration function call');
 				return;	
-			 }
+			}
 		}
 
 		let choice: string | undefined;
@@ -118,9 +118,9 @@ const choiceList = [
 		if (choice && context) {
 			let selectedConfigMap : any = undefined;
 			let selectedSecret : any = undefined;
-			let devMode : boolean = false;
+			let devMode  = false;
 			let selectedResource : any = undefined;
-			let errorEncountered : boolean = false;
+			let errorEncountered  = false;
 			let selectedProperty : any = undefined;
 			let selectedDependency : any = undefined;
 
@@ -232,17 +232,17 @@ async function sendStartIntegrationTelemetryEvent(choice: string, context: vscod
 }
 
 async function handleDefinedTask(context: vscode.Uri) {
-	let allCamelKTasks = await vscode.tasks.fetchTasks({type: CamelKRunTaskProvider.START_CAMELK_TYPE});
-	let filteredCamelKTasks = allCamelKTasks.filter(task => {
-		let camelTaskDefinition = task.definition as CamelKRunTaskDefinition;
-		let file = camelTaskDefinition.file;
+	const allCamelKTasks = await vscode.tasks.fetchTasks({type: CamelKRunTaskProvider.START_CAMELK_TYPE});
+	const filteredCamelKTasks = allCamelKTasks.filter(task => {
+		const camelTaskDefinition = task.definition as CamelKRunTaskDefinition;
+		const file = camelTaskDefinition.file;
 		return file && (isAVariable(file) || isTheExactFile(file, context));
 	});
 	if (filteredCamelKTasks && filteredCamelKTasks.length > 0) {
-		let camelKTaskNames = filteredCamelKTasks.map(task => task.name);
-		let camelKTaskNameToLaunch = await vscode.window.showQuickPick(camelKTaskNames, {placeHolder: 'Choose a predefined task'});
+		const camelKTaskNames = filteredCamelKTasks.map(task => task.name);
+		const camelKTaskNameToLaunch = await vscode.window.showQuickPick(camelKTaskNames, {placeHolder: 'Choose a predefined task'});
 		if(camelKTaskNameToLaunch) {
-			let camelKTaskToLaunch = filteredCamelKTasks.find(task => task.name === camelKTaskNameToLaunch);
+			const camelKTaskToLaunch = filteredCamelKTasks.find(task => task.name === camelKTaskNameToLaunch);
 			if(camelKTaskToLaunch) {
 				await vscode.tasks.executeTask(camelKTaskToLaunch);
 			}
@@ -300,8 +300,8 @@ function getSelectedResources(): Promise<string[]> {
 
 function getSelectedProperties(): Promise<string[]> {
 	return new Promise<string[]> ( async (resolve, reject) => {
-		let hasMoreProperties: boolean = true;
-		let returnedProperties : string[] = [];
+		let hasMoreProperties = true;
+		const returnedProperties : string[] = [];
 
 		while (hasMoreProperties) {
 			const propName: string | undefined = await vscode.window.showInputBox({
@@ -315,7 +315,7 @@ function getSelectedProperties(): Promise<string[]> {
 				if (propValue) {
 					propValue = propValue.replace(/"/g, '\\"');
 					console.log(propValue);
-					let newProperty = `${propName}=${propValue}`;
+					const newProperty = `${propName}=${propValue}`;
 
 					const moreProperties: string | undefined = await vscode.window.showQuickPick(['No', 'Yes'], {
 						placeHolder: 'Are there more properties?',
@@ -345,8 +345,8 @@ function getSelectedProperties(): Promise<string[]> {
 
 function getSelectedDependencies(): Promise<string[]> {
 	return new Promise <string[]> ( async (resolve, reject) => {
-		let hasMoreDependencies: boolean = true;
-		let returnedDependencies : string[] = [];
+		let hasMoreDependencies = true;
+		const returnedDependencies : string[] = [];
 		while (hasMoreDependencies) {
 			await vscode.window.showInputBox({
 				placeHolder: 'Specify the dependency. Use Apache Camel component Artifact Id or Maven dependency format with group:artifact:version',
@@ -378,14 +378,14 @@ function getSelectedDependencies(): Promise<string[]> {
 // use command-line "kamel" utility to start a new integration
 export function createNewIntegration(integrationFileUri: vscode.Uri, devMode? : boolean, configmap? : string, secret? : string, resourceArray? : string[], propertyArray? : string[], dependencyArray? : string[]): Promise<boolean> {
 	return new Promise( async (resolve, reject) => {
-		let filename = integrationFileUri.fsPath;
-		let foldername = path.dirname(filename);
-		let absoluteRoot = path.parse(filename).base;
-		let rootName = absoluteRoot.split('.', 1)[0];
-		let integrationName = utils.toKebabCase(rootName);
+		const filename = integrationFileUri.fsPath;
+		const foldername = path.dirname(filename);
+		const absoluteRoot = path.parse(filename).base;
+		const rootName = absoluteRoot.split('.', 1)[0];
+		const integrationName = utils.toKebabCase(rootName);
 		utils.shareMessage(extension.mainOutputChannel, `Deploying file ${absoluteRoot} as integration ${integrationName}`);
-				let kamelExecutor = kamel.create();
-				let kamelArgs: string[] = computeKamelArgs(
+				const kamelExecutor = kamel.create();
+				const kamelArgs: string[] = computeKamelArgs(
 					absoluteRoot,
 					devMode,
 					configmap,
@@ -433,7 +433,7 @@ export function computeKamelArgs(absoluteRoot: string,
 		integrationVolumesArray?: string[] | undefined,
 		compression?: boolean | undefined,
 		profile?: string) {
-	let kamelArgs: string[] = [];
+	const kamelArgs: string[] = [];
 	kamelArgs.push('run');
 	kamelArgs.push(`${absoluteRoot}`);
 	if (devMode && devMode === true) {
@@ -493,7 +493,7 @@ export function isCamelKAvailable(): Promise<boolean> {
 					return kubectl.api.invokeCommand('api-versions')
 					.then( (result) => {
 						if (result && result.code === 0) {
-							let foundCamel : boolean = result.stdout.includes("camel.apache.org/v1alpha1");
+							const foundCamel : boolean = result.stdout.includes("camel.apache.org/v1alpha1");
 							resolve(foundCamel);
 						} else {
 							resolve(false);
@@ -515,12 +515,12 @@ function validateName(text : string): string | null {
 }
 
 function validateDependency(text : string): string | null {
-	let inputEmpty : boolean = (text === undefined || text.trim().length === 0);
+	const inputEmpty : boolean = (text === undefined || text.trim().length === 0);
 	if (inputEmpty) {
 		return 'Dependency must be specified in the form of an Apache Camel component Artifact Id or a Maven dependency in the form of group:artifact:version';
 	}
 	if (!inputEmpty && text.indexOf(':') > -1) {
-		let trifold : string[] = text.split(':');
+		const trifold : string[] = text.split(':');
 		// make sure we have three colon-delimited strings
 		return !(trifold && trifold.length === 3) ? 'Dependency must be specified in the form of a Maven dependency as group:artifact:version' : null;
 	} else if (!(!inputEmpty && text.indexOf('-') > -1)) {
@@ -541,7 +541,7 @@ function getChildProcessForIntegration(integration:string) {
 
 export function killChildProcessForIntegration(integration:string) : Promise<boolean> {
 	return new Promise( (resolve, reject) => {
-		let childProcess : any = getChildProcessForIntegration(integration);
+		const childProcess : any = getChildProcessForIntegration(integration);
 		if (childProcess) {
 			try {
 				childProcess.kill();

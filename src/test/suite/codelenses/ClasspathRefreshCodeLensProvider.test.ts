@@ -24,7 +24,7 @@ import { getDocUri } from "../completion.util";
  
  suite("Classpath refresh CodeLenses Test", function() {
  
-	 test("Codelens provider returns correct CodeLens", async() => {
+	test("Codelens provider returns correct CodeLens", async() => {
 		const documentWithModeline = await vscode.workspace.openTextDocument({
 			language: 'java',
 			content: '// camel-k:'
@@ -32,9 +32,9 @@ import { getDocUri } from "../completion.util";
 		
 		const codeLenses = await new ClasspathRefreshCodeLensProvider().provideCodeLenses(documentWithModeline);
 		checkCodeLens(codeLenses as vscode.CodeLens[]);
-	 });
-	 
-	 test("No codelenses without camel-k modeline", async() => {
+	});
+	
+	test("No codelenses without camel-k modeline", async() => {
 		const documentWithModeline = await vscode.workspace.openTextDocument({
 			language: 'java',
 			content: 'dummy, not camel-k modeline'
@@ -44,9 +44,9 @@ import { getDocUri } from "../completion.util";
 					await new ClasspathRefreshCodeLensProvider().provideCodeLenses(documentWithModeline);
 		assert.isNotNull(codeLenses);
 		expect(codeLenses as vscode.CodeLens[]).has.length(0);
-	 });
-	 
-	 test("Codelens available on a file with a modeline", async() => {
+	});
+	
+	test("Codelens available on a file with a modeline", async() => {
 		const docUriJava = getDocUri('MyRouteBuilderWithAdditionalDependencies.java');
 		await vscode.window.showTextDocument(docUriJava);
 		

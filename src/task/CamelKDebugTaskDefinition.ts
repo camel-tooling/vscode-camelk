@@ -29,8 +29,8 @@ export interface CamelKDebugTaskDefinition extends vscode.TaskDefinition {
 export class CamelKDebugTaskProvider implements vscode.TaskProvider {
 
 	private tasks: vscode.Task[] | undefined;
-	static DEBUG_CAMELK_TYPE: string = 'camel-k-debug';
-	constructor() { }
+	static DEBUG_CAMELK_TYPE = 'camel-k-debug';
+	constructor() { /* Intentional Empty contructor */ }
 
 	public async provideTasks(): Promise<vscode.Task[]> {
 		return this.getTasks();

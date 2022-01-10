@@ -34,18 +34,18 @@ import * as CamelKRunTaskDefinition from '../../task/CamelKRunTaskDefinition';
 import { getTelemetryServiceInstance } from '../../Telemetry';
 import { cleanDeployedIntegration, createFile, startIntegrationWithBasicCheck, checkTelemetry, checkIntegrationDeployed, checkIntegrationRunning } from './Utils/DeployTestUtil';
 
-export const RUNNING_TIMEOUT: number = 720000;
-export const DEPLOYED_TIMEOUT: number = 10000;
-export const UNDEPLOY_TIMEOUT: number = 20000;
-export const PROVIDER_POPULATED_TIMEOUT: number = 20000;
-export const EDITOR_OPENED_TIMEOUT: number = 5000;
+export const RUNNING_TIMEOUT = 720000;
+export const DEPLOYED_TIMEOUT = 10000;
+export const UNDEPLOY_TIMEOUT = 20000;
+export const PROVIDER_POPULATED_TIMEOUT = 20000;
+export const EDITOR_OPENED_TIMEOUT = 5000;
 const TOTAL_TIMEOUT: number = RUNNING_TIMEOUT + DEPLOYED_TIMEOUT + EDITOR_OPENED_TIMEOUT + UNDEPLOY_TIMEOUT + PROVIDER_POPULATED_TIMEOUT;
 
-const lineReturnAndSpaces: RegExp = /\r?\n|\r|\s/g;
+const lineReturnAndSpaces = /\r?\n|\r|\s/g;
 
 suite('Check can deploy default examples', () => {
 	
-	const EXTRA_NAMESPACE_FOR_TEST: string = 'namespace-for-deployment-test';
+	const EXTRA_NAMESPACE_FOR_TEST = 'namespace-for-deployment-test';
 	let showQuickpickStub: sinon.SinonStub;
 	let showInputBoxStub: sinon.SinonStub;
 	let showWorkspaceFolderPickStub: sinon.SinonStub;
@@ -95,7 +95,7 @@ suite('Check can deploy default examples', () => {
 		showQuickpickStub.onSecondCall().returns(IntegrationUtils.vscodeTasksIntegration);
 		showQuickpickStub.onThirdCall().returns(CamelKRunTaskDefinition.NAME_OF_PROVIDED_TASK_TO_DEPLOY_IN_DEV_MODE_FROM_ACTIVE_EDITOR);
 		
-	 	await vscode.commands.executeCommand('camelk.startintegration');
+		await vscode.commands.executeCommand('camelk.startintegration');
 
 		await checkIntegrationDeployed(1);
 		await checkIntegrationRunning(0);
@@ -114,7 +114,7 @@ suite('Check can deploy default examples', () => {
 		showQuickpickStub.onSecondCall().returns(IntegrationUtils.configMapIntegration);
 		showQuickpickStub.onThirdCall().returns(confimapName);
 		
-	 	await vscode.commands.executeCommand('camelk.startintegration');
+		await vscode.commands.executeCommand('camelk.startintegration');
 
 		await checkIntegrationDeployed(1);
 		await checkIntegrationRunning(0);
@@ -137,7 +137,7 @@ suite('Check can deploy default examples', () => {
 		showQuickpickStub.onSecondCall().returns(IntegrationUtils.secretIntegration);
 		showQuickpickStub.onThirdCall().returns(secretName);
 		
-	 	await vscode.commands.executeCommand('camelk.startintegration');
+		await vscode.commands.executeCommand('camelk.startintegration');
 
 		await checkIntegrationDeployed(1);
 		await checkIntegrationRunning(0);
@@ -157,7 +157,7 @@ suite('Check can deploy default examples', () => {
 		showInputBoxStub.onThirdCall().returns('my Value');
 		showQuickpickStub.onThirdCall().returns("No");
 		
-	 	await vscode.commands.executeCommand('camelk.startintegration');
+		await vscode.commands.executeCommand('camelk.startintegration');
 
 		await checkIntegrationDeployed(1);
 		await checkIntegrationRunning(0);

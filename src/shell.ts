@@ -19,9 +19,9 @@
 import { ChildProcess } from 'child_process';
 import * as shelljs from 'shelljs';
 
-const WINDOWS: string = 'win32';
-const MACOS : string = 'darwin';
-const LINUX : string = 'linux';
+const WINDOWS = 'win32';
+const MACOS  = 'darwin';
+const LINUX  = 'linux';
 
 export enum Platform {
     WINDOWS,

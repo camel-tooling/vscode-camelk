@@ -30,11 +30,11 @@ import { getTelemetryServiceInstance } from '../../Telemetry';
 import { cleanDeployedIntegration, createFile, checkIntegrationDeployed, checkIntegrationRunning } from './Utils/DeployTestUtil';
 import * as tmp from 'tmp';
 
-export const RUNNING_TIMEOUT: number = 720000;
-export const DEPLOYED_TIMEOUT: number = 10000;
-export const UNDEPLOY_TIMEOUT: number = 20000;
-export const PROVIDER_POPULATED_TIMEOUT: number = 20000;
-export const EDITOR_OPENED_TIMEOUT: number = 5000;
+export const RUNNING_TIMEOUT = 720000;
+export const DEPLOYED_TIMEOUT = 10000;
+export const UNDEPLOY_TIMEOUT = 20000;
+export const PROVIDER_POPULATED_TIMEOUT = 20000;
+export const EDITOR_OPENED_TIMEOUT = 5000;
 const TOTAL_TIMEOUT: number = RUNNING_TIMEOUT + DEPLOYED_TIMEOUT + EDITOR_OPENED_TIMEOUT + UNDEPLOY_TIMEOUT + PROVIDER_POPULATED_TIMEOUT;
 
 suite('Check can deploy with resource', () => {
@@ -96,7 +96,7 @@ suite('Check can deploy with resource', () => {
 async function testDeployWithResources(resources: tmp.FileResult[], showQuickpickStub: sinon.SinonStub<any[], any>, showWorkspaceFolderPickStub: sinon.SinonStub<any[], any>, showInputBoxStub: sinon.SinonStub<any[], any>, showOpenDialogStub: sinon.SinonStub<any[], any>) {
 	const uriOfResources = resources.map(resource => {return vscode.Uri.file(resource.name);});
 	const language = 'Java';
-	let createdFile: vscode.Uri | undefined = await createFile(showQuickpickStub, showWorkspaceFolderPickStub, showInputBoxStub, `Test${language}DeployWithResources`, language);
+	const createdFile: vscode.Uri | undefined = await createFile(showQuickpickStub, showWorkspaceFolderPickStub, showInputBoxStub, `Test${language}DeployWithResources`, language);
 
 	await openCamelKTreeView();
 	assert.isEmpty(extension.camelKIntegrationsProvider.getTreeNodes());
@@ -116,7 +116,7 @@ async function testDeployWithResources(resources: tmp.FileResult[], showQuickpic
 async function checkResourcesAvailableForDeployedIntegration(fileNames: string[]) {
 	const describeShell = shelljs.exec(`"${await kamel.create().getPath()}" describe integration test-java-deploy-with-resources`);
 	const description: string = describeShell.stdout;
-	const lineReturnAndSpaces: RegExp = /\r?\n|\r|\s/g;
+	const lineReturnAndSpaces = /\r?\n|\r|\s/g;
 	const textForResourceDescription = fileNames.map(fileName => {return `Content:Name:${fileName}Type:data`;}).join('');
 	expect(description.replace(lineReturnAndSpaces, '')).includes(`Resources:${textForResourceDescription}`);
 }

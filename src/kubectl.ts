@@ -33,8 +33,7 @@ export interface Kubectl {
 class KubectlImpl implements Kubectl {
 	namespace: string | undefined = config.getNamespaceconfig();
 
-	constructor() {
-	}
+	constructor() { /* Intentional Empty contructor */ }
 
 	async getPath(): Promise<string> {
 		return baseKubectlPath();

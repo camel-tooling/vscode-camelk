@@ -25,15 +25,15 @@
  const extensionFolder = path.join(projectPath, '.test-extensions');
  
  async function main(): Promise<void> {
-	 if(process.argv.length === 4){
-		 if(process.argv[2] === '-t' && process.argv[3] === 'insider') {
-			 releaseType = ReleaseQuality.Insider;
-		 }
-	 }
-	 const tester = new ExTester(storageFolder, releaseType, extensionFolder);
-	 await tester.setupRequirements();
-	 await tester.installFromMarketplace('redhat.vscode-didact');
-	 await tester.runTests('out/src/ui-test/*_test.js');
+	if(process.argv.length === 4){
+		if(process.argv[2] === '-t' && process.argv[3] === 'insider') {
+			releaseType = ReleaseQuality.Insider;
+		}
+	}
+	const tester = new ExTester(storageFolder, releaseType, extensionFolder);
+	await tester.setupRequirements();
+	await tester.installFromMarketplace('redhat.vscode-didact');
+	await tester.runTests('out/src/ui-test/*_test.js');
  }
  
  main();

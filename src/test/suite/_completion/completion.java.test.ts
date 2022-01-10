@@ -32,14 +32,14 @@ const TOTAL_TIMEOUT = DOWNLOAD_JAVA_DEPENDENCIES_TIMEOUT + JAVA_EXTENSION_READIN
 // TODO: skipped on jenkins due to FUSETOOLS2-578
 suite('Should do completion in Camel K standalone files', () => {
 	
-	var testVar = test('Completes from method for Java', async () => {
+	const testVar = test('Completes from method for Java', async () => {
 		const docUriJava = getDocUri('MyRouteBuilder.java');
 		const expectedCompletion = { label: 'from(String uri) : RouteDefinition'};
 		Utils.skipOnJenkins(testVar);
 		await testCompletion(docUriJava, new vscode.Position(5, 11), expectedCompletion, false);
 	}).timeout(TOTAL_TIMEOUT);
 	
-	var testAdditionalDependencies = test('Completes additional dependencies', async () => {
+	const testAdditionalDependencies = test('Completes additional dependencies', async () => {
 		const docUriJava = getDocUri('MyRouteBuilderWithAdditionalDependencies.java');
 		const expectedCompletion = { label: 'ArithmeticUtils - org.apache.commons.math3.util'};
 		Utils.skipOnJenkins(testAdditionalDependencies);
@@ -67,7 +67,7 @@ async function testCompletion(
 		fail(`Camel Java dependencies not downloaded in reasonable time (${DOWNLOAD_JAVA_DEPENDENCIES_TIMEOUT}). ${messageForDownloaded}`);
 	});
 
-	let doc = await vscode.workspace.openTextDocument(docUri);
+	const doc = await vscode.workspace.openTextDocument(docUri);
 	await vscode.window.showTextDocument(doc);
 	if(refreshClasspath) {
 		await vscode.commands.executeCommand('camelk.classpath.refresh', docUri);

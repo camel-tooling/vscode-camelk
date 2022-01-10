@@ -83,10 +83,10 @@ suite('Camel-k Integrations View', () => {
 
 function checkIConForPodStatus(status: string) {
 	const context = extension.getStashedContext();
-	let iconPath = CamelKNodeProvider.TreeNode.getIconForPodStatus(status, context);
+	const iconPath = CamelKNodeProvider.TreeNode.getIconForPodStatus(status, context);
 	assert.notEqual(iconPath, undefined);
 	if (iconPath) {
-		let runningPath: string = path.resolve(iconPath.fsPath);
+		const runningPath: string = path.resolve(iconPath.fsPath);
 		assert.equal(fs.existsSync(runningPath), true);
 	}
 }

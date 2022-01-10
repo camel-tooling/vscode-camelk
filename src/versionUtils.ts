@@ -25,13 +25,13 @@ import { platform } from './installer';
 import fetch from 'cross-fetch';
 import { Platform } from './shell';
 
-export const version: string = '1.7.0'; //need to retrieve this if possible, but have a default
+export const version = '1.7.0'; //need to retrieve this if possible, but have a default
 
 /*
  * Can be retrieved using `curl -i https://api.github.com/repos/apache/camel-k/releases/latest | grep last-modified`
  * To be updated when updating the default "version" attribute
  */
-const LAST_MODIFIED_DATE_OF_DEFAULT_VERSION: string = 'Mon, 15 Nov 2021 14:26:17 GMT';
+const LAST_MODIFIED_DATE_OF_DEFAULT_VERSION = 'Mon, 15 Nov 2021 14:26:17 GMT';
 let latestVersionFromOnline: string;
 
 export async function testVersionAvailable(versionToUse: string): Promise<boolean> {
@@ -55,7 +55,7 @@ export async function checkKamelNeedsUpdate(versionToUse?: string): Promise<bool
 		if (versionToUse) {
 			const passedVersionAvailable = await testVersionAvailable(versionToUse);
 			if (!passedVersionAvailable) {
-				const msg: string = `Camel K CLI Version ${versionToUse} unavailable.`;
+				const msg = `Camel K CLI Version ${versionToUse} unavailable.`;
 				extension.shareMessageInMainOutputChannel(msg);
 				return false;
 			}
@@ -113,7 +113,7 @@ export async function getLatestCamelKVersion(): Promise<Errorable<string>> {
 	if (latestVersionFromOnline) {
 		return { succeeded: true, result: latestVersionFromOnline };
 	} else {
-		const latestURL: string = 'https://api.github.com/repos/apache/camel-k/releases/latest';
+		const latestURL = 'https://api.github.com/repos/apache/camel-k/releases/latest';
 		const headers: string[][] = [['If-Modified-Since', LAST_MODIFIED_DATE_OF_DEFAULT_VERSION]];
 		const githubToken: string | undefined = process.env.VSCODE_CAMELK_GITHUB_TOKEN;
 		if (githubToken) {
@@ -174,24 +174,24 @@ export async function handleChangeRuntimeConfiguration() {
 		if (runtimeSetting && version.toLowerCase() !== runtimeSetting.toLowerCase()) {
 			extension.shareMessageInMainOutputChannel(`Auto-upgrade setting enabled. Updating to default version ${version} of Apache Camel K CLI`);
 			await config.setKamelRuntimeVersionConfig(version);
-			const msg: string = `Setting for Apache Camel K runtime version has changed to default ${version}. Please restart the workspace to refresh the Camel K cli.`;
+			const msg = `Setting for Apache Camel K runtime version has changed to default ${version}. Please restart the workspace to refresh the Camel K cli.`;
 			setVersionAndTellUser(msg, version);
 		}
 	} else if (extension.runtimeVersionSetting) {
 		if (runtimeSetting && runtimeSetting.trim().length > 0 && extension.runtimeVersionSetting.toLowerCase() !== runtimeSetting.toLowerCase()) {
-			let isAvailable : boolean = await testVersionAvailable(runtimeSetting);
+			const isAvailable : boolean = await testVersionAvailable(runtimeSetting);
 			if (isAvailable) {
-				const msg: string = `Setting for Apache Camel K runtime version has changed to ${runtimeSetting}. Please restart the workspace to refresh the Camel K cli.`;
+				const msg = `Setting for Apache Camel K runtime version has changed to ${runtimeSetting}. Please restart the workspace to refresh the Camel K cli.`;
 				setVersionAndTellUser(msg, runtimeSetting);
 				await config.setKamelRuntimeVersionConfig(runtimeSetting);
 			} else {
-				const msg: string = `Setting for Apache Camel K runtime version changed to invalid version ${runtimeSetting}. Please set the version to a valid runtime version.`;
+				const msg = `Setting for Apache Camel K runtime version changed to invalid version ${runtimeSetting}. Please set the version to a valid runtime version.`;
 				extension.shareMessageInMainOutputChannel(msg);
 				vscode.window.showErrorMessage(msg);
 			}
 		}
 	} else if (runtimeSetting && runtimeSetting.trim().length > 0 && version.toLowerCase() !== runtimeSetting.toLowerCase()) {
-		const msg: string = `Setting for Apache Camel K runtime version has changed to ${runtimeSetting}. Please restart the workspace to refresh the Camel K cli.`;
+		const msg = `Setting for Apache Camel K runtime version has changed to ${runtimeSetting}. Please restart the workspace to refresh the Camel K cli.`;
 		setVersionAndTellUser(msg, runtimeSetting);
 		await config.setKamelRuntimeVersionConfig(runtimeSetting);
 	}
@@ -218,7 +218,7 @@ function toKamelOsString(platform: Platform | undefined): string | undefined {
 export async function getDownloadURLForCamelKTag(camelKVersion : string, platform : Platform): Promise<string> {
 	const platformStr = toKamelOsString(platform);
 	const tagName: string = isOldTagNaming(camelKVersion) ? camelKVersion : `v${camelKVersion}`;
-	const tagURL: string = `https://api.github.com/repos/apache/camel-k/releases/tags/${tagName}`;
+	const tagURL = `https://api.github.com/repos/apache/camel-k/releases/tags/${tagName}`;
 	const headers: string[][] = [];
 	const githubToken: string | undefined = process.env.VSCODE_CAMELK_GITHUB_TOKEN;
 	if (githubToken) {
@@ -228,7 +228,7 @@ export async function getDownloadURLForCamelKTag(camelKVersion : string, platfor
 	if (res.status === 200) {
 		const latestJSON: any = await res.json();
 		const assetsJSON: any = await latestJSON.assets;
-		for (let asset of assetsJSON) {
+		for (const asset of assetsJSON) {
 			const aUrl : string = asset.browser_download_url;
 			if (aUrl.includes(`-${platformStr}-`)) {
 				return aUrl;

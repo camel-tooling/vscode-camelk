@@ -25,7 +25,7 @@ const DEFAULT_DEBUG_PORT = 5005;
 
 export async function start(integrationItem: TreeNode): Promise<void> {
 	const kamelExecutor: kamel.Kamel = kamel.create();
-	let kamelArgs: string[] = [];
+	const kamelArgs: string[] = [];
 	kamelArgs.push('debug');
 	const integrationName = integrationItem.label as string;
 	kamelArgs.push(integrationName);
@@ -37,7 +37,7 @@ export async function start(integrationItem: TreeNode): Promise<void> {
 	let isListeningFromTransportMessageSent = false;
 	let isForwardingFrommessageSent = false; 
 	childProcess.stdout?.on('data', function (data) {
-		const messageData: string = `${data}`;
+		const messageData = `${data}`;
 		isListeningFromTransportMessageSent ||= messageData.includes('Listening for transport dt_socket at address:');
 		isForwardingFrommessageSent ||= messageData.includes('Forwarding from');
 		if (!debuggerLaunched && isListeningFromTransportMessageSent && isForwardingFrommessageSent) {

@@ -33,11 +33,10 @@ export interface Kamel {
 }
 
 class KamelImpl implements Kamel {
-	devMode : boolean = false;
+	devMode  = false;
 	namespace: string | undefined = config.getNamespaceconfig();
 
-	constructor() {
-	}
+	constructor() { /* Intentionial empty constructor*/ }
 
 	async getPath(): Promise<string> {
 		return baseKamelPath();
@@ -65,9 +64,9 @@ export function create() : Kamel {
 }
 
 export function getBaseCmd(binpath: string, command: string, namespace : string | undefined) : string {
-	let cmd: string = `"${binpath}" ${command}`;
+	let cmd = `"${binpath}" ${command}`;
 	if (namespace) {
-		 cmd += ` --namespace=${namespace}`;
+		cmd += ` --namespace=${namespace}`;
 	}
 	return cmd;
 }
@@ -83,7 +82,7 @@ async function kamelInternal(command: string, devMode: boolean, namespace : stri
 	
 		const cmd: string = getBaseCmd(binpath, command, namespace);
 		const sr: ChildProcess = exec(cmd);
-		let wholeOutData: string = '';
+		let wholeOutData = '';
 		if (sr) {
 			if (sr.stdout) {
 				sr.stdout.on('data', function (data) {
@@ -145,7 +144,7 @@ async function kamelInternalArgs(args: string[], devMode: boolean, namespace: st
 				}        
 				if (sr.stderr) {
 					sr.stderr.on('data', function (data) {
-						const errorMessage: string = `${data}`;
+						const errorMessage = `${data}`;
 						utils.shareMessage(extension.mainOutputChannel, errorMessage);
 						if (errorMessage.includes('no matches for kind "Integration"') && errorMessage.includes('camel.apache.org')) {
 							utils.shareMessage(extension.mainOutputChannel,

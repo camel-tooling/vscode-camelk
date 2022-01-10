@@ -24,8 +24,8 @@ suite("ensure utility methods in configmap and secrets code works as expected", 
 	
 	function runSetOfNames(inputs: string[], expectedResult : boolean) {
 		for (let i = 0; i < inputs.length; i++) {
-			let testString = inputs[i];
-			let result = configmapandsecrets.validNameRegex.test(testString);
+			const testString = inputs[i];
+			const result = configmapandsecrets.validNameRegex.test(testString);
 			assert.strictEqual(result, expectedResult, 
 				`Testing name ${testString}. Should be ${expectedResult}. Came back as ${result}`);
 		}
@@ -59,7 +59,7 @@ suite("ensure utility methods in configmap and secrets code works as expected", 
 			"something                1      90m\n" +
 			"something-else           1      92m";
 		const expectedResult : string[] = ['something','something-else'];
-		let result : string[] = parseShellResult(data);
+		const result : string[] = parseShellResult(data);
 		assert.deepEqual(result, expectedResult, `Did not get expected list of names from console shell results`);
 		done();
 	});

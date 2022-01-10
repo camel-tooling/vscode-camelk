@@ -23,7 +23,7 @@ import * as vscode from 'vscode';
 
 suite("Camel K Task Completion", function () {
 
-    let simpleContent = `{
+    const simpleContent = `{
         "version": "2.0.0",
         "tasks": [
             
@@ -35,13 +35,13 @@ suite("Camel K Task Completion", function () {
     });
 
     test("One completion in tasks array", async () => {
-        let res = await new CamelKTaskCompletionItemProvider().provideCompletionItemsForText(simpleContent, 49, new vscode.Position(2,19));
+        const res = await new CamelKTaskCompletionItemProvider().provideCompletionItemsForText(simpleContent, 49, new vscode.Position(2,19));
         expect(res).to.have.lengthOf(1);
     });
 
     test("Completion for traits", async () => {
         await Utils.ensureExtensionActivated();
-        let contentWithEmptyTrait =
+        const contentWithEmptyTrait =
 `{
     "version": "2.0.0",
     "tasks": [
@@ -64,7 +64,7 @@ suite("Camel K Task Completion", function () {
 
     test("Completion for trait properties", async () => {
         await Utils.ensureExtensionActivated();
-        let contentWithPropertyTrait =
+        const contentWithPropertyTrait =
 `{
     "version": "2.0.0",
     "tasks": [
@@ -79,7 +79,7 @@ suite("Camel K Task Completion", function () {
     ]
 }`;
 		const position = new vscode.Position(9,34);
-        let res = await new CamelKTaskCompletionItemProvider().provideCompletionItemsForText(contentWithPropertyTrait, 246, position);
+        const res = await new CamelKTaskCompletionItemProvider().provideCompletionItemsForText(contentWithPropertyTrait, 246, position);
 		expect(res).to.have.lengthOf(6);
 		expect(res[0].range).deep.equal(new vscode.Range(position, position));
     }).timeout(120000);
