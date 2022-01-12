@@ -29,6 +29,7 @@ describe('Tooling for Apache Camel K extension', function () {
 		it('Find extension', async function () {
 			this.timeout(10000);
 			item = await section.findItem(`@installed ${pjson.displayName}`) as ExtensionsViewItem;
+			assert.isNotNull(item);
 		});
 
 		it('Extension is installed', async function () {
