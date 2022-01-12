@@ -53,7 +53,7 @@ suite('Camel-k Integrations View', () => {
 			integrationExplorer.addChild(children, newNode, false);
 			expect(children.length).equals(1);
 			expect(children[0].label).equals("mockIntegration");
-			expect(refreshStub.calledOnce, 'true');
+			expect(refreshStub.calledOnce, 'Refresh method was not called once').true;
 			done();
 		});
 	});
@@ -65,7 +65,7 @@ suite('Camel-k Integrations View', () => {
 			const newNode = new CamelKNodeProvider.TreeNode("string", "mockIntegration", "running", vscode.TreeItemCollapsibleState.None);
 			integrationExplorer.addChild(children, newNode);
 			integrationExplorer.removeChild(children, newNode);
-			expect(refreshStub.calledTwice, 'true');
+			expect(refreshStub.calledTwice, 'Refresh method was nto called twice').true;
 			done();
 		});
 	});
