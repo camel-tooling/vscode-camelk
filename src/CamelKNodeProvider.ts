@@ -215,6 +215,12 @@ export class TreeNode extends vscode.TreeItem {
 		} else {
 			this.tooltip = `Status: ${this.status}`;
 		}
+		if (status && status.toLowerCase().startsWith("running")) {
+			this.contextValue = 'java-debuggable';
+		} else {
+			this.contextValue = 'non-java-debuggable';
+		} 
+		
 	}
 
 	static getIconForPodStatus(status: string, extContext: vscode.ExtensionContext): vscode.Uri | undefined {

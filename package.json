@@ -224,7 +224,7 @@
 				{
 					"command": "camelk.integrations.debug.java",
 					"group": "3_debuggroup@2",
-					"when": "view == camelk.integrations"
+					"when": "view == camelk.integrations && viewItem == java-debuggable"
 				}
 			],
 			"commandPalette": [
