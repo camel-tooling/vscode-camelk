@@ -36,6 +36,7 @@ export const startIntegration = pjson.contributes.commands[0].title;
 export const integrationRemove = pjson.contributes.commands[2].title;
 export const followIntegrationLogs = pjson.contributes.commands[3].title;
 export const createNewIntegrationFile = pjson.contributes.commands[9].title;
+export const startDebug = pjson.contributes.commands[11].title;
 
 export function prepareCodeLogMessages(extension: string, language: string): [string, string, string, string] {
     let initialCodeMessage = `Hello Camel K from`;
