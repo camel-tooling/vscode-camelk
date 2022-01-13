@@ -29,7 +29,8 @@ import {
     Locator,
     OutputView,
     WebDriver,
-    SideBarView
+    SideBarView,
+	ViewSection
 } from 'vscode-extension-tester';
 import { DoNextTest, findSectionItem } from './utils';
 import { workaroundMacIssue444 } from './workarounds';
@@ -73,6 +74,21 @@ export async function viewHasItem(content: ViewContent, section: string, item: s
         const currentItem = await currentSection.findItem(item);
         return (currentItem !== undefined);
     } catch (err) {
+        return false;
+    }
+}
+
+export async function sectionHasItem(section: ViewSection, item: string, timePeriod = 2000): Promise<boolean> {
+    try {
+        const currentItem = await section.findItem(item);
+        if (currentItem !== undefined) {
+            return true;
+        } else {
+            await section.getDriver().sleep(timePeriod);
+            return false;
+        }
+    } catch (err) {
+        await section.getDriver().sleep(timePeriod);
         return false;
     }
 }

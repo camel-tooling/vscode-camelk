@@ -20,6 +20,7 @@ import { DefaultWait } from 'vscode-uitests-tooling';
 import { LANGUAGES_WITH_FILENAME_EXTENSIONS } from '../IntegrationConstants';
 import { basicModeWithLogsTest } from './tests/basic_mode_test';
 import { camelkExtensionTest } from './tests/camelk_extension_test';
+import { javaDebugTest } from './tests/camelk_java_debug_test';
 import { createIntegrationFile } from './tests/create_integration_file_test';
 import { devModeTest } from './tests/dev_mode_test';
 import { DoNextTest } from './utils/utils';
@@ -48,6 +49,7 @@ describe('Tooling for Apache Camel K extension', function () {
                 basicModeWithLogsTest(extension, language, doNextTest);
             });
         });
+		describe('Test Debug on Camel K Integrations from Side Bar', javaDebugTest);
     } else {
         console.log("Extension activation error occurred!");
     }
