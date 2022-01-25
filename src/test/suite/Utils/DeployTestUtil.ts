@@ -86,10 +86,17 @@ export async function startIntegrationWithBasicCheck(showQuickpickStub: sinon.Si
 
 export async function checkIntegrationRunning(indexOfNewDeployedIntegration :number) {
 	try {
+		let counter = 0;
 		await waitUntil(() => {
-			return extension.camelKIntegrationsProvider.getTreeNodes()[indexOfNewDeployedIntegration]?.status === "Running";
+			const treeNode = extension.camelKIntegrationsProvider.getTreeNodes()[indexOfNewDeployedIntegration];
+			if (counter % 60000 === 0) {
+				console.log(`Awaiting that the integration ${treeNode?.label} is running. Current waiting time is ${counter} ms and current status is ${treeNode?.status}`);
+			}
+			counter += 1000;
+			return treeNode?.status === "Running";
 		}, RUNNING_TIMEOUT, 1000);
 	} catch (error) {
+		console.log(error);
 		assert.fail(`The integration has not been marked as Running in Camel K Integration provided view. Current status ${extension.camelKIntegrationsProvider.getTreeNodes()[0].status} \n${error}`);
 	}
 }
@@ -97,6 +104,7 @@ export async function checkIntegrationRunning(indexOfNewDeployedIntegration :num
 export async function checkIntegrationDeployed(expectedDeployedIntegration :number) {
 	try {
 		await waitUntil(() => {
+			console.log(`Await that there are ${expectedDeployedIntegration} integrations listed in Tree`);	
 			return extension.camelKIntegrationsProvider.getTreeNodes()?.length === expectedDeployedIntegration;
 		}, DEPLOYED_TIMEOUT, 1000);
 	} catch (error) {

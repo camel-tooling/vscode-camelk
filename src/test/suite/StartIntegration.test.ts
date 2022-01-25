@@ -183,6 +183,7 @@ suite('Check can deploy default examples', () => {
 async function checkConfigMapAvailableForDeployedIntegration() {
 	const describeShell = shelljs.exec(`"${await kamel.create().getPath()}" describe integration test-java-deploy-with-config-map`);
 	const description: string = describeShell.stdout;
+	console.log('Check describe have config map: ' + description);
 	expect(description.replace(lineReturnAndSpaces, '')).includes('Configuration:Type:configmapValue:my-configmap');
 }
 

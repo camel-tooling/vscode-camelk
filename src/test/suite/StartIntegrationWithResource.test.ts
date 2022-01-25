@@ -116,6 +116,7 @@ async function testDeployWithResources(resources: tmp.FileResult[], showQuickpic
 async function checkResourcesAvailableForDeployedIntegration(fileNames: string[]) {
 	const describeShell = shelljs.exec(`"${await kamel.create().getPath()}" describe integration test-java-deploy-with-resources`);
 	const description: string = describeShell.stdout;
+	console.log('Description for deployment with resources: ' + description);
 	const lineReturnAndSpaces = /\r?\n|\r|\s/g;
 	const textForResourceDescription = fileNames.map(fileName => {return `Content:Name:${fileName}Type:data`;}).join('');
 	expect(description.replace(lineReturnAndSpaces, '')).includes(`Resources:${textForResourceDescription}`);
