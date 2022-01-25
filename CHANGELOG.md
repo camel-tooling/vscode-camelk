@@ -4,6 +4,9 @@ All notable changes to the "vscode-camelk" extension will be documented in this 
 
 ## 0.0.29
 
+- Update default runtime version to v1.8.0
+- Update default Yaml schema to Camel 3.14.0
+
 ## 0.0.28
 
 - Update default runtime version to v1.7.0

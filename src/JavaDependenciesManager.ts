@@ -21,7 +21,7 @@ import * as kamelCli from './kamel';
 import * as utils from './CamelKJSONUtils';
 
 const PREFERENCE_KEY_JAVA_REFERENCED_LIBRARIES = "java.project.referencedLibraries";
-export const CAMEL_VERSION = "3.11.1";
+export const CAMEL_VERSION = "3.14.0";
 
 export async function initializeJavaDependenciesManager(context: vscode.ExtensionContext): Promise<void> {
 	const destination = parentDestinationFolderForDependencies(context);
