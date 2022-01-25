@@ -184,7 +184,7 @@ async function checkConfigMapAvailableForDeployedIntegration() {
 	const describeShell = shelljs.exec(`"${await kamel.create().getPath()}" describe integration test-java-deploy-with-config-map`);
 	const description: string = describeShell.stdout;
 	console.log('Check describe have config map: ' + description);
-	expect(description.replace(lineReturnAndSpaces, '')).includes('Configuration:Type:configmapValue:my-configmap');
+	expect(description.replace(lineReturnAndSpaces, '')).includes('Configuration:map[configs:[configmap:my-configmap]]');
 }
 
 async function checkPropertyAvailableAvailableForDeployedIntegration() {
