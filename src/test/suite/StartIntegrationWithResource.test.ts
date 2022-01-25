@@ -118,6 +118,10 @@ async function checkResourcesAvailableForDeployedIntegration(fileNames: string[]
 	const description: string = describeShell.stdout;
 	console.log('Description for deployment with resources: ' + description);
 	const lineReturnAndSpaces = /\r?\n|\r|\s/g;
-	const textForResourceDescription = fileNames.map(fileName => {return `Content:Name:${fileName}Type:data`;}).join('');
-	expect(description.replace(lineReturnAndSpaces, '')).includes(`Resources:${textForResourceDescription}`);
+	const descWithoutLineReturnAndSpaces = description.replace(lineReturnAndSpaces, '');
+	const configuration = descWithoutLineReturnAndSpaces.substring(descWithoutLineReturnAndSpaces.indexOf('Traits:Mount:Configuration:') + 'Traits:Mount:Configuration:'.length);
+	console.log(`configuration to check: ${configuration}`);
+	for (const fileName of fileNames) {
+		expect(configuration).contains(fileName);
+	}
 }
