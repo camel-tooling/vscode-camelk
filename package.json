@@ -351,7 +351,7 @@
 		"@types/sinon-chai": "^3.2.8",
 		"@types/vscode": "^1.57.0",
 		"@typescript-eslint/eslint-plugin": "^5.10.2",
-		"@typescript-eslint/parser": "^5.10.0",
+		"@typescript-eslint/parser": "^5.10.2",
 		"async-wait-until": "^2.0.12",
 		"chai": "^4.3.4",
 		"copyfiles": "^2.4.1",
