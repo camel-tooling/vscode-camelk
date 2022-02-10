@@ -99,6 +99,13 @@
 						"type": "string",
 						"default": "https://raw.githubusercontent.com/apache/camel/camel-3.14.0/dsl/camel-yaml-dsl/camel-yaml-dsl/src/generated/resources/camel-yaml-dsl.json",
 						"description": "Yaml Schema applied when Camel K modeline is set. (I.e. file starting with '# camel-k: ')"
+					},
+					"redhat.telemetry.enabled": {
+						"type": "boolean",
+						"default": null,
+						"markdownDescription": "Enable usage data and errors to be sent to Red Hat servers. Read our [privacy statement](https://developers.redhat.com/article/tool-data-collection).",
+						"tags":[ "telemetry" ],
+						"scope": "window"
 					}
 				}
 			}
