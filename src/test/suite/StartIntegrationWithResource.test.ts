@@ -85,7 +85,7 @@ suite('Check can deploy with resource', () => {
 	}).timeout(TOTAL_TIMEOUT);
 	
 	const testDeploymentWithSeveralResources = test('Check can deploy with several resources', async() => {
-		// Skipped due to https://github.com/apache/camel-k/issues/2943
+		// Skipped due to https://github.com/apache/camel-k/issues/3077
 		testDeploymentWithSeveralResources.skip();
 		skipOnJenkins(testDeploymentWithSeveralResources);
 		const resource1 = tmp.fileSync({ prefix: "simple1" });
