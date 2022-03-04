@@ -70,7 +70,7 @@ You can start a new Camel K integration with or without additional options such 
 * JavaScript (*.js)
 * Groovy (*.groovy)
 * Kotlin (*.kts)
-* Yaml (*.yaml) (Experimental)
+* Yaml (*.yaml)
 
     For more information about supported languages, see [Languages](https://camel.apache.org/camel-k/latest/languages/languages.html) in the Apache Camel-K documentation.
 	
