@@ -25,13 +25,13 @@ import { platform } from './installer';
 import fetch from 'cross-fetch';
 import { Platform } from './shell';
 
-export const version = '1.8.1'; //need to retrieve this if possible, but have a default
+export const version = '1.8.2'; //need to retrieve this if possible, but have a default
 
 /*
  * Can be retrieved using `curl -i https://api.github.com/repos/apache/camel-k/releases/latest | grep last-modified`
  * To be updated when updating the default "version" attribute
  */
-const LAST_MODIFIED_DATE_OF_DEFAULT_VERSION = 'Mon, 28 Feb 2022 16:57:14 GMT';
+const LAST_MODIFIED_DATE_OF_DEFAULT_VERSION = 'Mon, 07 Mar 2022 08:12:11 GMT';
 let latestVersionFromOnline: string;
 
 export async function testVersionAvailable(versionToUse: string): Promise<boolean> {
