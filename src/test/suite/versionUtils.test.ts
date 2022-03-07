@@ -73,21 +73,17 @@ suite("VersionUtils check", () => {
 		test("validate url for existing 1.7.0 version", async () => {
 			await validateVersion('1.7.0', Platform.LINUX, 'https://github.com/apache/camel-k/releases/download/v1.7.0/camel-k-client-1.7.0-linux-64bit.tar.gz');
 		});
-		
-		test("validate url for existing 1.8.0 version", async () => {
-			await validateVersion('1.8.0', Platform.LINUX, 'https://github.com/apache/camel-k/releases/download/v1.8.0/camel-k-client-1.8.0-linux-64bit.tar.gz');
+			
+		test("validate url for existing 1.8.2 version", async () => {
+			await validateVersion('1.8.2', Platform.LINUX, 'https://github.com/apache/camel-k/releases/download/v1.8.2/camel-k-client-1.8.2-linux-64bit.tar.gz');
 		});
 		
-		test("validate url for existing 1.8.1 version", async () => {
-			await validateVersion('1.8.1', Platform.LINUX, 'https://github.com/apache/camel-k/releases/download/v1.8.1/camel-k-client-1.8.1-linux-64bit.tar.gz');
-		});
-		
-		test("validate url for existing 1.8.1 windows version", async () => {
-			await validateVersion('1.8.1', Platform.WINDOWS, 'https://github.com/apache/camel-k/releases/download/v1.8.1/camel-k-client-1.8.1-windows-64bit.tar.gz');
+		test("validate url for existing 1.8.2 windows version", async () => {
+			await validateVersion('1.8.2', Platform.WINDOWS, 'https://github.com/apache/camel-k/releases/download/v1.8.2/camel-k-client-1.8.2-windows-64bit.tar.gz');
 		});
 
-		test("validate url for existing 1.8.1 MacOS version", async () => {
-			await validateVersion('1.8.1', Platform.MACOS, 'https://github.com/apache/camel-k/releases/download/v1.8.1/camel-k-client-1.8.1-mac-64bit.tar.gz');
+		test("validate url for existing 1.8.2 MacOS version", async () => {
+			await validateVersion('1.8.2', Platform.MACOS, 'https://github.com/apache/camel-k/releases/download/v1.8.2/camel-k-client-1.8.2-mac-64bit.tar.gz');
 		});
 		
 		
