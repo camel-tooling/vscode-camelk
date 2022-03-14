@@ -12,18 +12,15 @@ jobs:
       - checkout
       - restore_cache:
           key: dependency-cache-{{ checksum "package-lock.json" }}
-      - run:
-          name: Install Node environment
-          command: |
-            curl -sL https://deb.nodesource.com/setup_14.x | sudo -E bash -
-            sudo apt-get install -y nodejs
+      - node/install:
+          node-version: '14.19.0'
       - run:
           name: install-vsce
           command: |
             echo $PATH
             echo 'export PATH=$HOME/.local/bin:$PATH' >> $BASH_ENV
             source $BASH_ENV
-            npm install --prefix=$HOME/.local -g vsce@1.103.1
+            npm install --prefix=$HOME/.local -g vsce
             vsce --version
       - run:
           name: npm-ci
@@ -99,6 +96,7 @@ jobs:
 
 orbs:
   sonarcloud: sonarsource/sonarcloud@1.0.2
+  node: circleci/node@5.0.1
 
 workflows:
   version: 2
