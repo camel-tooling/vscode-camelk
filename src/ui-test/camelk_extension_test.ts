@@ -20,10 +20,7 @@ describe('Tooling for Apache Camel K extension', function () {
 
 		before(async function () {
 			this.timeout(10000);
-			VSBrowser.instance.driver.wait(until.elementIsEnabled(new TitleBar()));
-			await Marketplace.open(10000);
-			await DefaultWait.sleep(1000);
-			section = await new SideBarView().getContent().getSection('Installed') as ExtensionsViewSection;
+			
 		});
 
 		after(async function () {
@@ -31,7 +28,28 @@ describe('Tooling for Apache Camel K extension', function () {
 		});
 
 		it('Find extension', async function () {
+			
 			this.timeout(10000);
+			VSBrowser.instance.driver.wait(until.elementIsEnabled(new TitleBar()));
+			console.log('loop get title bar');
+			VSBrowser.instance.driver.wait(async() => {
+					console.log('try to get title bar view -> Extensions')
+					try {
+						return await new TitleBar().select('View', 'Extensions') !== undefined;
+					} catch (e){
+						console.log(e);
+						return false;
+					}
+				}, 10000
+			);
+			console.log('get title bar view extensions');
+			await new TitleBar().select('View', 'Extensions');
+			console.log('will get anySection...')
+			await new Marketplace().getAnySection(1000);
+			await Marketplace.open(10000);
+			await DefaultWait.sleep(1000);
+			section = await new SideBarView().getContent().getSection('Installed') as ExtensionsViewSection;
+			
 			item = await section.findItem(`@installed ${pjson.displayName}`) as ExtensionsViewItem;
 			assert.isNotNull(item);
 		});
