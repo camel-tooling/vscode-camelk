@@ -5,7 +5,10 @@ import {
 	EditorView,
 	ExtensionsViewItem,
 	ExtensionsViewSection,
-	SideBarView
+	SideBarView,
+	TitleBar,
+	until,
+	VSBrowser
 } from 'vscode-extension-tester';
 
 describe('Tooling for Apache Camel K extension', function () {
@@ -17,7 +20,8 @@ describe('Tooling for Apache Camel K extension', function () {
 
 		before(async function () {
 			this.timeout(10000);
-			await Marketplace.open();
+			VSBrowser.instance.driver.wait(until.elementIsEnabled(new TitleBar()));
+			await Marketplace.open(10000);
 			await DefaultWait.sleep(1000);
 			section = await new SideBarView().getContent().getSection('Installed') as ExtensionsViewSection;
 		});
