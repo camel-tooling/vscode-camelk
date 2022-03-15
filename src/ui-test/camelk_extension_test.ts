@@ -1,14 +1,15 @@
 import * as pjson from '../../package.json';
 import { assert } from 'chai';
-import { DefaultWait, Marketplace } from 'vscode-uitests-tooling';
 import {
 	EditorView,
 	ExtensionsViewItem,
 	ExtensionsViewSection,
+	InputBox,
 	SideBarView,
 	TitleBar,
 	until,
-	VSBrowser
+	VSBrowser,
+	Workbench
 } from 'vscode-extension-tester';
 
 describe('Tooling for Apache Camel K extension', function () {
@@ -29,25 +30,46 @@ describe('Tooling for Apache Camel K extension', function () {
 
 		it('Find extension', async function () {
 			
-			this.timeout(10000);
+			this.timeout(30000);
 			VSBrowser.instance.driver.wait(until.elementIsEnabled(new TitleBar()));
-			console.log('loop get title bar');
+			VSBrowser.instance.driver.wait(until.elementIsVisible(new Workbench()));
+			// console.log('loop get title bar');
+			// VSBrowser.instance.driver.wait(async() => {
+			// 		console.log('try to get title bar view -> Extensions')
+			// 		try {
+			// 			return await new TitleBar().select('View', 'Extensions') !== undefined;
+			// 		} catch (e){
+			// 			console.log(e);
+			// 			return false;
+			// 		}
+			// 	}, 10000
+			// );
+			// console.log('get title bar view extensions');
+			// await new TitleBar().select('View', 'Extensions');
+			//DefaultWait.sleep(5000);
 			VSBrowser.instance.driver.wait(async() => {
 					console.log('try to get title bar view -> Extensions')
 					try {
-						return await new TitleBar().select('View', 'Extensions') !== undefined;
+						return await new Workbench().executeCommand('View: Open View') !== undefined;
 					} catch (e){
 						console.log(e);
 						return false;
 					}
 				}, 10000
 			);
-			console.log('get title bar view extensions');
-			await new TitleBar().select('View', 'Extensions');
-			console.log('will get anySection...')
-			await new Marketplace().getAnySection(1000);
-			await Marketplace.open(10000);
-			await DefaultWait.sleep(1000);
+			//await new Workbench().executeCommand('View: Open View');
+			console.log('command View: Open View executed');
+			const input = await InputBox.create();
+			console.log('input box retrieved');
+			await input.setText('view Extensions');
+			console.log('text set in input box');
+			await input.click();
+			
+			
+			// console.log('will get anySection...')
+			// await new Marketplace().getAnySection(1000);
+			// await Marketplace.open(10000);
+			// await DefaultWait.sleep(1000);
 			section = await new SideBarView().getContent().getSection('Installed') as ExtensionsViewSection;
 			
 			item = await section.findItem(`@installed ${pjson.displayName}`) as ExtensionsViewItem;
