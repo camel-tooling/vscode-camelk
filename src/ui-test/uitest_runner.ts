@@ -32,7 +32,7 @@
 	}
 	const tester = new ExTester(storageFolder, releaseType, extensionFolder);
 	await tester.setupRequirements();
-	await tester.installFromMarketplace('redhat.vscode-didact');
+	//await tester.installFromMarketplace('redhat.vscode-didact');
 	await tester.runTests('out/src/ui-test/*_test.js');
  }
  

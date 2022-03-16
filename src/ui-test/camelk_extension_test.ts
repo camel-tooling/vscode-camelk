@@ -18,6 +18,7 @@ describe('Tooling for Apache Camel K extension', function () {
 
 		let section: ExtensionsViewSection;
 		let item: ExtensionsViewItem;
+		let input :InputBox;
 
 		before(async function () {
 			this.timeout(10000);
@@ -31,8 +32,8 @@ describe('Tooling for Apache Camel K extension', function () {
 		it('Find extension', async function () {
 			
 			this.timeout(30000);
-			VSBrowser.instance.driver.wait(until.elementIsEnabled(new TitleBar()));
-			VSBrowser.instance.driver.wait(until.elementIsVisible(new Workbench()));
+			await VSBrowser.instance.driver.wait(until.elementIsEnabled(new TitleBar()));
+			await VSBrowser.instance.driver.wait(until.elementIsVisible(new Workbench()));
 			// console.log('loop get title bar');
 			// VSBrowser.instance.driver.wait(async() => {
 			// 		console.log('try to get title bar view -> Extensions')
@@ -47,19 +48,23 @@ describe('Tooling for Apache Camel K extension', function () {
 			// console.log('get title bar view extensions');
 			// await new TitleBar().select('View', 'Extensions');
 			//DefaultWait.sleep(5000);
-			VSBrowser.instance.driver.wait(async() => {
-					console.log('try to get title bar view -> Extensions')
-					try {
-						return await new Workbench().executeCommand('View: Open View') !== undefined;
-					} catch (e){
-						console.log(e);
-						return false;
-					}
-				}, 10000
-			);
-			//await new Workbench().executeCommand('View: Open View');
+			
+			// await VSBrowser.instance.driver.wait(async() => {
+			// 		console.log('try to get openview')
+			// 		try {
+			// 			await new Workbench().executeCommand('View: Open View');
+			// 			console.log('command View: Open View executed');
+			// 			input = await InputBox.create();
+			// 			return input != undefined;
+			// 		} catch (e){
+			// 			console.log(e);
+			// 			return false;
+			// 		}
+			// 	}, 10000
+			// );
+			await new Workbench().executeCommand('View: Open View');
 			console.log('command View: Open View executed');
-			const input = await InputBox.create();
+			input = await InputBox.create();
 			console.log('input box retrieved');
 			await input.setText('view Extensions');
 			console.log('text set in input box');
@@ -71,8 +76,9 @@ describe('Tooling for Apache Camel K extension', function () {
 			// await Marketplace.open(10000);
 			// await DefaultWait.sleep(1000);
 			section = await new SideBarView().getContent().getSection('Installed') as ExtensionsViewSection;
-			
+			console.log('section extensiosn retrieved');
 			item = await section.findItem(`@installed ${pjson.displayName}`) as ExtensionsViewItem;
+			console.log('item found in section');
 			assert.isNotNull(item);
 		});
 
