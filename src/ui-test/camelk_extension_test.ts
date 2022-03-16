@@ -77,7 +77,15 @@ describe('Tooling for Apache Camel K extension', function () {
 			// await DefaultWait.sleep(1000);
 			section = await new SideBarView().getContent().getSection('Installed') as ExtensionsViewSection;
 			console.log('section extensiosn retrieved');
-			item = await section.findItem(`@installed ${pjson.displayName}`) as ExtensionsViewItem;
+			
+			await VSBrowser.instance.driver.wait(async() => {
+					console.log('try to get openview')
+					item = await section.findItem(`@installed ${pjson.displayName}`) as ExtensionsViewItem;
+					return item !== undefined;
+				}, 10000
+			);
+			
+			//item = await section.findItem(`@installed ${pjson.displayName}`) as ExtensionsViewItem;
 			console.log('item found in section');
 			assert.isNotNull(item);
 			assert.isDefined(item);
