@@ -80,6 +80,7 @@ describe('Tooling for Apache Camel K extension', function () {
 			item = await section.findItem(`@installed ${pjson.displayName}`) as ExtensionsViewItem;
 			console.log('item found in section');
 			assert.isNotNull(item);
+			assert.isDefined(item);
 		});
 
 		it('Extension is installed', async function () {
