@@ -24,6 +24,7 @@
 	"rules": {
 		"@typescript-eslint/no-var-requires": "off", /** allows require statements outside of imports **/
 		"no-async-promise-executor": "off", /* Deactivated for now as i do not know how to fix it safely*/
+		"@typescript-eslint/no-explicit-any": "off",
 		"import/no-extraneous-dependencies": [
 			"error",
 			{

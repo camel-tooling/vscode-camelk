@@ -12,8 +12,8 @@ vsc-extension-quickstart.md
 sonar-project.properties
 tslint.json
 test Fixture with speci@l chars
-test-resources
+uitests-resources
 coverconfig.json
 coverage
 *.vsix
-.test-extensions
+test-extensions

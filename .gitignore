@@ -3,7 +3,7 @@ node_modules
 .vscode-test/
 *.vsix
 *.sonarlint
-test-resources
+uitests-resources
 coverage
 test Fixture with speci@l chars/.vscode/settings.json
-.test-extensions
+test-extensions

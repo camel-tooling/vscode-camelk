@@ -138,8 +138,10 @@ export async function installKamel(context: vscode.ExtensionContext): Promise<Er
 		try {
 			kamelUrl = await versionUtils.getDownloadURLForCamelKTag(versionToUse, platform);
 		} catch (error) {
-			extension.shareMessageInMainOutputChannel(error);
-			throw new Error(error);
+			if(error instanceof Error) {
+				extension.shareMessageInMainOutputChannel(error.message);
+				throw new Error(error.message);
+			}
 		}
 	}
 
