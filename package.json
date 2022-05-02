@@ -351,7 +351,7 @@
 		"@types/download": "^8.0.1",
 		"@types/glob": "^7.2.0",
 		"@types/mkdirp": "^1.0.2",
-		"@types/mocha": "^9.1.0",
+		"@types/mocha": "^9.1.1",
 		"@types/nock": "^11.1.0",
 		"@types/node": "^17.0.31",
 		"@types/sinon": "^10.0.11",
