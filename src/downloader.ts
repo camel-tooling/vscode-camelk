@@ -36,6 +36,6 @@ export async function to(sourceUrl: string, destinationFile: string): Promise<Er
         await download!(sourceUrl, path.dirname(destinationFile), { filename: path.basename(destinationFile) });  // safe because we ensured it
         return { succeeded: true, result: null };
     } catch (e) {
-        return { succeeded: false, error: [e.message] };
+        return { succeeded: false, error: [(e as Error).message] };
     }
 }

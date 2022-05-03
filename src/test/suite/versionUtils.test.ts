@@ -101,7 +101,7 @@ suite("VersionUtils check", () => {
 				const testUrl = await versionUtils.getDownloadURLForCamelKTag(tagName, platform);
 				should.equal(testUrl, urlToTest);
 			} catch (error) {
-				should.fail(error);
+				should.fail((error as Error).message);
 			}
 		}
 
