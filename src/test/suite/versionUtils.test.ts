@@ -78,12 +78,16 @@ suite("VersionUtils check", () => {
 			await validateVersion('1.8.2', Platform.LINUX, 'https://github.com/apache/camel-k/releases/download/v1.8.2/camel-k-client-1.8.2-linux-64bit.tar.gz');
 		});
 		
-		test("validate url for existing 1.8.2 windows version", async () => {
-			await validateVersion('1.8.2', Platform.WINDOWS, 'https://github.com/apache/camel-k/releases/download/v1.8.2/camel-k-client-1.8.2-windows-64bit.tar.gz');
+		test("validate url for existing 1.9.0 version", async () => {
+			await validateVersion('1.9.0', Platform.LINUX, 'https://github.com/apache/camel-k/releases/download/v1.9.0/camel-k-client-1.9.0-linux-64bit.tar.gz');
+		});
+		
+		test("validate url for existing 1.9.0 windows version", async () => {
+			await validateVersion('1.9.0', Platform.WINDOWS, 'https://github.com/apache/camel-k/releases/download/v1.9.0/camel-k-client-1.9.0-windows-64bit.tar.gz');
 		});
 
-		test("validate url for existing 1.8.2 MacOS version", async () => {
-			await validateVersion('1.8.2', Platform.MACOS, 'https://github.com/apache/camel-k/releases/download/v1.8.2/camel-k-client-1.8.2-mac-64bit.tar.gz');
+		test("validate url for existing 1.9.0 MacOS version", async () => {
+			await validateVersion('1.9.0', Platform.MACOS, 'https://github.com/apache/camel-k/releases/download/v1.9.0/camel-k-client-1.9.0-mac-64bit.tar.gz');
 		});
 		
 		
