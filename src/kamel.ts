@@ -83,6 +83,7 @@ async function kamelInternal(command: string, devMode: boolean, namespace : stri
 		const cmd: string = getBaseCmd(binpath, command, namespace);
 		const sr: ChildProcess = exec(cmd);
 		let wholeOutData = '';
+		let wholeErrData = '';
 		if (sr) {
 			if (sr.stdout) {
 				sr.stdout.on('data', function (data) {
@@ -95,7 +96,7 @@ async function kamelInternal(command: string, devMode: boolean, namespace : stri
 			if (sr.stderr) {
 				sr.stderr.on('data', function (data) {
 					utils.shareMessage(extension.mainOutputChannel, `${data}`);
-					reject(new Error(data));
+					wholeErrData += data;
 				});
 			}
 			sr.on('close', function (exitCode, signal) {
@@ -107,12 +108,12 @@ async function kamelInternal(command: string, devMode: boolean, namespace : stri
 					}
 				} else if(exitCode === null) {
 					if (signal === null) {
-						reject("Closed with no exit code and no signal.");
+						reject(`Closed with no exit code and no signal.\n${wholeErrData}`);
 					} else {
-						reject(signal.toString());
+						reject(`${signal.toString()}\n${wholeErrData}`);
 					}
 				} else {
-					reject(exitCode.toString());
+					reject(`${exitCode.toString()}\n${wholeErrData}`);
 				}
 			});
 		}
