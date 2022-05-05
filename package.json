@@ -344,7 +344,7 @@
 		"copy-sanitize": "copyfiles -u 1 src/test/suite/sanitize.go.saved out/src",
 		"ui-test": "npm run compile && node --unhandled-rejections=warn-with-error-code out/src/ui-test/uitest_runner.js",
 		"ui-test-insiders": "npm run compile && node --unhandled-rejections=warn-with-error-code out/src/ui-test/uitest_runner.js -t insider",
-		"lint": "./node_modules/.bin/eslint src --ext .ts"
+		"lint": "eslint src --ext .ts"
 	},
 	"devDependencies": {
 		"@types/chai": "^4.3.1",
