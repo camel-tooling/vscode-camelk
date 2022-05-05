@@ -31,8 +31,7 @@
 		}
 	}
 	const tester = new ExTester(storageFolder, releaseType, extensionFolder);
-	await tester.setupRequirements();
-	await tester.runTests('out/src/ui-test/*_test.js');
+	await tester.setupAndRunTests('out/src/ui-test/*_test.js', process.env.CODE_VERSION);
  }
  
  main();
