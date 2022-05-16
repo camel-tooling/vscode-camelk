@@ -104,7 +104,9 @@
 						"type": "boolean",
 						"default": null,
 						"markdownDescription": "Enable usage data and errors to be sent to Red Hat servers. Read our [privacy statement](https://developers.redhat.com/article/tool-data-collection).",
-						"tags":[ "telemetry" ],
+						"tags": [
+							"telemetry"
+						],
 						"scope": "window"
 					}
 				}
@@ -338,7 +340,7 @@
 	"scripts": {
 		"vscode:prepublish": "npm run clean && npm run compile",
 		"compile": "tsc -p ./ && npm run copy-sanitize && npm run lint",
-		"clean": "rm -rf out || rmdir out /s /q",
+		"clean": "rimraf out",
 		"watch": "tsc -watch -p ./",
 		"test": "npm run compile && node ./out/src/test/runTests.js",
 		"copy-sanitize": "copyfiles -u 1 src/test/suite/sanitize.go.saved out/src",
@@ -369,6 +371,7 @@
 		"mocha": "^9.2.2",
 		"mocha-jenkins-reporter": "^0.4.7",
 		"nock": "^13.2.4",
+		"rimraf": "^3.0.2",
 		"sinon": "^14.0.0",
 		"sinon-chai": "^3.7.0",
 		"typescript": "^4.3.5",
