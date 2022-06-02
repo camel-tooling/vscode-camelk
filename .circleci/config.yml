@@ -42,7 +42,7 @@ jobs:
           name: Configure Kamel
           command: |               
             # Download and provide in path kamel.
-            curl -Lo kamel.tar.gz https://github.com/apache/camel-k/releases/download/v1.9.0/camel-k-client-1.9.0-linux-64bit.tar.gz
+            curl -Lo kamel.tar.gz https://github.com/apache/camel-k/releases/download/v1.9.2/camel-k-client-1.9.2-linux-64bit.tar.gz
             tar -zxvf kamel.tar.gz
             chmod +x kamel
             sudo mv kamel /usr/local/bin/
