@@ -19,7 +19,7 @@
  import { ExTester } from 'vscode-extension-tester';
  import { ReleaseQuality } from 'vscode-extension-tester/out/util/codeUtil';
  
- const storageFolder = undefined;
+ const storageFolder = 'test-resources';
  let releaseType: ReleaseQuality = ReleaseQuality.Stable;
  const projectPath = path.resolve(__dirname, '..', '..');
  const extensionFolder = path.join(projectPath, '.test-extensions');
@@ -31,8 +31,7 @@
 		}
 	}
 	const tester = new ExTester(storageFolder, releaseType, extensionFolder);
-	await tester.setupRequirements();
-	await tester.runTests('out/src/ui-test/*_test.js');
+	await tester.setupAndRunTests('out/src/ui-test/*_test.js', process.env.CODE_VERSION);
  }
  
  main();
