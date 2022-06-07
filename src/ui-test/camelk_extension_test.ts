@@ -1,35 +1,49 @@
 import * as pjson from '../../package.json';
 import { assert } from 'chai';
+import { EditorView, ExtensionsViewItem, VSBrowser, WebDriver } from 'vscode-extension-tester';
 import { DefaultWait, Marketplace } from 'vscode-uitests-tooling';
-import {
-	EditorView,
-	ExtensionsViewItem,
-	ExtensionsViewSection,
-	SideBarView
-} from 'vscode-extension-tester';
+import { extensionIsActivated } from './utils/waitConditions';
 
 describe('Tooling for Apache Camel K extension', function () {
+	this.timeout(180000);
+
+	let driver: WebDriver;
 
 	describe('Extensions view', function () {
-
-		let section: ExtensionsViewSection;
+		let marketplace: Marketplace;
 		let item: ExtensionsViewItem;
 
 		before(async function () {
-			this.timeout(10000);
-			await Marketplace.open();
-			await DefaultWait.sleep(1000);
-			section = await new SideBarView().getContent().getSection('Installed') as ExtensionsViewSection;
+			driver = VSBrowser.instance.driver;
+			VSBrowser.instance.waitForWorkbench;
 		});
 
 		after(async function () {
+			await marketplace.close();
 			await new EditorView().closeAllEditors();
+			// TMP static wait workaround for unexpected vscode-extension-tester 'afterAll' timeout on Fedora
+			await DefaultWait.sleep(10000);
+		});
+
+		it('Open Marketplace', async function () {
+			this.retries(3);
+			marketplace = await Marketplace.open(this.timeout());
 		});
 
 		it('Find extension', async function () {
-			this.timeout(10000);
-			item = await section.findItem(`@installed ${pjson.displayName}`) as ExtensionsViewItem;
-			assert.isNotNull(item);
+			this.retries(3);
+			item = await marketplace.findExtension(`@installed ${pjson.displayName}`);
+		});
+
+		it('Extension was properly activated', async function () {
+			this.timeout(120000);
+			await driver.wait(async () => {
+				// on macOS the extension is sometimes activated immediately and it causes UI test flakiness
+				if(process.platform == 'darwin') {
+					item = await marketplace.findExtension(`@installed ${pjson.displayName}`);
+				}
+				return extensionIsActivated(item);
+			}, 120000);
 		});
 
 		it('Extension is installed', async function () {
