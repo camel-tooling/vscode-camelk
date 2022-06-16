@@ -53,8 +53,8 @@ export async function handleLogViaKamelCli(integrationName: string) : Promise<vo
 			proc.stdout.on('data', async (data: string) => {
 				if (data.length > 0) {
 					const buf = Buffer.from(data);
-					const stripAnsi = await import('strip-ansi');
-					const text = stripAnsi.default(buf.toString());
+					const stripAnsi = require('strip-ansi');
+					const text = stripAnsi(buf.toString());
 					if (text.indexOf(`Received hang up - stopping the main instance`) !== -1 && !closeLogViewWhenIntegrationRemoved) {
 						const title: string = panel.getTitle();
 						updateLogViewTitleToStopped(panel, title);

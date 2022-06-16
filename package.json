@@ -104,7 +104,9 @@
 						"type": "boolean",
 						"default": null,
 						"markdownDescription": "Enable usage data and errors to be sent to Red Hat servers. Read our [privacy statement](https://developers.redhat.com/article/tool-data-collection).",
-						"tags":[ "telemetry" ],
+						"tags": [
+							"telemetry"
+						],
 						"scope": "window"
 					}
 				}
@@ -397,7 +399,7 @@
 		"request": "^2.88.2",
 		"request-promise": "^4.2.6",
 		"shelljs": "^0.8.5",
-		"strip-ansi": "^7.0.1",
+		"strip-ansi": "^6.0.1",
 		"tar": "^6.1.11",
 		"tmp": "^0.2.1",
 		"valid-filename": "^3.1.0",
