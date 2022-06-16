@@ -20,18 +20,18 @@ import { ChildProcess } from 'child_process';
 import * as shelljs from 'shelljs';
 
 const WINDOWS = 'win32';
-const MACOS  = 'darwin';
-const LINUX  = 'linux';
+const MACOS = 'darwin';
+const LINUX = 'linux';
 
 export enum Platform {
-    WINDOWS,
+    WINDOWS = 1,
     MACOS,
     LINUX
 }
 
 export interface FindBinaryResult {
-	err: number | null;
-	output: string;
+    err: number | null;
+    output: string;
 }
 
 export function concatIfBoth(s1: string | undefined, s2: string | undefined): string | undefined {
@@ -57,7 +57,7 @@ export function isUnix(): boolean {
     return (process.platform === LINUX);
 }
 
-export function getPlatform() : Platform | undefined {
+export function getPlatform(): Platform | undefined {
     if (isWindows()) { return Platform.WINDOWS; }
     if (isMacOS()) { return Platform.MACOS; }
     if (isUnix()) { return Platform.LINUX; }
@@ -66,8 +66,8 @@ export function getPlatform() : Platform | undefined {
 
 export function execCore(cmd: string, opts: any, callback?: ((proc: ChildProcess) => void) | null, stdin?: string): Promise<ShellResult> {
     return new Promise<ShellResult>((resolve) => {
-        const proc = shelljs.exec(cmd, opts, (code, stdout, stderr) => resolve({code : code, stdout : stdout, stderr : stderr}));
-        if (stdin &&  proc.stdin) {
+        const proc = shelljs.exec(cmd, opts, (code, stdout, stderr) => resolve({ code: code, stdout: stdout, stderr: stderr }));
+        if (stdin && proc.stdin) {
             proc.stdin.end(stdin);
         }
         if (callback) {
@@ -83,24 +83,24 @@ export interface ShellResult {
 }
 
 export async function findBinary(binName: string): Promise<FindBinaryResult> {
-	let cmd = `which ${binName}`;
+    let cmd = `which ${binName}`;
 
-	if (isWindows()) {
-		cmd = `where.exe ${binName}.exe`;
-	}
+    if (isWindows()) {
+        cmd = `where.exe ${binName}.exe`;
+    }
 
-	const opts = {
-		async: true,
-		env: {
-			HOME: process.env.HOME,
-			PATH: process.env.PATH
-		}
-	};
+    const opts = {
+        async: true,
+        env: {
+            HOME: process.env.HOME,
+            PATH: process.env.PATH
+        }
+    };
 
-	const execResult = await execCore(cmd, opts);
-	if (execResult.code) {
-		return { err: execResult.code, output: execResult.stderr };
-	}
+    const execResult = await execCore(cmd, opts);
+    if (execResult.code) {
+        return { err: execResult.code, output: execResult.stderr };
+    }
 
-	return { err: null, output: execResult.stdout };
+    return { err: null, output: execResult.stdout };
 }
