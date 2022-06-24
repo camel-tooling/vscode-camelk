@@ -13,7 +13,7 @@ jobs:
       - restore_cache:
           key: dependency-cache-{{ checksum "package-lock.json" }}
       - node/install:
-          node-version: '14.19.0'
+          node-version: '16.15'
       - run:
           name: install-vsce
           command: |
