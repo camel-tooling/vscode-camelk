@@ -21,6 +21,7 @@ import * as extension from './extension';
 import * as utils from './CamelKJSONUtils';
 import * as path from 'path';
 import * as child_process from 'child_process';
+import * as constants from './IntegrationConstants';
 import { getConfigMaps, getSecrets } from './kubectlutils';
 import * as k8s from 'vscode-kubernetes-tools-api';
 import * as kamel from './kamel';
@@ -29,37 +30,16 @@ import * as fs from 'fs';
 import { getTelemetryServiceInstance } from './Telemetry';
 import { TelemetryEvent } from '@redhat-developer/vscode-redhat-telemetry/lib';
 
-const validNameRegex = /^[A-Za-z][A-Za-z0-9\-.]*(?:[A-Za-z0-9]$){1}/;
-const devModeIntegration = 'Dev Mode - Apache Camel K Integration in Dev Mode';
-export const basicIntegration = 'Basic - Apache Camel K Integration without extra options';
-export const configMapIntegration = 'ConfigMap - Apache Camel K Integration with Kubernetes ConfigMap as Runtime Configuration';
-export const secretIntegration = 'Secret - Apache Camel K Integration with Kubernetes Secret as Runtime Configuration';
-export const resourceIntegration = 'Resource - Apache Camel K Integration with Resource file';
-export const propertyIntegration = 'Property - Apache Camel K Integration with Property';
-const dependencyIntegration = 'Dependencies - Apache Camel K Integration with Explicit Dependencies';
-export const vscodeTasksIntegration = 'Use a predefined Task - useful for multi-attributes deployment';
+ let childProcessMap : Map<string, child_process.ChildProcess>;
 
-const ResourceOptions: vscode.OpenDialogOptions = {
+ export const ResourceOptions: vscode.OpenDialogOptions = {
 	canSelectMany: true,
 	openLabel: 'Open Resource File(s)',
 	filters: {
 		'Text files': ['txt'],
 		'All files': ['*']
 	}
-};
-
-const choiceList = [
-	devModeIntegration,
-	basicIntegration,
-	configMapIntegration,
-	secretIntegration,
-	resourceIntegration,
-	propertyIntegration,
-	dependencyIntegration,
-	vscodeTasksIntegration
- ];
-
- let childProcessMap : Map<string, child_process.ChildProcess>;
+ };
 
  export function startIntegration(...args: any[]): Promise<boolean> {
 	return new Promise <boolean> ( async (resolve, reject) => {
@@ -108,7 +88,7 @@ const choiceList = [
 			reject('No valid file specified to start integration function call');
 			return;	
 		} else if (!inChoice && context) {
-			choice = await vscode.window.showQuickPick(choiceList, {
+			choice = await vscode.window.showQuickPick(constants.choiceList, {
 				placeHolder: 'Select the type of Apache Camel K Integration'
 			});
 		} else {
@@ -125,10 +105,10 @@ const choiceList = [
 			let selectedDependency : any = undefined;
 
 			switch (choice) {
-				case devModeIntegration:
+				case constants.devModeIntegration:
 					devMode = true;
 					break;
-				case configMapIntegration:
+				case constants.configMapIntegration:
 					await getSelectedConfigMap().then( (selection) => {
 						selectedConfigMap = selection;
 						if (selectedConfigMap === undefined) {
@@ -140,7 +120,7 @@ const choiceList = [
 						errorEncountered = true;
 					});
 					break;
-				case secretIntegration:
+				case constants.secretIntegration:
 					await getSelectedSecret().then( (selection) => {
 						selectedSecret = selection;
 						if (selectedSecret === undefined) {
@@ -152,7 +132,7 @@ const choiceList = [
 						errorEncountered = true;
 					});
 					break;
-				case resourceIntegration:
+				case constants.resourceIntegration:
 					await getSelectedResources().then( (selection) => {
 						selectedResource = selection;
 						if (selectedResource === undefined) {
@@ -164,7 +144,7 @@ const choiceList = [
 						errorEncountered = true;
 					});
 					break;
-				case propertyIntegration:
+				case constants.propertyIntegration:
 					await getSelectedProperties().then ( (selection) => {
 						selectedProperty = selection;
 						if (selectedProperty === undefined) {
@@ -176,7 +156,7 @@ const choiceList = [
 						errorEncountered = true;
 					});
 					break;
-				case dependencyIntegration:
+				case constants.dependencyIntegration:
 					await getSelectedDependencies().then ( (selection) => {
 						selectedDependency = selection;
 						if (selectedDependency === undefined) {
@@ -188,10 +168,10 @@ const choiceList = [
 						errorEncountered = true;
 					});
 					break;
-				case basicIntegration:
+				case constants.basicIntegration:
 					// do nothing with config-map or secret
 					break;
-				case vscodeTasksIntegration:
+				case constants.vscodeTasksIntegration:
 					await handleDefinedTask(context).then(() => {
 						resolve(true);
 					}).catch(onrejected => {
@@ -511,7 +491,7 @@ export function isCamelKAvailable(): Promise<boolean> {
 }
 
 function validateName(text : string): string | null {
-	return !validNameRegex.test(text) ? 'Name must be at least two characters long, start with a letter, and only include a-z, A-Z, periods and hyphens' : null;
+	return !constants.validNameRegex.test(text) ? 'Name must be at least two characters long, start with a letter, and only include a-z, A-Z, periods and hyphens' : null;
 }
 
 function validateDependency(text : string): string | null {
@@ -556,11 +536,11 @@ export function killChildProcessForIntegration(integration:string) : Promise<boo
 
 function findChoiceFromStartsWith(inChoice: string | undefined) : string | undefined {
 	if (inChoice) {
-		if (devModeIntegration.startsWith(inChoice)) {
-			return devModeIntegration;
+		if (constants.devModeIntegration.startsWith(inChoice)) {
+			return constants.devModeIntegration;
 		}
-		if (basicIntegration.startsWith(inChoice)) {
-			return basicIntegration;
+		if (constants.basicIntegration.startsWith(inChoice)) {
+			return constants.basicIntegration;
 		}
 	}
 	// other choices not supported at present because they will require additional inputs

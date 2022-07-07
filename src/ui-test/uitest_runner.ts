@@ -14,24 +14,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+'use strict';
 
- import * as path from 'path';
- import { ExTester } from 'vscode-extension-tester';
- import { ReleaseQuality } from 'vscode-extension-tester/out/util/codeUtil';
- 
- const storageFolder = 'test-resources';
- let releaseType: ReleaseQuality = ReleaseQuality.Stable;
- const projectPath = path.resolve(__dirname, '..', '..');
- const extensionFolder = path.join(projectPath, '.test-extensions');
- 
- async function main(): Promise<void> {
-	if(process.argv.length === 4){
-		if(process.argv[2] === '-t' && process.argv[3] === 'insider') {
+import * as path from 'path';
+import { ExTester } from 'vscode-extension-tester';
+import { ReleaseQuality } from 'vscode-extension-tester/out/util/codeUtil';
+
+const storageFolder = 'test-resources';
+let releaseType: ReleaseQuality = ReleaseQuality.Stable;
+export const projectPath = path.resolve(__dirname, '..', '..');
+const extensionFolder = path.join(projectPath, '.test-extensions');
+
+async function main(): Promise<void> {
+	if (process.argv.length === 4) {
+		if (process.argv[2] === '-t' && process.argv[3] === 'insider') {
 			releaseType = ReleaseQuality.Insider;
 		}
 	}
 	const tester = new ExTester(storageFolder, releaseType, extensionFolder);
 	await tester.setupAndRunTests('out/src/ui-test/*_test.js', process.env.CODE_VERSION);
- }
- 
- main();
+}
+
+main();
