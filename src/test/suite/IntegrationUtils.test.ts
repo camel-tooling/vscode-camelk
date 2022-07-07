@@ -19,6 +19,7 @@
 import * as sinon from 'sinon';
 import * as vscode from 'vscode';
 import * as IntegrationUtils from './../../IntegrationUtils';
+import * as IntegrationConstants from './../../IntegrationConstants';
 import { assert } from 'chai';
 import { getDocUri } from './completion.util';
 
@@ -44,7 +45,7 @@ suite("IntegrationUtil tests", function () {
 	});
 
 	test("ensure listing Camel K task when accessing 'Start Apache Camel Integration'", async function () {
-		showQuickPickStub.onFirstCall().returns(IntegrationUtils.vscodeTasksIntegration);
+		showQuickPickStub.onFirstCall().returns(IntegrationConstants.vscodeTasksIntegration);
 		showQuickPickStub.onSecondCall().returns('Test Camel K task');
 
 		const status = await IntegrationUtils.startIntegration(getDocUri('MyRouteBuilder.java'));
@@ -57,7 +58,7 @@ suite("IntegrationUtil tests", function () {
 	});
 
 	test("ensure filtering out Camel K task with unrelated target file when accessing 'Start Apache Camel Integration'", async function () {
-		showQuickPickStub.onFirstCall().returns(IntegrationUtils.vscodeTasksIntegration);
+		showQuickPickStub.onFirstCall().returns(IntegrationConstants.vscodeTasksIntegration);
 		showQuickPickStub.onSecondCall().returns(undefined);
 
 		try {
@@ -73,7 +74,7 @@ suite("IntegrationUtil tests", function () {
 	});
 
 	test("ensure no action called on cancel of defined task from 'Start Apache Camel Integration'", async function () {
-		showQuickPickStub.onFirstCall().returns(IntegrationUtils.vscodeTasksIntegration);
+		showQuickPickStub.onFirstCall().returns(IntegrationConstants.vscodeTasksIntegration);
 		showQuickPickStub.onSecondCall().returns(undefined);
 
 		try {

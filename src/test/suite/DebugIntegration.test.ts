@@ -23,7 +23,7 @@ import * as config from '../../config';
 import * as extension from '../../extension';
 import * as Utils from "./Utils";
 import * as shelljs from 'shelljs';
-import { LANGUAGES_WITH_FILENAME_EXTENSIONS } from '../../commands/NewIntegrationFileCommand';
+import { LANGUAGES_WITH_FILENAME_EXTENSIONS } from '../../IntegrationConstants';
 import { getTelemetryServiceInstance } from '../../Telemetry';
 import { cleanDeployedIntegration, createFile, startIntegrationWithBasicCheck, checkTelemetry, retrieveDeployedTreeNodes} from './Utils/DeployTestUtil';
 import { CamelKDebugTaskProvider } from '../../task/CamelKDebugTaskDefinition';

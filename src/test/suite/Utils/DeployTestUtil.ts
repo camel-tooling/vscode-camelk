@@ -17,13 +17,12 @@
 'use strict';
 import * as sinon from 'sinon';
 import * as vscode from 'vscode';
-import * as IntegrationUtils from '../../../IntegrationUtils';
+import * as IntegrationConstants from '../../../IntegrationConstants';
 import { openCamelKTreeView } from "../Utils";
 import { assert, expect } from 'chai';
 import { waitUntil } from 'async-wait-until';
 import * as extension from '../../../extension';
 import * as kamel from '../../../kamel';
-import { LANGUAGES_WITH_FILENAME_EXTENSIONS } from '../../../commands/NewIntegrationFileCommand';
 import { TelemetryEvent } from '@redhat-developer/vscode-redhat-telemetry/lib';
 import { TreeNode } from '../../../CamelKNodeProvider';
 import { UNDEPLOY_TIMEOUT, PROVIDER_POPULATED_TIMEOUT, RUNNING_TIMEOUT, DEPLOYED_TIMEOUT, EDITOR_OPENED_TIMEOUT } from '../StartIntegration.test';
@@ -76,7 +75,7 @@ export async function startIntegrationWithBasicCheck(showQuickpickStub: sinon.Si
 			alreadyDeployedIntegration,
 			`It is expected that there is ${alreadyDeployedIntegration} Integration already deployed but the following are detected ${currentIntegrations.map(treeNode => treeNode.label).join(';')}`);
 	}
-	showQuickpickStub.onSecondCall().returns(IntegrationUtils.basicIntegration);
+	showQuickpickStub.onSecondCall().returns(IntegrationConstants.basicIntegration);
 	telemetrySpy.resetHistory();
 	await vscode.commands.executeCommand('camelk.startintegration');
 
@@ -123,7 +122,7 @@ export async function createFile(showQuickpickStub: sinon.SinonStub<any[], any>,
 	showInputBoxStub.onFirstCall().returns(integrationName);
 
 	await vscode.commands.executeCommand('camelk.integrations.createNewIntegrationFile');
-	const fileExtension = LANGUAGES_WITH_FILENAME_EXTENSIONS.get(language);
+	const fileExtension = IntegrationConstants.LANGUAGES_WITH_FILENAME_EXTENSIONS.get(language);
 
 	try {
 		await waitUntil(() => {

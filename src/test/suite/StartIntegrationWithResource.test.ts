@@ -21,7 +21,7 @@ import * as fs from 'fs';
 import * as sinon from 'sinon';
 import * as vscode from 'vscode';
 import * as config from '../../config';
-import * as IntegrationUtils from '../../IntegrationUtils';
+import * as IntegrationConstants from '../../IntegrationConstants';
 import { skipOnJenkins, openCamelKTreeView } from "./Utils";
 import { assert, expect } from 'chai';
 import * as shelljs from 'shelljs';
@@ -100,7 +100,7 @@ async function testDeployWithResources(resources: tmp.FileResult[], showQuickpic
 
 	await openCamelKTreeView();
 	assert.isEmpty(extension.camelKIntegrationsProvider.getTreeNodes());
-	showQuickpickStub.onSecondCall().returns(IntegrationUtils.resourceIntegration);
+	showQuickpickStub.onSecondCall().returns(IntegrationConstants.resourceIntegration);
 	showOpenDialogStub.onFirstCall().returns(uriOfResources);
 
 	await vscode.commands.executeCommand('camelk.startintegration');

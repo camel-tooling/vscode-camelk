@@ -21,7 +21,7 @@ import * as fs from 'fs';
 import * as sinon from 'sinon';
 import * as vscode from 'vscode';
 import * as config from '../../config';
-import * as IntegrationUtils from '../../IntegrationUtils';
+import * as IntegrationConstants from './../../IntegrationConstants';
 import { skipOnJenkins, openCamelKTreeView } from "./Utils";
 import { assert, expect } from 'chai';
 import { waitUntil } from 'async-wait-until';
@@ -29,7 +29,7 @@ import { getNamedListFromKubernetesThenParseList } from '../../kubectlutils';
 import * as shelljs from 'shelljs';
 import * as kamel from './../../kamel';
 import * as kubectl from './../../kubectl';
-import { LANGUAGES, LANGUAGES_WITH_FILENAME_EXTENSIONS } from '../../commands/NewIntegrationFileCommand';
+import { LANGUAGES, LANGUAGES_WITH_FILENAME_EXTENSIONS } from '../../IntegrationConstants';
 import * as CamelKRunTaskDefinition from '../../task/CamelKRunTaskDefinition';
 import { getTelemetryServiceInstance } from '../../Telemetry';
 import { cleanDeployedIntegration, createFile, startIntegrationWithBasicCheck, checkTelemetry, checkIntegrationDeployed, checkIntegrationRunning } from './Utils/DeployTestUtil';
@@ -92,7 +92,7 @@ suite('Check can deploy default examples', () => {
 		createdFile = await createFile(showQuickpickStub, showWorkspaceFolderPickStub, showInputBoxStub, `Test${language}DeployFromTask`, language);
 		await openCamelKTreeView();
 		assert.isEmpty(extension.camelKIntegrationsProvider.getTreeNodes());
-		showQuickpickStub.onSecondCall().returns(IntegrationUtils.vscodeTasksIntegration);
+		showQuickpickStub.onSecondCall().returns(IntegrationConstants.vscodeTasksIntegration);
 		showQuickpickStub.onThirdCall().returns(CamelKRunTaskDefinition.NAME_OF_PROVIDED_TASK_TO_DEPLOY_IN_DEV_MODE_FROM_ACTIVE_EDITOR);
 		
 		await vscode.commands.executeCommand('camelk.startintegration');
@@ -111,7 +111,7 @@ suite('Check can deploy default examples', () => {
 		
 		await openCamelKTreeView();
 		assert.isEmpty(extension.camelKIntegrationsProvider.getTreeNodes());
-		showQuickpickStub.onSecondCall().returns(IntegrationUtils.configMapIntegration);
+		showQuickpickStub.onSecondCall().returns(IntegrationConstants.configMapIntegration);
 		showQuickpickStub.onThirdCall().returns(confimapName);
 		
 		await vscode.commands.executeCommand('camelk.startintegration');
@@ -134,7 +134,7 @@ suite('Check can deploy default examples', () => {
 		
 		await openCamelKTreeView();
 		assert.isEmpty(extension.camelKIntegrationsProvider.getTreeNodes());
-		showQuickpickStub.onSecondCall().returns(IntegrationUtils.secretIntegration);
+		showQuickpickStub.onSecondCall().returns(IntegrationConstants.secretIntegration);
 		showQuickpickStub.onThirdCall().returns(secretName);
 		
 		await vscode.commands.executeCommand('camelk.startintegration');
@@ -152,7 +152,7 @@ suite('Check can deploy default examples', () => {
 		
 		await openCamelKTreeView();
 		assert.isEmpty(extension.camelKIntegrationsProvider.getTreeNodes());
-		showQuickpickStub.onSecondCall().returns(IntegrationUtils.propertyIntegration);
+		showQuickpickStub.onSecondCall().returns(IntegrationConstants.propertyIntegration);
 		showInputBoxStub.onSecondCall().returns('propertyKey');
 		showInputBoxStub.onThirdCall().returns('my Value');
 		showQuickpickStub.onThirdCall().returns("No");
