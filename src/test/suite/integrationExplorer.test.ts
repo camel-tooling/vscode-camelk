@@ -19,7 +19,7 @@ import * as chai from 'chai';
 import * as extension from '../../extension';
 import * as CamelKNodeProvider from '../../CamelKNodeProvider';
 import * as sinon from 'sinon';
-import * as sinonChai from 'sinon-chai';
+import sinonChai from 'sinon-chai';
 import * as assert from 'assert';
 import * as fs from 'fs';
 import * as path from 'path';

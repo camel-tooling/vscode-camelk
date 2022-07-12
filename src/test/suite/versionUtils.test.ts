@@ -16,8 +16,8 @@
  */
 'use strict';
 
-import * as chai from 'chai';
-import * as sinonChai from 'sinon-chai';
+import chai from 'chai';
+import sinonChai from 'sinon-chai';
 import * as config from '../../config';
 import { Platform } from '../../shell';
 import * as versionUtils from '../../versionUtils';
