@@ -139,7 +139,10 @@ async function kamelInternalArgs(args: string[], devMode: boolean, namespace: st
 				if (sr.stdout) {
 					sr.stdout.on('data', function (data) {
 						if (devMode && devMode === true) {
-							utils.shareMessage(extension.mainOutputChannel, `Dev Mode -- ${data}`);
+							const buf = Buffer.from(data);
+							const stripAnsi = require('strip-ansi');
+							const text = stripAnsi(buf.toString());
+							utils.shareMessage(extension.mainOutputChannel, `Dev Mode -- ${text}`);
 						}
 					});
 				}        
