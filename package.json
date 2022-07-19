@@ -404,5 +404,11 @@
 		"tmp": "^0.2.1",
 		"valid-filename": "^3.1.0",
 		"vscode-kubernetes-tools-api": "^1.3.0"
+	},
+	"__metadata": {
+		"id": "5181e15d-d18d-444e-ba3b-e0cf48cab6f8",
+		"publisherDisplayName": "Red Hat",
+		"publisherId": "eed56242-9699-4317-8bc7-e9f4b9bdd3ff",
+		"isPreReleaseVersion": false
 	}
 }
