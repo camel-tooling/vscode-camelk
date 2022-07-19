@@ -16,7 +16,7 @@
  */
 'use strict';
 
-import detect from 'detect-port';
+import * as detect from 'detect-port';
 import * as vscode from 'vscode';
 import * as kamel from '../kamel';
 import { TreeNode } from "../CamelKNodeProvider";
