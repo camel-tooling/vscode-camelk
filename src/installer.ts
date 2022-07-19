@@ -25,7 +25,7 @@ import * as shell from './shell';
 import * as vscode from 'vscode';
 import * as kubectlutils from './kubectlutils';
 import * as downloader from './downloader';
-import download from 'download';
+import * as download from 'download';
 import * as versionUtils from './versionUtils';
 import * as mkdirp from 'mkdirp';
 
