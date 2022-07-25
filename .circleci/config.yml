@@ -34,8 +34,8 @@ jobs:
       - run:
           name: Configure Minikube
           command: |
-            curl -LO https://github.com/kubernetes/minikube/releases/download/v1.25.2/minikube_1.25.2-0_amd64.deb
-            sudo dpkg -i minikube_1.25.2-0_amd64.deb
+            curl -LO https://github.com/kubernetes/minikube/releases/download/v1.26.0/minikube_1.26.0-0_amd64.deb
+            sudo dpkg -i minikube_1.26.0-0_amd64.deb
             minikube start --vm-driver=docker --kubernetes-version=v1.23.4
             minikube addons enable registry
       - run:
