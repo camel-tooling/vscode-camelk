@@ -99,8 +99,7 @@ describe.only('Test Debug on Camel K Integrations from Side Bar', function () {
 			this.timeout(20000)
 			const item = await getIntegration(INTEGRATION_LABEL);
 			const menu = await item.openContextMenu();
-
-			assert.isFalse(await menu.hasItem(START_DEBUG_LABEL));
+			await promiseFail(VSBrowser.instance.driver.wait(() => menu.hasItem(START_DEBUG_LABEL), 5000));
 		});
 
 		after(async function() {
@@ -197,4 +196,16 @@ async function modifyCurrentFileToBeInvalid() {
 	const textEditor : TextEditor = new TextEditor();
 	await textEditor.setTextAtLine(14, ";");
 	await textEditor.save()
+}
+
+const promiseFail = async (proms: any) => await assertPromise(proms, false);
+
+const assertPromise = async (prom: any, succed = true) => {
+    succed = succed ? true : false;
+    try {
+        prom = Array.isArray(prom) ? prom : [prom];
+        await Promise.all(prom);
+        assert.strictEqual(true, succed);
+    }
+    catch (ex: any) { assert.notStrictEqual(true, succed, ex); }
 }
