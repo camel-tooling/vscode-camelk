@@ -42,7 +42,7 @@ const WORKSPACE_FOLDER = path.join(__dirname, TEST_FOLDER);
 const START_DEBUG_LABEL = uiTestConstants.startDebug;
 const REMOVE_INTEGRATION_LABEL = uiTestConstants.integrationRemove;
 
-describe('Test Debug on Camel K Integrations from Side Bar', function () {
+describe.only('Test Debug on Camel K Integrations from Side Bar', function () {
 
 	before(async function () {
 		this.timeout(90000);
@@ -69,8 +69,9 @@ describe('Test Debug on Camel K Integrations from Side Bar', function () {
 
 			const item = await getIntegration(INTEGRATION_LABEL);
 			const menu = await item.openContextMenu();
+			const hasJavaDebugAvailable = await VSBrowser.instance.driver.wait(() => menu.hasItem(START_DEBUG_LABEL), 5000);
 
-			assert.isTrue(await menu.hasItem(START_DEBUG_LABEL));
+			assert.isTrue(hasJavaDebugAvailable);
 		});
 
 		after(async function() {
