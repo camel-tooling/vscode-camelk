@@ -17,7 +17,6 @@
 
 'use strict'
 
-import { assert } from 'chai';
 import path = require('path');
 import * as pjson from '../../package.json';
 import {
