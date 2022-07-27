@@ -35,6 +35,7 @@ import { Marketplace } from 'vscode-uitests-tooling';
 import { prepareEmptyTestFolder } from './utils/resourcesUtils';
 import { extensionIsActivated, sectionHasItem } from './utils/waitConditions';
 import * as uiTestConstants from './utils/uiTestConstants';
+import { promiseFail, promiseSucceed } from './utils/promiseUtils';
 
 const TEST_FOLDER = '../../../testFolder';
 const WORKSPACE_FOLDER = path.join(__dirname, TEST_FOLDER);
@@ -69,9 +70,7 @@ describe.only('Test Debug on Camel K Integrations from Side Bar', function () {
 
 			const item = await getIntegration(INTEGRATION_LABEL);
 			const menu = await item.openContextMenu();
-			const hasJavaDebugAvailable = await VSBrowser.instance.driver.wait(() => menu.hasItem(START_DEBUG_LABEL), 5000);
-
-			assert.isTrue(hasJavaDebugAvailable);
+			await promiseSucceed(VSBrowser.instance.driver.wait(() => menu.hasItem(START_DEBUG_LABEL), 5000));
 		});
 
 		after(async function() {
@@ -196,16 +195,4 @@ async function modifyCurrentFileToBeInvalid() {
 	const textEditor : TextEditor = new TextEditor();
 	await textEditor.setTextAtLine(14, ";");
 	await textEditor.save()
-}
-
-const promiseFail = async (proms: any) => await assertPromise(proms, false);
-
-const assertPromise = async (prom: any, succed = true) => {
-    succed = succed ? true : false;
-    try {
-        prom = Array.isArray(prom) ? prom : [prom];
-        await Promise.all(prom);
-        assert.strictEqual(true, succed);
-    }
-    catch (ex: any) { assert.notStrictEqual(true, succed, ex); }
 }
