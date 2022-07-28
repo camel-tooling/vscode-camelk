@@ -42,12 +42,12 @@ const WORKSPACE_FOLDER = path.join(__dirname, TEST_FOLDER);
 const START_DEBUG_LABEL = uiTestConstants.startDebug;
 const REMOVE_INTEGRATION_LABEL = uiTestConstants.integrationRemove;
 
-describe.only('Test Debug on Camel K Integrations from Side Bar', function () {
+describe('Test Debug on Camel K Integrations from Side Bar', function () {
 
 	before(async function () {
 		this.timeout(90000);
 		this.retries(3);
-		await VSBrowser.instance.waitForWorkbench;
+		await VSBrowser.instance.waitForWorkbench();
 		await prepareTempWorkspaceForTests(WORKSPACE_FOLDER);
 		await VSBrowser.instance.driver.wait(camelKToolingIsEnabled);
 	});
@@ -124,7 +124,7 @@ async function camelKToolingIsEnabled() {
 async function moveToExplorerActivity() {
 	const ACTIVITY_LABEL = 'Explorer';
 
-	return await moveToActivity(ACTIVITY_LABEL);
+	return moveToActivity(ACTIVITY_LABEL);
 }
 
 async function moveToActivity(viewIdentifier: string) {
@@ -142,14 +142,12 @@ async function getCamelKIntegrationSection() {
 async function getIntegration(integrationLabel: string) {
 	const section = await getCamelKIntegrationSection();
 	await VSBrowser.instance.driver.wait(async () => hasIntegration(integrationLabel));
-	const item = await section.findItem(integrationLabel) as ViewItem;
-	return item;
+	return await section.findItem(integrationLabel) as ViewItem;
 }
 
 async function hasIntegration(integrationLabel: string) {
 	const section = await getCamelKIntegrationSection();
-	const isOnView = await sectionHasItem(section, integrationLabel);
-	return isOnView;
+	return await sectionHasItem(section, integrationLabel);
 }
 
 async function createIntegration(integrationFile: string) {
