@@ -32,7 +32,7 @@ async function main(): Promise<void> {
 		}
 	}
 	const tester = new ExTester(storageFolder, releaseType, extensionFolder);
-	await tester.setupAndRunTests('out/src/ui-test/*_test.js', process.env.CODE_VERSION);
+	await tester.setupAndRunTests('out/src/ui-test/uitest_suite.js', process.env.CODE_VERSION);
 }
 
 main();
