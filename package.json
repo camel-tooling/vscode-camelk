@@ -159,8 +159,7 @@
 			},
 			{
 				"command": "camelk.integrations.createNewIntegrationFile",
-				"title": "Create a new Apache Camel K Integration file",
-				"enablement": "workspaceFolderCount != 0"
+				"title": "Create a new Apache Camel K Integration file"
 			},
 			{
 				"command": "camelk.classpath.refresh",
