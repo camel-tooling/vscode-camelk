@@ -16,50 +16,41 @@
  */
 'use strict';
 
-import { By, ExtensionsViewItem, Workbench, ViewContent, InputBox, BottomBarPanel, SideBarView, DefaultTreeItem, TextEditor } from 'vscode-extension-tester';
+import * as consts from './uiTestConstants';
+import {
+    By,
+    ExtensionsViewItem,
+    Workbench,
+    ViewContent,
+    BottomBarPanel,
+    DefaultTreeItem,
+    TextEditor,
+    WebView,
+    Locator,
+    OutputView,
+    WebDriver,
+    SideBarView
+} from 'vscode-extension-tester';
+import { DoNextTest, findSectionItem } from './utils';
+import { workaroundMacIssue444 } from './workarounds';
 
-export let activationError = true;
-
-export async function extensionIsActivated(extension: ExtensionsViewItem, timePeriod = 2000): Promise<boolean> {
+export async function extensionIsActivated(extension: ExtensionsViewItem, activationError: DoNextTest): Promise<boolean> {
     try {
         const activationTime = await extension.findElement(By.className('activationTime'));
         if (activationTime !== undefined) {
-            activationError = false;
+            activationError.stopTest();
             return true;
         } else {
-            await extension.getDriver().sleep(timePeriod);
-            activationError = true;
+            activationError.continueTest();
             return false;
         }
     } catch (err) {
-        await extension.getDriver().sleep(timePeriod);
-        activationError = true;
+        activationError.continueTest();
         return false;
     }
 }
 
-export async function findSectionItem(section: string, item: string): Promise<DefaultTreeItem> {
-    const content = new SideBarView().getContent();
-    const currentSection = await content.getSection(section);
-    await currentSection.expand();
-    return await currentSection.findItem(item) as DefaultTreeItem;
-}
-
-export async function inputBoxQuickPickOrSet(type: "pick" | "set", indexOrText: string | number): Promise<boolean> {
-    const input = await InputBox.create();
-    if (type === "pick") {
-        await input.selectQuickPick(indexOrText);
-        return true;
-    } else if (type === "set" && typeof indexOrText === "string") {
-        await input.setText(indexOrText);
-        await input.confirm();
-        return true;
-    } else {
-        return false;
-    }
-}
-
-export async function outputViewHasText(text: string, timePeriod = 2000): Promise<boolean> {
+export async function outputViewHasText(text: string, timePeriod = 1000): Promise<boolean> {
     const outputView = await new BottomBarPanel().openOutputView();
     try {
         await (await new Workbench().openNotificationsCenter()).clearAllNotifications();
@@ -76,23 +67,17 @@ export async function outputViewHasText(text: string, timePeriod = 2000): Promis
     }
 }
 
-export async function viewHasItem(content: ViewContent, section: string, item: string, timePeriod = 2000): Promise<boolean> {
+export async function viewHasItem(content: ViewContent, section: string, item: string): Promise<boolean> {
     try {
         const currentSection = await content.getSection(section);
         const currentItem = await currentSection.findItem(item);
-        if (currentItem !== undefined) {
-            return true;
-        } else {
-            await currentSection.getDriver().sleep(timePeriod);
-            return false;
-        }
+        return (currentItem !== undefined);
     } catch (err) {
-        await content.getDriver().sleep(timePeriod);
         return false;
     }
 }
 
-export async function updateFileText(oldText: string, newText: string, timePeriod = 2000): Promise<boolean> {
+export async function updateFileText(oldText: string, newText: string): Promise<boolean> {
     const editor = new TextEditor();
     try {
         await editor.selectText(oldText);
@@ -100,7 +85,98 @@ export async function updateFileText(oldText: string, newText: string, timePerio
         await editor.save();
         return true;
     } catch (err) {
-        await editor.getDriver().sleep(timePeriod);
+        return false;
+    }
+}
+
+export async function contextMenuItemClick(parentItem: DefaultTreeItem, childItem: string): Promise<boolean> {
+    try {
+        if (process.platform === 'darwin') {
+            await workaroundMacIssue444(parentItem, childItem);
+            return true;
+        } else { // Regular test 
+            const menu = await parentItem.openContextMenu();
+            const option = await menu.getItem(childItem);
+            if (option && await option.isDisplayed() && await option.isEnabled()) {
+                await option.click();
+                return true;
+            } else {
+                return false;
+            }
+        }
+    } catch (err) {
+        return false;
+    }
+}
+
+export async function cleanOutputView(): Promise<boolean> {
+    let outputView: OutputView;
+    if (await new BottomBarPanel().isDisplayed()) {
+        outputView = await new BottomBarPanel().openOutputView();
+    } else {
+        return true;
+    }
+    try {
+        await (await new Workbench().openNotificationsCenter()).clearAllNotifications();
+        await outputView.clearText();
+        const outputTextLength = (await outputView.getText()).length;
+        return ((outputTextLength === 1 && process.platform !== 'win32') ||
+            (outputTextLength === 2 && process.platform === 'win32'))
+    } catch (err) {
+        return false;
+    }
+}
+
+export async function sidebarIntegrationRemove(driver: WebDriver, section: string, item: string): Promise<boolean> {
+    const treeItem = await findSectionItem(section, item.toLowerCase());
+    if (treeItem !== undefined) {
+        await driver.wait(() => { return contextMenuItemClick(treeItem, consts.integrationRemove); });
+        const content = new SideBarView().getContent();
+        return await driver.wait(async () => {
+            return !(await viewHasItem(content, section, item.toLowerCase()));
+        });
+    } else {
+        return true;
+    }
+}
+
+export async function webViewOpen(): Promise<WebView> {
+    try {
+        const webView = new WebView();
+        if (await webView.isDisplayed() && await webView.isEnabled()) {
+            return webView;
+        } else {
+            return await webViewOpen();
+        }
+    } catch (e) {
+        return await webViewOpen();
+    }
+}
+
+export async function webViewHasTextInWebElement(driver: WebDriver, text: string, locator: Locator = { id: 'content' }, timePeriod = 1000, timeout = 25000): Promise<boolean> {
+    const webView = await driver.wait(async () => { return webViewOpen(); }, 5000);
+    try {
+        return await driver.wait(async () => {
+            try {
+                await webView.switchToFrame();
+                const contentElement = await webView.findWebElement(locator);
+                const content = await contentElement.getText();
+                await webView.switchBack();
+                if (content.indexOf(text) > -1) {
+                    return true;
+                } else {
+                    webView.getDriver().sleep(timePeriod);
+                    return false;
+                }
+            } catch (err) {
+                await webView.switchBack();
+                webView.getDriver().sleep(timePeriod);
+                return false;
+            }
+        }, timeout);
+    } catch (e) {
+        await webView.switchBack();
+        webView.getDriver().sleep(timePeriod);
         return false;
     }
 }

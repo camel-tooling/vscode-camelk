@@ -16,23 +16,13 @@
  */
 'use strict';
 
-import * as fs from 'fs';
-import * as path from 'path';
+import { DefaultTreeItem, Workbench } from "vscode-extension-tester";
+import { inputBoxQuickPickOrSet } from "./utils";
 
-export async function prepareEmptyTestFolder(directory: string): Promise<void> {
-    if (!fs.existsSync(directory)) {
-        fs.mkdirSync(directory);
-    } else {
-        // Clean test directory if it exists
-        // Windows not allows to delete the whole directory with rmSync
-        fs.readdir(directory, async (_err, files) => {
-            for (const file of files) {
-                try {
-                    if (fs.existsSync(path.join(directory, file))) {
-                        fs.unlinkSync(path.join(directory, file));
-                    }
-                } catch (err) { console.log(err); }
-            }
-        });
-    }
+// TODO: Workaround due the issue -> https://github.com/redhat-developer/vscode-extension-tester/issues/444
+export async function workaroundMacIssue444(item: DefaultTreeItem, command: string): Promise<boolean> {
+    await item.click();
+    const workbench = new Workbench();
+    await workbench.openCommandPrompt();
+    return await inputBoxQuickPickOrSet('set', `>${command}`);
 }
