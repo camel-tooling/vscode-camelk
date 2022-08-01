@@ -42,6 +42,7 @@ describe('Tooling for Apache Camel K extension', function () {
     });
 
     if (extensionActivated) {
+		describe('Test Debug on Camel K Integrations from Side Bar', javaDebugTest);
         LANGUAGES_WITH_FILENAME_EXTENSIONS.forEach(async function (extension: string, language: string) {
             describe(`${language} test pipeline`, async function () {
                 createIntegrationFile(extension, language, doNextTest);
@@ -49,7 +50,6 @@ describe('Tooling for Apache Camel K extension', function () {
                 basicModeWithLogsTest(extension, language, doNextTest);
             });
         });
-		describe('Test Debug on Camel K Integrations from Side Bar', javaDebugTest);
     } else {
         console.log("Extension activation error occurred!");
     }
