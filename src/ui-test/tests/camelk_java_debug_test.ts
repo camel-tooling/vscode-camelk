@@ -54,16 +54,11 @@ export function javaDebugTest() {
 		const INTEGRATION_LABEL = 'java-debug-test';
 		const INTEGRATION_FILE = 'JavaDebugTest';
 
-		before(async function (){
-			this.timeout(60000);
+		it('Check Java Debug available', async function () {
+			this.timeout(680000);
 			await moveToExplorerActivity();
 			await createIntegration(INTEGRATION_FILE);
 			await startIntegration(INTEGRATION_LABEL);
-		})
-
-		it('Check Java Debug available', async function () {
-			this.timeout(20000);
-
 			const item = await getIntegration(INTEGRATION_LABEL);
 			await VSBrowser.instance.driver.wait(async() => {
 				const menu = await item.openContextMenu();
@@ -86,16 +81,12 @@ export function javaDebugTest() {
 		const INTEGRATION_LABEL = 'java-debug-test-invalid';
 		const INTEGRATION_FILE = 'JavaDebugTestInvalid';
 
-		before(async function (){
-			this.timeout(60000);
+		it('Test Java Debugger Not Available On Invalid File', async function() {
+			this.timeout(20000)
 			await moveToExplorerActivity();
 			await createIntegration(INTEGRATION_FILE);
 			await modifyCurrentFileToBeInvalid();
 			await startIntegration(INTEGRATION_LABEL);
-		});
-
-		it('Test Java Debugger Not Available On Invalid File', async function() {
-			this.timeout(20000)
 			const item = await getIntegration(INTEGRATION_LABEL);
 			const menu = await item.openContextMenu();
 			assert.isFalse(await menu.hasItem(START_DEBUG_LABEL));
