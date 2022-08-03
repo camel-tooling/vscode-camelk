@@ -4,6 +4,7 @@ All notable changes to the "vscode-camelk" extension will be documented in this 
 
 ## 0.0.32
 
+- Removed Didact extension support
 - Added extensions as dependencies
   - [VS Code Language support for java](https://marketplace.visualstudio.com/items?itemName=redhat.java)
   - [VS Code Debugger for Java](https://marketplace.visualstudio.com/items?itemName=vscjava.vscode-java-debug)
