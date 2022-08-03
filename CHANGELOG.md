@@ -4,7 +4,9 @@ All notable changes to the "vscode-camelk" extension will be documented in this 
 
 ## 0.0.32
 
-- Removed Didact extension support
+- Added extensions as dependencies
+  - Language Support for Java
+  - Debugger for Java
 
 ## 0.0.31
 
