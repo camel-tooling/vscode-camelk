@@ -25,7 +25,7 @@ import { fail } from 'assert';
 import * as Utils from '../Utils';
 import { waitUntil } from 'async-wait-until';
 
-const DOWNLOAD_JAVA_DEPENDENCIES_TIMEOUT = 240000;
+const DOWNLOAD_JAVA_DEPENDENCIES_TIMEOUT = 600000;
 const JAVA_EXTENSION_READINESS_TIMEOUT = 40000;
 const TOTAL_TIMEOUT = DOWNLOAD_JAVA_DEPENDENCIES_TIMEOUT + JAVA_EXTENSION_READINESS_TIMEOUT + 5000;
 
