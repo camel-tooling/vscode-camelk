@@ -17,8 +17,6 @@ In order to use our **Tooling for Apache Camel K** extension for VS Code, you mu
 
 * An instance of Apache Camel K running on a Kubernetes or an OpenShift cluster that is  accessible from your system on your network. You must also have Minikube (or the Kubernetes CLI) installed. See the Apache Camel K installation page for details: (https://camel.apache.org/camel-k/latest/installation/installation.html). 
 * Microsoft VS Code installed. You can get the most recent version from (https://code.visualstudio.com/) for your chosen operating system.
-* To benefit from Java Language completion on standalone files, [VS Code Language support for java](https://marketplace.visualstudio.com/items?itemName=redhat.java) needs to be installed.
-* To benefit from Java debug on standalone files, [VS Code Debugger for Java](https://marketplace.visualstudio.com/items?itemName=vscjava.vscode-java-debug) needs to be installed.
 
 ## Installing the extension
 
@@ -257,7 +255,9 @@ Note: By default, `Auto-scroll` is checked and new entries in the log will autom
 
 ## Java language support
 
-To benefit from Java Language completion on standalone files, [VS Code Language support for java](https://marketplace.visualstudio.com/items?itemName=redhat.java) needs to be installed. An invisible project is created with a default classpath.
+From version 0.0.32 we provide [VS Code Language support for java](https://marketplace.visualstudio.com/items?itemName=redhat.java) and [VS Code Debugger for Java](https://marketplace.visualstudio.com/items?itemName=vscjava.vscode-java-debug) as dependencies.
+
+With [VS Code Language support for java](https://marketplace.visualstudio.com/items?itemName=redhat.java), you will benefit from Java Language completion on standalone files. An invisible project is created with a default classpath.
 
 The command `Refresh local Java classpath for Camel K standalone file based on current editor. Available with kamel 1.4+.` refreshes specific dependencies for the classpath of the opened Integration, such as dependencies declared as part of the modeline of the file. When using a modeline to configure such dependencies, you gain a [CodeLens](https://code.visualstudio.com/blogs/2017/02/12/code-lens-roundup) link (`Refresh classpath dependencies`) at the top of the editor to trigger the refresh more easily.
 
@@ -268,7 +268,7 @@ Be aware of the following limitations:
   - A single classpath is provided. It means that refresh command needs to be called when switching between Integration file written in Java that does not have the same dependencies.
   - There is no progress indicator. Please be patient. The first time may take several minutes on a slow network.
   
-To benefit from Java debug on standalone files, [VS Code Debugger for Java](https://marketplace.visualstudio.com/items?itemName=vscjava.vscode-java-debug) needs to be installed. To leverage it, you need to start an integration, then there are 2 solutions:
+[VS Code Debugger for Java](https://marketplace.visualstudio.com/items?itemName=vscjava.vscode-java-debug) is provided to benefit from Java debug on standalone files. To leverage it, you need to start an integration, then there are 2 solutions:
 - Right-click on integration in Integrations view, then choose `Start Java debugger on Camel K integration`.
 - Launch a `camel-k-debug` VS Code tasks and then to launch a `java` attach in debug VS Code tasks.
 
