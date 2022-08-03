@@ -5,8 +5,8 @@ All notable changes to the "vscode-camelk" extension will be documented in this 
 ## 0.0.32
 
 - Added extensions as dependencies
-  - Language Support for Java
-  - Debugger for Java
+  - [VS Code Language support for java](https://marketplace.visualstudio.com/items?itemName=redhat.java)
+  - [VS Code Debugger for Java](https://marketplace.visualstudio.com/items?itemName=vscjava.vscode-java-debug)
 
 ## 0.0.31
 
