@@ -18,30 +18,33 @@
 
 import * as consts from '../utils/uiTestConstants';
 import { EditorView, SideBarView, VSBrowser, WebDriver } from 'vscode-extension-tester';
-import { basicIntegration } from '../../IntegrationConstants';
+import { inputBoxQuickPickOrSet, prepareEmptyTestFolder } from '../utils/utils';
+import { propertyIntegration } from '../../IntegrationConstants';
 import {
     cleanOutputView,
-    viewHasItem,
     contextMenuItemClick,
-    webViewHasTextInWebElement,
+    updateFileText,
     sidebarIntegrationRemove,
-    webViewOpen
+    webViewHasTextInWebElement,
+    webViewOpen,
+    viewHasItem
 } from '../utils/waitConditions';
 import {
-    textDoesNotContainAsci,
-    inputBoxQuickPickOrSet,
     findSectionItem,
     DoNextTest
 } from '../utils/utils';
 import { assert } from 'chai';
 
-export function basicModeTest(extension: string, language: string, doNextTest: DoNextTest) {
+export function propertyModeTest(extension: string, language: string, doNextTest: DoNextTest) {
 
-    describe(`Basic mode test with the logs`, async function () {
+    describe(`Property mode test with the logs`, async function () {
 
         let driver: WebDriver;
 
-        const [, , , updatedLogMessage] = consts.prepareCodeLogMessages(extension, language);
+        const [, updatedCodeMessage, ,] = consts.prepareCodeLogMessages(extension, language);
+
+        const codeMessage = 'Hello Camel K with properties from {{firstProperty}} with extension - {{secondProperty}}'
+        const logMessage = `Hello Camel K with properties from ${language} with extension - ${extension}`;
 
         before(async function () {
             driver = VSBrowser.instance.driver;
@@ -51,7 +54,8 @@ export function basicModeTest(extension: string, language: string, doNextTest: D
             this.timeout(consts.TIMEOUT_60_SECONDS);
             await new EditorView().closeAllEditors();
             await sidebarIntegrationRemove(driver, consts.extensionName, consts.integrationFileName);
-            await driver.wait(() => { return cleanOutputView(); });
+            await cleanOutputView();
+            await prepareEmptyTestFolder(consts.testDir);
         });
 
         beforeEach(async function () {
@@ -66,15 +70,52 @@ export function basicModeTest(extension: string, language: string, doNextTest: D
             }
         });
 
+        it(`Update Simple.${extension} with new message`, async function () {
+            this.timeout(consts.TIMEOUT_30_SECONDS);
+            const item = await findSectionItem(consts.testFolder, `${consts.integrationFileName}.${extension}`);
+            await item.click();
+            await driver.wait(() => { return updateFileText(updatedCodeMessage, codeMessage); }, consts.TIMEOUT_30_SECONDS);
+        });
+
         it(`Select ${consts.startIntegration} in the popup menu`, async function () {
             this.timeout(consts.TIMEOUT_15_SECONDS);
             const item = await findSectionItem(consts.testFolder, `${consts.integrationFileName}.${extension}`);
-            await driver.wait(() => { return contextMenuItemClick(item, consts.startIntegration); });
+            await driver.wait(() => { return contextMenuItemClick(item, consts.startIntegration); }, consts.TIMEOUT_15_SECONDS);
         });
 
-        it(`Start integration with '${basicIntegration}' command`, async function () {
+        it(`Start integration with '${propertyIntegration}' command`, async function () {
             this.timeout(consts.TIMEOUT_15_SECONDS);
-            assert.isTrue(await inputBoxQuickPickOrSet('pick', basicIntegration));
+            assert.isTrue(await inputBoxQuickPickOrSet('pick', propertyIntegration));
+        });
+
+        it(`Set first property key`, async function () {
+            this.timeout(consts.TIMEOUT_5_SECONDS);
+            assert.isTrue(await inputBoxQuickPickOrSet('set', 'firstProperty'));
+        });
+
+        it(`Set first property value`, async function () {
+            this.timeout(consts.TIMEOUT_5_SECONDS);
+            assert.isTrue(await inputBoxQuickPickOrSet('set', language));
+        });
+
+        it(`Pick Yes option to add second property`, async function () {
+            this.timeout(consts.TIMEOUT_5_SECONDS);
+            assert.isTrue(await inputBoxQuickPickOrSet('pick', 'Yes'));
+        });
+
+        it(`Set second property key`, async function () {
+            this.timeout(consts.TIMEOUT_5_SECONDS);
+            assert.isTrue(await inputBoxQuickPickOrSet('set', 'secondProperty'));
+        });
+
+        it(`Set second property value`, async function () {
+            this.timeout(consts.TIMEOUT_5_SECONDS);
+            assert.isTrue(await inputBoxQuickPickOrSet('set', extension));
+        });
+
+        it(`Pick No option to start`, async function () {
+            this.timeout(consts.TIMEOUT_5_SECONDS);
+            assert.isTrue(await inputBoxQuickPickOrSet('pick', 'No'));
         });
 
         it(`Integration exists in ${consts.extensionName} sidebar`, async function () {
@@ -96,15 +137,9 @@ export function basicModeTest(extension: string, language: string, doNextTest: D
             assert.isTrue(await webViewHasTextInWebElement(driver, consts.initialPodReadyMessage));
         });
 
-        it(`Integration log contains - ${updatedLogMessage}`, async function () {
+        it(`Integration log contains - ${logMessage}`, async function () {
             this.timeout(consts.TIMEOUT_60_SECONDS);
-            assert.isTrue(await webViewHasTextInWebElement(driver, updatedLogMessage));
-        });
-
-        it(`Integration log does not contain ASCI`, async function () {
-            this.timeout(consts.TIMEOUT_5_SECONDS);
-            this.id = 'independent';
-            assert.isTrue(await textDoesNotContainAsci('WebView'));
+            assert.isTrue(await webViewHasTextInWebElement(driver, logMessage));
         });
 
     });

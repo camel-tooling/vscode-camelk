@@ -37,7 +37,7 @@ import { assert } from 'chai';
 
 export function devModeTest(extension: string, language: string, doNextTest: DoNextTest) {
 
-	describe(`Dev Mode test with the integration file update`, function () {
+	describe(`Dev Mode test with the integration file update`, async function () {
 
 		let driver: WebDriver;
 
@@ -54,13 +54,13 @@ export function devModeTest(extension: string, language: string, doNextTest: DoN
 			await driver.wait(() => { return cleanOutputView(); });
 		});
 
-		beforeEach(function () {
+		beforeEach(async function () {
 			if (!doNextTest.doNextTest) {
 				this.skip();
 			}
 		});
 
-		afterEach(function () {
+		afterEach(async function () {
 			if (this.currentTest?.state === 'failed' && this.id !== 'independent') {
 				doNextTest.stopTest();
 			}
@@ -83,7 +83,7 @@ export function devModeTest(extension: string, language: string, doNextTest: DoN
 		});
 
 		it(`Initial integration output contains - ${initialLogMessage}`, async function () {
-			this.timeout(consts.TIMEOUT_30_SECONDS);
+			this.timeout(consts.TIMEOUT_60_SECONDS);
 			await driver.wait(() => { return outputViewHasText(initialLogMessage); });
 		});
 
@@ -111,7 +111,7 @@ export function devModeTest(extension: string, language: string, doNextTest: DoN
 		});
 
 		it(`Updated integration output contains - ${updatedLogMessage}`, async function () {
-			this.timeout(consts.TIMEOUT_30_SECONDS);
+			this.timeout(consts.TIMEOUT_60_SECONDS);
 			await driver.wait(() => { return outputViewHasText(updatedLogMessage); });
 		});
 

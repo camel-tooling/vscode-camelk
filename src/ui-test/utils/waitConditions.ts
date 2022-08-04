@@ -26,10 +26,10 @@ import {
     DefaultTreeItem,
     TextEditor,
     WebView,
-    Locator,
     OutputView,
     WebDriver,
-    SideBarView
+    SideBarView,
+    Locator
 } from 'vscode-extension-tester';
 import { DoNextTest, findSectionItem } from './utils';
 import { workaroundMacIssue444 } from './workarounds';
@@ -148,13 +148,13 @@ export async function webViewOpen(): Promise<WebView> {
         } else {
             return await webViewOpen();
         }
-    } catch (e) {
+    } catch (err) {
         return await webViewOpen();
     }
 }
 
 export async function webViewHasTextInWebElement(driver: WebDriver, text: string, locator: Locator = { id: 'content' }, timePeriod = 1000, timeout = 25000): Promise<boolean> {
-    const webView = await driver.wait(async () => { return webViewOpen(); }, 5000);
+    const webView = await driver.wait(async () => { return webViewOpen(); }, consts.TIMEOUT_5_SECONDS);
     try {
         return await driver.wait(async () => {
             try {
@@ -174,7 +174,7 @@ export async function webViewHasTextInWebElement(driver: WebDriver, text: string
                 return false;
             }
         }, timeout);
-    } catch (e) {
+    } catch (err) {
         await webView.switchBack();
         webView.getDriver().sleep(timePeriod);
         return false;

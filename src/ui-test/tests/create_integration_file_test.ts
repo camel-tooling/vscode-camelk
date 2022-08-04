@@ -25,7 +25,7 @@ import { prepareEmptyTestFolder } from '../utils/utils';
 
 export function createIntegrationFile(extension: string, language: string, doNextTest: DoNextTest) {
 
-    describe(`Create default integration file: ${consts.integrationFileName}.${extension}`, function () {
+    describe(`Create default integration file: ${consts.integrationFileName}.${extension}`, async function () {
 
         let driver: WebDriver;
 
@@ -45,13 +45,13 @@ export function createIntegrationFile(extension: string, language: string, doNex
             }
         });
 
-        beforeEach(function () {
+        beforeEach(async function () {
             if (!doNextTest.doNextTest) {
                 this.skip();
             }
         });
 
-        afterEach(function () {
+        afterEach(async function () {
             if (this.currentTest?.state === 'failed') {
                 doNextTest.stopTest();
             }

@@ -26,7 +26,7 @@ import { DoNextTest } from '../utils/utils';
 
 export function camelkExtensionTest(extensionActivated: DoNextTest) {
 
-	describe('Extensions view', function () {
+	describe('Extensions view', async function () {
 
 		let marketplace: Marketplace;
 		let item: ExtensionsViewItem;
@@ -43,7 +43,7 @@ export function camelkExtensionTest(extensionActivated: DoNextTest) {
 			await new EditorView().closeAllEditors();
 		});
 
-		afterEach(function () {
+		afterEach(async function () {
 			if (this.currentTest?.state === 'failed' && this.id === 'required') {
 				extensionActivated.stopTest();
 			}

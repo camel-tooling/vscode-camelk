@@ -16,25 +16,18 @@
  */
 'use strict';
 
-import { DefaultWait } from 'vscode-uitests-tooling';
 import { LANGUAGES_WITH_FILENAME_EXTENSIONS } from '../IntegrationConstants';
-import { basicModeWithLogsTest } from './tests/basic_mode_test';
+import { basicModeTest } from './tests/basic_mode_test';
 import { camelkExtensionTest } from './tests/camelk_extension_test';
 import { createIntegrationFile } from './tests/create_integration_file_test';
 import { devModeTest } from './tests/dev_mode_test';
+import { propertyModeTest } from './tests/property_mode_test';
 import { DoNextTest } from './utils/utils';
 
 const doNextTest = new DoNextTest();
 const extensionActivated = new DoNextTest();
 
-describe('Tooling for Apache Camel K extension', function () {
-
-    after(async function () {
-        this.timeout(11000);
-        // TODO: TMP static wait workaround for unexpected vscode-extension-tester 'afterAll' timeout on Fedora
-        // Issue: https://github.com/redhat-developer/vscode-extension-tester/issues/475
-        await DefaultWait.sleep(10000);
-    });
+describe('Tooling for Apache Camel K extension', async function () {
 
     describe(`Verify extension on Marketplace, check activation status`, async function () {
         camelkExtensionTest(extensionActivated);
@@ -42,10 +35,11 @@ describe('Tooling for Apache Camel K extension', function () {
 
     if (extensionActivated) {
         LANGUAGES_WITH_FILENAME_EXTENSIONS.forEach(async function (extension: string, language: string) {
-            describe(`${language} test pipeline`, async function () {
+            describe(`${language} test pipeline`, function () {
                 createIntegrationFile(extension, language, doNextTest);
                 devModeTest(extension, language, doNextTest);
-                basicModeWithLogsTest(extension, language, doNextTest);
+                basicModeTest(extension, language, doNextTest);
+                propertyModeTest(extension, language, doNextTest);
             });
         });
     } else {
