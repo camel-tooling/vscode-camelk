@@ -53,6 +53,9 @@ import { TelemetryEvent } from '@redhat-developer/vscode-redhat-telemetry/lib';
 				context = args[0];
 				inChoice = undefined;
 			} else if (Array.isArray(args[0])) {
+				// Didact is being removed as part of FUSETOOLS2-1690. This code is being
+				// only by Didact afaik, but we don't want an API break.
+				// Remove this code in the future if we realize is no longer being used.
 				const innerArgs1 : any[] = args[0];
 				const innerArgs2 : any[] = innerArgs1[0];
 				const innerArgs3 : any[] = innerArgs2[0];
