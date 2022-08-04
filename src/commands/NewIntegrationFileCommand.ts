@@ -36,6 +36,9 @@ export async function create(...args: any[]) : Promise<void> {
 	let filename : string | undefined;
 
 	// for didact use, we expect two arguments -- filename and language
+	// Didact is being removed as part of FUSETOOLS2-1690. This code is being
+	// only by Didact afaik, but we don't want an API break.
+	// Remove this code in the future if we realize is no longer being used.
 	if (args && args.length > 0 && Array.isArray(args[0])) {
 		const innerArgs1 : any[] = args[0];
 		if (innerArgs1[0] && innerArgs1[1]) {
