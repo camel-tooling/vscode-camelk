@@ -76,7 +76,6 @@ export async function activate(context: vscode.ExtensionContext) {
 	applyUserSettings();
 
 	mainOutputChannel = vscode.window.createOutputChannel("Apache Camel K");
-	await installAllTutorials(context);
 	registerCamelKSchemaProvider(mainOutputChannel);
 	myStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 100);
 	context.subscriptions.push(myStatusBarItem);
@@ -465,35 +464,4 @@ async function removeIntegrationLogView(integrationName: string) : Promise<void>
 
 export function setRuntimeVersionSetting(value: string) {
 	runtimeVersionSetting = value;	
-}
-
-async function installAllTutorials(context : vscode.ExtensionContext) {
-	const tutorialList = {
-		"tutorials": [
-			{
-				"name": "Your First Integration", 
-				"extpath" : "./didact/camelk/first-integration.md", "category": "Apache Camel K"
-			}
-		]
-	};
-	for (const tutorial of tutorialList.tutorials) {
-		await registerTutorialWithDidact(context, tutorial.name, tutorial.extpath, tutorial.category);
-	}
-}
-
-async function registerTutorialWithDidact(context: vscode.ExtensionContext, name : string, extpath : string, category : string) {
-	try {
-		// test to ensure didact is available 
-		const extensionId = 'redhat.vscode-didact';
-		const didactExt: any = vscode.extensions.getExtension(extensionId);
-		if (didactExt) {
-			const commandId = 'vscode.didact.register';
-			const tutorialUri: vscode.Uri = vscode.Uri.file(context.asAbsolutePath(extpath));
-
-			// then pass name, file system path, and category
-			await vscode.commands.executeCommand(commandId,	name, tutorialUri.fsPath, category);
-		}
-	} catch (error) {
-		console.log(error);
-	}
 }
