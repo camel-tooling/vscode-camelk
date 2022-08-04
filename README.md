@@ -40,14 +40,6 @@ The **Tooling for Apache Camel K** extension is available in the VS Code Extensi
 
     You can install them by following the same steps except search for Kubernetes or Apache Camel in the list of extensions.
 
-## Get started using Didact tutorial
-
-A tutorial to get started is available when [VS Code Didact](https://marketplace.visualstudio.com/items?itemName=redhat.vscode-didact) is installed. It is accessible through the `Didact Tutorials` view:
-
-![Start tutorial](images/tutorial-access.png)
-
-The tutorial is providing a detailed step-by-step description and is integrated in VS Code. When finished, you can continue to look to this readme which contains broader scope information.
-
 ## Creating a new Camel K Integration file
 
 1. From command palette, choose `Create a new Apache Camel K Integration file`
