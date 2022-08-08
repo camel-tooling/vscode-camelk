@@ -349,7 +349,7 @@
 		"lint": "eslint src --ext .ts"
 	},
 	"devDependencies": {
-		"@types/chai": "^4.3.1",
+		"@types/chai": "^4.3.3",
 		"@types/download": "^8.0.1",
 		"@types/glob": "^7.2.0",
 		"@types/mkdirp": "^1.0.2",
