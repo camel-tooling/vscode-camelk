@@ -1,7 +1,7 @@
 import * as path from 'path';
 import * as cp from 'child_process';
 
-import { downloadAndUnzipVSCode, resolveCliPathFromVSCodeExecutablePath, runTests } from 'vscode-test';
+import { downloadAndUnzipVSCode, resolveCliArgsFromVSCodeExecutablePath, runTests } from '@vscode/test-electron';
 
 async function main() : Promise<void> {
 	try {
@@ -19,10 +19,10 @@ async function main() : Promise<void> {
 		console.log(`vscodeExecutablePath = ${vscodeExecutablePath}`);
 		const testWorkspace = path.resolve(__dirname, '../../../test Fixture with speci@l chars');
 
-		const cliPath: string = resolveCliPathFromVSCodeExecutablePath(vscodeExecutablePath);
-		installExtraExtension(cliPath, 'ms-kubernetes-tools.vscode-kubernetes-tools');
-		installExtraExtension(cliPath, 'redhat.java');
-		installExtraExtension(cliPath, 'vscjava.vscode-java-debug');
+		const [cliPath, ...args] = resolveCliArgsFromVSCodeExecutablePath(vscodeExecutablePath);
+		installExtraExtension(cliPath, 'ms-kubernetes-tools.vscode-kubernetes-tools', args);
+		installExtraExtension(cliPath, 'redhat.java', args);
+		installExtraExtension(cliPath, 'vscjava.vscode-java-debug', args);
 
 		await runTests({ vscodeExecutablePath, extensionDevelopmentPath, extensionTestsPath, launchArgs: [testWorkspace, '--disable-workspace-trust'] });
 
@@ -32,8 +32,8 @@ async function main() : Promise<void> {
 	}
 }
 
-function installExtraExtension(cliPath: string, extensionId: string) {
-	cp.spawnSync(cliPath, ['--install-extension', extensionId, '--force'], {
+function installExtraExtension(cliPath: string, extensionId: string, args: string[]) {
+	cp.spawnSync(cliPath, [...args, '--install-extension', extensionId, '--force'], {
 		encoding: 'utf-8',
 		stdio: 'inherit'
 	});
