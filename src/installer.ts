@@ -20,14 +20,14 @@ import * as fs from 'fs';
 import { Errorable, failed } from './errorable';
 import * as extension from './extension';
 import * as config from './config';
+import fetch from 'node-fetch';
 import * as kamelCli from './kamel';
 import * as shell from './shell';
 import * as vscode from 'vscode';
 import * as kubectlutils from './kubectlutils';
-import * as downloader from './downloader';
-import * as download from 'download';
 import * as versionUtils from './versionUtils';
 import * as mkdirp from 'mkdirp';
+import * as tar from 'tar';
 
 export const kamel = 'kamel';
 export const kamel_windows = 'kamel.exe';
@@ -49,39 +49,48 @@ export async function isKubernetesAvailable(): Promise<boolean> {
 	return await kubectlutils.getKubernetesVersion() !== undefined;
 }
 
-async function downloadAndExtract(link: string, dlFilename: string, installFolder: string, extractFlag: boolean): Promise<boolean> {
-	return new Promise<boolean>((resolve, reject) => {
-		const myStatusBarItem: vscode.StatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 100);
-		const downloadSettings: any = {
-			filename: `${dlFilename}`,
-			extract: extractFlag,
-		};
-		extension.mainOutputChannel.appendLine('Downloading from: ' + link);
+async function downloadAndExtract(link: string, dlFilename: string, installFolder: string): Promise<boolean> {
+	const myStatusBarItem: vscode.StatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 100);
+	extension.mainOutputChannel.appendLine('Downloading from: ' + link);
+	updateStatusBarItem(myStatusBarItem, 'Downloading...', `Downloading ${dlFilename}...`);
+	try {
+		const response = await fetch(link);
+		const tmpDirectory = fs.mkdtempSync(`camelk-downloadandextract-${dlFilename}`);
+		const tmpTar = path.join(tmpDirectory, dlFilename);
+		await fs.promises.writeFile(tmpTar, await response.buffer());
+		extension.mainOutputChannel.appendLine(`Downloaded ${dlFilename}.`);
+		updateStatusBarItem(myStatusBarItem, 'Extracting...', `Extracting ${dlFilename}...`);
+		tar.extract({
+			cwd: installFolder,
+			file: tmpTar,
+			sync: true,
+		});
+		extension.mainOutputChannel.appendLine(`Extracted ${dlFilename}.`);
+		return true;
+	} catch(error) {
+		console.log(error);
+		return false;
+	} finally {
+		myStatusBarItem.dispose();
+	}
+}
 
-		download(link, installFolder, downloadSettings)
-			.on('response', (response) => {
-				extension.mainOutputChannel.appendLine(`Bytes to transfer: ${response.headers['content-length']}`);
-			}).on('downloadProgress', (progress) => {
-				let totalMessagePart: string;
-				if (progress.total != null) {
-					totalMessagePart = `${progress.total}`;
-				} else {
-					totalMessagePart = `unknown`;
-				}
-				const message = `Download progress: ${progress.transferred} / ${totalMessagePart} (${Math.round(progress.percent * 100)}%)`;
-				const tooltip = `Download progress for ${dlFilename}`;
-				updateStatusBarItem(myStatusBarItem, message, tooltip);
-			}).then(() => {
-				extension.mainOutputChannel.appendLine(`Downloaded ${dlFilename}.`);
-				myStatusBarItem.dispose();
-				resolve(true);
-			}).catch((error) => {
-				console.log(error);
-				reject(error);
-			}).finally(() => {
-				myStatusBarItem.dispose();
-			});
-	});
+async function download(link: string, dlFilename: string, installFolder: string): Promise<boolean> {
+	const myStatusBarItem: vscode.StatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 100);
+	extension.mainOutputChannel.appendLine('Downloading from: ' + link);
+	updateStatusBarItem(myStatusBarItem, 'Downloading...', `Downloading ${dlFilename}...`);
+	try {
+		const response = await fetch(link);
+		fs.mkdirSync(installFolder, {recursive: true});
+		await fs.promises.writeFile(path.join(installFolder, dlFilename), await response.buffer());
+		extension.mainOutputChannel.appendLine(`Downloaded ${dlFilename}.`);
+		return true;
+	} catch(error) {
+		console.log(error);
+		return false;
+	} finally {
+		myStatusBarItem.dispose();
+	}
 }
 
 function updateStatusBarItem(sbItem: vscode.StatusBarItem, text: string, tooltip: string): void {
@@ -160,7 +169,7 @@ export async function installKamel(context: vscode.ExtensionContext): Promise<Er
 	extension.shareMessageInMainOutputChannel(`Downloading kamel cli tool from ${kamelUrl} to ${downloadFile}`);
 
 	try {
-		const flag = await downloadAndExtract(kamelUrl, kamelCliFile, installFolder, true);
+		const flag = await downloadAndExtract(kamelUrl, kamelCliFile, installFolder);
 		console.log(`Downloaded ${downloadFile} successfully: ${flag}`);
 		if (fs.existsSync(downloadFile)) {
 			if (shell.isUnix()) {
@@ -181,13 +190,12 @@ function getInstallFolder(tool: string, context: vscode.ExtensionContext): strin
 }
 
 async function getStableKubectlVersion(): Promise<Errorable<string>> {
-	const downloadResult: Errorable<string> = await downloader.toTempFile('https://storage.googleapis.com/kubernetes-release/release/stable.txt');
-	if (failed(downloadResult)) {
-		return { succeeded: false, error: [`Failed to establish kubectl stable version: ${downloadResult.error[0]}`] };
+	const response = await fetch('https://storage.googleapis.com/kubernetes-release/release/stable.txt');
+	if(response.status === 200) {
+		return {succeeded: true, result: await response.text()};
+	} else {
+		return { succeeded: false, error: [`Failed to establish kubectl stable version: ${response.statusText}`] };
 	}
-	const version: string = fs.readFileSync(downloadResult.result, 'utf-8');
-	fs.unlinkSync(downloadResult.result);
-	return { succeeded: true, result: version };
 }
 
 function getKubectlInstallFolder(tool: string): string {
@@ -225,7 +233,7 @@ export async function installKubectl(context: vscode.ExtensionContext): Promise<
 	extension.shareMessageInMainOutputChannel(`Downloading Kubernetes cli tool from ${kubectlUrl} to ${downloadFile}`);
 
 	try {
-		const flag: boolean = await downloadAndExtract(kubectlUrl, executable, installFolder, true);
+		const flag: boolean = await download(kubectlUrl, executable, installFolder);
 		console.log(`Downloaded ${downloadFile} successfully: ${flag}`);
 	} catch (error) {
 		console.log(error);
