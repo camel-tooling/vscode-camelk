@@ -56,7 +56,11 @@ export async function prepareEmptyTestFolder(directory: string): Promise<void> {
             for (const file of files) {
                 try {
                     if (fs.existsSync(path.join(directory, file))) {
-                        fs.unlinkSync(path.join(directory, file));
+                        fs.rm(path.join(directory, file), { recursive: true }, err => {
+                            if (err) {
+                                throw err
+                            }
+                        });
                     }
                 } catch (err) { console.log(err); }
             }

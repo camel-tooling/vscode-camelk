@@ -37,8 +37,9 @@ export function createIntegrationFile(extension: string, language: string, doNex
             (await new ActivityBar().getViewControl('Explorer'))?.openView();
             await VSBrowser.instance.openResources(consts.testDir);
             VSBrowser.instance.waitForWorkbench;
-            // TODO: static wait for CamelK Windows settings through cmd.exe
-            if (process.platform == 'win32' && doNextTest.firstRun == true) {
+            // TODO previous: static wait for CamelK Windows settings through cmd.exe (process.platform == 'win32' && doNextTest.firstRun == true)
+            // TODO actual: static wait for all systems due to the issue with new dependencies (doNextTest.firstRun == true)
+            if (doNextTest.firstRun == true) {
                 this.timeout(consts.TIMEOUT_60_SECONDS);
                 doNextTest.firstRun = false;
                 await DefaultWait.sleep(consts.TIMEOUT_30_SECONDS);
