@@ -184,14 +184,14 @@ async function checkConfigMapAvailableForDeployedIntegration() {
 	const describeShell = shelljs.exec(`"${await kamel.create().getPath()}" describe integration test-java-deploy-with-config-map`);
 	const description: string = describeShell.stdout;
 	console.log('Check describe have config map: ' + description);
-	expect(description.replace(lineReturnAndSpaces, '')).includes('Configuration:map[configs:[configmap:my-configmap]]');
+	expect(description.replace(lineReturnAndSpaces, '')).includes('Configs:[configmap:my-configmap]');
 }
 
 async function checkPropertyAvailableAvailableForDeployedIntegration() {
 	const describeShell = shelljs.exec(`"${await kamel.create().getPath()}" describe integration test-java-deploy-with-property`);
 	const description: string = describeShell.stdout;
 	expect(description).includes('propertyKey = my Value');
-	expect(description.replace(lineReturnAndSpaces, '')).includes('Configuration:map[properties:[propertyKey=myValue]]');
+	expect(description.replace(lineReturnAndSpaces, '')).includes('Properties:[propertyKey=myValue]');
 }
 
 function createConfigMap(kubectlPath: string, confimapName: string) {
