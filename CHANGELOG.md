@@ -4,6 +4,7 @@ All notable changes to the "vscode-camelk" extension will be documented in this 
 
 ## 0.0.32
 
+- Update default runtime version to v1.10.0
 - Removed Didact extension support
 - Added the following extensions as dependencies. They are now installed automatically when installing VS Code Camel K instead of being optional downloads.
   - [VS Code Language support for java](https://marketplace.visualstudio.com/items?itemName=redhat.java)

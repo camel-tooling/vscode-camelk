@@ -97,7 +97,7 @@
 					},
 					"camelk.yaml.schema": {
 						"type": "string",
-						"default": "https://raw.githubusercontent.com/apache/camel/camel-3.16.0/dsl/camel-yaml-dsl/camel-yaml-dsl/src/generated/resources/camel-yaml-dsl.json",
+						"default": "https://raw.githubusercontent.com/apache/camel/camel-3.18.0/dsl/camel-yaml-dsl/camel-yaml-dsl/src/generated/resources/schema/camel-yaml-dsl.json",
 						"description": "Yaml Schema applied when Camel K modeline is set. (I.e. file starting with '# camel-k: ')"
 					},
 					"redhat.telemetry.enabled": {
