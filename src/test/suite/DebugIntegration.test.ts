@@ -66,6 +66,7 @@ suite('Check can debug default Java example', () => {
 		cleanFile(secondCreatedFile);
 		await cleanDeployedIntegration(telemetrySpy);
 		await config.addNamespaceToConfig(undefined);
+		await config.addOperatorIdToConfig(undefined);
 		telemetrySpy.restore();
 		if(debugConfigurationTaskExecution) {
 			debugConfigurationTaskExecution.terminate();

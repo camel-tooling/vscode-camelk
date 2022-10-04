@@ -66,6 +66,7 @@ suite('Check can deploy with resource', () => {
 		}
 		await cleanDeployedIntegration(telemetrySpy);
 		await config.addNamespaceToConfig(undefined);
+		await config.addOperatorIdToConfig(undefined);
 		telemetrySpy.restore();
 		tmp.setGracefulCleanup();
 	});

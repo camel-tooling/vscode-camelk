@@ -58,6 +58,11 @@
 						"description": "Default namespace to use for all Apache Camel K operations. If blank, uses system default",
 						"scope": "window"
 					},
+					"camelk.operatorId": {
+						"type": "string",
+						"description": "Operator id to use for all Apache Camel K operations. It requires Camel K 1.10+",
+						"scope": "window"
+					},
 					"camelk.tools": {
 						"type": "object",
 						"description": "CLI locations",

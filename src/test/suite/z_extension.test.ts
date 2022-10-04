@@ -35,13 +35,18 @@ suite("ensure camelk extension exists and is accessible", function() {
 	}).timeout(ACTIVATION_TIMEOUT + 1000);	
 
 	test('test that getBaseCmd returned value doesn\'t contain --namespace parameter when no namespace is passed', function() {
-		const cmdStrNoNS : string = kamel.getBaseCmd(`fakepath`,`fakecommand`, undefined);
+		const cmdStrNoNS : string = kamel.getBaseCmd(`fakepath`,`fakecommand`, undefined, undefined);
 		assert.equal(cmdStrNoNS.indexOf('--namespace'), -1);
 	});
 	
 	test('test that getBaseCmd returned value contains --namespace parameter when namespace is passed', function() {
-		const cmdStrWithNS : string = kamel.getBaseCmd(`fakepath`,`fakecommand`, 'fakens');
+		const cmdStrWithNS : string = kamel.getBaseCmd(`fakepath`,`fakecommand`, 'fakens', undefined);
 		assert.ok(cmdStrWithNS.includes('--namespace'));
+	});
+	
+	test('test that getBaseCmd returned value contains --operator-id parameter when operatorId is passed', function() {
+		const cmdStrWithNS : string = kamel.getBaseCmd(`fakepath`,`fakecommand`, 'fakens', 'fake-operator-id');
+		assert.ok(cmdStrWithNS.includes('--operator-id'));
 	});
 
 	test('test setting namespace to undefined', async function() {
@@ -63,6 +68,27 @@ suite("ensure camelk extension exists and is accessible", function() {
 		assert.equal(namespaceConfigValueAfterReset, testNs, 'The value specified should be available.');
 
 		await config.addNamespaceToConfig(namespace);
+	});
+	
+	test('test setting operatorId to undefined', async function() {
+		const operatorId : string | undefined = config.getOperatorIdconfig();
+		await config.addOperatorIdToConfig(undefined);
+
+		const operatorIdConfigValueAfterReset : string | undefined = config.getOperatorIdconfig();
+		assert.equal(operatorIdConfigValueAfterReset, undefined, 'By default, the operatorId config should be undefined');
+		
+		await config.addOperatorIdToConfig(operatorId);
+	});
+
+	test('test setting operatorId to other value', async function() {
+		const operatorId : string | undefined = config.getOperatorIdconfig();
+		const testOperatorId = 'testing';
+		await config.addOperatorIdToConfig(testOperatorId);
+
+		const operatorIdConfigValueAfterReset : string | undefined = config.getOperatorIdconfig();
+		assert.equal(operatorIdConfigValueAfterReset, testOperatorId, 'The value specified should be available.');
+
+		await config.addOperatorIdToConfig(operatorId);
 	});	
 
 	test('test can set autoupgrade setting', async function() {
