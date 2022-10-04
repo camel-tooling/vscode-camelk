@@ -46,6 +46,7 @@ const lineReturnAndSpaces = /\r?\n|\r|\s/g;
 suite('Check can deploy default examples', () => {
 	
 	const EXTRA_NAMESPACE_FOR_TEST = 'namespace-for-deployment-test';
+	const EXTRA_OPERATOR_ID_FOR_TEST = 'operator-id-for-deployment-test';
 	let showQuickpickStub: sinon.SinonStub;
 	let showInputBoxStub: sinon.SinonStub;
 	let showWorkspaceFolderPickStub: sinon.SinonStub;
@@ -70,6 +71,7 @@ suite('Check can deploy default examples', () => {
 		}
 		await cleanDeployedIntegration(telemetrySpy);
 		await config.addNamespaceToConfig(undefined);
+		await config.addOperatorIdToConfig(undefined);
 		telemetrySpy.restore();
 	});
 	
@@ -168,9 +170,10 @@ suite('Check can deploy default examples', () => {
 	
 	const testSpecificNamespace = test('Check can deploy on specific namespace', async () => {
 		skipOnJenkins(testSpecificNamespace);
-		await prepareNewNamespaceWithCamelK(EXTRA_NAMESPACE_FOR_TEST);
+		await prepareNewNamespaceWithCamelK(EXTRA_NAMESPACE_FOR_TEST, EXTRA_OPERATOR_ID_FOR_TEST);
 		createdFile = await createFile(showQuickpickStub, showWorkspaceFolderPickStub, showInputBoxStub, 'TestDeployInSpecificNamespace', 'Java');
 		await config.addNamespaceToConfig(EXTRA_NAMESPACE_FOR_TEST);
+		await config.addOperatorIdToConfig(EXTRA_OPERATOR_ID_FOR_TEST);
 
 		await startIntegrationWithBasicCheck(showQuickpickStub, telemetrySpy, 0);
 		await checkIntegrationsInDifferentNamespaces(EXTRA_NAMESPACE_FOR_TEST);
@@ -217,12 +220,19 @@ async function checkIntegrationsInDifferentNamespaces(EXTRA_NAMESPACE_FOR_TEST: 
 	assert.isEmpty(integrationsOnDefault);
 }
 
-async function prepareNewNamespaceWithCamelK(EXTRA_NAMESPACE_FOR_TEST: string) {
+async function prepareNewNamespaceWithCamelK(namespace: string, operatorId: string) {
 	const kubectlPath = await kubectl.create().getPath();
-	const createNamespaceExec = shelljs.exec(`"${kubectlPath}" create namespace ${EXTRA_NAMESPACE_FOR_TEST}`);
+	const createNamespaceExec = shelljs.exec(`"${kubectlPath}" create namespace ${namespace}`);
 	assert.equal(createNamespaceExec.stderr, '');
-	waitUntil(() => {
-		return createNamespaceExec.stdout.includes(`namespace/${EXTRA_NAMESPACE_FOR_TEST} created`);
+	await waitUntil(() => {
+		return createNamespaceExec.stdout.includes(`namespace/${namespace} created`);
 	});
-	assert.include(shelljs.exec(`"${await kamel.create().getPath()}" install --namespace=${EXTRA_NAMESPACE_FOR_TEST}`).stdout, `Camel K installed in namespace ${EXTRA_NAMESPACE_FOR_TEST} \n`);
+	const installKamelExec = shelljs.exec(`"${await kamel.create().getPath()}" install --global --olm=false --namespace=${namespace} --operator-id=${operatorId}`);
+	try {
+		await waitUntil(() => {
+			return installKamelExec.stdout.includes(`Camel K installed in namespace ${namespace}`);
+		});
+	} catch (error) {
+		assert.fail(`Camel K not succesfully installed in namespace ${namespace}.\nstdout:\n${installKamelExec.stdout}\nstderr:\n${installKamelExec.stderr}`);
+	} 
 }

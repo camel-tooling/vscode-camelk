@@ -35,6 +35,7 @@ export interface Kamel {
 class KamelImpl implements Kamel {
 	devMode  = false;
 	namespace: string | undefined = config.getNamespaceconfig();
+	operatorId: string | undefined = config.getOperatorIdconfig();
 
 	constructor() { /* Intentionial empty constructor*/ }
 
@@ -43,11 +44,11 @@ class KamelImpl implements Kamel {
 	}
 
 	async invoke(command: string): Promise<string> {
-		return kamelInternal(command, this.devMode, this.namespace);
+		return kamelInternal(command, this.devMode, this.namespace, this.operatorId);
 	}
 
 	invokeArgs(args: string[], folderName?: string): Promise<ChildProcess> {
-		return kamelInternalArgs(args, this.devMode, this.namespace, folderName);
+		return kamelInternalArgs(args, this.devMode, this.namespace, this.operatorId, folderName);
 	}
 
 	setDevMode(flag: boolean): void {
@@ -57,21 +58,28 @@ class KamelImpl implements Kamel {
 	setNamespace(value: string): void {
 		this.namespace = value;
 	}
+	
+	setOperatorId(value: string): void {
+		this.operatorId = value;
+	}
 }
 
 export function create() : Kamel {
 	return new KamelImpl();
 }
 
-export function getBaseCmd(binpath: string, command: string, namespace : string | undefined) : string {
+export function getBaseCmd(binpath: string, command: string, namespace : string | undefined, operatorId: string | undefined) : string {
 	let cmd = `"${binpath}" ${command}`;
 	if (namespace) {
 		cmd += ` --namespace=${namespace}`;
 	}
+	if (operatorId) {
+		cmd += ` --operator-id=${namespace}`;
+	}
 	return cmd;
 }
 
-async function kamelInternal(command: string, devMode: boolean, namespace : string | undefined): Promise<string> {
+async function kamelInternal(command: string, devMode: boolean, namespace : string | undefined, operatorId: string | undefined): Promise<string> {
 	return new Promise<string>(async (resolve, reject) => {
 		const bin: string = await baseKamelPath();
 		const binpath: string = bin.trim();
@@ -80,7 +88,7 @@ async function kamelInternal(command: string, devMode: boolean, namespace : stri
 			return;
 		}
 	
-		const cmd: string = getBaseCmd(binpath, command, namespace);
+		const cmd: string = getBaseCmd(binpath, command, namespace, operatorId);
 		const sr: ChildProcess = exec(cmd);
 		let wholeOutData = '';
 		let wholeErrData = '';
@@ -120,13 +128,16 @@ async function kamelInternal(command: string, devMode: boolean, namespace : stri
 	});
 }
 
-async function kamelInternalArgs(args: string[], devMode: boolean, namespace: string | undefined, foldername?: string): Promise<ChildProcess> {
+async function kamelInternalArgs(args: string[], devMode: boolean, namespace: string | undefined, operatorId: string | undefined, foldername?: string): Promise<ChildProcess> {
 	return new Promise<ChildProcess>(async (resolve, reject) => {
 		const bin: string = await baseKamelPath();
 		if (bin) {
 			const binpath: string = bin.trim();
 			if (namespace) {
 				args.push(`--namespace=${namespace}`);
+			}
+			if (operatorId) {
+				args.push(`--operator-id=${operatorId}`)
 			}
 			console.log(`command called: ${binpath} with arguments ${args}`);
 			let sr : ChildProcess;

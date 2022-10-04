@@ -24,6 +24,7 @@ export const KAMEL_PATH_CONFIG_KEY = "camelk.tools.kamel-path";
 export const KUBERNETES_EXTENSION_CONFIG_KEY = "vs-kubernetes";
 export const KUBECTL_PATH_CONFIG_KEY = "vs-kubernetes.kubectl-path";
 export const NAMESPACE_KEY = "camelk.namespace";
+export const OPERATORID_KEY = "camelk.operatorId";
 export const SHOW_STATUS_BAR_KEY = "camelk.integrations.showStatusBarMessages";
 export const REMOVE_LOGVIEW_ON_SHUTDOWN_KEY = "camelk.integrations.closeLogViewWhenIntegrationRemoved";
 export const RUNTIME_VERSION_KEY = "camelk.integrations.runtimeVersion";
@@ -148,6 +149,18 @@ export function getNamespaceconfig(): string | undefined {
 		return undefined;
 	}
 	return namespace;
+}
+
+export async function addOperatorIdToConfig(value: string | undefined): Promise<void> {
+	await vscode.workspace.getConfiguration().update(OPERATORID_KEY, value, true);
+}
+
+export function getOperatorIdconfig(): string | undefined {
+	const operatorId : string | undefined = vscode.workspace.getConfiguration().get(OPERATORID_KEY);
+	if (!operatorId ||operatorId.length === 0) {
+		return undefined;
+	}
+	return operatorId;
 }
 
 export function getKamelRuntimeVersionConfig(): string | undefined {
