@@ -90,7 +90,7 @@ You can start a new Camel K integration with or without additional options such 
 
 * **Secret - Apache Camel K Integration with Kubernetes Secret as Runtime Configuration**
 
-    Select a Secret from a list of the published Secrets in your current Kubernetes system. For more information about configuration with ConfigMaps or Secrets, see [Configuration via ConfigMap or Secret](https://camel.apache.org/camel-k/latest/configuration/configmap-secret.html) in the Apache Camel K documentation.
+    Select a Secret from a list of the published Secrets in your current Kubernetes system. For more information about configuration with ConfigMaps or Secrets, see [Configuration via ConfigMap or Secret](https://camel.apache.org/camel-k/next/configuration/runtime-config.html) in the Apache Camel K documentation.
 
 * **Resource - Apache Camel K Integration with Resource file**
 
@@ -98,7 +98,7 @@ You can start a new Camel K integration with or without additional options such 
 
 * **Property - Apache Camel K Integration with Property**
 
-    Specify property name/property value pairs, with the option to specify more than one. For more information about configuration with properties, see [Configure Integrations](https://camel.apache.org/camel-k/latest/configuration/configuration.html) in the Apache Camel-K documentation.
+    Specify property name/property value pairs, with the option to specify more than one. For more information about configuration with properties, see [Configure Integrations](https://camel.apache.org/camel-k/latest/configuration/configuration.html) in the Apache Camel K documentation.
 
 * **Dependencies - Apache Camel K Integration with Explicit Dependencies**
 
@@ -194,7 +194,7 @@ In a Groovy route, that might look like **from('timer:props?period=1s').log('{{m
 
 4. Press **Enter**. The extension creates a new ConfigMap or Secret that you can reference in your Apache Camel K route.
 
-For more information about configuration with ConfigMaps or Secrets, see [Configuration via ConfigMap or Secret](https://camel.apache.org/camel-k/latest/configuration/configmap-secret.html) in the Apache Camel-K documentation for more details.
+For more information about configuration with ConfigMaps or Secrets, see [Configuration via ConfigMap or Secret](https://camel.apache.org/camel-k/next/configuration/runtime-config.html) in the Apache Camel-K documentation for more details.
 
 ## Viewing the status of published integrations
 
