@@ -31,7 +31,7 @@ import {
 	Workbench
 } from 'vscode-extension-tester';
 import { Marketplace } from 'vscode-uitests-tooling';
-import { prepareEmptyTestFolder } from './utils/resourcesUtils';
+import { DoNextTest, prepareEmptyTestFolder } from './utils/utils';
 import { extensionIsActivated, sectionHasItem } from './utils/waitConditions';
 import * as uiTestConstants from './utils/uiTestConstants';
 import { promiseFail, promiseSucceed } from './utils/promiseUtils';
@@ -41,6 +41,8 @@ const WORKSPACE_FOLDER = path.join(__dirname, TEST_FOLDER);
 
 const START_DEBUG_LABEL = uiTestConstants.startDebug;
 const REMOVE_INTEGRATION_LABEL = uiTestConstants.integrationRemove;
+
+const extensionActivated = new DoNextTest();
 
 describe('Test Debug on Camel K Integrations from Side Bar', function () {
 
@@ -118,7 +120,7 @@ async function prepareTempWorkspaceForTests(workspaceFolder: string) {
 async function camelKToolingIsEnabled() {
 	const marketplace = await Marketplace.open();
 	const item = await marketplace.findExtension(`@installed ${pjson.displayName}`);
-	return extensionIsActivated(item);
+	return extensionIsActivated(item, extensionActivated);
 }
 
 async function moveToExplorerActivity() {
