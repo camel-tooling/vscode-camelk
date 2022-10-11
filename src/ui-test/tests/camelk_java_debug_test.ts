@@ -72,6 +72,7 @@ export function camelKJavaDebugTest(extensionActivated: DoNextTest) {
 				const item = await getIntegration(INTEGRATION_LABEL);
 				const menu = await item.openContextMenu();
 				await promiseSucceed(VSBrowser.instance.driver.wait(() => menu.hasItem(START_DEBUG_LABEL), 5000));
+				await menu.close();
 			});
 
 			after(async function() {
@@ -100,6 +101,7 @@ export function camelKJavaDebugTest(extensionActivated: DoNextTest) {
 				const item = await getIntegration(INTEGRATION_LABEL);
 				const menu = await item.openContextMenu();
 				await promiseFail(VSBrowser.instance.driver.wait(() => menu.hasItem(START_DEBUG_LABEL), 5000));
+				await menu.close();
 			});
 
 			after(async function() {
