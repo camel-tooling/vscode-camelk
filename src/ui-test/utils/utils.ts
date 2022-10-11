@@ -20,13 +20,20 @@ import * as fs from 'fs';
 import * as path from 'path';
 import {
     BottomBarPanel,
+    CustomTreeSection,
     DefaultTreeItem,
+    EditorView,
     InputBox,
     Locator,
     SideBarView,
+    TextEditor,
+    ViewItem,
+    VSBrowser,
     WebView,
     Workbench
 } from 'vscode-extension-tester';
+import * as uiTestConstants from '../utils/uiTestConstants';
+import { sectionHasItem } from './waitConditions';
 
 export class DoNextTest {
     doNextTest: boolean;
@@ -100,4 +107,59 @@ export async function textDoesNotContainAsci(view: 'OutputView' | 'WebView', loc
         await webView.switchBack();
     }
     return !ansiRegex().test(text);
+}
+
+export async function getCamelKIntegrationSection() {
+    const section = await new SideBarView().getContent().getSection(uiTestConstants.extensionName) as CustomTreeSection;
+    await section.expand();
+    await VSBrowser.instance.driver.wait(async () => section.isExpanded());
+    return section;
+}
+
+export async function getIntegration(integrationLabel: string) {
+    const section = await getCamelKIntegrationSection();
+    await VSBrowser.instance.driver.wait(async () => hasIntegration(integrationLabel));
+    return await section.findItem(integrationLabel) as ViewItem;
+}
+
+export async function hasIntegration(integrationLabel: string) {
+    const section = await getCamelKIntegrationSection();
+    return await sectionHasItem(section, integrationLabel);
+}
+
+export async function startIntegration(integrationLabel: string, mode: string) {
+    const workbench = new Workbench();
+    await workbench.executeCommand(uiTestConstants.startIntegration);
+    const startMode = await InputBox.create();
+    await startMode.selectQuickPick(mode);
+
+    await VSBrowser.instance.driver.wait(async () => hasIntegration(integrationLabel));
+}
+
+export async function createIntegration(integrationFile: string, language: string, extension: string) {
+    const workbench = new Workbench();
+    await workbench.executeCommand(uiTestConstants.createNewIntegrationFile);
+    const languageInput = await InputBox.create();
+    await languageInput.selectQuickPick(language);
+    const WORKSPACE_FOLDERInput = await InputBox.create();
+    await WORKSPACE_FOLDERInput.selectQuickPick(0);
+    const nameInput = await InputBox.create();
+    await nameInput.setText(integrationFile);
+    await nameInput.confirm();
+
+    const editorView = new EditorView();
+    await VSBrowser.instance.driver.wait(async () => {
+        try {
+            return await editorView.openEditor(integrationFile + '.' + extension) !== undefined;
+        } catch {
+            return false;
+        }
+    });
+    return workbench;
+}
+
+export async function modifyCurrentFileToBeInvalid() {
+    const textEditor: TextEditor = new TextEditor();
+    await textEditor.setTextAtLine(14, ";");
+    await textEditor.save()
 }
