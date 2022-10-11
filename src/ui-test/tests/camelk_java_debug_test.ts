@@ -17,7 +17,6 @@
 
 'use strict'
 
-import path = require('path');
 import * as pjson from '../../../package.json';
 import {
 	ActivityBar,
@@ -35,9 +34,6 @@ import { DoNextTest, prepareEmptyTestFolder } from '../utils/utils';
 import { extensionIsActivated, sectionHasItem } from '../utils/waitConditions';
 import * as uiTestConstants from '../utils/uiTestConstants';
 
-const TEST_FOLDER = '../../../testFolder';
-const WORKSPACE_FOLDER = path.join(__dirname, TEST_FOLDER);
-
 const START_DEBUG_LABEL = uiTestConstants.startDebug;
 const REMOVE_INTEGRATION_LABEL = uiTestConstants.integrationRemove;
 
@@ -49,7 +45,8 @@ export function camelKJavaDebugTest(extensionActivated: DoNextTest) {
 			this.timeout(90000);
 			this.retries(3);
 			await VSBrowser.instance.waitForWorkbench();
-			await prepareTempWorkspaceForTests(WORKSPACE_FOLDER);
+			await prepareEmptyTestFolder(uiTestConstants.testDir);
+			await VSBrowser.instance.openResources(uiTestConstants.testDir);
 			await VSBrowser.instance.driver.wait(camelKToolingIsEnabled);
 		});
 
@@ -81,7 +78,7 @@ export function camelKJavaDebugTest(extensionActivated: DoNextTest) {
 			after(async function() {
 				this.timeout(20000);
 				await removeIntegration(INTEGRATION_LABEL);
-				await prepareEmptyTestFolder(WORKSPACE_FOLDER);
+				await prepareEmptyTestFolder(uiTestConstants.testDir);
 			});
 
 		});
@@ -114,17 +111,11 @@ export function camelKJavaDebugTest(extensionActivated: DoNextTest) {
 			after(async function() {
 				this.timeout(20000);
 				await removeIntegration(INTEGRATION_LABEL);
-				await prepareEmptyTestFolder(WORKSPACE_FOLDER);
+				await prepareEmptyTestFolder(uiTestConstants.testDir);
 			});
 		})
 
 	});
-
-	async function prepareTempWorkspaceForTests(workspaceFolder: string) {
-		await new EditorView().closeAllEditors();
-		await prepareEmptyTestFolder(workspaceFolder);
-		await VSBrowser.instance.openResources(workspaceFolder);
-	}
 
 	async function camelKToolingIsEnabled() {
 		const marketplace = await Marketplace.open();
