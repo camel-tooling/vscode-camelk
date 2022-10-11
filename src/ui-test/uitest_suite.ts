@@ -49,7 +49,7 @@ describe('Tooling for Apache Camel K extension', function () {
                 basicModeWithLogsTest(extension, language, doNextTest);
 
                 if (language == "Java") {
-                    camelKJavaDebugTest(doNextTest)
+                    camelKJavaDebugTest()
                 }
             });
         });
