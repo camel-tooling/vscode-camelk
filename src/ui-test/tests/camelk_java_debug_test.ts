@@ -17,42 +17,20 @@
 
 'use strict'
 
-//import path = require('path');
-//import * as pjson from '../../../package.json';
 import {
-	//ActivityBar,
-	CustomTreeSection,
 	EditorView,
-	InputBox,
-	SideBarView,
-	TextEditor,
-	ViewItem,
 	VSBrowser,
-	Workbench
 } from 'vscode-extension-tester';
-//import { Marketplace } from 'vscode-uitests-tooling';
-import { /**DoNextTest,**/ prepareEmptyTestFolder } from '../utils/utils';
-import { /**extensionIsActivated,**/ cleanOutputView, sectionHasItem, sidebarIntegrationRemove } from '../utils/waitConditions';
+import { createIntegration, getIntegration, modifyCurrentFileToBeInvalid, prepareEmptyTestFolder, startIntegration } from '../utils/utils';
+import { cleanOutputView, sidebarIntegrationRemove } from '../utils/waitConditions';
 import * as uiTestConstants from '../utils/uiTestConstants';
 import { promiseFail, promiseSucceed } from '../utils/promiseUtils';
 
-//const WORKSPACE_FOLDER = path.join(__dirname, uiTestConstants.testFolder);
-
 const START_DEBUG_LABEL = uiTestConstants.startDebug;
-//const REMOVE_INTEGRATION_LABEL = uiTestConstants.integrationRemove;
 
-//export function camelKJavaDebugTest(extensionActivated: DoNextTest) {
 export function camelKJavaDebugTest() {
 
 	describe('Test Debug on Camel K Integrations from Side Bar', function () {
-
-		//before(async function () {
-		//	this.timeout(90000);
-		//	this.retries(3);
-		//	await VSBrowser.instance.waitForWorkbench();
-		//	await prepareTempWorkspaceForTests(WORKSPACE_FOLDER);
-		//	await VSBrowser.instance.driver.wait(camelKToolingIsEnabled);
-		//});
 
 		describe('Java Debug', function () {
 
@@ -61,9 +39,8 @@ export function camelKJavaDebugTest() {
 
 			before(async function () {
 				this.timeout(uiTestConstants.TIMEOUT_60_SECONDS);
-				//await moveToExplorerActivity();
-				await createIntegration(INTEGRATION_FILE);
-				await startIntegration(INTEGRATION_LABEL);
+				await createIntegration(INTEGRATION_FILE, 'Java', 'java');
+				await startIntegration(INTEGRATION_LABEL, 'Basic');
 			})
 
 			it('Check Java Debug available', async function () {
@@ -75,7 +52,6 @@ export function camelKJavaDebugTest() {
 
 			after(async function () {
 				this.timeout(uiTestConstants.TIMEOUT_60_SECONDS);
-				//await removeIntegration(INTEGRATION_LABEL);
 				await sidebarIntegrationRemove(VSBrowser.instance.driver, uiTestConstants.extensionName, INTEGRATION_LABEL);
 				await new EditorView().closeAllEditors();
 				await VSBrowser.instance.driver.wait(() => { return cleanOutputView(); });
@@ -91,10 +67,9 @@ export function camelKJavaDebugTest() {
 
 			before(async function () {
 				this.timeout(uiTestConstants.TIMEOUT_60_SECONDS);
-				//await moveToExplorerActivity();
-				await createIntegration(INTEGRATION_FILE);
+				await createIntegration(INTEGRATION_FILE, 'Java', 'java');
 				await modifyCurrentFileToBeInvalid();
-				await startIntegration(INTEGRATION_LABEL);
+				await startIntegration(INTEGRATION_LABEL, 'Basic');
 			});
 
 			it('Test Java Debugger Not Available On Invalid File', async function () {
@@ -106,7 +81,6 @@ export function camelKJavaDebugTest() {
 
 			after(async function () {
 				this.timeout(uiTestConstants.TIMEOUT_60_SECONDS);
-				//await removeIntegration(INTEGRATION_LABEL); function bellow is more secure in general way usually integration still exists in sidebar for some time =(
 				await sidebarIntegrationRemove(VSBrowser.instance.driver, uiTestConstants.extensionName, INTEGRATION_LABEL);
 				await new EditorView().closeAllEditors();
 				await VSBrowser.instance.driver.wait(() => { return cleanOutputView(); });
@@ -115,89 +89,4 @@ export function camelKJavaDebugTest() {
 		})
 
 	});
-
-	//async function prepareTempWorkspaceForTests(workspaceFolder: string) {
-	//	await new EditorView().closeAllEditors();
-	//	await prepareEmptyTestFolder(workspaceFolder);
-	//	await VSBrowser.instance.openResources(workspaceFolder);
-	//}
-
-	//async function camelKToolingIsEnabled() {
-	//	const marketplace = await Marketplace.open();
-	//	const item = await marketplace.findExtension(`@installed ${pjson.displayName}`);
-	//	return extensionIsActivated(item, extensionActivated);
-	//}
-
-	//async function moveToExplorerActivity() {
-	//	const ACTIVITY_LABEL = 'Explorer';
-	//
-	//	return moveToActivity(ACTIVITY_LABEL);
-	//}
-
-	//async function moveToActivity(viewIdentifier: string) {
-	//	const control = await new ActivityBar().getViewControl(viewIdentifier);
-	//	return VSBrowser.instance.driver.wait(async () => control?.openView());
-	//}
-
-	async function getCamelKIntegrationSection() {
-		const section = await new SideBarView().getContent().getSection(uiTestConstants.extensionName) as CustomTreeSection;
-		await section.expand();
-		await VSBrowser.instance.driver.wait(async () => section.isExpanded());
-		return section;
-	}
-
-	async function getIntegration(integrationLabel: string) {
-		const section = await getCamelKIntegrationSection();
-		await VSBrowser.instance.driver.wait(async () => hasIntegration(integrationLabel));
-		return await section.findItem(integrationLabel) as ViewItem;
-	}
-
-	async function hasIntegration(integrationLabel: string) {
-		const section = await getCamelKIntegrationSection();
-		return await sectionHasItem(section, integrationLabel);
-	}
-
-	async function createIntegration(integrationFile: string) {
-		const workbench = new Workbench();
-		await workbench.executeCommand(uiTestConstants.createNewIntegrationFile);
-		const languageInput = await InputBox.create();
-		await languageInput.selectQuickPick('Java');
-		const WORKSPACE_FOLDERInput = await InputBox.create();
-		await WORKSPACE_FOLDERInput.selectQuickPick(0);
-		const nameInput = await InputBox.create();
-		await nameInput.setText(integrationFile);
-		await nameInput.confirm();
-
-		const editorView = new EditorView();
-		await VSBrowser.instance.driver.wait(async () => {
-			try {
-				return await editorView.openEditor(integrationFile + '.java') !== undefined;
-			} catch {
-				return false;
-			}
-		});
-		return workbench;
-	}
-
-	async function startIntegration(integrationLabel: string) {
-		const workbench = new Workbench();
-		await workbench.executeCommand(uiTestConstants.startIntegration);
-		const startMode = await InputBox.create();
-		await startMode.selectQuickPick('Basic');
-
-		await VSBrowser.instance.driver.wait(async () => hasIntegration(integrationLabel));
-	}
-
-	//async function removeIntegration(integrationLabel: string) {
-	//	const item = await getIntegration(integrationLabel);
-	//	const menu = await item.openContextMenu();
-	//	const removeItem = await menu.getItem(REMOVE_INTEGRATION_LABEL);
-	//	await removeItem?.click();
-	//}
-
-	async function modifyCurrentFileToBeInvalid() {
-		const textEditor: TextEditor = new TextEditor();
-		await textEditor.setTextAtLine(14, ";");
-		await textEditor.save()
-	}
 }
