@@ -47,7 +47,7 @@ export function camelKJavaDebugTest() {
 				this.timeout(uiTestConstants.TIMEOUT_30_SECONDS);
 				const item = await getIntegration(INTEGRATION_LABEL);
 				const menu = await item.openContextMenu();
-				await promiseSucceed(VSBrowser.instance.driver.wait(() => menu.hasItem(START_DEBUG_LABEL), 5000));
+				await promiseSucceed(VSBrowser.instance.driver.wait(() => menu.hasItem(START_DEBUG_LABEL), uiTestConstants.TIMEOUT_5_SECONDS));
 			});
 
 			after(async function () {
@@ -76,7 +76,7 @@ export function camelKJavaDebugTest() {
 				this.timeout(uiTestConstants.TIMEOUT_30_SECONDS);
 				const item = await getIntegration(INTEGRATION_LABEL);
 				const menu = await item.openContextMenu();
-				await promiseFail(VSBrowser.instance.driver.wait(() => menu.hasItem(START_DEBUG_LABEL), 5000));
+				await promiseFail(VSBrowser.instance.driver.wait(() => menu.hasItem(START_DEBUG_LABEL), uiTestConstants.TIMEOUT_5_SECONDS));
 			});
 
 			after(async function () {
