@@ -34,7 +34,6 @@ import { Marketplace } from 'vscode-uitests-tooling';
 import { DoNextTest, prepareEmptyTestFolder } from '../utils/utils';
 import { extensionIsActivated, sectionHasItem } from '../utils/waitConditions';
 import * as uiTestConstants from '../utils/uiTestConstants';
-import { promiseFail, promiseSucceed } from '../utils/promiseUtils';
 
 const TEST_FOLDER = '../../../testFolder';
 const WORKSPACE_FOLDER = path.join(__dirname, TEST_FOLDER);
@@ -70,9 +69,13 @@ export function camelKJavaDebugTest(extensionActivated: DoNextTest) {
 				this.timeout(20000);
 
 				const item = await getIntegration(INTEGRATION_LABEL);
-				const menu = await item.openContextMenu();
-				await promiseSucceed(VSBrowser.instance.driver.wait(() => menu.hasItem(START_DEBUG_LABEL), 5000));
-				await menu.close();
+				await VSBrowser.instance.driver.wait(async() => 
+					{
+						const menu = await item.openContextMenu();
+						const hasMenu = await menu.hasItem(START_DEBUG_LABEL);
+						await menu.close();
+						return hasMenu;
+					}, 5000);
 			});
 
 			after(async function() {
@@ -99,9 +102,13 @@ export function camelKJavaDebugTest(extensionActivated: DoNextTest) {
 			it('Test Java Debugger Not Available On Invalid File', async function() {
 				this.timeout(20000)
 				const item = await getIntegration(INTEGRATION_LABEL);
-				const menu = await item.openContextMenu();
-				await promiseFail(VSBrowser.instance.driver.wait(() => menu.hasItem(START_DEBUG_LABEL), 5000));
-				await menu.close();
+				await VSBrowser.instance.driver.wait(async() => 
+					{
+						const menu = await item.openContextMenu();
+						const hasMenu = await menu.hasItem(START_DEBUG_LABEL);
+						await menu.close();
+						return !hasMenu;
+					}, 5000);
 			});
 
 			after(async function() {
