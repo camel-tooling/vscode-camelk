@@ -24,7 +24,7 @@ import {
 import { createIntegration, getIntegration, modifyCurrentFileToBeInvalid, prepareEmptyTestFolder, startIntegration } from '../utils/utils';
 import { cleanOutputView, sidebarIntegrationRemove } from '../utils/waitConditions';
 import * as uiTestConstants from '../utils/uiTestConstants';
-import { promiseFail, promiseSucceed } from '../utils/promiseUtils';
+import { assertPromiseSucceed, assertPromiseFail } from '../utils/promiseUtils';
 
 const START_DEBUG_LABEL = uiTestConstants.startDebug;
 
@@ -47,7 +47,10 @@ export function camelKJavaDebugTest() {
 				this.timeout(uiTestConstants.TIMEOUT_30_SECONDS);
 				const item = await getIntegration(INTEGRATION_LABEL);
 				const menu = await item.openContextMenu();
-				await promiseSucceed(VSBrowser.instance.driver.wait(() => menu.hasItem(START_DEBUG_LABEL), uiTestConstants.TIMEOUT_5_SECONDS));
+				await assertPromiseSucceed(
+					VSBrowser.instance.driver.wait(() => menu.hasItem(START_DEBUG_LABEL), uiTestConstants.TIMEOUT_5_SECONDS),
+					'Java debug was not available on a run of a valid file'
+				);
 			});
 
 			after(async function () {
@@ -76,7 +79,10 @@ export function camelKJavaDebugTest() {
 				this.timeout(uiTestConstants.TIMEOUT_30_SECONDS);
 				const item = await getIntegration(INTEGRATION_LABEL);
 				const menu = await item.openContextMenu();
-				await promiseFail(VSBrowser.instance.driver.wait(() => menu.hasItem(START_DEBUG_LABEL), uiTestConstants.TIMEOUT_5_SECONDS));
+				await assertPromiseFail(
+					VSBrowser.instance.driver.wait(() => menu.hasItem(START_DEBUG_LABEL), uiTestConstants.TIMEOUT_5_SECONDS),
+					'Java debugger was available for a run on an invalid file'
+				);
 			});
 
 			after(async function () {
