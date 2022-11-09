@@ -1,14 +1,20 @@
 import { assert } from "chai";
 
-export const promiseSucceed = async (proms: any) => await assertPromise(proms);
-export const promiseFail = async (proms: any) => await assertPromise(proms, false);
+export const assertPromiseSucceed = async (proms: any, failMessage?: string) => await assertPromise(proms, true, failMessage);
+export const assertPromiseFail = async (proms: any, failMessage?: string) => await assertPromise(proms, false, failMessage);
 
-const assertPromise = async (prom: any, succed = true) => {
-    succed = succed ? true : false;
+const assertPromise = async (prom: any, assertSucceed = true, failMessage?: string) => {
+
+    const toAssert = assertSucceed ? true : false;
+    
     try {
         prom = Array.isArray(prom) ? prom : [prom];
         await Promise.all(prom);
-        assert.strictEqual(true, succed);
+        assert.strictEqual(true, toAssert, failMessage);
+    } catch (ex: any) { 
+        assert.notStrictEqual(
+            true, toAssert, 
+            failMessage ? failMessage : ex
+        ); 
     }
-    catch (ex: any) { assert.notStrictEqual(true, succed, ex); }
 }
