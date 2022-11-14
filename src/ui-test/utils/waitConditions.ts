@@ -79,18 +79,8 @@ export async function viewHasItem(content: ViewContent, section: string, item: s
 }
 
 export async function sectionHasItem(section: ViewSection, item: string, timePeriod = 2000): Promise<boolean> {
-    try {
-        const currentItem = await section.findItem(item);
-        if (currentItem !== undefined) {
-            return true;
-        } else {
-            await section.getDriver().sleep(timePeriod);
-            return false;
-        }
-    } catch (err) {
-        await section.getDriver().sleep(timePeriod);
-        return false;
-    }
+    
+    return await section.getDriver().wait(() => section.findItem(item) , timePeriod) !== undefined;
 }
 
 export async function updateFileText(oldText: string, newText: string, timePeriod = 2000): Promise<boolean> {
