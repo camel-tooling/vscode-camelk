@@ -46,9 +46,15 @@ export function camelKJavaDebugTest() {
 			it('Check Java Debug available', async function () {
 				this.timeout(uiTestConstants.TIMEOUT_30_SECONDS);
 				const item = await getIntegration(INTEGRATION_LABEL);
-				const menu = await item.openContextMenu();
 				await assertPromiseSucceed(
-					VSBrowser.instance.driver.wait(() => menu.hasItem(START_DEBUG_LABEL), uiTestConstants.TIMEOUT_5_SECONDS),
+					VSBrowser.instance.driver.wait(
+						async () => {
+							const menu = await item.openContextMenu();
+							const hasItem = menu.hasItem(START_DEBUG_LABEL);
+							menu.close();
+
+							return hasItem;
+						}, uiTestConstants.TIMEOUT_5_SECONDS),
 					'Java debug was not available on a run of a valid file'
 				);
 			});
@@ -78,9 +84,15 @@ export function camelKJavaDebugTest() {
 			it('Test Java Debugger Not Available On Invalid File', async function () {
 				this.timeout(uiTestConstants.TIMEOUT_30_SECONDS);
 				const item = await getIntegration(INTEGRATION_LABEL);
-				const menu = await item.openContextMenu();
 				await assertPromiseFail(
-					VSBrowser.instance.driver.wait(() => menu.hasItem(START_DEBUG_LABEL), uiTestConstants.TIMEOUT_5_SECONDS),
+					VSBrowser.instance.driver.wait(
+						async () => {
+							const menu = await item.openContextMenu();
+							const hasItem = await menu.hasItem(START_DEBUG_LABEL);
+							menu.close();
+
+							return hasItem;
+						}, uiTestConstants.TIMEOUT_5_SECONDS),
 					'Java debugger was available for a run on an invalid file'
 				);
 			});
