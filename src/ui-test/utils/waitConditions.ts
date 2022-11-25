@@ -79,7 +79,6 @@ export async function viewHasItem(content: ViewContent, section: string, item: s
 }
 
 export async function sectionHasItem(section: ViewSection, item: string, timePeriod = 2000): Promise<boolean> {
-    
     return await section.getDriver().wait(() => section.findItem(item) , timePeriod) !== undefined;
 }
 
