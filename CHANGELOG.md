@@ -3,6 +3,8 @@
 All notable changes to the "vscode-camelk" extension will be documented in this file.
 
 ## 0.0.33
+- Update default runtime version to v1.11.0
+
 
 ## 0.0.32
 

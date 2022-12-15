@@ -87,11 +87,23 @@ function invalidateKubeConfigFileByRenamingIt(kubeconfigFilePath: string) {
 }
 
 function checkErrorMessageLogged(messageStub: sinon.SinonStub<[string], void>) {
+	const allMessagesLogged = computeMessages(messageStub);
 	expect(messageStub.callCount,
-		`Depending on latency, versions used and environment configuration, one or two messages can be logged. Number of messages logged ${messageStub.callCount}`)
-		.above(0).below(3);
+		`Depending on latency, versions used and environment configuration, several messages can be logged. Number of messages logged ${messageStub.callCount}.
+		The messages are: ${allMessagesLogged}`)
+		.above(0).below(10);
 }
 
 function sleep(ms = 0) {
 	return new Promise(r => setTimeout(r, ms));
 }
+function computeMessages(messageStub: sinon.SinonStub<[string], void>): string{
+	const totalMessage = messageStub.callCount;
+	let messages = '';
+	for (let index = 0; index < totalMessage; index++) {
+		const call = messageStub.getCall(index);
+		messages += '\n' + call.args[0];
+	}
+	return messages;
+}
+

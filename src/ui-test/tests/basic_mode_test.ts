@@ -94,7 +94,7 @@ export function basicModeWithLogsTest(extension: string, language: string, doNex
         });
 
         it(`Integration pod started`, async function () {
-            this.timeout(consts.TIMEOUT_30_SECONDS);
+            this.timeout(consts.TIMEOUT_60_SECONDS);
             assert.isTrue(await webViewHasTextInWebElement(driver, consts.initialPodReadyMessage));
         });
 
