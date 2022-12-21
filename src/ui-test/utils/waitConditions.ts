@@ -153,16 +153,17 @@ export async function webViewOpen(): Promise<WebView> {
     }
 }
 
-export async function webViewHasTextInWebElement(driver: WebDriver, text: string, locator: Locator = { id: 'content' }, timePeriod = 1000, timeout = 25000): Promise<boolean> {
+export async function webViewHasTextInWebElement(driver: WebDriver, text: string, locator: Locator = By.id('content'), timePeriod = 1000, timeout = 25000): Promise<boolean> {
     const webView = await driver.wait(async () => { return webViewOpen(); }, 5000);
+    let lastContent = '';
     try {
         return await driver.wait(async () => {
             try {
                 await webView.switchToFrame();
                 const contentElement = await webView.findWebElement(locator);
-                const content = await contentElement.getText();
+                lastContent = await contentElement.getText();
                 await webView.switchBack();
-                if (content.indexOf(text) > -1) {
+                if (lastContent.indexOf(text) > -1) {
                     return true;
                 } else {
                     webView.getDriver().sleep(timePeriod);
@@ -175,6 +176,7 @@ export async function webViewHasTextInWebElement(driver: WebDriver, text: string
             }
         }, timeout);
     } catch (e) {
+        console.log(`Last content retrieved from webView: ${lastContent}`);
         await webView.switchBack();
         webView.getDriver().sleep(timePeriod);
         return false;
