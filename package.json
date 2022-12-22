@@ -375,7 +375,7 @@
 		"eslint": "^8.29.0",
 		"eslint-plugin-import": "^2.26.0",
 		"glob": "^8.0.3",
-		"mocha": "^10.1.0",
+		"mocha": "^10.2.0",
 		"mocha-jenkins-reporter": "^0.4.8",
 		"nock": "^13.2.9",
 		"sinon": "^15.0.0",
