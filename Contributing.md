@@ -10,7 +10,7 @@
 * Create a tag
 * Push the tag to vscode-camelk repository, it will trigger a build after few minutes
 * Check build is working fine on [Circle CI](https://app.circleci.com/pipelines/github/camel-tooling/vscode-camelk)
-* Start build on [Jenkins CI](https://dev-platform-jenkins.rhev-ci-vms.eng.rdu2.redhat.com/view/VS%20Code/job/vscode-camelk-release/) with _publishToMarketPlace_ parameter checked
+* Start build on [Jenkins CI](https://studio-jenkins-csb-codeready.apps.ocp-c1.prod.psi.redhat.com/job/Fuse/job/VSCode/job/vscode-camelk-release/) with _publishToMarketPlace_ parameter checked
 * Wait the build is waiting on step _Publish to Marketplace_
 * Ensure you are logged in
 * Go to the console log of the build and click "Proceed"
