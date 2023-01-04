@@ -391,7 +391,7 @@
 		"vscjava.vscode-java-debug"
 	],
 	"dependencies": {
-		"@redhat-developer/vscode-redhat-telemetry": "^0.5.2",
+		"@redhat-developer/vscode-redhat-telemetry": "^0.5.3",
 		"@types/detect-port": "^1.3.2",
 		"@types/request-promise": "^4.1.48",
 		"@types/shelljs": "^0.8.10",
