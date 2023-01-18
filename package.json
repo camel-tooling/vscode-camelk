@@ -374,7 +374,7 @@
 		"decache": "^4.6.1",
 		"eslint": "^8.32.0",
 		"eslint-plugin-import": "^2.27.4",
-		"glob": "^8.0.3",
+		"glob": "^8.1.0",
 		"mocha": "^10.2.0",
 		"mocha-jenkins-reporter": "^0.4.8",
 		"nock": "^13.3.0",
