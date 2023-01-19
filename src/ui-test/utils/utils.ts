@@ -33,7 +33,7 @@ import {
     Workbench
 } from 'vscode-extension-tester';
 import * as uiTestConstants from '../utils/uiTestConstants';
-import { sectionHasItem } from './waitConditions';
+import { sectionHasItem, viewHasItem } from './waitConditions';
 
 export class DoNextTest {
     doNextTest: boolean;
@@ -132,8 +132,8 @@ export async function startIntegration(integrationLabel: string, mode: string) {
     await workbench.executeCommand(uiTestConstants.startIntegration);
     const startMode = await InputBox.create();
     await startMode.selectQuickPick(mode);
-
-    await VSBrowser.instance.driver.wait(async () => hasIntegration(integrationLabel));
+    const content = new SideBarView().getContent();
+    await VSBrowser.instance.driver.wait(viewHasItem(content, uiTestConstants.extensionName, integrationLabel));
 }
 
 export async function createIntegration(integrationFile: string, language: string, extension: string) {
