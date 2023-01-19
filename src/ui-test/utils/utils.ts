@@ -133,7 +133,7 @@ export async function startIntegration(integrationLabel: string, mode: string) {
     const startMode = await InputBox.create();
     await startMode.selectQuickPick(mode);
     const content = new SideBarView().getContent();
-    await VSBrowser.instance.driver.wait(viewHasItem(content, uiTestConstants.extensionName, integrationLabel));
+    await VSBrowser.instance.driver.wait(() => { return viewHasItem(content, uiTestConstants.extensionName, integrationLabel); });
 }
 
 export async function createIntegration(integrationFile: string, language: string, extension: string) {
