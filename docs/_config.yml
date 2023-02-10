@@ -1,0 +1,5 @@
+title: Tooling for Apache Camel K by Red Hat
+logo: https://raw.githubusercontent.com/camel-tooling/vscode-camelk/main/icons/icon128.png
+description: This is the support for Apache Camel K functionality for Visual Studio Code
+# Used theme https://github.com/pages-themes/minimal
+theme: jekyll-theme-minimal
