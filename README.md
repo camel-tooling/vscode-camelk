@@ -8,7 +8,7 @@
   <a href="https://marketplace.visualstudio.com/items?itemName=redhat.vscode-camelk"><img src="https://img.shields.io/visual-studio-marketplace/v/redhat.vscode-camelk?style=for-the-badge" alt="Marketplace Version"/></a>
   <a href="https://circleci.com/gh/camel-tooling/vscode-camelk"><img src="https://img.shields.io/circleci/build/github/camel-tooling/vscode-camelk/main?style=for-the-badge" alt="CircleCI"></a>
   <a href="https://github.com/camel-tooling/vscode-camelk/blob/main/LICENSE"><img src="https://img.shields.io/github/license/camel-tooling/vscode-camelk?color=blue&style=for-the-badge" alt="License"/></a>
-  <a href="https://gitter.im/camel-tooling/Lobby"><img src="https://img.shields.io/gitter/room/camel-tooling/Lobby?color=yellow&style=for-the-badge" alt="Gitter"/></a>
+  <a href="https://camel.zulipchat.com/#narrow/stream/258729-camel-tooling"><img src="https://img.shields.io/badge/zulip-join_chat-brightgreen?color=yellow&style=for-the-badge" alt="Zulip"/></a>
 </p><br/>
 
 <h2 align="center">VS Code support for Apache Camel K functionality</h2>
