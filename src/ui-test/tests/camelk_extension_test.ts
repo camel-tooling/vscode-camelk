@@ -17,7 +17,6 @@
 'use strict';
 
 import * as consts from '../utils/uiTestConstants';
-import * as pjson from '../../../package.json';
 import { assert } from 'chai';
 import { EditorView, ExtensionsViewItem, VSBrowser, WebDriver } from 'vscode-extension-tester';
 import { Marketplace } from 'vscode-uitests-tooling';
@@ -58,7 +57,7 @@ export function camelkExtensionTest(extensionActivated: DoNextTest) {
 		it('Find extension', async function () {
 			this.timeout(consts.TIMEOUT_15_SECONDS);
 			this.retries(3);
-			item = await marketplace.findExtension(`@installed ${pjson.displayName}`);
+			item = await marketplace.findExtension(`@installed ${consts.displayName}`);
 		});
 
 		it('Extension was properly activated', async function () {
@@ -67,7 +66,7 @@ export function camelkExtensionTest(extensionActivated: DoNextTest) {
 			await driver.wait(async () => {
 				// on macOS the extension is sometimes activated immediately and it causes UI test flakiness
 				if (process.platform == 'darwin') {
-					item = await marketplace.findExtension(`@installed ${pjson.displayName}`);
+					item = await marketplace.findExtension(`@installed ${consts.displayName}`);
 				}
 				return extensionIsActivated(item, extensionActivated);
 			}, consts.TIMEOUT_60_SECONDS);
@@ -88,19 +87,19 @@ export function camelkExtensionTest(extensionActivated: DoNextTest) {
 		it('Verify display name', async function () {
 			this.timeout(consts.TIMEOUT_5_SECONDS);
 			const title = await item.getTitle();
-			assert.equal(title, `${pjson.displayName}`);
+			assert.equal(title, `${consts.displayName}`);
 		});
 
 		it('Verify description', async function () {
 			this.timeout(consts.TIMEOUT_5_SECONDS);
 			const desc = await item.getDescription();
-			assert.equal(desc, `${pjson.description}`);
+			assert.equal(desc, `${consts.description}`);
 		});
 
 		it('Verify version', async function () {
 			this.timeout(consts.TIMEOUT_5_SECONDS);
 			const version = await item.getVersion();
-			assert.equal(version, `${pjson.version}`);
+			assert.equal(version, `${consts.version}`);
 		});
 
 	});

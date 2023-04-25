@@ -17,22 +17,28 @@
 'use strict';
 
 import * as path from 'path';
+import * as fs from 'fs';
 import { ExTester } from 'vscode-extension-tester';
 import { ReleaseQuality } from 'vscode-extension-tester/out/util/codeUtil';
 
 const storageFolder = 'test-resources';
-let releaseType: ReleaseQuality = ReleaseQuality.Stable;
+const releaseType: ReleaseQuality = process.env.CODE_TYPE === 'insider' ? ReleaseQuality.Insider : ReleaseQuality.Stable;
 export const projectPath = path.resolve(__dirname, '..', '..');
 const extensionFolder = path.join(projectPath, '.test-extensions');
 
 async function main(): Promise<void> {
-	if (process.argv.length === 4) {
-		if (process.argv[2] === '-t' && process.argv[3] === 'insider') {
-			releaseType = ReleaseQuality.Insider;
-		}
-	}
 	const tester = new ExTester(storageFolder, releaseType, extensionFolder);
-	await tester.setupAndRunTests('out/src/ui-test/uitest_suite.js', process.env.CODE_VERSION);
+	await tester.setupAndRunTests('out/src/ui-test/uitest_suite.js',
+		process.env.CODE_VERSION,
+		{
+			'installDependencies': true
+		},
+		{
+			'cleanup': true,
+			'settings': '.out/src/ui-test/resources/vscode-settings.json',
+			resources: []
+		});
+	fs.rmSync(extensionFolder, { recursive: true });
 }
 
 main();

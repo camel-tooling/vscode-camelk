@@ -18,7 +18,11 @@
 
 import { projectPath } from './../uitest_runner';
 import * as path from 'path';
-import * as pjson from '../../../package.json';
+import * as fs from 'fs';
+
+const extensionMetadata: { [key: string]: any } = JSON.parse(fs.readFileSync('package.json', {
+    encoding: 'utf-8'
+}));
 
 export const TIMEOUT_5_SECONDS = 5000;
 export const TIMEOUT_15_SECONDS = 15000;
@@ -31,11 +35,14 @@ export const testFolder = 'vscode-camelk-ui-test';
 export const testDir = path.resolve(`${projectPath}`, '..', 'test-resources', 'vscode-camelk-ui-test');
 export const integrationFileName = 'Simple';
 
-export const extensionName = pjson.contributes.views.explorer[0].name;
-export const startIntegration = pjson.contributes.commands[0].title;
-export const integrationRemove = pjson.contributes.commands[2].title;
-export const followIntegrationLogs = pjson.contributes.commands[3].title;
-export const createNewIntegrationFile = pjson.contributes.commands[9].title;
+export const displayName = extensionMetadata.displayName;
+export const description = extensionMetadata.description;
+export const version = extensionMetadata.version;
+export const extensionName = extensionMetadata.contributes.views.explorer[0].name;
+export const startIntegration = extensionMetadata.contributes.commands[0].title;
+export const integrationRemove = extensionMetadata.contributes.commands[2].title;
+export const followIntegrationLogs = extensionMetadata.contributes.commands[3].title;
+export const createNewIntegrationFile = extensionMetadata.contributes.commands[9].title;
 
 export function prepareCodeLogMessages(extension: string, language: string): [string, string, string, string] {
     let initialCodeMessage = `Hello Camel K from`;
