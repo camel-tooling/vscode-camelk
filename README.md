@@ -6,7 +6,7 @@
 
 <p align="center">
   <a href="https://marketplace.visualstudio.com/items?itemName=redhat.vscode-camelk"><img src="https://img.shields.io/visual-studio-marketplace/v/redhat.vscode-camelk?style=for-the-badge" alt="Marketplace Version"/></a>
-  <a href="https://circleci.com/gh/camel-tooling/vscode-camelk"><img src="https://img.shields.io/circleci/build/github/camel-tooling/vscode-camelk/main?style=for-the-badge" alt="CircleCI"></a>
+  <a href="https://github.com/camel-tooling/vscode-camelk/actions/workflows/main.yaml"><img src="https://img.shields.io/github/actions/workflow/status/camel-tooling/vscode-camelk/main.yaml?style=for-the-badge" alt="Main CI"></a>
   <a href="https://github.com/camel-tooling/vscode-camelk/blob/main/LICENSE"><img src="https://img.shields.io/github/license/camel-tooling/vscode-camelk?color=blue&style=for-the-badge" alt="License"/></a>
   <a href="https://camel.zulipchat.com/#narrow/stream/258729-camel-tooling"><img src="https://img.shields.io/badge/zulip-join_chat-brightgreen?color=yellow&style=for-the-badge" alt="Zulip"/></a>
 </p><br/>
