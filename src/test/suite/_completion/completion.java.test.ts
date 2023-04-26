@@ -34,14 +34,21 @@ suite('Should do completion in Camel K standalone files', () => {
 	
 	const testVar = test('Completes from method for Java', async () => {
 		const docUriJava = getDocUri('MyRouteBuilder.java');
-		const expectedCompletion = { label: 'from(String uri) : RouteDefinition'};
+		const expectedCompletion = { label: {
+			description: 'RouteDefinition',
+			detail: '(String uri) : RouteDefinition',
+			label: 'from'
+		}};
 		Utils.skipOnJenkins(testVar);
 		await testCompletion(docUriJava, new vscode.Position(5, 11), expectedCompletion, false);
 	}).timeout(TOTAL_TIMEOUT);
 	
 	const testAdditionalDependencies = test('Completes additional dependencies', async () => {
 		const docUriJava = getDocUri('MyRouteBuilderWithAdditionalDependencies.java');
-		const expectedCompletion = { label: 'ArithmeticUtils - org.apache.commons.math3.util'};
+		const expectedCompletion = { label: {
+			description: 'org.apache.commons.math3.util',
+			label: 'ArithmeticUtils'
+		}};
 		Utils.skipOnJenkins(testAdditionalDependencies);
 		await testCompletion(docUriJava, new vscode.Position(6, 19), expectedCompletion, true);
 	}).timeout(TOTAL_TIMEOUT);

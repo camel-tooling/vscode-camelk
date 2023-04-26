@@ -35,7 +35,7 @@ export async function checkExpectedCompletion(docUri: vscode.Uri, position: vsco
 				const actualCompletionList = value as vscode.CompletionList;
 				lastCompletionList = actualCompletionList;
 				const completionItemFound = actualCompletionList.items.find(completion => {
-					return completion.label === expectedCompletion.label
+					return completion.label.toString() === expectedCompletion.label.toString()
 						&& completion.documentation === expectedCompletion.documentation
 						&& (expectedCompletion.insertText === undefined || completion.insertText === expectedCompletion.insertText);
 				});
@@ -47,7 +47,7 @@ export async function checkExpectedCompletion(docUri: vscode.Uri, position: vsco
 		let errorMessage = '';
 		if(lastCompletionList) {
 			lastCompletionList.items.forEach(completion => {
-				errorMessage += completion.label + '\n';
+				errorMessage += completion.label.toString() + '\n';
 			});
 		}
 		throw new Error(`${err}\nCannot find expected completion "${expectedCompletion.label}" in the list of completions:\n${errorMessage}`);
