@@ -35,7 +35,7 @@ async function main(): Promise<void> {
 		},
 		{
 			'cleanup': true,
-			'settings': '.out/src/ui-test/resources/vscode-settings.json',
+			'settings': './src/ui-test/resources/vscode-settings.json',
 			resources: []
 		});
 	fs.rmSync(extensionFolder, { recursive: true });
