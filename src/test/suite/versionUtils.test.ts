@@ -61,27 +61,27 @@ suite("VersionUtils check", () => {
 		test("validate url for existing 1.4.1 version", async () => {
 			await validateVersion('1.4.1', Platform.LINUX, 'https://github.com/apache/camel-k/releases/download/v1.4.1/camel-k-client-1.4.1-linux-64bit.tar.gz');
 		});
-		
+
 		test("validate url for existing 1.5.0 version", async () => {
 			await validateVersion('1.5.0', Platform.LINUX, 'https://github.com/apache/camel-k/releases/download/v1.5.0/camel-k-client-1.5.0-linux-64bit.tar.gz');
 		});
-		
+
 		test("validate url for existing 1.6.0 version", async () => {
 			await validateVersion('1.6.0', Platform.LINUX, 'https://github.com/apache/camel-k/releases/download/v1.6.0/camel-k-client-1.6.0-linux-64bit.tar.gz');
 		});
-		
+
 		test("validate url for existing 1.7.0 version", async () => {
 			await validateVersion('1.7.0', Platform.LINUX, 'https://github.com/apache/camel-k/releases/download/v1.7.0/camel-k-client-1.7.0-linux-64bit.tar.gz');
 		});
-			
+
 		test("validate url for existing 1.8.2 version", async () => {
 			await validateVersion('1.8.2', Platform.LINUX, 'https://github.com/apache/camel-k/releases/download/v1.8.2/camel-k-client-1.8.2-linux-64bit.tar.gz');
 		});
-		
+
 		test("validate url for existing 1.9.2 version", async () => {
 			await validateVersion('1.9.2', Platform.LINUX, 'https://github.com/apache/camel-k/releases/download/v1.9.2/camel-k-client-1.9.2-linux-64bit.tar.gz');
 		});
-		
+
 		test("validate url for existing 1.10.0 version", async () => {
 			await validateVersion('1.10.0', Platform.LINUX, 'https://github.com/apache/camel-k/releases/download/v1.10.0/camel-k-client-1.10.0-linux-64bit.tar.gz');
 		});
@@ -93,7 +93,7 @@ suite("VersionUtils check", () => {
 		test("validate url for existing 1.12.0 version", async () => {
 			await validateVersion('1.12.0', Platform.LINUX, 'https://github.com/apache/camel-k/releases/download/v1.12.0/camel-k-client-1.12.0-linux-64bit.tar.gz');
 		});
-		
+
 		test("validate url for existing 1.12.0 windows version", async () => {
 			await validateVersion('1.12.0', Platform.WINDOWS, 'https://github.com/apache/camel-k/releases/download/v1.12.0/camel-k-client-1.12.0-windows-64bit.tar.gz');
 		});
@@ -101,8 +101,6 @@ suite("VersionUtils check", () => {
 		test("validate url for existing 1.12.0 MacOS version", async () => {
 			await validateVersion('1.12.0', Platform.MACOS, 'https://github.com/apache/camel-k/releases/download/v1.12.0/camel-k-client-1.12.0-mac-64bit.tar.gz');
 		});
-		
-		
 
 		test("validate invalid url for xyz1 version", async () => {
 			await invalidateVersion('xyz1', Platform.LINUX);
@@ -113,7 +111,8 @@ suite("VersionUtils check", () => {
 				const testUrl = await versionUtils.getDownloadURLForCamelKTag(tagName, platform);
 				should.equal(testUrl, urlToTest);
 			} catch (error) {
-				should.fail(error);
+				const errMessage = error instanceof Error ? error.message : String(error);
+				should.fail(errMessage);
 			}
 		}
 
@@ -149,7 +148,7 @@ suite("VersionUtils check", () => {
 
 			chai.expect(await versionUtils.checkKamelNeedsUpdate()).to.be.false;
 		});
-		
+
 		test("When Auto-upgrade off and no cli path setting provided then need to update kamel binary", async () => {
 
 			await config.setKamelAutoupgradeConfig(false);

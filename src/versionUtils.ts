@@ -37,7 +37,7 @@ let latestVersionFromOnline: string;
 export async function testVersionAvailable(versionToUse: string): Promise<boolean> {
 	if (platform && versionToUse) {
 		try {
-			const kamelUrl : string = await getDownloadURLForCamelKTag(versionToUse, platform);
+			const kamelUrl: string = await getDownloadURLForCamelKTag(versionToUse, platform);
 			return await pingGithubUrl(kamelUrl);
 		} catch (error) {
 			// ignore
@@ -50,7 +50,7 @@ export async function checkKamelNeedsUpdate(versionToUse?: string): Promise<bool
 	const runtimeVersionSetting = config.getKamelRuntimeVersionConfig();
 	const autoUpgradeSetting: boolean | undefined = config.getKamelAutoupgradeConfig();
 	const kamelCliToolsPathSetting: string | undefined = config.getActiveKamelconfig();
-	
+
 	if (autoUpgradeSetting || kamelCliToolsPathSetting === undefined) {
 		if (versionToUse) {
 			const passedVersionAvailable = await testVersionAvailable(versionToUse);
@@ -94,7 +94,7 @@ export async function pingGithubUrl(urlStr: string): Promise<boolean> {
 	console.log(`Validate that ${urlStr} is accessible`);
 	try {
 		const res = await fetch(urlStr);
-		return res !==undefined && res.status === 200;
+		return res !== undefined && res.status === 200;
 	} catch (err) {
 		console.error(err);
 	}
@@ -114,7 +114,7 @@ export async function getLatestCamelKVersion(): Promise<Errorable<string>> {
 		return { succeeded: true, result: latestVersionFromOnline };
 	} else {
 		const latestURL = 'https://api.github.com/repos/apache/camel-k/releases/latest';
-		const headers: string[][] = [['If-Modified-Since', LAST_MODIFIED_DATE_OF_DEFAULT_VERSION]];
+		const headers: [string, string][] = [['If-Modified-Since', LAST_MODIFIED_DATE_OF_DEFAULT_VERSION]];
 		const githubToken: string | undefined = process.env.VSCODE_CAMELK_GITHUB_TOKEN;
 		if (githubToken) {
 			headers.push(['Authorization', `token ${githubToken}`]);
@@ -140,7 +140,7 @@ export async function getLatestCamelKVersion(): Promise<Errorable<string>> {
 }
 
 async function checkKamelCLIVersion(): Promise<string | void> {
-	try { 
+	try {
 		const kamelLocal: kamelCli.Kamel = kamelCli.create();
 		const rtnValue: string | void = await kamelLocal.invoke('version');
 		const strArray: string[] = rtnValue.split(' ');
@@ -149,7 +149,7 @@ async function checkKamelCLIVersion(): Promise<string | void> {
 		return detectedVersion;
 	} catch (error) {
 		console.error(error);
-	}	
+	}
 }
 
 export async function handleChangeRuntimeConfiguration() {
@@ -179,7 +179,7 @@ export async function handleChangeRuntimeConfiguration() {
 		}
 	} else if (extension.runtimeVersionSetting) {
 		if (runtimeSetting && runtimeSetting.trim().length > 0 && extension.runtimeVersionSetting.toLowerCase() !== runtimeSetting.toLowerCase()) {
-			const isAvailable : boolean = await testVersionAvailable(runtimeSetting);
+			const isAvailable: boolean = await testVersionAvailable(runtimeSetting);
 			if (isAvailable) {
 				const msg = `Setting for Apache Camel K runtime version has changed to ${runtimeSetting}. Please restart the workspace to refresh the Camel K cli.`;
 				setVersionAndTellUser(msg, runtimeSetting);
@@ -215,11 +215,11 @@ function toKamelOsString(platform: Platform | undefined): string | undefined {
 	return undefined;
 }
 
-export async function getDownloadURLForCamelKTag(camelKVersion : string, platform : Platform): Promise<string> {
+export async function getDownloadURLForCamelKTag(camelKVersion: string, platform: Platform): Promise<string> {
 	const platformStr = toKamelOsString(platform);
 	const tagName: string = isOldTagNaming(camelKVersion) ? camelKVersion : `v${camelKVersion}`;
 	const tagURL = `https://api.github.com/repos/apache/camel-k/releases/tags/${tagName}`;
-	const headers: string[][] = [];
+	const headers: [string, string][] = [];
 	const githubToken: string | undefined = process.env.VSCODE_CAMELK_GITHUB_TOKEN;
 	if (githubToken) {
 		headers.push(['Authorization', `token ${githubToken}`]);
@@ -229,7 +229,7 @@ export async function getDownloadURLForCamelKTag(camelKVersion : string, platfor
 		const latestJSON: any = await res.json();
 		const assetsJSON: any = await latestJSON.assets;
 		for (const asset of assetsJSON) {
-			const aUrl : string = asset.browser_download_url;
+			const aUrl: string = asset.browser_download_url;
 			if (aUrl.includes(`-${platformStr}-`)) {
 				return aUrl;
 			}
@@ -246,8 +246,8 @@ export async function getDownloadURLForCamelKTag(camelKVersion : string, platfor
  * @param {Promise} promise
  */
 async function timeout(time: number, promise: Promise<any>): Promise<any> {
-	return new Promise<any>( (resolve, reject) => {
-		setTimeout( () => {
+	return new Promise<any>((resolve, reject) => {
+		setTimeout(() => {
 			reject(new Error('Request timed out.'));
 		}, time);
 		promise.then(resolve, reject);
