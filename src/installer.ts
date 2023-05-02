@@ -67,7 +67,7 @@ async function downloadAndExtract(link: string, dlFilename: string, installFolde
 		});
 		extension.mainOutputChannel.appendLine(`Extracted ${dlFilename}.`);
 		return true;
-	} catch(error) {
+	} catch (error) {
 		console.log(error);
 		return false;
 	} finally {
@@ -81,11 +81,11 @@ async function download(link: string, dlFilename: string, installFolder: string)
 	updateStatusBarItem(myStatusBarItem, 'Downloading...', `Downloading ${dlFilename}...`);
 	try {
 		const response = await fetch(link);
-		fs.mkdirSync(installFolder, {recursive: true});
+		fs.mkdirSync(installFolder, { recursive: true });
 		await fs.promises.writeFile(path.join(installFolder, dlFilename), await response.buffer());
 		extension.mainOutputChannel.appendLine(`Downloaded ${dlFilename}.`);
 		return true;
-	} catch(error) {
+	} catch (error) {
 		console.log(error);
 		return false;
 	} finally {
@@ -147,8 +147,9 @@ export async function installKamel(context: vscode.ExtensionContext): Promise<Er
 		try {
 			kamelUrl = await versionUtils.getDownloadURLForCamelKTag(versionToUse, platform);
 		} catch (error) {
-			extension.shareMessageInMainOutputChannel(error);
-			throw new Error(error);
+			const errMessage = error instanceof Error ? error.message : String(error);
+			extension.shareMessageInMainOutputChannel(errMessage);
+			throw new Error(errMessage);
 		}
 	}
 
@@ -191,8 +192,8 @@ function getInstallFolder(tool: string, context: vscode.ExtensionContext): strin
 
 async function getStableKubectlVersion(): Promise<Errorable<string>> {
 	const response = await fetch('https://storage.googleapis.com/kubernetes-release/release/stable.txt');
-	if(response.status === 200) {
-		return {succeeded: true, result: await response.text()};
+	if (response.status === 200) {
+		return { succeeded: true, result: await response.text() };
 	} else {
 		return { succeeded: false, error: [`Failed to establish kubectl stable version: ${response.statusText}`] };
 	}
