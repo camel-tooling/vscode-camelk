@@ -46,16 +46,16 @@ jobs:
         run: npm run compile
 
       - name: Start minikube
-        uses: medyagh/setup-minikube@v0.0.11
+        uses: medyagh/setup-minikube@v0.0.13
         with:
-          minikube-version: 1.29.0
+          minikube-version: 1.30.1
           driver: docker
           addons: registry
 
       - name: Configure Kamel (ubuntu)
         if: matrix.os == 'ubuntu-latest'
         run: |
-          curl -Lo kamel.tar.gz https://github.com/apache/camel-k/releases/download/v1.11.0/camel-k-client-1.11.0-linux-64bit.tar.gz
+          curl -Lo kamel.tar.gz https://github.com/apache/camel-k/releases/download/v1.12.0/camel-k-client-1.12.0-linux-64bit.tar.gz
           tar -zxvf kamel.tar.gz
           chmod +x kamel
           sudo mv kamel /usr/local/bin/
