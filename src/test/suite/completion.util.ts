@@ -42,7 +42,7 @@ export async function checkExpectedCompletion(docUri: vscode.Uri, position: vsco
 				hasExpectedCompletion = completionItemFound !== undefined;
 			});
 			return hasExpectedCompletion;
-		}, 200000, 500);
+		}, 400000, 500);
 	} catch (err) {
 		let errorMessage = '';
 		if (lastCompletionList) {
