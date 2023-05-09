@@ -78,6 +78,7 @@ async function testCompletion(
 	await vscode.window.showTextDocument(doc);
 	if(refreshClasspath) {
 		await vscode.commands.executeCommand('camelk.classpath.refresh', docUri);
+		await vscode.commands.executeCommand('camelk.classpath.refresh', docUri);
 	}
 	let javaExtension: vscode.Extension<any> | undefined;
 	await waitUntil(() => {
