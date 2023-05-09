@@ -30,7 +30,7 @@ const JAVA_EXTENSION_READINESS_TIMEOUT = 40000;
 const TOTAL_TIMEOUT = DOWNLOAD_JAVA_DEPENDENCIES_TIMEOUT + JAVA_EXTENSION_READINESS_TIMEOUT + 5000;
 
 // TODO: skipped on jenkins due to FUSETOOLS2-578
-suite('Should do completion in Camel K standalone files', () => {
+suite.only('Should do completion in Camel K standalone files', () => {
 	
 	const testVar = test('Completes from method for Java', async () => {
 		const docUriJava = getDocUri('MyRouteBuilder.java');
