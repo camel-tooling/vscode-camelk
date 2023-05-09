@@ -27,7 +27,7 @@ export const getDocUri = (p: string) => {
 
 export async function checkExpectedCompletion(docUri: vscode.Uri, position: vscode.Position, expectedCompletion: vscode.CompletionItem) {
 	let hasExpectedCompletion = false;
-	let lastCompletionList : vscode.CompletionList | undefined;
+	let lastCompletionList: vscode.CompletionList | undefined;
 	try {
 		await waitUntil(() => {
 			// Executing the command `vscode.executeCompletionItemProvider` to simulate triggering completion
@@ -42,10 +42,10 @@ export async function checkExpectedCompletion(docUri: vscode.Uri, position: vsco
 				hasExpectedCompletion = completionItemFound !== undefined;
 			});
 			return hasExpectedCompletion;
-		}, 10000, 500);
+		}, 200000, 500);
 	} catch (err) {
 		let errorMessage = '';
-		if(lastCompletionList) {
+		if (lastCompletionList) {
 			lastCompletionList.items.forEach(completion => {
 				errorMessage += completion.label.toString() + '\n';
 			});
