@@ -58,7 +58,8 @@ suite('Check can deploy default examples', () => {
 		showInputBoxStub = sinon.stub(vscode.window, 'showInputBox');
 		showWorkspaceFolderPickStub = sinon.stub(vscode.window, 'showWorkspaceFolderPick');
 		// Workaround due to bug in shelljs: https://github.com/shelljs/shelljs/issues/704
-		shelljs.config.execPath = shelljs.which('node').toString();
+		const nodePath = shelljs.which('node');
+		shelljs.config.execPath = nodePath ? nodePath.toString() : '';
 		telemetrySpy = sinon.spy(await getTelemetryServiceInstance(), 'send');
 	});
 
