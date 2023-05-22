@@ -12,7 +12,7 @@
 
 import * as path from 'path';
 import * as Mocha from 'mocha';
-import * as glob from 'glob';
+import { globSync } from 'glob';
 
 // Linux: prevent a weird NPE when mocha on Linux requires the window size from the TTY
 // Since we are not running in a tty environment, we just implement the method statically
@@ -37,28 +37,24 @@ export function run(): Promise<void> {
 	console.log(`testsRoot = ${testsRoot}`);
 
 	return new Promise((c, e) => {
-		glob('**/**.test.js', { cwd: testsRoot }, (err, files) => {
-			if (err) {
-				return e(err);
-			}
+		const files = globSync('**/**.test.js', { cwd: testsRoot });
 
-			// Add files to the test suite
-			files.forEach(f => {
-				mocha.addFile(path.resolve(testsRoot, f));
-			});
-
-			try {
-				// Run the mocha test
-				mocha.run(failures => {
-					if (failures > 0) {
-						e(new Error(`${failures} tests failed.`));
-					} else {
-						c();
-					}
-				});
-			} catch (innererr) {
-				e(innererr);
-			}
+		// Add files to the test suite
+		files.forEach(f => {
+			mocha.addFile(path.resolve(testsRoot, f));
 		});
+
+		try {
+			// Run the mocha test
+			mocha.run(failures => {
+				if (failures > 0) {
+					e(new Error(`${failures} tests failed.`));
+				} else {
+					c();
+				}
+			});
+		} catch (innererr) {
+			e(innererr);
+		}
 	});
 }
