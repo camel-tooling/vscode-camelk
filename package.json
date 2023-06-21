@@ -370,7 +370,7 @@
 		"async-wait-until": "^2.0.12",
 		"chai": "^4.3.7",
 		"copyfiles": "^2.4.1",
-		"decache": "^4.6.1",
+		"decache": "^4.6.2",
 		"eslint": "^8.43.0",
 		"eslint-plugin-import": "^2.27.5",
 		"glob": "^10.2.7",
