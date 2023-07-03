@@ -6,7 +6,7 @@ After your Apache Camel K/Minikube environment is running and you have installed
 2. Download the [simple.groovy](https://github.com/apache/camel-k-examples/blob/main/generic-examples/languages/simple.groovy) file into your new **integrations** directory.
 3. Start a new workspace in your VS Code Integrated Development Environment (IDE).
 4. Add the folder from step 1 to your new workspace with **File > Add Folder to Workspace...**
-5. Right-click on `simple.groovy` in your directory and select **Start Apache Camel K Integration**.
+5. Right-click on `simple.groovy` in your directory and select **Deploy Integration with Apache Camel K**.
 6. Select `Dev Mode - Apache Camel K Integration in Dev Mode`.
 7. Watch as messages appear in the **Apache Camel K Output channel** as your integration begins to run.
 8. Open **simple.groovy** and update the message to say `This is my first Camel K Integration!`. Save the file with **File > Save** or **Ctrl+S**.

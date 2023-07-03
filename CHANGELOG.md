@@ -5,6 +5,8 @@ All notable changes to the "vscode-camelk" extension will be documented in this 
 ## 0.0.34
 
 - Update default runtime version to v1.12.1
+- Rename command `Start Apache Camel K Integration` to `Deploy Integration with Apache Camel K`
+- Provide Quick menu action on editor title to `Deploy Integration with Apache Camel K`
 
 ## 0.0.33
 

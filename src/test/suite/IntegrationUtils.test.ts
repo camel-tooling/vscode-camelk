@@ -44,7 +44,7 @@ suite("IntegrationUtil tests", function () {
 		sandbox.reset();
 	});
 
-	test("ensure listing Camel K task when accessing 'Start Apache Camel Integration'", async function () {
+	test("ensure listing Camel K task when accessing 'Deploy Integration with Apache Camel K'", async function () {
 		showQuickPickStub.onFirstCall().returns(IntegrationConstants.vscodeTasksIntegration);
 		showQuickPickStub.onSecondCall().returns('Test Camel K task');
 
@@ -57,7 +57,7 @@ suite("IntegrationUtil tests", function () {
 		sinon.assert.calledOnce(executeTaskStub);
 	});
 
-	test("ensure filtering out Camel K task with unrelated target file when accessing 'Start Apache Camel Integration'", async function () {
+	test("ensure filtering out Camel K task with unrelated target file when accessing 'Deploy Integration with Apache Camel K'", async function () {
 		showQuickPickStub.onFirstCall().returns(IntegrationConstants.vscodeTasksIntegration);
 		showQuickPickStub.onSecondCall().returns(undefined);
 
@@ -73,7 +73,7 @@ suite("IntegrationUtil tests", function () {
 		sinon.assert.notCalled(executeTaskStub);
 	});
 
-	test("ensure no action called on cancel of defined task from 'Start Apache Camel Integration'", async function () {
+	test("ensure no action called on cancel of defined task from 'Deploy Integration with Apache Camel K'", async function () {
 		showQuickPickStub.onFirstCall().returns(IntegrationConstants.vscodeTasksIntegration);
 		showQuickPickStub.onSecondCall().returns(undefined);
 

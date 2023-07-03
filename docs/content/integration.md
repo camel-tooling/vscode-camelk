@@ -29,9 +29,9 @@ You can start a new Camel K integration with or without additional options such 
     For more information about supported languages, see [Languages](https://camel.apache.org/camel-k/latest/languages/languages.html) in the Apache Camel K documentation.
     **Note**: `Start` CodeLens can also be used at the top of the editor of opened Camel K files.
 
-2. In the popup menu, select **Start Apache Camel K Integration**.
+2. In the popup menu, select **Deploy Integration with Apache Camel K**.
     A drop-down appears in the command palette with several choices:
-    <p align="center"><img src="../images/camelk-start-integration-dropdown.jpg" alt="Start Apache Camel K Integration - Dropdown options" class="zoom" width="50%"/></p>
+    <p align="center"><img src="../images/camelk-start-integration-dropdown.jpg" alt="Deploy Integration with Apache Camel K - Dropdown options" class="zoom" width="50%"/></p>
 
     - **Dev Mode - Apache Camel K Integration in Dev Mode**
       In “Dev Mode,” all output is directed to the Apache Camel K output channel, including startup tasks. In addition, when you update the integration file, the integration is re-deployed automatically for easier development and debugging. For more information about Dev Mode, see [Running in Dev Mode](https://camel.apache.org/camel-k/latest/running/dev-mode.html) in the Apache Camel K documentation.
@@ -41,7 +41,7 @@ You can start a new Camel K integration with or without additional options such 
 
     - **ConfigMap - Apache Camel K Integration with Kubernetes ConfigMap as Runtime Configuration**
       Select a ConfigMap from a list of the published ConfigMaps in your current Kubernetes system. For example:
-      <p align="center"><img src="../images/kubernetes-configmap-list.jpg" alt="Start Apache Camel K Integration - ConfigMap list" class="zoom" width="50%"/></p>
+      <p align="center"><img src="../images/kubernetes-configmap-list.jpg" alt="Deploy Integration with Apache Camel K - ConfigMap list" class="zoom" width="50%"/></p>
 
     - **Secret - Apache Camel K Integration with Kubernetes Secret as Runtime Configuration**
       Select a Secret from a list of the published Secrets in your current Kubernetes system. For more information about configuration with ConfigMaps or Secrets, see [Configuration via ConfigMap or Secret](https://camel.apache.org/camel-k/next/configuration/runtime-config.html) in the Apache Camel K documentation.

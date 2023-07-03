@@ -1,6 +1,6 @@
 ## Creating a new Camel K Integration task configuration with multiple parameters
 
-Though the simple "Start Apache Camel K Integration" menu works well for simple cases, you can use a Task for more complex integrations. When the Camel K integration requires more configuration, you can set that up using a Task.
+Though the simple "Deploy Integration with Apache Camel K" menu works well for simple cases, you can use a Task for more complex integrations. When the Camel K integration requires more configuration, you can set that up using a Task.
 
 To create a new Task, you have a few options.
 
@@ -43,6 +43,6 @@ Once you've created your Camel K task, you can use auto-complete to explore the 
 When you've defined your Task, you can use one of two options to execute it:
 
 - call command from palette `Tasks: Run Task`. You will see the command listed with the label that you provided previously.
-- with the `Start Apache Camel Integration` command, pick the option `Use a predefined Task - useful for multi-attributes deployment`
+- with the `Deploy Integration with Apache Camel K` command, pick the option `Use a predefined Task - useful for multi-attributes deployment`
 
 After running the camel-k `Task`, a terminal will open where you can see the command used and any execution result.
