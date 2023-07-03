@@ -120,7 +120,8 @@
 		"commands": [
 			{
 				"command": "camelk.startintegration",
-				"title": "Start Apache Camel K Integration"
+				"title": "Deploy Integration with Apache Camel K",
+				"icon": "$(rocket)"
 			},
 			{
 				"command": "camelk.integrations.refresh",
@@ -178,6 +179,13 @@
 			}
 		],
 		"menus": {
+			"editor/title": [
+				{
+					"command": "camelk.startintegration",
+					"when": "resourceExtname =~ /\\.(groovy|java|xml|js|kts|yaml)$/",
+					"group": "navigation"
+				}
+			],
 			"explorer/context": [
 				{
 					"command": "camelk.startintegration",
