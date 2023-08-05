@@ -367,7 +367,7 @@
 		"@types/mocha": "^10.0.1",
 		"@types/node": "^20.4.7",
 		"@types/node-fetch": "^2.6.4",
-		"@types/sinon": "^10.0.15",
+		"@types/sinon": "^10.0.16",
 		"@types/sinon-chai": "^3.2.9",
 		"@types/tar": "^6.1.5",
 		"@types/vscode": "^1.77.0",
