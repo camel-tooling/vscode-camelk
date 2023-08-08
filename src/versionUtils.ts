@@ -203,7 +203,7 @@ function setVersionAndTellUser(msg: string, newVersion: string) {
 	extension.setRuntimeVersionSetting(newVersion);
 }
 
-function toKamelOsString(platform: Platform | undefined): string | undefined {
+function toKamel1xOsString(platform: Platform | undefined): string | undefined {
 	switch (platform) {
 		case Platform.WINDOWS:
 			return 'windows';
@@ -215,8 +215,21 @@ function toKamelOsString(platform: Platform | undefined): string | undefined {
 	return undefined;
 }
 
+function toKamel2xOsString(platform: Platform | undefined): string | undefined {
+	switch (platform) {
+		case Platform.WINDOWS:
+			return 'windows';
+		case Platform.LINUX:
+			return 'linux';
+		case Platform.MACOS:
+			return 'darwin';
+	}
+	return undefined;
+}
+
 export async function getDownloadURLForCamelKTag(camelKVersion: string, platform: Platform): Promise<string> {
-	const platformStr = toKamelOsString(platform);
+	const platformStr1x = toKamel1xOsString(platform);
+	const platformStr2x = toKamel2xOsString(platform);
 	const tagName: string = isOldTagNaming(camelKVersion) ? camelKVersion : `v${camelKVersion}`;
 	const tagURL = `https://api.github.com/repos/apache/camel-k/releases/tags/${tagName}`;
 	const headers: [string, string][] = [];
@@ -230,7 +243,10 @@ export async function getDownloadURLForCamelKTag(camelKVersion: string, platform
 		const assetsJSON: any = await latestJSON.assets;
 		for (const asset of assetsJSON) {
 			const aUrl: string = asset.browser_download_url;
-			if (aUrl.includes(`-${platformStr}-`)) {
+			if (aUrl.includes('camel-k-client-1') && aUrl.includes(`-${platformStr1x}-`)) {
+				return aUrl;
+			}
+			if (aUrl.includes('camel-k-client-2') && aUrl.includes('amd64') && aUrl.includes(`-${platformStr2x}-`)) {
 				return aUrl;
 			}
 		}
