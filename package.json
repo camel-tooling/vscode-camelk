@@ -380,7 +380,7 @@
 		"copyfiles": "^2.4.1",
 		"decache": "^4.6.2",
 		"eslint": "^8.47.0",
-		"eslint-plugin-import": "^2.28.0",
+		"eslint-plugin-import": "^2.28.1",
 		"glob": "^10.3.3",
 		"mocha": "^10.2.0",
 		"mocha-jenkins-reporter": "^0.4.8",
