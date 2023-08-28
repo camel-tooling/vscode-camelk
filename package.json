@@ -164,11 +164,6 @@
 				}
 			},
 			{
-				"command": "camelk.integrations.createNewIntegrationFile",
-				"title": "Create a new Apache Camel K Integration file",
-				"enablement": "workspaceFolderCount != 0"
-			},
-			{
 				"command": "camelk.classpath.refresh",
 				"title": "Refresh local Java classpath for Camel K standalone file based on current editor. Available with kamel 1.4+.",
 				"enablement": "editorIsOpen && editorLangId == java"
@@ -393,6 +388,7 @@
 	},
 	"extensionDependencies": [
 		"ms-kubernetes-tools.vscode-kubernetes-tools",
+		"redhat.vscode-apache-camel",
 		"redhat.vscode-yaml",
 		"redhat.java",
 		"vscjava.vscode-java-debug"

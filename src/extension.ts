@@ -37,7 +37,6 @@ import { ChildProcess } from 'child_process';
 import { LogsPanel } from './logsWebview';
 import * as logUtils from './logUtils';
 import {checkKamelNeedsUpdate, version, handleChangeRuntimeConfiguration} from './versionUtils';
-import * as NewIntegrationFileCommand from './commands/NewIntegrationFileCommand';
 import { registerCamelKSchemaProvider } from './CamelKSchemaManager';
 import * as telemetry from './Telemetry';
 import { ClasspathRefreshCodeLensProvider } from './codelenses/ClasspathRefreshCodeLensProvider';
@@ -185,7 +184,6 @@ export async function activate(context: vscode.ExtensionContext) {
 			telemetry.sendCommandTracking(COMMAND_ID_OPEN_OPERATOR_LOG);
 		});
 
-		vscode.commands.registerCommand('camelk.integrations.createNewIntegrationFile', async (...args:any[]) => { await NewIntegrationFileCommand.create(args);});
 		vscode.commands.registerCommand('camelk.integrations.selectFirstNode', () => { selectFirstItemInTree();});
 		vscode.commands.registerCommand(COMMAND_ID_CLASSPATH_REFRESH, async (uri:vscode.Uri) => { await downloadSpecificCamelKJavaDependencies(context, uri, mainOutputChannel)});
 		const docSelector: vscode.DocumentSelector = {

@@ -21,6 +21,7 @@ async function main(): Promise<void> {
 		const [cliPath, ...args] = resolveCliArgsFromVSCodeExecutablePath(vscodeExecutablePath);
 		installExtraExtension(cliPath, 'ms-kubernetes-tools.vscode-kubernetes-tools', args);
 		installExtraExtension(cliPath, 'redhat.java', args);
+		installExtraExtension(cliPath, 'redhat.vscode-apache-camel', args);
 		installExtraExtension(cliPath, 'vscjava.vscode-java-debug', args);
 
 		await runTests({ vscodeExecutablePath, extensionDevelopmentPath, extensionTestsPath, launchArgs: [testWorkspace, '--disable-workspace-trust'] });

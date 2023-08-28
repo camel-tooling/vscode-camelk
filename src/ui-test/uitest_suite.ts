@@ -16,16 +16,17 @@
  */
 'use strict';
 
-import { DefaultWait } from 'vscode-uitests-tooling';
+import * as consts from './utils/uiTestConstants';
+import { DefaultWait, EditorView, InputBox, VSBrowser, WebDriver, Workbench } from 'vscode-uitests-tooling';
 import { LANGUAGES_WITH_FILENAME_EXTENSIONS } from '../IntegrationConstants';
 import { basicModeWithLogsTest } from './tests/basic_mode_test';
 import { camelkExtensionTest } from './tests/camelk_extension_test';
-import { createIntegrationFile } from './tests/create_integration_file_test';
 import { devModeTest } from './tests/dev_mode_test';
-import { DoNextTest } from './utils/utils';
+import { DoNextTest, prepareEmptyTestFolder } from './utils/utils';
 
 const doNextTest = new DoNextTest();
 const extensionActivated = new DoNextTest();
+let input: InputBox;
 
 describe('Tooling for Apache Camel K extension', function () {
 
@@ -36,6 +37,12 @@ describe('Tooling for Apache Camel K extension', function () {
         await DefaultWait.sleep(10000);
     });
 
+    before(async function() {
+        this.timeout(consts.TIMEOUT_60_SECONDS);
+        await VSBrowser.instance.openResources(consts.testDir);
+        await VSBrowser.instance.waitForWorkbench();
+    });
+
     describe(`Verify extension on Marketplace, check activation status`, async function () {
         camelkExtensionTest(extensionActivated);
     });
@@ -43,7 +50,9 @@ describe('Tooling for Apache Camel K extension', function () {
     if (extensionActivated) {
         LANGUAGES_WITH_FILENAME_EXTENSIONS.forEach(async function (extension: string, language: string) {
             describe(`${language} test pipeline`, async function () {
-                createIntegrationFile(extension, language, doNextTest);
+                this.timeout(consts.TIMEOUT_60_SECONDS);
+                await prepareEmptyTestFolder(consts.testDir);
+                await createIntegrationFile(extension, language);
                 devModeTest(extension, language, doNextTest);
                 basicModeWithLogsTest(extension, language, doNextTest);
             });
@@ -53,3 +62,23 @@ describe('Tooling for Apache Camel K extension', function () {
     }
 
 });
+
+async function createIntegrationFile(extension: string, language: string) {
+    await new Workbench().executeCommand(`Camel: Create Camel route with ${language} DSL`);
+
+	await VSBrowser.instance.driver.wait(async function () {
+				input = await InputBox.create();
+				return (await input.isDisplayed());
+			}, 30000);
+    const fileNameInput = consts.integrationFileName;
+	await input.setText('Simple');
+	await input.confirm();
+
+	await waitUntilEditorIsOpened(VSBrowser.instance.driver, fileNameInput, extension);
+}
+
+async function waitUntilEditorIsOpened(driver: WebDriver, fileNameInput: string, extension: string, timeout = 10000): Promise<void> {
+	await driver.wait(async function () {
+		return (await new EditorView().getOpenEditorTitles()).find(t => t.startsWith(fileNameInput) && t.endsWith(extension));
+	}, timeout);
+}

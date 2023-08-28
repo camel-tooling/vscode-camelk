@@ -35,7 +35,7 @@ For more information about Camel K, be sure to check out its <a href="https://ca
 
 ### Features
 
-- Create/Start/Stop an Apache Camel K Integration
+- Start/Stop an Apache Camel K Integration
 - Create a new Camel K Integration task configuration with multiple parameters
 - Publish new Kubernetes ConfigMaps or Secrets
 - View the status of published integrations

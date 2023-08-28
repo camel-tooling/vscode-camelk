@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 'use strict';
+import * as path from 'path';
 import * as sinon from 'sinon';
 import * as vscode from 'vscode';
 import * as IntegrationConstants from '../../../IntegrationConstants';
@@ -75,7 +76,7 @@ export async function startIntegrationWithBasicCheck(showQuickpickStub: sinon.Si
 			alreadyDeployedIntegration,
 			`It is expected that there is ${alreadyDeployedIntegration} Integration already deployed but the following are detected ${currentIntegrations.map(treeNode => treeNode.label).join(';')}`);
 	}
-	showQuickpickStub.onSecondCall().returns(IntegrationConstants.basicIntegration);
+	showQuickpickStub.onFirstCall().returns(IntegrationConstants.basicIntegration);
 	telemetrySpy.resetHistory();
 	await vscode.commands.executeCommand('camelk.startintegration');
 
@@ -111,25 +112,16 @@ export async function checkIntegrationDeployed(expectedDeployedIntegration :numb
 	}
 }
 
-export async function createFile(showQuickpickStub: sinon.SinonStub<any[], any>,
-	showWorkspaceFolderPickStub: sinon.SinonStub<any[], any>,
-	showInputBoxStub: sinon.SinonStub<any[], any>,
-	integrationName: string,
-	language: string): Promise<vscode.Uri | undefined> {
-	showQuickpickStub.onFirstCall().returns(language);
-	const workspaceFolder = (vscode.workspace.workspaceFolders as vscode.WorkspaceFolder[])[0];
-	showWorkspaceFolderPickStub.returns(workspaceFolder);
-	showInputBoxStub.onFirstCall().returns(integrationName);
-
-	await vscode.commands.executeCommand('camelk.integrations.createNewIntegrationFile');
-	const fileExtension = IntegrationConstants.LANGUAGES_WITH_FILENAME_EXTENSIONS.get(language);
+export async function openCamelFile(fileName: string): Promise<vscode.Uri | undefined> {
+	const workspaceFolder = vscode.workspace.workspaceFolders![0];
+	await vscode.commands.executeCommand('vscode.open', vscode.Uri.parse(path.join(workspaceFolder.uri.path, fileName)));
 
 	try {
 		await waitUntil(() => {
-			return vscode.window.activeTextEditor?.document.fileName.endsWith(`${integrationName}.${fileExtension}`);
+			return vscode.window.activeTextEditor?.document.fileName.endsWith(fileName);
 		}, EDITOR_OPENED_TIMEOUT, 1000);
 	} catch (error) {
-		assert.fail(`${integrationName}.${fileExtension} has not been opened in editor. Filename of currently opened editor: ${vscode.window.activeTextEditor?.document.fileName}`);
+		assert.fail(`${fileName} has not been opened in editor. Filename of currently opened editor: ${vscode.window.activeTextEditor?.document.fileName}`);
 	}
 	const uri = vscode.window.activeTextEditor?.document.uri;
 	

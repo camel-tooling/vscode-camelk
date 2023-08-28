@@ -17,7 +17,7 @@
 'use strict';
 
 import * as consts from '../utils/uiTestConstants';
-import { EditorView, SideBarView, VSBrowser, WebDriver } from 'vscode-extension-tester';
+import { ActivityBar, EditorView, SideBarView, VSBrowser, WebDriver } from 'vscode-extension-tester';
 import { devModeIntegration } from '../../IntegrationConstants';
 import {
 	cleanOutputView,
@@ -44,7 +44,10 @@ export function devModeTest(extension: string, language: string, doNextTest: DoN
 		const [initialCodeMessage, updatedCodeMessage, initialLogMessage, updatedLogMessage] = consts.prepareCodeLogMessages(extension, language);
 
 		before(async function () {
+			this.timeout(consts.TIMEOUT_30_SECONDS);
 			driver = VSBrowser.instance.driver;
+			const control = await new ActivityBar().getViewControl('Explorer');
+			await control?.openView();
 		});
 
 		after(async function () {
@@ -68,7 +71,7 @@ export function devModeTest(extension: string, language: string, doNextTest: DoN
 
 		it(`Select ${consts.startIntegration} in the popup menu`, async function () {
 			this.timeout(consts.TIMEOUT_15_SECONDS);
-			const item = await findSectionItem(consts.testFolder, `${consts.integrationFileName}.${extension}`);
+			const item = await findSectionItem(consts.testFolder, getFullFileName(extension));
 			await driver.wait(() => { return contextMenuItemClick(item, consts.startIntegration); });
 		});
 
@@ -101,7 +104,7 @@ export function devModeTest(extension: string, language: string, doNextTest: DoN
 
 		it(`Update Simple.${extension} with new message`, async function () {
 			this.timeout(consts.TIMEOUT_30_SECONDS);
-			await findSectionItem(consts.testFolder, `${consts.integrationFileName}.${extension}`);
+			await findSectionItem(consts.testFolder, getFullFileName(extension));
 			await driver.wait(() => { return updateFileText(initialCodeMessage, updatedCodeMessage); });
 		});
 
@@ -117,3 +120,8 @@ export function devModeTest(extension: string, language: string, doNextTest: DoN
 
 	});
 }
+
+function getFullFileName(extension: string) {
+	return extension === 'java' ? `${consts.integrationFileName}.${extension}` : `${consts.integrationFileName}.camel.${extension}`;
+}
+

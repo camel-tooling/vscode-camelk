@@ -40,9 +40,6 @@ export const choiceList = [
 export const LANGUAGES_WITH_FILENAME_EXTENSIONS = new Map([
 	['Java', 'java'],
 	['XML', 'xml'],
-	['Yaml', 'yaml'],
-	['Groovy', 'groovy'],
-	['JavaScript', 'js'],
-	['Kotlin', 'kts']]);
+	['Yaml', 'yaml']]);
 
 export const LANGUAGES = Array.from(LANGUAGES_WITH_FILENAME_EXTENSIONS.keys());
