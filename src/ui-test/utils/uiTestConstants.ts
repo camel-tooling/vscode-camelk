@@ -32,7 +32,7 @@ export const TIMEOUT_60_SECONDS = 60000;
 export const initialPodReadyMessage = '[1] Monitoring pod';
 export const updatedPodReadyMessage = '[2] Monitoring pod';
 export const testFolder = 'vscode-camelk-ui-test';
-export const testDir = path.resolve(`${projectPath}`, '..', 'test-resources', 'vscode-camelk-ui-test');
+export const testDir = path.resolve(`${projectPath}`, '..', 'test-resources', testFolder);
 export const integrationFileName = 'Simple';
 
 export const displayName = extensionMetadata.displayName;
@@ -42,7 +42,6 @@ export const extensionName = extensionMetadata.contributes.views.explorer[0].nam
 export const startIntegration = extensionMetadata.contributes.commands[0].title;
 export const integrationRemove = extensionMetadata.contributes.commands[2].title;
 export const followIntegrationLogs = extensionMetadata.contributes.commands[3].title;
-export const createNewIntegrationFile = extensionMetadata.contributes.commands[9].title;
 
 export function prepareCodeLogMessages(extension: string, language: string): [string, string, string, string] {
     let initialCodeMessage = `Hello Camel K from`;

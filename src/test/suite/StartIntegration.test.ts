@@ -17,7 +17,6 @@
 'use strict';
 
 import * as extension from '../../extension';
-import * as fs from 'fs';
 import * as sinon from 'sinon';
 import * as vscode from 'vscode';
 import * as config from '../../config';
@@ -29,10 +28,10 @@ import { getNamedListFromKubernetesThenParseList } from '../../kubectlutils';
 import * as shelljs from 'shelljs';
 import * as kamel from './../../kamel';
 import * as kubectl from './../../kubectl';
-import { LANGUAGES, LANGUAGES_WITH_FILENAME_EXTENSIONS } from '../../IntegrationConstants';
 import * as CamelKRunTaskDefinition from '../../task/CamelKRunTaskDefinition';
 import { getTelemetryServiceInstance } from '../../Telemetry';
-import { cleanDeployedIntegration, createFile, startIntegrationWithBasicCheck, checkTelemetry, checkIntegrationDeployed, checkIntegrationRunning } from './Utils/DeployTestUtil';
+import { cleanDeployedIntegration, startIntegrationWithBasicCheck, checkTelemetry, checkIntegrationDeployed, checkIntegrationRunning, openCamelFile } from './Utils/DeployTestUtil';
+import { LANGUAGES } from './../../IntegrationConstants';
 
 export const RUNNING_TIMEOUT = 720000;
 export const DEPLOYED_TIMEOUT = 10000;
@@ -49,14 +48,11 @@ suite('Check can deploy default examples', () => {
 	const EXTRA_OPERATOR_ID_FOR_TEST = 'operator-id-for-deployment-test';
 	let showQuickpickStub: sinon.SinonStub;
 	let showInputBoxStub: sinon.SinonStub;
-	let showWorkspaceFolderPickStub: sinon.SinonStub;
-	let createdFile: vscode.Uri | undefined;
 	let telemetrySpy: sinon.SinonSpy;
 
 	setup(async() => {
 		showQuickpickStub = sinon.stub(vscode.window, 'showQuickPick');
 		showInputBoxStub = sinon.stub(vscode.window, 'showInputBox');
-		showWorkspaceFolderPickStub = sinon.stub(vscode.window, 'showWorkspaceFolderPick');
 		// Workaround due to bug in shelljs: https://github.com/shelljs/shelljs/issues/704
 		const nodePath = shelljs.which('node');
 		shelljs.config.execPath = nodePath ? nodePath.toString() : '';
@@ -66,10 +62,6 @@ suite('Check can deploy default examples', () => {
 	teardown(async () => {
 		showQuickpickStub.restore();
 		showInputBoxStub.restore();
-		showWorkspaceFolderPickStub.restore();
-		if (createdFile && fs.existsSync(createdFile.fsPath)) {
-			fs.unlinkSync(createdFile.fsPath);
-		}
 		await cleanDeployedIntegration(telemetrySpy);
 		await config.addNamespaceToConfig(undefined);
 		await config.addOperatorIdToConfig(undefined);
@@ -80,10 +72,11 @@ suite('Check can deploy default examples', () => {
 		LANGUAGES.forEach(function(language) {
 			const testInProgress = test(`Check can deploy ${language} example`, async() => {
 				skipOnJenkins(testInProgress);
-				createdFile = await createFile(showQuickpickStub, showWorkspaceFolderPickStub, showInputBoxStub, `TestBasic${language}Deploy`, language);
+				const fileName = language === 'Java' ? `TestBasic${language}Deploy.java` : `TestBasic${language}Deploy.camel.${language.toLowerCase()}`
+				await openCamelFile(fileName);
 				
 				await startIntegrationWithBasicCheck(showQuickpickStub, telemetrySpy, 0);
-				const extensionFile = LANGUAGES_WITH_FILENAME_EXTENSIONS.get(language);
+				const extensionFile = IntegrationConstants.LANGUAGES_WITH_FILENAME_EXTENSIONS.get(language);
 				checkTelemetry(telemetrySpy, extensionFile ? extensionFile : "");
 			}).timeout(TOTAL_TIMEOUT);
 		});
@@ -91,12 +84,11 @@ suite('Check can deploy default examples', () => {
 	
 	const testDeploymentUsingDefaultTask = test('Check can deploy from a task', async() => {
 		skipOnJenkins(testDeploymentUsingDefaultTask);
-		const language = 'Java';
-		createdFile = await createFile(showQuickpickStub, showWorkspaceFolderPickStub, showInputBoxStub, `Test${language}DeployFromTask`, language);
+		await openCamelFile('TestJavaDeployFromTask.java');
 		await openCamelKTreeView();
 		assert.isEmpty(extension.camelKIntegrationsProvider.getTreeNodes());
-		showQuickpickStub.onSecondCall().returns(IntegrationConstants.vscodeTasksIntegration);
-		showQuickpickStub.onThirdCall().returns(CamelKRunTaskDefinition.NAME_OF_PROVIDED_TASK_TO_DEPLOY_IN_DEV_MODE_FROM_ACTIVE_EDITOR);
+		showQuickpickStub.onFirstCall().returns(IntegrationConstants.vscodeTasksIntegration);
+		showQuickpickStub.onSecondCall().returns(CamelKRunTaskDefinition.NAME_OF_PROVIDED_TASK_TO_DEPLOY_IN_DEV_MODE_FROM_ACTIVE_EDITOR);
 		
 		await vscode.commands.executeCommand('camelk.startintegration');
 
@@ -106,16 +98,15 @@ suite('Check can deploy default examples', () => {
 	
 	const testDeploymentWithConfigMap = test('Check can deploy with a configmap', async() => {
 		skipOnJenkins(testDeploymentWithConfigMap);
-		const language = 'Java';
-		createdFile = await createFile(showQuickpickStub, showWorkspaceFolderPickStub, showInputBoxStub, `Test${language}DeployWithConfigMap`, language);
+		await openCamelFile('TestJavaDeployWithConfigMap.java');
 		const kubectlPath = await kubectl.create().getPath();
 		const confimapName = 'my-configmap';
 		createConfigMap(kubectlPath, confimapName);
 		
 		await openCamelKTreeView();
 		assert.isEmpty(extension.camelKIntegrationsProvider.getTreeNodes());
-		showQuickpickStub.onSecondCall().returns(IntegrationConstants.configMapIntegration);
-		showQuickpickStub.onThirdCall().returns(confimapName);
+		showQuickpickStub.onFirstCall().returns(IntegrationConstants.configMapIntegration);
+		showQuickpickStub.onSecondCall().returns(confimapName);
 		
 		await vscode.commands.executeCommand('camelk.startintegration');
 
@@ -129,16 +120,15 @@ suite('Check can deploy default examples', () => {
 	
 	const testDeploymentWithSecret = test('Check can deploy with a secret', async() => {
 		skipOnJenkins(testDeploymentWithSecret);
-		const language = 'Java';
-		createdFile = await createFile(showQuickpickStub, showWorkspaceFolderPickStub, showInputBoxStub, `Test${language}DeployWithSecret`, language);
+		await openCamelFile('TestJavaDeployWithSecret.java');
 		const kubectlPath = await kubectl.create().getPath();
 		const secretName = 'my-secret';
 		createSecret(kubectlPath, secretName);
 		
 		await openCamelKTreeView();
 		assert.isEmpty(extension.camelKIntegrationsProvider.getTreeNodes());
-		showQuickpickStub.onSecondCall().returns(IntegrationConstants.secretIntegration);
-		showQuickpickStub.onThirdCall().returns(secretName);
+		showQuickpickStub.onFirstCall().returns(IntegrationConstants.secretIntegration);
+		showQuickpickStub.onSecondCall().returns(secretName);
 		
 		await vscode.commands.executeCommand('camelk.startintegration');
 
@@ -150,15 +140,14 @@ suite('Check can deploy default examples', () => {
 	
 	const testDeploymentWithproperty = test('Check can deploy with a property', async() => {
 		skipOnJenkins(testDeploymentWithproperty);
-		const language = 'Java';
-		createdFile = await createFile(showQuickpickStub, showWorkspaceFolderPickStub, showInputBoxStub, `Test${language}DeployWithProperty`, language);
+		await openCamelFile('TestJavaDeployWithProperty.java');
 		
 		await openCamelKTreeView();
 		assert.isEmpty(extension.camelKIntegrationsProvider.getTreeNodes());
-		showQuickpickStub.onSecondCall().returns(IntegrationConstants.propertyIntegration);
-		showInputBoxStub.onSecondCall().returns('propertyKey');
-		showInputBoxStub.onThirdCall().returns('my Value');
-		showQuickpickStub.onThirdCall().returns("No");
+		showQuickpickStub.onFirstCall().returns(IntegrationConstants.propertyIntegration);
+		showInputBoxStub.onFirstCall().returns('propertyKey');
+		showInputBoxStub.onSecondCall().returns('my Value');
+		showQuickpickStub.onSecondCall().returns("No");
 		
 		await vscode.commands.executeCommand('camelk.startintegration');
 
@@ -172,7 +161,7 @@ suite('Check can deploy default examples', () => {
 	const testSpecificNamespace = test('Check can deploy on specific namespace', async () => {
 		skipOnJenkins(testSpecificNamespace);
 		await prepareNewNamespaceWithCamelK(EXTRA_NAMESPACE_FOR_TEST, EXTRA_OPERATOR_ID_FOR_TEST);
-		createdFile = await createFile(showQuickpickStub, showWorkspaceFolderPickStub, showInputBoxStub, 'TestDeployInSpecificNamespace', 'Java');
+		await openCamelFile('TestDeployInSpecificNamespace.java');
 		await config.addNamespaceToConfig(EXTRA_NAMESPACE_FOR_TEST);
 		await config.addOperatorIdToConfig(EXTRA_OPERATOR_ID_FOR_TEST);
 

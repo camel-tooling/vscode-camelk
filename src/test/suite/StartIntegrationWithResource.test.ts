@@ -17,7 +17,6 @@
 'use strict';
 
 import * as extension from '../../extension';
-import * as fs from 'fs';
 import * as sinon from 'sinon';
 import * as vscode from 'vscode';
 import * as config from '../../config';
@@ -27,7 +26,7 @@ import { assert, expect } from 'chai';
 import * as shelljs from 'shelljs';
 import * as kamel from '../../kamel';
 import { getTelemetryServiceInstance } from '../../Telemetry';
-import { cleanDeployedIntegration, createFile, checkIntegrationDeployed, checkIntegrationRunning } from './Utils/DeployTestUtil';
+import { cleanDeployedIntegration, checkIntegrationDeployed, checkIntegrationRunning, openCamelFile } from './Utils/DeployTestUtil';
 import * as tmp from 'tmp';
 
 export const RUNNING_TIMEOUT = 720000;
@@ -40,16 +39,11 @@ const TOTAL_TIMEOUT: number = RUNNING_TIMEOUT + DEPLOYED_TIMEOUT + EDITOR_OPENED
 suite('Check can deploy with resource', () => {
 	
 	let showQuickpickStub: sinon.SinonStub;
-	let showInputBoxStub: sinon.SinonStub;
-	let showWorkspaceFolderPickStub: sinon.SinonStub;
 	let showOpenDialogStub: sinon.SinonStub;
-	let createdFile: vscode.Uri | undefined;
 	let telemetrySpy: sinon.SinonSpy;
 
 	setup(async() => {
 		showQuickpickStub = sinon.stub(vscode.window, 'showQuickPick');
-		showInputBoxStub = sinon.stub(vscode.window, 'showInputBox');
-		showWorkspaceFolderPickStub = sinon.stub(vscode.window, 'showWorkspaceFolderPick');
 		showOpenDialogStub = sinon.stub(vscode.window, 'showOpenDialog');
 		// Workaround due to bug in shelljs: https://github.com/shelljs/shelljs/issues/704
 		const nodePath = shelljs.which('node');
@@ -59,12 +53,7 @@ suite('Check can deploy with resource', () => {
 
 	teardown(async () => {
 		showQuickpickStub.restore();
-		showInputBoxStub.restore();
-		showWorkspaceFolderPickStub.restore();
 		showOpenDialogStub.restore();
-		if (createdFile && fs.existsSync(createdFile.fsPath)) {
-			fs.unlinkSync(createdFile.fsPath);
-		}
 		await cleanDeployedIntegration(telemetrySpy);
 		await config.addNamespaceToConfig(undefined);
 		await config.addOperatorIdToConfig(undefined);
@@ -75,7 +64,7 @@ suite('Check can deploy with resource', () => {
 	const testDeploymentWithResource = test('Check can deploy with a single resource', async() => {
 		skipOnJenkins(testDeploymentWithResource);
 		const resource = tmp.fileSync({ prefix: "simple" });
-		createdFile = await testDeployWithResources([resource], showQuickpickStub, showWorkspaceFolderPickStub, showInputBoxStub, showOpenDialogStub);
+		await testDeployWithResources([resource], showQuickpickStub, showOpenDialogStub);
 	}).timeout(TOTAL_TIMEOUT);
 	
 	const testDeploymentWithResourceInPathWithSpace = test('Check can deploy with a single resource with space in path', async() => {
@@ -83,26 +72,26 @@ suite('Check can deploy with resource', () => {
 		const dir = tmp.dirSync({prefix: "with a space"}).name;
 		const resource = tmp.fileSync({ dir: dir, prefix: "simpleWithParentFolderHavingSpace" });
 		expect(resource.name).includes(' ');
-		createdFile = await testDeployWithResources([resource], showQuickpickStub, showWorkspaceFolderPickStub, showInputBoxStub, showOpenDialogStub);
+		await testDeployWithResources([resource], showQuickpickStub, showOpenDialogStub);
 	}).timeout(TOTAL_TIMEOUT);
 	
 	const testDeploymentWithSeveralResources = test('Check can deploy with several resources', async() => {
 		skipOnJenkins(testDeploymentWithSeveralResources);
 		const resource1 = tmp.fileSync({ prefix: "simple1" });
 		const resource2 = tmp.fileSync({ prefix: "simple2" });
-		createdFile = await testDeployWithResources([resource1, resource2], showQuickpickStub, showWorkspaceFolderPickStub, showInputBoxStub, showOpenDialogStub);
+		await testDeployWithResources([resource1, resource2], showQuickpickStub, showOpenDialogStub);
 	}).timeout(TOTAL_TIMEOUT);
 	
 });
 
-async function testDeployWithResources(resources: tmp.FileResult[], showQuickpickStub: sinon.SinonStub<any[], any>, showWorkspaceFolderPickStub: sinon.SinonStub<any[], any>, showInputBoxStub: sinon.SinonStub<any[], any>, showOpenDialogStub: sinon.SinonStub<any[], any>) {
+async function testDeployWithResources(resources: tmp.FileResult[], showQuickpickStub: sinon.SinonStub<any[], any>, showOpenDialogStub: sinon.SinonStub<any[], any>) {
 	const uriOfResources = resources.map(resource => {return vscode.Uri.file(resource.name);});
-	const language = 'Java';
-	const createdFile: vscode.Uri | undefined = await createFile(showQuickpickStub, showWorkspaceFolderPickStub, showInputBoxStub, `Test${language}DeployWithResources`, language);
+	const createdFile: vscode.Uri | undefined = await openCamelFile('TestJavaDeployWithResources.java');
 
 	await openCamelKTreeView();
 	assert.isEmpty(extension.camelKIntegrationsProvider.getTreeNodes());
-	showQuickpickStub.onSecondCall().returns(IntegrationConstants.resourceIntegration);
+	showQuickpickStub.reset();
+	showQuickpickStub.onFirstCall().returns(IntegrationConstants.resourceIntegration);
 	showOpenDialogStub.onFirstCall().returns(uriOfResources);
 
 	await vscode.commands.executeCommand('camelk.startintegration');

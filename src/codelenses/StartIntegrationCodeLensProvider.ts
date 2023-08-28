@@ -32,6 +32,7 @@ export class StartIntegrationCodeLensProvider implements vscode.CodeLensProvider
 		const fileName = document.fileName;
 		const fulltext = document.getText();
 		if (fileName.includes('.camelk.')
+			|| fileName.includes('.camel.')
 			|| fulltext.includes(CAMELK_MODELINE_PREFIX_JAVA_LIKE)
 			|| fulltext.includes(CAMELK_MODELINE_PREFIX_YAML_LIKE)
 			|| fulltext.includes(CAMELK_MODELINE_PREFIX_XML_LIKE)) {

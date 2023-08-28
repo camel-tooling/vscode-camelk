@@ -1,11 +1,9 @@
 ## Creating a new Camel K Integration file
 
-1. From the command palette, choose `Create a new Apache Camel K Integration file`
-2. Choose the language to use.
-3. Choose the workspace folder
-4. Provide a name for the new file
+1. From the command palette, choose `Camel: Create a Camel route using XXX DSL`
+2. Provide a name for the new file
 
-The new Apache Camel K Integration file is created at the root of the chosen workspace folder.
+The new Apache Camel K Integration file is created at the root of the workspace folder.
 
 ## Stopping an Apache Camel K integration
 

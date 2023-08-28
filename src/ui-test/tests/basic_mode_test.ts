@@ -18,7 +18,6 @@
 
 import * as consts from '../utils/uiTestConstants';
 import { EditorView, SideBarView, VSBrowser, WebDriver } from 'vscode-extension-tester';
-import { prepareEmptyTestFolder } from '../utils/utils';
 import { basicIntegration } from '../../IntegrationConstants';
 import {
     cleanOutputView,
@@ -32,7 +31,8 @@ import {
     textDoesNotContainAsci,
     inputBoxQuickPickOrSet,
     findSectionItem,
-    DoNextTest
+    DoNextTest,
+    prepareEmptyTestFolder
 } from '../utils/utils';
 import { assert } from 'chai';
 

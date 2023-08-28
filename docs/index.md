@@ -25,7 +25,7 @@ This extension provides features such as create, start, stop and Apache Camel K 
 
 ## Features
 
-- [Create/Start/Stop an Apache Camel K Integration](./content/integration.md)
+- [Start/Stop an Apache Camel K Integration](./content/integration.md)
 - [Create a new Camel K Integration task configuration with multiple parameters](./content/multiple-parameters.md)
 - [Publish new Kubernetes ConfigMaps or Secrets](./content/configmaps-secrets.md)
 - [View the status of published integrations](./content/logs.md#viewing-the-status-of-published-integrations)
