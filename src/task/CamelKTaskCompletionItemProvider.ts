@@ -18,17 +18,16 @@
 
 import * as jsonparser from 'jsonc-parser';
 import * as vscode from 'vscode';
-import { TraitManager } from './TraitManager';
 
 export class CamelKTaskCompletionItemProvider implements vscode.CompletionItemProvider {
 
 	provideCompletionItems(document: vscode.TextDocument, position: vscode.Position, token: vscode.CancellationToken, context: vscode.CompletionContext): vscode.ProviderResult<vscode.CompletionItem[] | vscode.CompletionList> {
-		return this.provideCompletionItemsForText(document.getText(), document.offsetAt(position), position);
+		return this.provideCompletionItemsForText(document.getText(), document.offsetAt(position));
 	}
 
-	public async provideCompletionItemsForText(text: string, offset: number, position: vscode.Position): Promise<vscode.CompletionItem[]> {
+	public async provideCompletionItemsForText(text: string, offset: number): Promise<vscode.CompletionItem[]> {
 		const globalNode = jsonparser.parseTree(text);
-		let completions: vscode.CompletionItem[] = [];
+		const completions: vscode.CompletionItem[] = [];
 		if(globalNode !== undefined) {
 			const node = jsonparser.findNodeAtOffset(globalNode, offset, false);
 			if (node) {
@@ -45,33 +44,10 @@ export class CamelKTaskCompletionItemProvider implements vscode.CompletionItemPr
 }`
 					};
 					completions.push(completionBasic);
-				} else if (this.isInTraitsArray(node)) {
-					const traitCompletions: vscode.CompletionItem[] = await TraitManager.provideAvailableTraits();
-					completions = completions.concat(traitCompletions);
-				} else if (this.isInTraitsArrayMember(node)) {
-					const value = node.value as string;
-					const traitpropertyCompletions: vscode.CompletionItem[] = await TraitManager.provideTraitProperties(value.substr(0, value.length - 1), position);
-					completions = completions.concat(traitpropertyCompletions);
 				}
 			}
 		}
 		return Promise.resolve(completions);
-	}
-
-	private isInTraitsArray(node: jsonparser.Node) {
-		return this.isInArray(node)
-			&& this.isSiblingTraitTasks(node);
-	}
-	
-	private isInTraitsArrayMember(node: jsonparser.Node) {
-		const parent = node.parent;
-		if (parent && this.isInTraitsArray(parent) && node.type === "string") {
-			const value = node.value as string;
-			if (value && value.endsWith('.')) {
-				return true;
-			}
-		}
-		return false;
 	}
 
 	private isParentHasStringPropertyOfType(node: jsonparser.Node, type: string) {
@@ -83,10 +59,6 @@ export class CamelKTaskCompletionItemProvider implements vscode.CompletionItemPr
 			return nodeTasks !== undefined;
 		}
 		return false;
-	}
-
-	private isSiblingTraitTasks(node: jsonparser.Node) {
-		return this.isParentHasStringPropertyOfType(node, 'traits');
 	}
 
 	private isInTasksArray(node: jsonparser.Node) {
