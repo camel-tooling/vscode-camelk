@@ -76,7 +76,7 @@ import { TelemetryEvent } from '@redhat-developer/vscode-redhat-telemetry/lib';
 				const currentFile = await getCurrentFileSelectionPath();
 
 				// validate that the file is in fact a file we might be interested in
-				const regex = /\.(groovy|java|xml|js|kts|yaml)$/g;
+				const regex = /\.(groovy|java|xml|js|kts|yaml|yml)$/g;
 				if (currentFile.fsPath.match(regex)) {
 					context = currentFile;
 				}

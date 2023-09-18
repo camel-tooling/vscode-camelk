@@ -4,6 +4,7 @@ All notable changes to the "vscode-camelk" extension will be documented in this 
 
 ## 0.0.35
 
+- Support `*.yml` Camel files (and not only `*.yaml`)
 - Remove `Create Integration file` command, in favor of `Camel: Create Camel Route in xxx DSL` provided by VS Code Language Support for Apache Camel. It allows also to get rid of internal dependency to `kamel init` which is removed from kamel 2.x.
 - Remove completion for traits in VS Code tasks.json. This will be now provided by the VS Code Language Support for Camel extension. It allows also to get rid of internal dependency to `kamel help trait` which is removed from kamel 2.x.
 

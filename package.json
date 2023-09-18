@@ -177,14 +177,14 @@
 			"editor/title": [
 				{
 					"command": "camelk.startintegration",
-					"when": "resourceExtname =~ /\\.(groovy|java|xml|js|kts|yaml)$/",
+					"when": "resourceExtname =~ /\\.(groovy|java|xml|js|kts|yaml|yml)$/",
 					"group": "navigation"
 				}
 			],
 			"explorer/context": [
 				{
 					"command": "camelk.startintegration",
-					"when": "resourceExtname =~ /\\.(groovy|java|xml|js|kts|yaml)$/",
+					"when": "resourceExtname =~ /\\.(groovy|java|xml|js|kts|yaml|yml)$/",
 					"group": "camelk.group"
 				},
 				{
