@@ -57,7 +57,7 @@ jobs:
       - name: Start minikube
         uses: medyagh/setup-minikube@v0.0.14
         with:
-          minikube-version: 1.31.1
+          minikube-version: 1.31.2
           driver: docker
           addons: registry
 
