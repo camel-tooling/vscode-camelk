@@ -78,7 +78,7 @@ function requestYamlSchemaUriCallback(resource: string): string | undefined {
 		return document.uri.toString() === resource;
 	});
 	if (textDocument
-		&& resource.endsWith('.yaml')
+		&& (resource.endsWith('.yaml') || resource.endsWith('.yml'))
 		&& textDocument.getText().startsWith(CAMELK_MODELINE_PREFIX)) {
 			return CAMELK_SCHEMA_URI_PREFIX + resource;
 		}
