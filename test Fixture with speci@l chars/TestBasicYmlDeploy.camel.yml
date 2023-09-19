@@ -1,0 +1,9 @@
+- route:
+    id: camelroute15
+    from:
+      uri: timer:yaml
+      steps:
+      - set-body:
+          simple: "Hello Camel from ${routeId}"
+      - log:
+          message: "${body}"

@@ -42,4 +42,12 @@ export const LANGUAGES_WITH_FILENAME_EXTENSIONS = new Map([
 	['XML', 'xml'],
 	['Yaml', 'yaml']]);
 
+export const EXTENDED_LANGUAGES_WITH_FILENAME_EXTENSIONS = new Map([
+		['Java', 'java'],
+		['XML', 'xml'],
+		['Yaml', 'yaml'],
+		['Yml', 'yml']]);
+
 export const LANGUAGES = Array.from(LANGUAGES_WITH_FILENAME_EXTENSIONS.keys());
+
+export const EXTENDED_LANGUAGES = Array.from(EXTENDED_LANGUAGES_WITH_FILENAME_EXTENSIONS.keys());
