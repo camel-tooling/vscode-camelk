@@ -31,7 +31,6 @@ import * as kubectl from './../../kubectl';
 import * as CamelKRunTaskDefinition from '../../task/CamelKRunTaskDefinition';
 import { getTelemetryServiceInstance } from '../../Telemetry';
 import { cleanDeployedIntegration, startIntegrationWithBasicCheck, checkTelemetry, checkIntegrationDeployed, checkIntegrationRunning, openCamelFile } from './Utils/DeployTestUtil';
-import { LANGUAGES } from './../../IntegrationConstants';
 
 export const RUNNING_TIMEOUT = 720000;
 export const DEPLOYED_TIMEOUT = 10000;
@@ -69,14 +68,14 @@ suite('Check can deploy default examples', () => {
 	});
 	
 	suite('Check basic deployments for each languages', function() {
-		LANGUAGES.forEach(function(language) {
+		IntegrationConstants.EXTENDED_LANGUAGES.forEach(function(language) {
 			const testInProgress = test(`Check can deploy ${language} example`, async() => {
 				skipOnJenkins(testInProgress);
 				const fileName = language === 'Java' ? `TestBasic${language}Deploy.java` : `TestBasic${language}Deploy.camel.${language.toLowerCase()}`
 				await openCamelFile(fileName);
 				
 				await startIntegrationWithBasicCheck(showQuickpickStub, telemetrySpy, 0);
-				const extensionFile = IntegrationConstants.LANGUAGES_WITH_FILENAME_EXTENSIONS.get(language);
+				const extensionFile = IntegrationConstants.EXTENDED_LANGUAGES_WITH_FILENAME_EXTENSIONS.get(language);
 				checkTelemetry(telemetrySpy, extensionFile ? extensionFile : "");
 			}).timeout(TOTAL_TIMEOUT);
 		});
