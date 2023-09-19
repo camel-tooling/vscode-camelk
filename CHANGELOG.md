@@ -2,6 +2,8 @@
 
 All notable changes to the "vscode-camelk" extension will be documented in this file.
 
+## 0.0.36
+
 ## 0.0.35
 
 - Support `*.yml` Camel files (and not only `*.yaml`)
