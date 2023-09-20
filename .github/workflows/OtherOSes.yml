@@ -1,4 +1,4 @@
-name: Main CI
+name: Other OSes CI
 
 on:
   push:
@@ -15,7 +15,7 @@ jobs:
   main:
     strategy:
       matrix:
-        os: [windows-latest, masos-latest]
+        os: [windows-latest, macos-latest]
         version: [max] # [x.x.x | latest | max]
         type: [stable] # [stable | insider]
       fail-fast: false
@@ -51,67 +51,25 @@ jobs:
           java-version: 17
           distribution: "temurin"
 
-      - name: Install JBang
-        run: |
-          curl -Ls https://sh.jbang.dev | bash -s - app setup
-          echo "$HOME/.jbang/bin" >> $GITHUB_PATH
-
-      - name: Start minikube
-        uses: medyagh/setup-minikube@v0.0.14
-        with:
-          minikube-version: 1.31.1
-          driver: docker
-          addons: registry
-
-      - name: Configure Kamel (ubuntu)
-        if: matrix.os == 'ubuntu-latest'
-        run: |
-          curl -Lo kamel.tar.gz https://github.com/apache/camel-k/releases/download/v1.12.1/camel-k-client-1.12.1-linux-64bit.tar.gz
-          tar -zxvf kamel.tar.gz
-          chmod +x kamel
-          sudo mv kamel /usr/local/bin/
-          kamel install
-          sudo rm /usr/local/bin/kamel
-          sudo rm /usr/local/bin/kubectl
-
       - name: npm-ci
         run: npm ci
 
       - name: npm-vscode:prepublish
         run: npm run vscode:prepublish
 
-      - name: test (ubuntu)
-        if: matrix.os == 'ubuntu-latest'
-        run: xvfb-run --auto-servernum npm test
-
-      - name: ui test (Ubuntu)
-        id: uiTest_Ubuntu
-        if: matrix.os == 'ubuntu-latest'
-        run: xvfb-run --auto-servernum npm run ui-test
+      - name: test
+        id: test
+        run: npm test
 
       - name: vsce-package
         run: vsce package
 
-      - name: Store VS Code Logs (Ubuntu)
+      - name: Store VS Code Logs
         uses: actions/upload-artifact@v3
-        if: failure() && matrix.os == 'ubuntu-latest'
+        if: failure()
         with:
           name: ${{ matrix.os }}-${{ matrix.version }}-vscode-logs
           path: ~/.config/Code/logs/*
-
-      - name: Store UI test log
-        uses: actions/upload-artifact@v3
-        if: failure() && (steps.uiTest_Ubuntu.outcome == 'failure')
-        with:
-          name: ${{ matrix.os }}-${{ matrix.version }}-ui-test-logs
-          path: test-resources/settings/logs/*
-
-      - name: Store UI Test Screenshots
-        uses: actions/upload-artifact@v3
-        if: failure() && (steps.uiTest_Ubuntu.outcome == 'failure')
-        with:
-          name: ${{ matrix.os }}-${{ matrix.version }}-ui-test-screenshots
-          path: test-resources/screenshots/*.png
 
   check:
     if: always()

@@ -20,6 +20,7 @@ import * as assert from 'assert';
 import * as config from '../../config';
 import * as installer from '../../installer';
 import * as kamel from '../../kamel';
+import * as os from 'os';
 import { expect } from 'chai';
 import path = require('path');
 
@@ -51,7 +52,7 @@ suite("ensure kamel and kubectl are available", function() {
 	});
 	
 	test('check kamel can be on path with space', async function() {
-		const kamelWithSpacePath = path.resolve(__dirname, '../../../../test Fixture with speci@l chars/binaries for test with space/kamel');
+		const kamelWithSpacePath = path.resolve(__dirname, `../../../../test Fixture with speci@l chars/binaries for test with space/${os.platform()}/kamel${os.platform()=== 'win32' ? '.exe' : ''}`);
 		await config.addKamelPathToConfig(kamelWithSpacePath);
 		const kamelExe = kamel.create();
 		const kamelExePath = await kamelExe.getPath();

@@ -65,6 +65,7 @@ suite('Check can debug default Java example', () => {
 	
 	const testUsingTasks = test(`Check can debug Java example using VS Code tasks`, async() => {
 		Utils.skipOnJenkins(testUsingTasks);
+		Utils.skipIfNoCamelKInstance(testUsingTasks);
 		await openAndDeployIntegration(showQuickpickStub, telemetrySpy, 'Task', 0);
 		const debugActivationTask = await createCamelKDebugTask();
 		
@@ -76,6 +77,7 @@ suite('Check can debug default Java example', () => {
 	
 	const testUsingContextualMenu = test(`Check can debug Java example using contextual menu in Integration view`, async() => {
 		Utils.skipOnJenkins(testUsingContextualMenu);
+		Utils.skipIfNoCamelKInstance(testUsingContextualMenu);
 		await openAndDeployIntegration(showQuickpickStub, telemetrySpy, 'ContextualMenu', 0);
 		
 		await vscode.commands.executeCommand(extension.COMMAND_ID_START_JAVA_DEBUG, (await retrieveDeployedTreeNodes())[0]);
@@ -85,6 +87,7 @@ suite('Check can debug default Java example', () => {
 	
 	const testTwoDebugSessionUsingContextualMenu = test(`Check can debug Java 2 examples using contextual menu in Integration view`, async() => {
 		Utils.skipOnJenkins(testTwoDebugSessionUsingContextualMenu);
+		Utils.skipIfNoCamelKInstance(testTwoDebugSessionUsingContextualMenu);
 		await openAndDeployIntegration(showQuickpickStub, telemetrySpy, 'First', 0);
 		await vscode.commands.executeCommand('workbench.action.closeActiveEditor');
 		await openAndDeployIntegration(showQuickpickStub, telemetrySpy, 'Second', 1);

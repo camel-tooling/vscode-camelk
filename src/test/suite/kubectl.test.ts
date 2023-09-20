@@ -20,6 +20,7 @@ import * as assert from 'assert';
 import * as config from '../../config';
 import * as kubectl from '../../kubectl';
 import * as kubectlutils from '../../kubectlutils';
+import * as os from 'os';
 import { expect } from 'chai';
 import path = require('path');
 
@@ -50,7 +51,7 @@ suite("ensure kubectl are available", function() {
 	});
 	
 	test('check kubectl can be on path with space', async function() {
-		const kubectlWithSpacePath = path.resolve(__dirname, '../../../../test Fixture with speci@l chars/binaries for test with space/kubectl');
+		const kubectlWithSpacePath = path.resolve(__dirname, `../../../../test Fixture with speci@l chars/binaries for test with space/${os.platform()}/kubectl${os.platform()=== 'win32' ? '.exe' : ''}`);
 		await config.addKubectlPathToConfig(kubectlWithSpacePath);
 		const kubectlExe = kubectl.create();
 		const kubectlExePath = await kubectlExe.getPath();

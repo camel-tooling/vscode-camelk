@@ -61,3 +61,9 @@ export function skipOnJenkins(testVar: Mocha.Test) {
 		testVar.skip();
 	}
 }
+
+export function skipIfNoCamelKInstance(testVar: Mocha.Test) {
+	if (os.platform() === 'win32'  || os.platform() === 'darwin') {
+		testVar.skip();
+	}
+}

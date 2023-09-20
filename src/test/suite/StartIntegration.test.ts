@@ -21,7 +21,7 @@ import * as sinon from 'sinon';
 import * as vscode from 'vscode';
 import * as config from '../../config';
 import * as IntegrationConstants from './../../IntegrationConstants';
-import { skipOnJenkins, openCamelKTreeView } from "./Utils";
+import { skipOnJenkins, openCamelKTreeView, skipIfNoCamelKInstance } from "./Utils";
 import { assert, expect } from 'chai';
 import { waitUntil } from 'async-wait-until';
 import { getNamedListFromKubernetesThenParseList } from '../../kubectlutils';
@@ -71,6 +71,7 @@ suite('Check can deploy default examples', () => {
 		IntegrationConstants.EXTENDED_LANGUAGES.forEach(function(language) {
 			const testInProgress = test(`Check can deploy ${language} example`, async() => {
 				skipOnJenkins(testInProgress);
+				skipIfNoCamelKInstance(testInProgress);
 				const fileName = language === 'Java' ? `TestBasic${language}Deploy.java` : `TestBasic${language}Deploy.camel.${language.toLowerCase()}`
 				await openCamelFile(fileName);
 				
@@ -83,6 +84,7 @@ suite('Check can deploy default examples', () => {
 	
 	const testDeploymentUsingDefaultTask = test('Check can deploy from a task', async() => {
 		skipOnJenkins(testDeploymentUsingDefaultTask);
+		skipIfNoCamelKInstance(testDeploymentUsingDefaultTask);
 		await openCamelFile('TestJavaDeployFromTask.java');
 		await openCamelKTreeView();
 		assert.isEmpty(extension.camelKIntegrationsProvider.getTreeNodes());
@@ -97,6 +99,7 @@ suite('Check can deploy default examples', () => {
 	
 	const testDeploymentWithConfigMap = test('Check can deploy with a configmap', async() => {
 		skipOnJenkins(testDeploymentWithConfigMap);
+		skipIfNoCamelKInstance(testDeploymentWithConfigMap);
 		await openCamelFile('TestJavaDeployWithConfigMap.java');
 		const kubectlPath = await kubectl.create().getPath();
 		const confimapName = 'my-configmap';
@@ -119,6 +122,7 @@ suite('Check can deploy default examples', () => {
 	
 	const testDeploymentWithSecret = test('Check can deploy with a secret', async() => {
 		skipOnJenkins(testDeploymentWithSecret);
+		skipIfNoCamelKInstance(testDeploymentWithSecret);
 		await openCamelFile('TestJavaDeployWithSecret.java');
 		const kubectlPath = await kubectl.create().getPath();
 		const secretName = 'my-secret';
@@ -139,6 +143,7 @@ suite('Check can deploy default examples', () => {
 	
 	const testDeploymentWithproperty = test('Check can deploy with a property', async() => {
 		skipOnJenkins(testDeploymentWithproperty);
+		skipIfNoCamelKInstance(testDeploymentWithproperty);
 		await openCamelFile('TestJavaDeployWithProperty.java');
 		
 		await openCamelKTreeView();
@@ -159,6 +164,7 @@ suite('Check can deploy default examples', () => {
 	
 	const testSpecificNamespace = test('Check can deploy on specific namespace', async () => {
 		skipOnJenkins(testSpecificNamespace);
+		skipIfNoCamelKInstance(testSpecificNamespace);
 		await prepareNewNamespaceWithCamelK(EXTRA_NAMESPACE_FOR_TEST, EXTRA_OPERATOR_ID_FOR_TEST);
 		await openCamelFile('TestDeployInSpecificNamespace.java');
 		await config.addNamespaceToConfig(EXTRA_NAMESPACE_FOR_TEST);
