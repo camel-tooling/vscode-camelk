@@ -1,0 +1,134 @@
+name: Main CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: true
+
+jobs:
+  main:
+    strategy:
+      matrix:
+        os: [windows-latest, masos-latest]
+        version: [max] # [x.x.x | latest | max]
+        type: [stable] # [stable | insider]
+      fail-fast: false
+
+    env:
+      CODE_VERSION: ${{ matrix.version }}
+      CODE_TYPE: ${{ matrix.type }}
+      VSCODE_CAMELK_GITHUB_TOKEN: ${{ github.token }}
+
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16
+          cache: npm
+
+      - name: Install global dependencies
+        run: npm install -g typescript @vscode/vsce
+  
+      - name: npm-ci
+        run: npm ci
+  
+      - name: npm-compile
+        run: npm run compile
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          java-version: 17
+          distribution: "temurin"
+
+      - name: Install JBang
+        run: |
+          curl -Ls https://sh.jbang.dev | bash -s - app setup
+          echo "$HOME/.jbang/bin" >> $GITHUB_PATH
+
+      - name: Start minikube
+        uses: medyagh/setup-minikube@v0.0.14
+        with:
+          minikube-version: 1.31.1
+          driver: docker
+          addons: registry
+
+      - name: Configure Kamel (ubuntu)
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          curl -Lo kamel.tar.gz https://github.com/apache/camel-k/releases/download/v1.12.1/camel-k-client-1.12.1-linux-64bit.tar.gz
+          tar -zxvf kamel.tar.gz
+          chmod +x kamel
+          sudo mv kamel /usr/local/bin/
+          kamel install
+          sudo rm /usr/local/bin/kamel
+          sudo rm /usr/local/bin/kubectl
+
+      - name: npm-ci
+        run: npm ci
+
+      - name: npm-vscode:prepublish
+        run: npm run vscode:prepublish
+
+      - name: test (ubuntu)
+        if: matrix.os == 'ubuntu-latest'
+        run: xvfb-run --auto-servernum npm test
+
+      - name: ui test (Ubuntu)
+        id: uiTest_Ubuntu
+        if: matrix.os == 'ubuntu-latest'
+        run: xvfb-run --auto-servernum npm run ui-test
+
+      - name: vsce-package
+        run: vsce package
+
+      - name: Store VS Code Logs (Ubuntu)
+        uses: actions/upload-artifact@v3
+        if: failure() && matrix.os == 'ubuntu-latest'
+        with:
+          name: ${{ matrix.os }}-${{ matrix.version }}-vscode-logs
+          path: ~/.config/Code/logs/*
+
+      - name: Store UI test log
+        uses: actions/upload-artifact@v3
+        if: failure() && (steps.uiTest_Ubuntu.outcome == 'failure')
+        with:
+          name: ${{ matrix.os }}-${{ matrix.version }}-ui-test-logs
+          path: test-resources/settings/logs/*
+
+      - name: Store UI Test Screenshots
+        uses: actions/upload-artifact@v3
+        if: failure() && (steps.uiTest_Ubuntu.outcome == 'failure')
+        with:
+          name: ${{ matrix.os }}-${{ matrix.version }}-ui-test-screenshots
+          path: test-resources/screenshots/*.png
+
+  check:
+    if: always()
+    runs-on: ubuntu-latest
+    name: Status Check
+    needs: [ main ]
+    steps:
+      - name: Test Matrix Result
+        run: |
+          echo result = ${{ needs.main.result }}
+      - name: Status Check - success
+        if: ${{ needs.main.result == 'success' }}
+        run: |
+          echo "All tests successfully completed!"
+          exit 0
+      - name: Status Check - failure
+        if: ${{ needs.main.result != 'success' }}
+        run: |
+          echo "Status Check failed!"
+          exit 1
