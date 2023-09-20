@@ -1,0 +1,120 @@
+name: Other OSes CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: true
+
+jobs:
+  main:
+    strategy:
+      matrix:
+        os: [windows-latest, macos-latest]
+        version: [max] # [x.x.x | latest | max]
+        type: [stable] # [stable | insider]
+      fail-fast: false
+
+    env:
+      CODE_VERSION: ${{ matrix.version }}
+      CODE_TYPE: ${{ matrix.type }}
+      VSCODE_CAMELK_GITHUB_TOKEN: ${{ github.token }}
+
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Remove Kubectl (Windows)
+        run: choco uninstall kubernetes-cli minikube
+        if: matrix.os == 'windows-latest'
+
+      - name: Setup Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18.15.x
+          cache: npm
+
+      - name: Install global dependencies
+        run: npm install -g typescript @vscode/vsce
+  
+      - name: npm-ci
+        run: npm ci
+  
+      - name: npm-compile
+        run: npm run compile
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          java-version: 17
+          distribution: "temurin"
+
+
+      - name: Set up Maven 3.8.x
+        uses: stCarolas/setup-maven@v4.5
+        with:
+          maven-version: 3.8.8
+      - name: Check Maven version
+        id: check-maven-version
+        run: mvn --version
+
+      - name: Install JBang (ubuntu, macOS)
+        if: matrix.os == 'ubuntu-latest' || matrix.os == 'macos-latest'
+        run: |
+          curl -Ls https://sh.jbang.dev | bash -s - app setup
+          echo "$HOME/.jbang/bin" >> $GITHUB_PATH
+
+      - name: Install JBang (windows)
+        if: matrix.os == 'windows-latest'
+        run: choco install jbang
+
+      - name: Setup JBang (trusted sources)
+        run: jbang trust add https://github.com/apache/
+        
+      - name: npm-ci
+        run: npm ci
+
+      - name: npm-vscode:prepublish
+        run: npm run vscode:prepublish
+
+      - name: test
+        id: test
+        run: npm test
+
+      - name: vsce-package
+        run: vsce package
+
+      - name: Store VS Code Logs
+        uses: actions/upload-artifact@v3
+        if: failure()
+        with:
+          name: ${{ matrix.os }}-${{ matrix.version }}-vscode-logs
+          path: |
+            ~/.config/Code/logs/*
+            .vscode-test/logs/*
+
+  check:
+    if: always()
+    runs-on: ubuntu-latest
+    name: Status Check
+    needs: [ main ]
+    steps:
+      - name: Test Matrix Result
+        run: |
+          echo result = ${{ needs.main.result }}
+      - name: Status Check - success
+        if: ${{ needs.main.result == 'success' }}
+        run: |
+          echo "All tests successfully completed!"
+          exit 0
+      - name: Status Check - failure
+        if: ${{ needs.main.result != 'success' }}
+        run: |
+          echo "Status Check failed!"
+          exit 1

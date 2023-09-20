@@ -68,12 +68,14 @@ export const COMMAND_ID_START_JAVA_DEBUG = 'camelk.integrations.debug.java';
 export const COMMAND_ID_CLASSPATH_REFRESH = 'camelk.classpath.refresh';
 
 export async function activate(context: vscode.ExtensionContext) {
+	console.log('Begin activation');
 	stashedContext = context;
 	await telemetry.initializeTelemetry(context);
+	console.log('telemetry initialized');
 	camelKIntegrationsProvider = new CamelKNodeProvider(context);
-
+	console.log('Noede integration provider initialized');
 	applyUserSettings();
-
+	console.log('user settings applied');
 	mainOutputChannel = vscode.window.createOutputChannel("Apache Camel K");
 	registerCamelKSchemaProvider(mainOutputChannel);
 	myStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 100);
@@ -84,8 +86,9 @@ export async function activate(context: vscode.ExtensionContext) {
 	const tasksJson:vscode.DocumentSelector = { scheme: 'file', language: 'jsonc', pattern: '**/tasks.json' };
 	vscode.languages.registerCompletionItemProvider(tasksJson, new CamelKTaskCompletionItemProvider());
 
+	console.log('task and completion provider registerd');
 	await installDependencies(context).then ( (): void => {
-		
+		console.log('in then afer installDepdencies');
 		createIntegrationsView();
 
 		// start the watch listener for auto-updates
@@ -195,10 +198,13 @@ export async function activate(context: vscode.ExtensionContext) {
 			await StartJavaDebuggerCommand.start(integrationItem);
 			telemetry.sendCommandTracking(COMMAND_ID_START_JAVA_DEBUG);
 		});
+		console.log('end of then afer installDepdencies');
 	});
 
-	initializeJavaDependenciesManager(context);
-	
+	console.log('install depdencies done');
+	initializeJavaDependenciesManager(context, mainOutputChannel);
+	console.log('Java dependencies Manager initialized');
+
 	vscode.workspace.onDidChangeConfiguration(async (event) => {
 		await handleChangeRuntimeConfiguration();
 		closeLogViewWhenIntegrationRemoved = vscode.workspace.getConfiguration().get(config.REMOVE_LOGVIEW_ON_SHUTDOWN_KEY) as boolean;
@@ -220,6 +226,7 @@ export async function activate(context: vscode.ExtensionContext) {
 	});
 	
 	(await telemetry.getTelemetryServiceInstance()).sendStartupEvent();
+	console.log('activation done');
 }
 
 function retrieveIntegratioName(selection: TreeNode) {
@@ -405,6 +412,7 @@ export async function installDependencies(context: vscode.ExtensionContext) {
 	try {
 		const kubectlCliVersion: string | undefined = await kubectlutils.getKubernetesVersion();
 		if (kubectlCliVersion) {
+			console.log(`Found Kubernetes CLI (kubectl) version ${kubectlCliVersion}...`);
 			shareMessageInMainOutputChannel(`Found Kubernetes CLI (kubectl) version ${kubectlCliVersion}...`);
 			gotKubernetes = true;
 		}
@@ -423,11 +431,14 @@ export async function installDependencies(context: vscode.ExtensionContext) {
 
 async function installDependency(name: string, alreadyGot: boolean, context: vscode.ExtensionContext, installFunc: (context: vscode.ExtensionContext) => Promise<Errorable<null>>): Promise<void> {
 	if (!alreadyGot) {
+		console.log(`Installing ${name}...`);
 		shareMessageInMainOutputChannel(`Installing ${name}...`);
 		const result: Errorable<null> = await installFunc(context);
 		if (failed(result)) {
+			console.log(`Unable to install ${name}: ${result.error[0]}`);
 			utils.shareMessage(mainOutputChannel, `Unable to install ${name}: ${result.error[0]}`);
 		} else {
+			console.log(`Installed ${name}`);
 			shareMessageInMainOutputChannel('done');
 		}
 	}

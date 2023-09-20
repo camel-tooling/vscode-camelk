@@ -403,7 +403,6 @@
 		"cross-fetch": "^4.0.0",
 		"detect-port": "^1.5.1",
 		"jsonc-parser": "^3.2.0",
-		"maven": "^5.0.0",
 		"mkdirp": "^3.0.1",
 		"node-fetch": "^2.7.0",
 		"path": "^0.12.7",

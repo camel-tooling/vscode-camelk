@@ -14,39 +14,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import * as fs from 'fs';
 import * as path from 'path';
 import * as vscode from 'vscode';
 import * as utils from './CamelKJSONUtils';
 import { execSync } from 'child_process';
 
 const PREFERENCE_KEY_JAVA_REFERENCED_LIBRARIES = "java.project.referencedLibraries";
-export const CAMEL_VERSION = "3.20.1";
 
-export async function initializeJavaDependenciesManager(context: vscode.ExtensionContext): Promise<void> {
+export async function initializeJavaDependenciesManager(context: vscode.ExtensionContext, mainOutputChannel: vscode.OutputChannel): Promise<void> {
 	const destination = destinationFolderForDependencies(context);
-	await downloadCommonCamelKJavaDependencies(context);
+	const javaFileToWarmup = context.asAbsolutePath(path.join('resources', 'simple-java-file', 'UsedToWarmupDependenciesDownload.java'));
+	await downloadSpecificCamelKJavaDependencies(context, vscode.Uri.file(javaFileToWarmup), mainOutputChannel);
 	await initializeJavaSettingManagement(destination);
-}
-
-async function downloadJavaDependencies(context: vscode.ExtensionContext, groupId: string, artifactId: string, version: string) {
-	const destination = destinationFolderForDependencies(context);
-	const pomTemplate = context.asAbsolutePath(path.join('resources', 'maven-project', 'pom-to-copy-java-dependencies.xml'));
-	fs.mkdirSync(destination, { recursive: true });
-
-	const mvn = require('maven').create({
-		cwd: destination,
-		file: pomTemplate
-	});
-
-	mvn.execute(['dependency:copy-dependencies'],
-		{
-			'groupId': groupId,
-			'artifactId': artifactId,
-			'version': version,
-			'outputDirectory': destination
-		});
-	return destination;
 }
 
 async function initializeJavaSettingManagement(destination: string) {
@@ -59,12 +38,6 @@ async function initializeJavaSettingManagement(destination: string) {
 	}
 }
 
-export async function downloadCommonCamelKJavaDependencies(context: vscode.ExtensionContext): Promise<string> {
-	const groupId = 'org.apache.camel';
-	const artifactId = 'camel-core-engine';
-	return downloadJavaDependencies(context, groupId, artifactId, CAMEL_VERSION);
-}
-
 export async function downloadSpecificCamelKJavaDependencies(
 	context: vscode.ExtensionContext,
 	uri: vscode.Uri | undefined,
@@ -75,12 +48,14 @@ export async function downloadSpecificCamelKJavaDependencies(
 	if (uri) {
 		const destination = destinationFolderForDependencies(context);
 		await clearDestinationFolder(mainOutputChannel, destination);
-		const command = `jbang camel@apache/camel dependency copy --output-directory="${destination}" "${uri.path}"`;
+		// replace of backslash by slash is a workaround to CAMEL-20033
+		const command = `jbang camel@apache/camel dependency copy --output-directory="${destination}" "${uri.fsPath.replace(/\\/g,'/')}"`;
 		try {
 			execSync(command);
 			triggerRefreshOfJavaClasspath(context);
 		} catch(error) {
-			utils.shareMessage(mainOutputChannel, `Error while trying to refresh Java classpath based on file ${uri.path}:\n${error}`);
+			console.log(`Error while trying to refresh Java classpath based on file ${uri.fsPath}:\n${error}`);
+			utils.shareMessage(mainOutputChannel, `Error while trying to refresh Java classpath based on file ${uri.fsPath}:\n${error}`);
 		}
 	} else {
 		utils.shareMessage(mainOutputChannel, 'Cannot determine which file to use as base to refresh classpath');

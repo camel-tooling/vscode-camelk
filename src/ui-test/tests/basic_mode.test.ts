@@ -85,7 +85,7 @@ function basicModeWithLogsTest(extension: string, language: string) {
         });
 
         it(`Integration exists in ${consts.extensionName} sidebar`, async function () {
-            this.timeout(consts.TIMEOUT_15_SECONDS);
+            this.timeout(consts.TIMEOUT_30_SECONDS);
             const content = new SideBarView().getContent();
             await driver.wait(() => { return viewHasItem(content, consts.extensionName, consts.integrationFileName.toLowerCase()); }, this.timeout() - 1000);
         });
