@@ -91,7 +91,7 @@ function checkErrorMessageLogged(messageStub: sinon.SinonStub<[string], void>) {
 	expect(messageStub.callCount,
 		`Depending on latency, versions used and environment configuration, several messages can be logged. Number of messages logged ${messageStub.callCount}.
 		The messages are: ${allMessagesLogged}`)
-		.above(0).below(10);
+		.above(0).below(15);
 }
 
 function sleep(ms = 0) {

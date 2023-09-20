@@ -21,7 +21,7 @@ import * as sinon from 'sinon';
 import * as vscode from 'vscode';
 import * as config from '../../config';
 import * as IntegrationConstants from '../../IntegrationConstants';
-import { skipOnJenkins, openCamelKTreeView } from "./Utils";
+import { skipOnJenkins, openCamelKTreeView, skipIfNoCamelKInstance } from "./Utils";
 import { assert, expect } from 'chai';
 import * as shelljs from 'shelljs';
 import * as kamel from '../../kamel';
@@ -63,12 +63,14 @@ suite('Check can deploy with resource', () => {
 	
 	const testDeploymentWithResource = test('Check can deploy with a single resource', async() => {
 		skipOnJenkins(testDeploymentWithResource);
+		skipIfNoCamelKInstance(testDeploymentWithResource);
 		const resource = tmp.fileSync({ prefix: "simple" });
 		await testDeployWithResources([resource], showQuickpickStub, showOpenDialogStub);
 	}).timeout(TOTAL_TIMEOUT);
 	
 	const testDeploymentWithResourceInPathWithSpace = test('Check can deploy with a single resource with space in path', async() => {
 		skipOnJenkins(testDeploymentWithResourceInPathWithSpace);
+		skipIfNoCamelKInstance(testDeploymentWithResourceInPathWithSpace);
 		const dir = tmp.dirSync({prefix: "with a space"}).name;
 		const resource = tmp.fileSync({ dir: dir, prefix: "simpleWithParentFolderHavingSpace" });
 		expect(resource.name).includes(' ');
@@ -77,6 +79,7 @@ suite('Check can deploy with resource', () => {
 	
 	const testDeploymentWithSeveralResources = test('Check can deploy with several resources', async() => {
 		skipOnJenkins(testDeploymentWithSeveralResources);
+		skipIfNoCamelKInstance(testDeploymentWithSeveralResources);
 		const resource1 = tmp.fileSync({ prefix: "simple1" });
 		const resource2 = tmp.fileSync({ prefix: "simple2" });
 		await testDeployWithResources([resource1, resource2], showQuickpickStub, showOpenDialogStub);
