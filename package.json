@@ -165,7 +165,8 @@
 			},
 			{
 				"command": "camelk.classpath.refresh",
-				"title": "Refresh local Java classpath for Camel K standalone file based on current editor. Available with kamel 1.4+.",
+				"shortTitle": "Refresh local Java classpath for Camel K standalone file",
+				"title": "Refresh local Java classpath for Camel K standalone file based on current editor. It requires jbang and a valid compilable file.",
 				"enablement": "editorIsOpen && editorLangId == java"
 			},
 			{
