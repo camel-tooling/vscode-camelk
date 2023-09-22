@@ -142,9 +142,9 @@ async function kamelInternalArgs(args: string[], devMode: boolean, namespace: st
 			console.log(`command called: ${binpath} with arguments ${args}`);
 			let sr : ChildProcess;
 			if (foldername) {
-				sr = spawn(binpath, args, { cwd : foldername});
+				sr = spawn(binpath, args, { cwd : foldername, shell: process.platform == 'win32' });
 			} else {
-				sr = spawn(binpath, args);
+				sr = spawn(binpath, args, { shell: process.platform == 'win32' });
 			}
 			if (sr) {
 				if (sr.stdout) {
