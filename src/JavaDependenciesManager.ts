@@ -75,12 +75,12 @@ export async function downloadSpecificCamelKJavaDependencies(
 	if (uri) {
 		const destination = destinationFolderForDependencies(context);
 		await clearDestinationFolder(mainOutputChannel, destination);
-		const command = `jbang camel@apache/camel dependency copy --output-directory="${destination}" "${uri.path}"`;
+		const command = `jbang camel@apache/camel dependency copy --output-directory="${destination}" "${uri.fsPath}"`;
 		try {
 			execSync(command);
 			triggerRefreshOfJavaClasspath(context);
 		} catch(error) {
-			utils.shareMessage(mainOutputChannel, `Error while trying to refresh Java classpath based on file ${uri.path}:\n${error}`);
+			utils.shareMessage(mainOutputChannel, `Error while trying to refresh Java classpath based on file ${uri.fsPath}:\n${error}`);
 		}
 	} else {
 		utils.shareMessage(mainOutputChannel, 'Cannot determine which file to use as base to refresh classpath');
