@@ -89,6 +89,7 @@ async function kamelInternal(command: string, devMode: boolean, namespace : stri
 		}
 	
 		const cmd: string = getBaseCmd(binpath, command, namespace, operatorId);
+		console.log(`Command for kamel internal: ${cmd}`);
 		const sr: ChildProcess = exec(cmd);
 		let wholeOutData = '';
 		let wholeErrData = '';
