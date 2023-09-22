@@ -40,6 +40,7 @@ suite("Camel K Debug Task definition", function() {
         };
         const task = await new CamelKDebugTaskProvider().getDebugTask(def);
         const execution = task.execution as ShellExecution;
+        console.log(`command line generated for debug task ${execution.commandLine}`);
         if (process.platform === 'win32') {
             assert.include(execution.commandLine, 'kamel.exe" debug demo');
         } else {
@@ -56,6 +57,7 @@ suite("Camel K Debug Task definition", function() {
         };
         const task = await new CamelKDebugTaskProvider().getDebugTask(def);
         const execution = task.execution as ShellExecution;
+        console.log(`command line generated for debug task ${execution.commandLine}`);
         if (process.platform === 'win32') {
             assert.include(execution.commandLine, 'kamel.exe" debug demo');
         } else {
@@ -72,6 +74,7 @@ suite("Camel K Debug Task definition", function() {
         };
         const task = await new CamelKDebugTaskProvider().getDebugTask(def);
         const execution = task.execution as ShellExecution;
+        console.log(`command line generated for debug task ${execution.commandLine}`);
         if (process.platform === 'win32') {
             assert.include(execution.commandLine, 'kamel.exe" debug demo');
         } else {
