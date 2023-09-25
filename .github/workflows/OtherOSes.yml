@@ -51,6 +51,11 @@ jobs:
           java-version: 17
           distribution: "temurin"
 
+      - name: Set up Maven 3.8.x
+        uses: stCarolas/setup-maven@v4.5
+        with:
+          maven-version: 3.8.8
+
       - name: npm-ci
         run: npm ci
 
