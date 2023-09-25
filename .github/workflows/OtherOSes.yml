@@ -77,7 +77,9 @@ jobs:
         if: failure()
         with:
           name: ${{ matrix.os }}-${{ matrix.version }}-vscode-logs
-          path: ~/.config/Code/logs/*
+          path: |
+            ~/.config/Code/logs/*
+            .vscode-test/logs/*
 
   check:
     if: always()
