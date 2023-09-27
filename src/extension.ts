@@ -101,7 +101,7 @@ export async function activate(context: vscode.ExtensionContext) {
 		vscode.commands.registerCommand(COMMAND_ID_REFRESH, () => {
 			camelKIntegrationsProvider.refresh()
 			.catch( (err) => {
-				console.log(err);
+				console.log(`Error refreshing Camel K integration provider using the Command:\n${err}`);
 			});
 			telemetry.sendCommandTracking(COMMAND_ID_REFRESH);
 		});
@@ -128,7 +128,7 @@ export async function activate(context: vscode.ExtensionContext) {
 					const isKilled = await integrationutils.killChildProcessForIntegration(integrationName);
 					console.log(`Removed the child process running in the background for ${integrationName}: ${isKilled}`);
 				} catch(err) {
-					console.log(err);
+					console.log(`Error when trying to kill child process for integration ${integrationName}:\n${err}`);
 				}
 				await removeIntegrationLogView(integrationName);
 				// TODO: we need to look into closing the log view when the integration is stopped
@@ -136,7 +136,7 @@ export async function activate(context: vscode.ExtensionContext) {
 				try {
 					await camelKIntegrationsProvider.refresh();
 				} catch (err) {
-					console.log(err);
+					console.log(`Error when tring to refresh Camel Integration provider at the end of command to remove an integration:\n${err}`);
 				}
 				telemetry.sendCommandTracking(COMMAND_ID_REMOVE);
 			}
@@ -214,7 +214,7 @@ export async function activate(context: vscode.ExtensionContext) {
 			try {
 				await camelKIntegrationsProvider.refresh();
 			} catch (err) {
-				console.log(err);
+				console.log(`Error when trying to refresh Camel K integration provider when a configuration has changed:\n${err}`);
 			}
 		}
 	});
@@ -260,7 +260,7 @@ async function runTheFile(...args: any[]) {
 		await startIntegration(args);
 		await camelKIntegrationsProvider.refresh();
 	} catch (error) {
-		console.log(error);
+		console.log(`Error when trying to refresh the start an integration:\n${error}`);
 	}
 }
 
@@ -312,7 +312,7 @@ export function getIntegrationsFromKubectlCliWithWatch() : Promise<void> {
 						try {
 							await camelKIntegrationsProvider.refresh();
 						} catch(err) {
-							console.log(err);
+							console.log(`Error when trying to refresh the Camel K integration provider in the process watching for changes and that received data:\n${err}`);
 						}
 					}
 				});
@@ -383,7 +383,7 @@ function createIntegrationsView(): void {
 			try { 
 				await camelKIntegrationsProvider.refresh();
 			} catch( err ) {
-				console.log(err);
+				console.log(`Error when trying to refresh the Camel K integration provider when the tree view becomes visible:\n${err}`);
 			}
 		} else {
 			runningKubectl?.kill();

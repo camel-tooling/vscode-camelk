@@ -96,7 +96,7 @@ export async function checkIntegrationRunning(indexOfNewDeployedIntegration :num
 			return treeNode?.status === "Running";
 		}, RUNNING_TIMEOUT, 1000);
 	} catch (error) {
-		console.log(error);
+		console.log(`Error while checking integration is running:\n${error}`);
 		assert.fail(`The integration has not been marked as Running in Camel K Integration provided view. Current status ${extension.camelKIntegrationsProvider.getTreeNodes()[0].status} \n${error}`);
 	}
 }

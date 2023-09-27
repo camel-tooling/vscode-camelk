@@ -88,7 +88,7 @@ async function testCompletion(
 			try {
 				return javaExtension?.exports?.status === "Started";
 			} catch (error) {
-				console.log(error);
+				console.log(`Error when checking that java extension is started:\n${error}`);
 				return false;
 			}
 		} else {

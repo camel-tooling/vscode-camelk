@@ -68,7 +68,7 @@ async function downloadAndExtract(link: string, dlFilename: string, installFolde
 		extension.mainOutputChannel.appendLine(`Extracted ${dlFilename}.`);
 		return true;
 	} catch (error) {
-		console.log(error);
+		console.log(`Error during download and extract of ${dlFilename}:\n${error}`);
 		return false;
 	} finally {
 		myStatusBarItem.dispose();
@@ -86,7 +86,7 @@ async function download(link: string, dlFilename: string, installFolder: string)
 		extension.mainOutputChannel.appendLine(`Downloaded ${dlFilename}.`);
 		return true;
 	} catch (error) {
-		console.log(error);
+		console.log(`Error during download of ${dlFilename}:\n${error}`);
 		return false;
 	} finally {
 		myStatusBarItem.dispose();
@@ -179,7 +179,7 @@ export async function installKamel(context: vscode.ExtensionContext): Promise<Er
 			await config.addKamelPathToConfig(downloadFile);
 		}
 	} catch (error) {
-		console.log(error);
+		console.log(`Error during install of kamel CLI:\n${error}`);
 		return { succeeded: false, error: [`Failed to download kamel: ${error}`] };
 	}
 
@@ -237,7 +237,7 @@ export async function installKubectl(context: vscode.ExtensionContext): Promise<
 		const flag: boolean = await download(kubectlUrl, executable, installFolder);
 		console.log(`Downloaded ${downloadFile} successfully: ${flag}`);
 	} catch (error) {
-		console.log(error);
+		console.log(`Error during install of kubectl CLI:\n${error}`);
 		return { succeeded: false, error: [`Failed to download kubectl: ${error}`] };
 	}
 	await config.addKubectlPathToConfig(downloadFile);
