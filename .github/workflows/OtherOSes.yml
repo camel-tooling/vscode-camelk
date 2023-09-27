@@ -59,6 +59,17 @@ jobs:
       - name: Check Maven version
         id: check-maven-version
         run: mvn --version
+
+      - name: Install JBang (ubuntu, macOS)
+        if: matrix.os == 'ubuntu-latest' || matrix.os == 'macos-latest'
+        run: |
+          curl -Ls https://sh.jbang.dev | bash -s - app setup
+          echo "$HOME/.jbang/bin" >> $GITHUB_PATH
+
+      - name: Install JBang (windows)
+        if: matrix.os == 'windows-latest'
+        run: choco install jbang
+
       - name: npm-ci
         run: npm ci
 
