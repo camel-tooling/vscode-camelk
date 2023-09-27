@@ -184,7 +184,7 @@ export class CamelKNodeProvider implements vscode.TreeDataProvider<TreeNode> {
 					}
 				}
 			} catch( error ) {
-				console.log(error);
+				console.log(`Error when trying to process integration list received from JSon:\n${error}`);
 			}
 		}
 	}

@@ -297,7 +297,6 @@ function getSelectedProperties(): Promise<string[]> {
 				});
 				if (propValue) {
 					propValue = propValue.replace(/"/g, '\\"');
-					console.log(propValue);
 					const newProperty = `${propName}=${propValue}`;
 
 					const moreProperties: string | undefined = await vscode.window.showQuickPick(['No', 'Yes'], {
@@ -487,7 +486,7 @@ export function isCamelKAvailable(): Promise<boolean> {
 				}
 			})
 			.catch(err => {
-				console.log(err);
+				console.log(`Error when trying to determine if Camel K is available:\n${err}`);
 				resolve(false);
 			});
 	});

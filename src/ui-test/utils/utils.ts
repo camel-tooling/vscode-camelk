@@ -58,7 +58,7 @@ export async function prepareEmptyTestFolder(directory: string): Promise<void> {
                     if (fs.existsSync(path.join(directory, file))) {
                         fs.rmSync(path.join(directory, file), { recursive: true });
                     }
-                } catch (err) { console.log(err); }
+                } catch (err) { console.log(`Error while cleaning files and folders ${file}:\n${err}`); }
             }
         });
     }
