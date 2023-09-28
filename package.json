@@ -371,7 +371,7 @@
 		"@vscode/test-electron": "^2.3.4",
 		"ansi-regex": "^5.0.1",
 		"async-wait-until": "^2.0.12",
-		"chai": "^4.3.8",
+		"chai": "^4.3.10",
 		"copyfiles": "^2.4.1",
 		"decache": "^4.6.2",
 		"eslint": "^8.50.0",
