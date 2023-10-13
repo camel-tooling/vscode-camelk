@@ -358,7 +358,7 @@
 		"lint": "eslint src --ext .ts"
 	},
 	"devDependencies": {
-		"@types/chai": "^4.3.7",
+		"@types/chai": "^4.3.8",
 		"@types/glob": "^8.1.0",
 		"@types/mocha": "^10.0.2",
 		"@types/node": "^20.8.4",
