@@ -384,7 +384,6 @@
 		"sinon": "^16.1.1",
 		"sinon-chai": "^3.7.0",
 		"typescript": "^5.2.2",
-		"vscode-extension-tester": "^5.10.0",
 		"vscode-uitests-tooling": "^4.0.7"
 	},
 	"extensionDependencies": [

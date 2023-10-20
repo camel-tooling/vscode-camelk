@@ -20,6 +20,11 @@ import { projectPath } from './../uitest_runner';
 import * as path from 'path';
 import * as fs from 'fs';
 
+export const TEST_RESOURCES_DIR = path.resolve('.', 'test-resources');
+export const EXTENSION_DIR = path.join(TEST_RESOURCES_DIR, 'test-extensions');
+export const WORKBENCH_DIR = path.join(TEST_RESOURCES_DIR, 'ui-workbench');
+export const RESOURCES_DIR = path.resolve('.', 'src', 'ui-test', 'resources');
+
 const extensionMetadata: { [key: string]: any } = JSON.parse(fs.readFileSync('package.json', {
     encoding: 'utf-8'
 }));
@@ -28,6 +33,7 @@ export const TIMEOUT_5_SECONDS = 5000;
 export const TIMEOUT_15_SECONDS = 15000;
 export const TIMEOUT_30_SECONDS = 30000;
 export const TIMEOUT_60_SECONDS = 60000;
+export const TIMEOUT_120_SECONDS = 120000;
 
 export const initialPodReadyMessage = '[1] Monitoring pod';
 export const updatedPodReadyMessage = '[2] Monitoring pod';
@@ -43,26 +49,8 @@ export const startIntegration = extensionMetadata.contributes.commands[0].title;
 export const integrationRemove = extensionMetadata.contributes.commands[2].title;
 export const followIntegrationLogs = extensionMetadata.contributes.commands[3].title;
 
-export function prepareCodeLogMessages(extension: string, language: string): [string, string, string, string] {
-    let initialCodeMessage = `Hello Camel K from`;
-    let updatedCodeMessage = `Updated message with Camel K from`;
-    let initialLogMessage = initialCodeMessage;
-    let updatedLogMessage = updatedCodeMessage;
-    if (extension === 'kts') {
-        initialLogMessage = initialLogMessage.concat(` ${language.toLowerCase()}`);
-        updatedLogMessage = updatedLogMessage.concat(` ${language.toLowerCase()}`);
-        initialCodeMessage = initialCodeMessage.concat(' \\${routeId}');
-        updatedCodeMessage = updatedCodeMessage.concat(' \\${routeId}');
-    } else if (extension === 'yaml') {
-        initialLogMessage = initialLogMessage.concat(` ${extension}`);
-        updatedLogMessage = updatedLogMessage.concat(` ${extension}`);
-        initialCodeMessage = initialLogMessage;
-        updatedCodeMessage = updatedLogMessage;
-    } else {
-        initialLogMessage = initialLogMessage.concat(` ${extension}`);
-        updatedLogMessage = updatedLogMessage.concat(` ${extension}`);
-        initialCodeMessage = initialCodeMessage.concat(' ${routeId}');
-        updatedCodeMessage = updatedCodeMessage.concat(' ${routeId}');
-    }
-    return [initialCodeMessage, updatedCodeMessage, initialLogMessage, updatedLogMessage]
+export function prepareCodeLogMessages(extension: string, language: string): [string, string] {
+    const initialMessage = `Hello Camel from ${language}`;
+    const updatedMessage = `Updated message with Camel from ${language}`;
+    return [initialMessage, updatedMessage]
 }

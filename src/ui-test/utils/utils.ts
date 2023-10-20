@@ -25,26 +25,11 @@ import {
     Locator,
     SideBarView,
     WebView,
-    Workbench
-} from 'vscode-extension-tester';
-
-export class DoNextTest {
-    doNextTest: boolean;
-    firstRun: boolean;
-
-    constructor() {
-        this.doNextTest = true;
-        this.firstRun = true;
-    }
-
-    stopTest() {
-        this.doNextTest = false;
-    }
-
-    continueTest() {
-        this.doNextTest = true;
-    }
-}
+    Workbench,
+    error,
+    repeat
+} from 'vscode-uitests-tooling';
+import * as consts from './uiTestConstants';
 
 export async function prepareEmptyTestFolder(directory: string): Promise<void> {
     if (!fs.existsSync(directory)) {
@@ -72,17 +57,29 @@ export async function findSectionItem(section: string, item: string): Promise<De
 }
 
 export async function inputBoxQuickPickOrSet(type: "pick" | "set", indexOrText: string | number): Promise<boolean> {
-    const input = await InputBox.create();
-    if (type === "pick") {
-        await input.selectQuickPick(indexOrText);
-        return true;
-    } else if (type === "set" && typeof indexOrText === "string") {
-        await input.setText(indexOrText);
-        await input.confirm();
-        return true;
-    } else {
-        return false;
-    }
+    return await repeat(async () => {
+        try {
+            const input = await InputBox.create();
+            if (type === "pick") {
+                await input.selectQuickPick(indexOrText);
+                return true;
+            } else if (type === "set" && typeof indexOrText === "string") {
+                await input.setText(indexOrText);
+                await input.confirm();
+                return true;
+            } else {
+                return false;
+            }
+        } catch (e) {
+            if (e instanceof error.TimeoutError) {
+                return undefined
+            }
+            throw e;
+        }
+    }, {
+        timeout: consts.TIMEOUT_30_SECONDS,
+        message: 'Object was not loaded in time'
+    });
 }
 
 export async function textDoesNotContainAsci(view: 'OutputView' | 'WebView', locator: Locator = { id: 'content' }): Promise<boolean> {

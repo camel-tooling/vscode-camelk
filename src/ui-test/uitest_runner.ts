@@ -18,17 +18,17 @@
 
 import * as path from 'path';
 import * as fs from 'fs';
-import { ExTester } from 'vscode-extension-tester';
-import { ReleaseQuality } from 'vscode-extension-tester/out/util/codeUtil';
+import * as consts from './utils/uiTestConstants';
+import { ExTester, ReleaseQuality } from 'vscode-uitests-tooling';
 
-const storageFolder = 'test-resources';
+export const storageFolder = consts.TEST_RESOURCES_DIR;
 const releaseType: ReleaseQuality = process.env.CODE_TYPE === 'insider' ? ReleaseQuality.Insider : ReleaseQuality.Stable;
 export const projectPath = path.resolve(__dirname, '..', '..');
-const extensionFolder = path.join(projectPath, '.test-extensions');
+const extensionFolder = consts.EXTENSION_DIR;
 
 async function main(): Promise<void> {
 	const tester = new ExTester(storageFolder, releaseType, extensionFolder);
-	await tester.setupAndRunTests('out/src/ui-test/uitest_suite.js',
+	await tester.setupAndRunTests('out/src/ui-test/tests/**/*.test.js',
 		process.env.CODE_VERSION,
 		{
 			'installDependencies': true
@@ -37,8 +37,11 @@ async function main(): Promise<void> {
 			'cleanup': true,
 			'settings': './src/ui-test/resources/vscode-settings.json',
 			resources: []
-		});
+		}
+	);
 	fs.rmSync(extensionFolder, { recursive: true });
 }
 
-main();
+main().catch((error) => {
+	console.error('Unhandled promise rejection in main: ', error);
+});
