@@ -16,7 +16,7 @@
  */
 'use strict';
 
-import { DefaultTreeItem, Workbench } from "vscode-extension-tester";
+import { DefaultTreeItem, Workbench } from "vscode-uitests-tooling";
 import { inputBoxQuickPickOrSet } from "./utils";
 
 // TODO: Workaround due the issue -> https://github.com/redhat-developer/vscode-extension-tester/issues/444

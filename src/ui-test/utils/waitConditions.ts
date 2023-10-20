@@ -19,7 +19,6 @@
 import * as consts from './uiTestConstants';
 import {
     By,
-    ExtensionsViewItem,
     Workbench,
     ViewContent,
     BottomBarPanel,
@@ -30,25 +29,9 @@ import {
     OutputView,
     WebDriver,
     SideBarView
-} from 'vscode-extension-tester';
-import { DoNextTest, findSectionItem } from './utils';
+} from 'vscode-uitests-tooling';
+import { findSectionItem } from './utils';
 import { workaroundMacIssue444 } from './workarounds';
-
-export async function extensionIsActivated(extension: ExtensionsViewItem, activationError: DoNextTest): Promise<boolean> {
-    try {
-        const activationTime = await extension.findElement(By.className('activationTime'));
-        if (activationTime !== undefined) {
-            activationError.stopTest();
-            return true;
-        } else {
-            activationError.continueTest();
-            return false;
-        }
-    } catch (err) {
-        activationError.continueTest();
-        return false;
-    }
-}
 
 export async function outputViewHasText(text: string, timePeriod = 1000): Promise<boolean> {
     const outputView = await new BottomBarPanel().openOutputView();
@@ -112,7 +95,7 @@ export async function contextMenuItemClick(parentItem: DefaultTreeItem, childIte
 export async function cleanOutputView(): Promise<boolean> {
     let outputView: OutputView;
     if (await new BottomBarPanel().isDisplayed()) {
-        outputView = await new BottomBarPanel().openOutputView();
+        outputView = await new BottomBarPanel().openOutputView() as OutputView;
     } else {
         return true;
     }
@@ -130,7 +113,7 @@ export async function cleanOutputView(): Promise<boolean> {
 export async function sidebarIntegrationRemove(driver: WebDriver, section: string, item: string): Promise<boolean> {
     const treeItem = await findSectionItem(section, item.toLowerCase());
     if (treeItem !== undefined) {
-        await driver.wait(() => { return contextMenuItemClick(treeItem, consts.integrationRemove); });
+        await driver.wait(() => { return contextMenuItemClick(treeItem, consts.integrationRemove); }, consts.TIMEOUT_60_SECONDS);
         const content = new SideBarView().getContent();
         return await driver.wait(async () => {
             return !(await viewHasItem(content, section, item.toLowerCase()));
