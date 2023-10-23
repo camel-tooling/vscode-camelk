@@ -202,7 +202,7 @@ export async function activate(context: vscode.ExtensionContext) {
 	});
 
 	console.log('install depdencies done');
-	initializeJavaDependenciesManager(context);
+	initializeJavaDependenciesManager(context, mainOutputChannel);
 	console.log('Java dependencies Manager initialized');
 
 	vscode.workspace.onDidChangeConfiguration(async (event) => {
