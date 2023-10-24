@@ -32,7 +32,6 @@ export interface CamelKRunTaskDefinition extends vscode.TaskDefinition {
 	file: string;
 	profile?: string;
 	properties?: Array<string>;
-	resources?: Array<string>;
 	secret?: string;
 	traits?: Array<string>;
 	volumes?: Array<string>;
@@ -73,7 +72,6 @@ export class CamelKRunTaskProvider implements vscode.TaskProvider {
 			definition.dev,
 			definition.configmap,
 			definition.secret,
-			definition.resources,
 			definition.dependencies,
 			definition.properties,
 			definition.traits,

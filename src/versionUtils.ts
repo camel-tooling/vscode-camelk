@@ -25,13 +25,13 @@ import { platform } from './installer';
 import fetch from 'cross-fetch';
 import { Platform } from './shell';
 
-export const version = '2.0.0'; //need to retrieve this if possible, but have a default
+export const version = '2.1.0'; //need to retrieve this if possible, but have a default
 
 /*
  * Can be retrieved using `curl -i https://api.github.com/repos/apache/camel-k/releases/latest | grep last-modified`
  * To be updated when updating the default "version" attribute
  */
-const LAST_MODIFIED_DATE_OF_DEFAULT_VERSION = 'Mon, 24 Jul 2023 07:56:50 GMT';
+const LAST_MODIFIED_DATE_OF_DEFAULT_VERSION = 'Mon, 23 Oct 2023 08:52:28 GMT';
 let latestVersionFromOnline: string;
 
 export async function testVersionAvailable(versionToUse: string): Promise<boolean> {
@@ -203,7 +203,7 @@ function setVersionAndTellUser(msg: string, newVersion: string) {
 	extension.setRuntimeVersionSetting(newVersion);
 }
 
-function toKamelOsString(platform: Platform | undefined): string | undefined {
+function toKamel1xOsString(platform: Platform | undefined): string | undefined {
 	switch (platform) {
 		case Platform.WINDOWS:
 			return 'windows';
@@ -215,8 +215,21 @@ function toKamelOsString(platform: Platform | undefined): string | undefined {
 	return undefined;
 }
 
+function toKamel2xOsString(platform: Platform | undefined): string | undefined {
+	switch (platform) {
+		case Platform.WINDOWS:
+			return 'windows';
+		case Platform.LINUX:
+			return 'linux';
+		case Platform.MACOS:
+			return 'darwin';
+	}
+	return undefined;
+}
+
 export async function getDownloadURLForCamelKTag(camelKVersion: string, platform: Platform): Promise<string> {
-	const platformStr = toKamelOsString(platform);
+	const platformStr1x = toKamel1xOsString(platform);
+	const platformStr2x = toKamel2xOsString(platform);
 	const tagName: string = isOldTagNaming(camelKVersion) ? camelKVersion : `v${camelKVersion}`;
 	const tagURL = `https://api.github.com/repos/apache/camel-k/releases/tags/${tagName}`;
 	const headers: [string, string][] = [];
@@ -230,7 +243,10 @@ export async function getDownloadURLForCamelKTag(camelKVersion: string, platform
 		const assetsJSON: any = await latestJSON.assets;
 		for (const asset of assetsJSON) {
 			const aUrl: string = asset.browser_download_url;
-			if (aUrl.includes(`-${platformStr}-`)) {
+			if (aUrl.includes('camel-k-client-1') && aUrl.includes(`-${platformStr1x}-`)) {
+				return aUrl;
+			}
+			if (aUrl.includes('camel-k-client-2') && aUrl.includes('amd64') && aUrl.includes(`-${platformStr2x}-`)) {
 				return aUrl;
 			}
 		}
