@@ -44,9 +44,6 @@ You can start a new Camel K integration with or without additional options such 
     - **Secret - Apache Camel K Integration with Kubernetes Secret as Runtime Configuration**
       Select a Secret from a list of the published Secrets in your current Kubernetes system. For more information about configuration with ConfigMaps or Secrets, see [Configuration via ConfigMap or Secret](https://camel.apache.org/camel-k/next/configuration/runtime-config.html) in the Apache Camel K documentation.
 
-    - **Resource - Apache Camel K Integration with Resource file**
-      Select one or more resource files from the file selection dialog.
-
     - **Property - Apache Camel K Integration with Property**
       Specify property name/property value pairs, with the option to specify more than one. For more information about configuration with properties, see [Configure Integrations](https://camel.apache.org/camel-k/latest/configuration/configuration.html) in the Apache Camel K documentation.
 

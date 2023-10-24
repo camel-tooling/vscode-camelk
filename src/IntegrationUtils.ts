@@ -102,7 +102,6 @@ import { TelemetryEvent } from '@redhat-developer/vscode-redhat-telemetry/lib';
 			let selectedConfigMap : any = undefined;
 			let selectedSecret : any = undefined;
 			let devMode  = false;
-			let selectedResource : any = undefined;
 			let errorEncountered  = false;
 			let selectedProperty : any = undefined;
 			let selectedDependency : any = undefined;
@@ -128,18 +127,6 @@ import { TelemetryEvent } from '@redhat-developer/vscode-redhat-telemetry/lib';
 						selectedSecret = selection;
 						if (selectedSecret === undefined) {
 							reject (new Error('No Secret selected.'));
-							errorEncountered = true;
-						}
-					}).catch ( (error) => {
-						reject(error);
-						errorEncountered = true;
-					});
-					break;
-				case constants.resourceIntegration:
-					await getSelectedResources().then( (selection) => {
-						selectedResource = selection;
-						if (selectedResource === undefined) {
-							reject (new Error('No Resource selected.'));
 							errorEncountered = true;
 						}
 					}).catch ( (error) => {
@@ -187,7 +174,7 @@ import { TelemetryEvent } from '@redhat-developer/vscode-redhat-telemetry/lib';
 
 			if (!errorEncountered) {
 				try {
-					const isSuccess = await createNewIntegration(context, devMode, selectedConfigMap, selectedSecret, selectedResource, selectedProperty, selectedDependency);
+					const isSuccess = await createNewIntegration(context, devMode, selectedConfigMap, selectedSecret, selectedProperty, selectedDependency);
 					sendStartIntegrationTelemetryEvent(choice, context);
 					resolve(isSuccess);
 				} catch(err) {
@@ -270,17 +257,6 @@ function getSelectedSecret(): Promise<string | undefined> {
 	});
 }
 
-function getSelectedResources(): Promise<string[]> {
-	return new Promise<string[]> ( async (resolve, reject) => {
-		const fileUris = await vscode.window.showOpenDialog(ResourceOptions);
-		if (fileUris === undefined || fileUris.length === 0) {
-			reject(new Error('No Resource file(s) specified.'));
-		} else {
-			resolve(fileUris.map(fileUri => path.normalize(fileUri.path)));
-		}
-	});
-}
-
 function getSelectedProperties(): Promise<string[]> {
 	return new Promise<string[]> ( async (resolve, reject) => {
 		let hasMoreProperties = true;
@@ -358,7 +334,7 @@ function getSelectedDependencies(): Promise<string[]> {
 }
 
 // use command-line "kamel" utility to start a new integration
-export function createNewIntegration(integrationFileUri: vscode.Uri, devMode? : boolean, configmap? : string, secret? : string, resourceArray? : string[], propertyArray? : string[], dependencyArray? : string[]): Promise<boolean> {
+export function createNewIntegration(integrationFileUri: vscode.Uri, devMode? : boolean, configmap? : string, secret? : string, propertyArray? : string[], dependencyArray? : string[]): Promise<boolean> {
 	return new Promise( async (resolve, reject) => {
 		const filename = integrationFileUri.fsPath;
 		const foldername = path.dirname(filename);
@@ -372,7 +348,6 @@ export function createNewIntegration(integrationFileUri: vscode.Uri, devMode? : 
 					devMode,
 					configmap,
 					secret,
-					resourceArray,
 					dependencyArray,
 					propertyArray);
 				if (devMode && devMode === true) {
@@ -407,7 +382,6 @@ export function computeKamelArgs(absoluteRoot: string,
 		devMode: boolean | undefined,
 		configmap: string | undefined,
 		secret: string | undefined,
-		resourceArray: string[] | undefined,
 		dependencyArray: string[] | undefined,
 		propertyArray: string[] | undefined,
 		traitsArray?: string[] | undefined,
@@ -432,11 +406,6 @@ export function computeKamelArgs(absoluteRoot: string,
 	}
 	if (profile && profile.trim().length > 0) {
 		kamelArgs.push(`--profile=${profile}`);
-	}
-	if (resourceArray && resourceArray.length > 0) {
-		resourceArray.forEach(resource => {
-			kamelArgs.push(`--resource=file:${resource}`);
-		});
 	}
 	if (dependencyArray && dependencyArray.length > 0) {
 		dependencyArray.forEach(dependency => {

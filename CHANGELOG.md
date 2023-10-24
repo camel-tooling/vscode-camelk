@@ -6,7 +6,8 @@ All notable changes to the "vscode-camelk" extension will be documented in this 
 
 - Requires jbang for java standalone completion. It allows also to get rid of internal dependency to `kamel local` which is removed from kamel 2.x.
 - Fix Java standalone support on Windows
-- Update default runtime version to v2.0.0
+- Update default runtime version to v2.1.0
+- Removal of `Start integration with resources` command as Camel K 2.1 is no more supporting it with files (which was the only implemented use case)
 
 ## 0.0.35
 
