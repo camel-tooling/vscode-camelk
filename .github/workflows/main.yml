@@ -38,10 +38,10 @@ jobs:
 
       - name: Install global dependencies
         run: npm install -g typescript @vscode/vsce
-  
+
       - name: npm-ci
         run: npm ci
-  
+
       - name: npm-compile
         run: npm run compile
 
@@ -55,10 +55,10 @@ jobs:
         run: |
           curl -Ls https://sh.jbang.dev | bash -s - app setup
           echo "$HOME/.jbang/bin" >> $GITHUB_PATH
-      
+
       - name: Setup JBang (trusted sources)
         run: jbang trust add https://github.com/apache/
-      
+
       - name: Start minikube
         uses: medyagh/setup-minikube@v0.0.14
         with:
@@ -104,14 +104,20 @@ jobs:
 
       - name: Store UI test log
         uses: actions/upload-artifact@v3
-        if: failure() && (steps.uiTest_Ubuntu.outcome == 'failure')
+        if: |
+          (failure() || cancelled()) &&
+          (steps.uiTest_Ubuntu.outcome == 'failure' ||
+          steps.uiTest_Ubuntu.outcome == 'cancelled')
         with:
           name: ${{ matrix.os }}-${{ matrix.version }}-ui-test-logs
           path: test-resources/settings/logs/*
 
       - name: Store UI Test Screenshots
         uses: actions/upload-artifact@v3
-        if: failure() && (steps.uiTest_Ubuntu.outcome == 'failure')
+        if: |
+          (failure() || cancelled()) &&
+          (steps.uiTest_Ubuntu.outcome == 'failure' ||
+          steps.uiTest_Ubuntu.outcome == 'cancelled')
         with:
           name: ${{ matrix.os }}-${{ matrix.version }}-ui-test-screenshots
           path: test-resources/screenshots/*.png
@@ -120,7 +126,7 @@ jobs:
     if: always()
     runs-on: ubuntu-latest
     name: Status Check
-    needs: [ main ]
+    needs: [main]
     steps:
       - name: Test Matrix Result
         run: |
