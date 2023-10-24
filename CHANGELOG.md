@@ -5,6 +5,7 @@ All notable changes to the "vscode-camelk" extension will be documented in this 
 ## 0.0.36
 
 - Requires jbang for java standalone completion. It allows also to get rid of internal dependency to `kamel local` which is removed from kamel 2.x.
+- Fix Java standalone support on Windows
 
 ## 0.0.35
 
