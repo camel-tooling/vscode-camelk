@@ -22,7 +22,7 @@ import os = require('os');
 import { waitUntil } from 'async-wait-until';
 
 const extensionId = 'redhat.vscode-camelk';
-export const ACTIVATION_TIMEOUT = 45000;
+export const ACTIVATION_TIMEOUT = 90000;
 
 export async function ensureExtensionActivated() {
 	const extension = vscode.extensions.getExtension(extensionId);
