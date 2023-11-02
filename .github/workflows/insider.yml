@@ -73,7 +73,7 @@ jobs:
           sudo mv kamel /usr/local/bin/
           kamel install
           sudo rm /usr/local/bin/kamel
-          sudo rm /usr/local/bin/kubectl
+          sudo apt-get remove -y kubectl
 
       - name: npm-ci
         run: npm ci
