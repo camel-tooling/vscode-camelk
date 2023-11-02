@@ -381,7 +381,7 @@
 		"mocha": "^10.2.0",
 		"mocha-jenkins-reporter": "^0.4.8",
 		"nock": "^13.3.7",
-		"sinon": "^17.0.0",
+		"sinon": "^17.0.1",
 		"sinon-chai": "^3.7.0",
 		"typescript": "^5.2.2",
 		"vscode-uitests-tooling": "^4.0.7"
