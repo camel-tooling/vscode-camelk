@@ -54,7 +54,6 @@ export async function downloadSpecificCamelKJavaDependencies(
 			execSync(command);
 			triggerRefreshOfJavaClasspath(context);
 		} catch(error) {
-			console.log(`Error while trying to refresh Java classpath based on file ${uri.fsPath}:\n${error}`);
 			utils.shareMessage(mainOutputChannel, `Error while trying to refresh Java classpath based on file ${uri.fsPath}:\n${error}`);
 		}
 	} else {
