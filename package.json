@@ -356,7 +356,7 @@
 		"@types/chai": "^4.3.10",
 		"@types/glob": "^8.1.0",
 		"@types/mocha": "^10.0.4",
-		"@types/node": "^20.9.1",
+		"@types/node": "^20.9.3",
 		"@types/node-fetch": "^2.6.4",
 		"@types/sinon": "^17.0.1",
 		"@types/sinon-chai": "^3.2.12",
