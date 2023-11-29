@@ -51,7 +51,12 @@ export async function downloadSpecificCamelKJavaDependencies(
 		// replace of backslash by slash is a workaround to CAMEL-20033
 		const command = `jbang camel@apache/camel dependency copy --output-directory="${destination}" "${uri.fsPath.replace(/\\/g,'/')}"`;
 		try {
-			execSync(command);
+			if (vscode.workspace.workspaceFolders != undefined) {
+				// In some not clearly defined cases on MacOS, the current working directory must be provided
+				execSync(command, {cwd: (vscode.workspace.workspaceFolders as vscode.WorkspaceFolder[])[0].uri.fsPath});
+			} else {
+				execSync(command);
+			}
 			triggerRefreshOfJavaClasspath(context);
 		} catch(error) {
 			utils.shareMessage(mainOutputChannel, `Error while trying to refresh Java classpath based on file ${uri.fsPath}:\n${error}`);
