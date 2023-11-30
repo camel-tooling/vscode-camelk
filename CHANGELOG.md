@@ -2,6 +2,8 @@
 
 All notable changes to the "vscode-camelk" extension will be documented in this file.
 
+## 0.0.38
+
 ## 0.0.37
 
 - Fix Java standalone support on MacOS
