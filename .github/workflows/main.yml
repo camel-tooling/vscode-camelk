@@ -101,14 +101,14 @@ jobs:
         run: vsce package
 
       - name: Store VS Code Logs (Ubuntu)
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         if: failure() && matrix.os == 'ubuntu-latest'
         with:
           name: ${{ matrix.os }}-${{ matrix.version }}-vscode-logs
           path: ~/.config/Code/logs/*
 
       - name: Store UI test log
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         if: |
           (failure() || cancelled()) &&
           (steps.uiTest_Ubuntu.outcome == 'failure' ||
@@ -118,7 +118,7 @@ jobs:
           path: test-resources/settings/logs/*
 
       - name: Store UI Test Screenshots
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         if: |
           (failure() || cancelled()) &&
           (steps.uiTest_Ubuntu.outcome == 'failure' ||
