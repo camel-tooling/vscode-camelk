@@ -55,15 +55,6 @@ jobs:
           java-version: 17
           distribution: "temurin"
 
-
-      - name: Set up Maven 3.8.x
-        uses: stCarolas/setup-maven@v4.5
-        with:
-          maven-version: 3.8.8
-      - name: Check Maven version
-        id: check-maven-version
-        run: mvn --version
-
       - name: Install JBang (ubuntu, macOS)
         if: matrix.os == 'ubuntu-latest' || matrix.os == 'macos-latest'
         run: |
