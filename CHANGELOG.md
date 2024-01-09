@@ -4,6 +4,8 @@ All notable changes to the "vscode-camelk" extension will be documented in this 
 
 ## 0.0.38
 
+- Update default runtime version to v2.2.0
+
 ## 0.0.37
 
 - Fix Java standalone support on MacOS

@@ -102,12 +102,16 @@ suite("VersionUtils check", () => {
 			await validateVersion('2.1.0', Platform.LINUX, 'https://github.com/apache/camel-k/releases/download/v2.1.0/camel-k-client-2.1.0-linux-amd64.tar.gz');
 		});
 
-		test("validate url for existing 2.1.0 windows version", async () => {
-			await validateVersion('2.1.0', Platform.WINDOWS, 'https://github.com/apache/camel-k/releases/download/v2.1.0/camel-k-client-2.1.0-windows-amd64.tar.gz');
+		test("validate url for existing 2.2.0 version", async () => {
+			await validateVersion('2.2.0', Platform.LINUX, 'https://github.com/apache/camel-k/releases/download/v2.2.0/camel-k-client-2.2.0-linux-amd64.tar.gz');
 		});
 
-		test("validate url for existing 2.1.0 MacOS version", async () => {
-			await validateVersion('2.1.0', Platform.MACOS, 'https://github.com/apache/camel-k/releases/download/v2.1.0/camel-k-client-2.1.0-darwin-amd64.tar.gz');
+		test("validate url for existing 2.2.0 windows version", async () => {
+			await validateVersion('2.2.0', Platform.WINDOWS, 'https://github.com/apache/camel-k/releases/download/v2.2.0/camel-k-client-2.2.0-windows-amd64.tar.gz');
+		});
+
+		test("validate url for existing 2.2.0 MacOS version", async () => {
+			await validateVersion('2.2.0', Platform.MACOS, 'https://github.com/apache/camel-k/releases/download/v2.2.0/camel-k-client-2.2.0-darwin-amd64.tar.gz');
 		});
 
 		test("validate invalid url for xyz1 version", async () => {
