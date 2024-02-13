@@ -55,6 +55,6 @@ suite('Test Camel K Schema Manager', function () {
 		await waitUntil(() => {
 			const schema: string | undefined = CamelKSchemaManager.requestYamlSchemaContentCallback(CAMELK_SCHEMA_URI_PREFIX);
 			return schema?.includes('# Visual Studio extension to support Apache Camel K');
-		});
+		}, 5000, 1000);
 	});
 });
