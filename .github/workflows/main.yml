@@ -60,7 +60,7 @@ jobs:
         run: jbang trust add https://github.com/apache/
 
       - name: Start minikube
-        uses: medyagh/setup-minikube@v0.0.14
+        uses: medyagh/setup-minikube@v0.0.15
         with:
           minikube-version: 1.32.0
           driver: docker
