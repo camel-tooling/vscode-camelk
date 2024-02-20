@@ -50,6 +50,7 @@ For more information about Camel K, be sure to check out its <a href="https://ca
 - An **instance of Apache Camel K** running on a Kubernetes or an OpenShift cluster
 - **Minikube** or the **Kubernetes CLI** installed. (more details at [Apache Camel K Installation](https://camel.apache.org/camel-k/latest/installation/installation.html) page)
 - For some features, [JBang](https://www.jbang.dev/documentation/guide/latest/index.html) must be available on the system command-line.
+- VS Code up to 1.85 is recommended. One test related to completion on Java standalone files with 1.86.x is failing but we have not found steps to reproduce manually, neither how to fix it so far.
 
 ### Documentation
 
