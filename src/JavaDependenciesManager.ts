@@ -14,6 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import { platform } from 'os';
 import * as path from 'path';
 import * as vscode from 'vscode';
 import * as utils from './CamelKJSONUtils';
@@ -51,7 +52,7 @@ export async function downloadSpecificCamelKJavaDependencies(
 		// replace of backslash by slash is a workaround to CAMEL-20033
 		const command = `jbang camel@apache/camel dependency copy --output-directory="${destination}" "${uri.fsPath.replace(/\\/g,'/')}"`;
 		try {
-			if (vscode.workspace.workspaceFolders != undefined) {
+			if (platform() === 'darwin' && vscode.workspace.workspaceFolders != undefined) {
 				// In some not clearly defined cases on MacOS, the current working directory must be provided
 				execSync(command, {cwd: (vscode.workspace.workspaceFolders as vscode.WorkspaceFolder[])[0].uri.fsPath});
 			} else {
