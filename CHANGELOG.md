@@ -5,7 +5,7 @@ All notable changes to the "vscode-camelk" extension will be documented in this 
 ## 0.0.39
 
 - Update default runtime version to v2.3.0
-- Mitigate issue of a created `.camel.jbang` folder when the extension is starting. It is now occuring only on MacOS. No more on Linux and Windows. This is a workaround on MacOS related to https://github.com/camel-tooling/vscode-camelk/issues/1698 that we cannot remove for now.
+- Avoid creating `.camel.jbang` folder at workspace root when the extension is starting
 
 ## 0.0.38
 
