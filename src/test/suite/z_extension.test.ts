@@ -31,7 +31,9 @@ suite("ensure camelk extension exists and is accessible", function() {
 	});
 
 	test('vscode-camelk extension should activate', async() => {
+		console.log('test vscode-camelk extension should activate');
 		await utils.ensureExtensionActivated();
+		console.log('end of test vscode-camelk extension should activate');
 	}).timeout(ACTIVATION_TIMEOUT + 1000);	
 
 	test('test that getBaseCmd returned value doesn\'t contain --namespace parameter when no namespace is passed', function() {

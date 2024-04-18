@@ -26,6 +26,7 @@ export const ACTIVATION_TIMEOUT = 90000;
 
 export async function ensureExtensionActivated() {
 	const extension = vscode.extensions.getExtension(extensionId);
+	console.log(`extension: ${extension}`);
 	if (extension) {
 		await waitInCaseExtensionIsActivating(extension);
 		if(!extension.isActive) {
