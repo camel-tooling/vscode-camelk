@@ -68,6 +68,7 @@ export const COMMAND_ID_START_JAVA_DEBUG = 'camelk.integrations.debug.java';
 export const COMMAND_ID_CLASSPATH_REFRESH = 'camelk.classpath.refresh';
 
 export async function activate(context: vscode.ExtensionContext) {
+	console.log('start activation');
 	stashedContext = context;
 	await telemetry.initializeTelemetry(context);
 	camelKIntegrationsProvider = new CamelKNodeProvider(context);
@@ -82,6 +83,7 @@ export async function activate(context: vscode.ExtensionContext) {
 	const tasksJson:vscode.DocumentSelector = { scheme: 'file', language: 'jsonc', pattern: '**/tasks.json' };
 	vscode.languages.registerCompletionItemProvider(tasksJson, new CamelKTaskCompletionItemProvider());
 
+	console.log('will install dependencies');
 	await installDependencies(context).then ( (): void => {
 		createIntegrationsView();
 
@@ -193,6 +195,7 @@ export async function activate(context: vscode.ExtensionContext) {
 			telemetry.sendCommandTracking(COMMAND_ID_START_JAVA_DEBUG);
 		});
 	});
+	console.log('dependencies installed');
 
 	initializeJavaDependenciesManager(context, mainOutputChannel);
 
