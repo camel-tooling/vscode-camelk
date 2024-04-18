@@ -23,10 +23,12 @@ import { execSync } from 'child_process';
 const PREFERENCE_KEY_JAVA_REFERENCED_LIBRARIES = "java.project.referencedLibraries";
 
 export async function initializeJavaDependenciesManager(context: vscode.ExtensionContext, mainOutputChannel: vscode.OutputChannel): Promise<void> {
+	console.log('initializeJavaDependenciesManager starting');
 	const destination = destinationFolderForDependencies(context);
 	const javaFileToWarmup = context.asAbsolutePath(path.join('resources', 'simple-java-file', 'UsedToWarmupDependenciesDownload.java'));
 	await downloadSpecificCamelKJavaDependencies(context, vscode.Uri.file(javaFileToWarmup), mainOutputChannel);
 	await initializeJavaSettingManagement(destination);
+	console.log('initializeJavaDependenciesManager done');
 }
 
 async function initializeJavaSettingManagement(destination: string) {
