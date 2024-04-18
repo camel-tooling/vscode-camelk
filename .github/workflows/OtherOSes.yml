@@ -89,7 +89,8 @@ jobs:
           path: |
             ~/.config/Code/logs/*
             .vscode-test/logs/*
-            ~/AppData/Roaming/Code/logs/*
+            ~/AppData/Roaming/Code/logs/**/*
+            ~\AppData\Roaming\Code\logs\**\*
 
   check:
     if: always()
