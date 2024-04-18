@@ -24,6 +24,7 @@ import { getDocUri } from '../completion.util';
 suite("Start Integration CodeLenses Test", function () {
 	
 	test("Codelens provider returns correct CodeLens for yaml file with modeline and without filename following pattern", async () => {
+		console.log('starting test Start Integration CodeLenses Test: Codelens provider returns correct CodeLens for yaml file with modeline and without filename following pattern ')
 		const doc = getDocUri('test-codelens-with-modeline.yaml');
 		await vscode.workspace.openTextDocument(doc);
 
