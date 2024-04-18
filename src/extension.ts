@@ -434,6 +434,7 @@ async function installDependency(name: string, alreadyGot: boolean, context: vsc
 
 export function shareMessageInMainOutputChannel(msg: string) {
 	utils.shareMessage(mainOutputChannel, msg);
+	console.log('Message shared in main output channel of Camel K: '+ msg);
 }
 
 // for testing purposes only
