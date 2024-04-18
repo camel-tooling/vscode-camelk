@@ -16,7 +16,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest]
-        version: ["1.85.2"] # [x.x.x | latest | max]
+        version: ["1.85.2", "1.86.2", "1.87.2", "1.88.0"] # [x.x.x | latest | max]
         type: [stable] # [stable | insider]
       fail-fast: false
 
