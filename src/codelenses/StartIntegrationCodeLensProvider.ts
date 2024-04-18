@@ -29,6 +29,7 @@ export class StartIntegrationCodeLensProvider implements vscode.CodeLensProvider
 	onDidChangeCodeLenses?: vscode.Event<void>;
 
 	provideCodeLenses(document: vscode.TextDocument): vscode.ProviderResult<vscode.CodeLens[]> {
+		console.log('StartIntegrationCodeLensProvider.provideCodeLenses called');
 		const fileName = document.fileName;
 		const fulltext = document.getText();
 		if (fileName.includes('.camelk.')
@@ -42,6 +43,7 @@ export class StartIntegrationCodeLensProvider implements vscode.CodeLensProvider
 				title: CODELENS_TITLE_START_INTEGRATION,
 				arguments: [document.uri]
 			};
+			console.log('StartIntegrationCodeLensProvider.provideCodeLenses returns result');
 			return [new vscode.CodeLens(topOfDocument, classPathRefreshCommand)];
 		}
 		return [];
