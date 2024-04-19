@@ -27,6 +27,8 @@ jobs:
 
     runs-on: ${{ matrix.os }}
     steps:
+      - name: echo Home folder
+        run: echo $HOME
       - name: Checkout Repository
         uses: actions/checkout@v4
 
@@ -91,7 +93,7 @@ jobs:
             .vscode-test/logs/*
             ~/AppData/Roaming/Code/logs/**/*
             ~\AppData\Roaming\Code\logs\**\*
-            $HOME/AppData/Roaming/Code/logs/**/*
+            ${{ env.HOME }}/AppData/Roaming/Code/logs/**/*
 
   check:
     if: always()
