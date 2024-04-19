@@ -91,6 +91,7 @@ jobs:
             .vscode-test/logs/*
             ~/AppData/Roaming/Code/logs/**/*
             ~\AppData\Roaming\Code\logs\**\*
+            $HOME/AppData/Roaming/Code/logs/**/*
 
   check:
     if: always()
