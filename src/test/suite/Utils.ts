@@ -28,17 +28,22 @@ export async function ensureExtensionActivated() {
 	const extension = vscode.extensions.getExtension(extensionId);
 	console.log(`extension: ${extension}`);
 	if (extension) {
+		console.log("one extension provided, let's look if it is activated...");
 		await waitInCaseExtensionIsActivating(extension);
+		console.log('Is extension active? '+ extension.isActive)
 		if(!extension.isActive) {
 			await forceActivation(extension);
 		}
 	} else {
+		console.log("No extension, will fail test");
 		assert.fail("Camel K extension is undefined and cannot be activated");
 	}
+	console.log('will return the extension which is activated in theory: ' + extension.isActive)
 	return extension;
 }
 
 async function forceActivation(extension: vscode.Extension<any>) {
+	console.log('will force activation!!');
 	await extension.activate();
 	await waitUntil(() => {
 		return extension.isActive;
