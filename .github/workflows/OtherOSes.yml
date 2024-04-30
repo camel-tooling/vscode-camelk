@@ -83,10 +83,6 @@ jobs:
       - name: vsce-package
         run: vsce package
 
-      - name: ls log folder
-        run: |
-          ls d:\Users\runneradmin
-          ls d:\Users\runneradmin/AppData/Roaming/Code/logs/
       - name: Store VS Code Logs
         uses: actions/upload-artifact@v4
         if: failure()
@@ -95,6 +91,7 @@ jobs:
           path: |
             ~/.config/Code/logs/*
             .vscode-test/logs/*
+            .vscode-test/user-data/logs/**/*
             ~/AppData/Roaming/Code/logs/**/*
             ~\AppData\Roaming\Code\logs\**\*
             C:\Users\runneradmin/AppData/Roaming/Code/logs/**/*
