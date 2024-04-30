@@ -167,7 +167,10 @@ export async function activate(context: vscode.ExtensionContext) {
 		const docSelectorForPhysicalFiles: vscode.DocumentSelector = {
 				scheme: 'file'
 			}
+
+		console.log("register StartIntegrationCodeLensProvider");
 		vscode.languages.registerCodeLensProvider(docSelectorForPhysicalFiles, new StartIntegrationCodeLensProvider());
+		console.log("registered StartIntegrationCodeLensProvider");
 	
 		// add commands to create config-map and secret objects from .properties files
 		configmapsandsecrets.registerCommands();
