@@ -96,6 +96,8 @@ jobs:
             ~/AppData/Roaming/Code/logs/**/*
             ~\AppData\Roaming\Code\logs\**\*
             C:\Users\runneradmin/AppData/Roaming/Code/logs/**/*
+            D:\Users\runneradmin/AppData/Roaming/Code/logs/**/*
+            ../../../Users\runneradmin/AppData/Roaming/Code/logs/**/*
 
   check:
     if: always()
