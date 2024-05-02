@@ -24,7 +24,6 @@ jobs:
       CODE_VERSION: ${{ matrix.version }}
       CODE_TYPE: ${{ matrix.type }}
       VSCODE_CAMELK_GITHUB_TOKEN: ${{ github.token }}
-      NODE_OPTIONS: --openssl-legacy-provider
 
     runs-on: ${{ matrix.os }}
     steps:
