@@ -2,6 +2,7 @@ import * as path from 'path';
 import * as cp from 'child_process';
 
 import { downloadAndUnzipVSCode, resolveCliArgsFromVSCodeExecutablePath, runTests } from '@vscode/test-electron';
+import * as os from 'os';
 
 async function main(): Promise<void> {
 	try {
@@ -46,7 +47,8 @@ async function main(): Promise<void> {
 function installExtraExtension(cliPath: string, extensionId: string, args: string[]) {
 	cp.spawnSync(cliPath, [...args, '--install-extension', extensionId, '--force'], {
 		encoding: 'utf-8',
-		stdio: 'inherit'
+		stdio: 'inherit',
+		shell: os.platform() === 'win32' // to workaround https://github.com/nodejs/node/issues/52554#issuecomment-2060026269
 	});
 	console.log(`VS Code extension ${extensionId} installed`);
 }
