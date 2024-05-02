@@ -31,7 +31,11 @@ export async function ensureExtensionActivated() {
 		console.log("one extension provided, let's look if it is activated...");
 		await waitInCaseExtensionIsActivating(extension);
 		console.log('Is extension active? '+ extension.isActive)
-		if(!extension.isActive) {
+
+		if(!extension.isActive
+			|| /* Force activation on Windows as a workaround, on CI it is marked as active although the activation was never called.
+				*  Cannot reproduce locally.*/
+				os.platform() === 'win32') {
 			await forceActivation(extension);
 		}
 	} else {
