@@ -89,6 +89,7 @@ jobs:
           path: |
             ~/.config/Code/logs/*
             .vscode-test/logs/*
+            .vscode-test/user-data/logs/**/*
 
   check:
     if: always()
