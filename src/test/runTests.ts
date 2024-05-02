@@ -19,7 +19,7 @@ async function main(): Promise<void> {
 		console.log(`vscodeExecutablePath = ${vscodeExecutablePath}`);
 
 		const [cliPath, ...args] = resolveCliArgsFromVSCodeExecutablePath(vscodeExecutablePath);
-		installExtraExtension(cliPath, 'ms-kubernetes-tools.vscode-kubernetes-tools@1.3.15', args);
+		installExtraExtension(cliPath, 'ms-kubernetes-tools.vscode-kubernetes-tools', args);
 		installExtraExtension(cliPath, 'redhat.java', args);
 		installExtraExtension(cliPath, 'redhat.vscode-apache-camel', args);
 		installExtraExtension(cliPath, 'vscjava.vscode-java-debug', args);
