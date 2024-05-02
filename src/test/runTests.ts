@@ -46,7 +46,8 @@ async function main(): Promise<void> {
 function installExtraExtension(cliPath: string, extensionId: string, args: string[]) {
 	const spawnOutput = cp.spawnSync(cliPath, [...args, '--install-extension', extensionId, '--force'], {
 		encoding: 'utf-8',
-		stdio: 'inherit'
+		stdio: 'inherit',
+		shell: true // to workaround https://github.com/nodejs/node/issues/52554#issuecomment-2060026269
 	});
 	console.log('output: '+spawnOutput.output);
 	console.log('stderr: '+spawnOutput.stderr);
