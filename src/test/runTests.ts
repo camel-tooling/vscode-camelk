@@ -50,7 +50,7 @@ function installExtraExtension(cliPath: string, extensionId: string, args: strin
 		stdio: 'inherit',
 		shell: os.platform() === 'win32' // to workaround https://github.com/nodejs/node/issues/52554#issuecomment-2060026269
 	});
-	console.log(`VS Code extension ${extensionId} installed`);
+	console.log(`A message of type "Extension '${extensionId}' vx.y.z was successfully installed." must be written few lines above if installation really worked.`);
 }
 
 main();
