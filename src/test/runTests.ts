@@ -44,10 +44,13 @@ async function main(): Promise<void> {
 }
 
 function installExtraExtension(cliPath: string, extensionId: string, args: string[]) {
-	cp.spawnSync(cliPath, [...args, '--install-extension', extensionId, '--force'], {
+	const spawnOutput = cp.spawnSync(cliPath, [...args, '--install-extension', extensionId, '--force'], {
 		encoding: 'utf-8',
 		stdio: 'inherit'
 	});
+	console.log('output: '+spawnOutput.output);
+	console.log('stderr: '+spawnOutput.stderr);
+	console.log('error: '+ spawnOutput.error);
 	console.log(`VS Code extension ${extensionId} installed`);
 }
 
