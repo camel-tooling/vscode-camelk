@@ -53,10 +53,14 @@ async function forceActivation(extension: vscode.Extension<any>) {
 	} catch (ex) {
 		console.log(ex);
 		const kubernetesExtension = vscode.extensions.getExtension('ms-kubernetes-tools.vscode-kubernetes-tools');
+		console.log('kubernetes extension found?: '+ kubernetesExtension);
 		try {
 			await kubernetesExtension?.activate();
+			await waitUntil(() => {
+				return kubernetesExtension?.isActive;
+			}, ACTIVATION_TIMEOUT);
 			await extension.activate();
-		} catch( secondException) {
+		} catch(secondException) {
 			console.log(secondException);
 			throw secondException;
 		}
