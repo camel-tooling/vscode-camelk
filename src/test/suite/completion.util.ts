@@ -34,10 +34,10 @@ export async function checkExpectedCompletion(docUri: vscode.Uri, position: vsco
 			(vscode.commands.executeCommand('vscode.executeCompletionItemProvider', docUri, position)).then(value => {
 				const actualCompletionList = value as vscode.CompletionList;
 				lastCompletionList = actualCompletionList;
-				console.log(`expectedCompleItemLabel: ${expectedCompletion.label.toString()}`);
+				console.log(`expectedCompleItemLabel: ${(expectedCompletion.label as vscode.CompletionItemLabel).label}`);
 				const completionItemFound = actualCompletionList.items.find(completion => {
 					console.log(`compleitemLabel: ${completion.label.toString()}`);
-					if(completion.label.toString() === expectedCompletion.label.toString()) {
+					if(completion.label.toString() === (expectedCompletion.label as vscode.CompletionItemLabel).label) {
 						console.log('same label found');
 						if(completion.documentation === expectedCompletion.documentation) {
 							console.log('same documentation found');
