@@ -43,7 +43,7 @@ suite('Should do completion in Camel K standalone files', () => {
 		await testCompletion(docUriJava, new vscode.Position(5, 11), expectedCompletion, false);
 	}).timeout(TOTAL_TIMEOUT);
 	
-	const testAdditionalDependencies = test('Completes additional dependencies', async () => {
+	const testAdditionalDependencies = test.only('Completes additional dependencies', async () => {
 		const docUriJava = getDocUri('MyRouteBuilderWithAdditionalDependencies.java');
 		const expectedCompletion = { label: {
 			description: 'org.apache.commons.math3.util',
@@ -60,9 +60,14 @@ async function testCompletion(
 	expectedCompletion: vscode.CompletionItem,
 	refreshClasspath: boolean
 ) {
+	let initialNumberOfDependencies = 0;
 	await waitUntil(()=> {
 		const destination = retrieveDestination();
-		return fs.existsSync(destination) && fs.readdirSync(destination).length >=7;
+		if(fs.existsSync(destination)) {
+			initialNumberOfDependencies = fs.readdirSync(destination).length;
+			return initialNumberOfDependencies >= 7;
+		}
+		return false;
 	}, DOWNLOAD_JAVA_DEPENDENCIES_TIMEOUT, 5000).catch(() => {
 		const destination = retrieveDestination();
 		let messageForDownloaded: string;
@@ -79,6 +84,23 @@ async function testCompletion(
 	if(refreshClasspath) {
 		await vscode.commands.executeCommand('camelk.classpath.refresh', docUri);
 		await vscode.commands.executeCommand('camelk.classpath.refresh', docUri);
+		await waitUntil(()=> {
+			const destination = retrieveDestination();
+			if(fs.existsSync(destination)) {
+				console.log(`The one that were downloaded in ${destination} are: ${fs.readdirSync(destination).join(';')}`);
+				return fs.readdirSync(destination).length > initialNumberOfDependencies;
+			}
+			return false;
+		}, DOWNLOAD_JAVA_DEPENDENCIES_TIMEOUT, 5000).catch(() => {
+			const destination = retrieveDestination();
+			let messageForDownloaded: string;
+			if(fs.existsSync(destination)) {
+				messageForDownloaded = `The one that were downloaded in ${destination} are: ${fs.readdirSync(destination).join(';')}`;
+			} else {
+				messageForDownloaded = `The destination folder has not been created ${destination}`;
+			}
+			fail(`Additional Camel Java dependencies not downloaded in reasonable time (${DOWNLOAD_JAVA_DEPENDENCIES_TIMEOUT}). ${messageForDownloaded}`);
+		});
 	}
 	let javaExtension: vscode.Extension<any> | undefined;
 	await waitUntil(() => {
