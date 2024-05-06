@@ -47,9 +47,9 @@ export async function checkExpectedCompletion(docUri: vscode.Uri, position: vsco
 		let errorMessage = '';
 		if(lastCompletionList) {
 			lastCompletionList.items.forEach(completion => {
-				errorMessage += completion.label.toString() + '\n';
+				errorMessage += completion.label.toString() + '\n with documentation' + completion.documentation + ' and inserText ' + completion.insertText;
 			});
 		}
-		throw new Error(`${err}\nCannot find expected completion "${expectedCompletion.label}" in the list of completions:\n${errorMessage}`);
+		throw new Error(`${err}\nCannot find expected completion "${expectedCompletion.label.toString()}" in the list of completions:\n${errorMessage}`);
 	}
 }
