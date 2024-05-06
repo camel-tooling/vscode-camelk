@@ -31,6 +31,7 @@ export async function initializeJavaDependenciesManager(context: vscode.Extensio
 
 async function initializeJavaSettingManagement(destination: string) {
 	vscode.window.onDidChangeActiveTextEditor((editor) => {
+		console.log(`onDidChangeActiveTextEditor triggered`);
 		updateReferenceLibraries(editor, destination);
 	});
 
@@ -55,9 +56,9 @@ export async function downloadSpecificCamelKJavaDependencies(
 			if (platform() === 'darwin' && context.storageUri != undefined) {
 				// In some not clearly defined cases on MacOS, a current working directory must be provided
 				await vscode.workspace.fs.createDirectory(context.storageUri);
-				execSync(command, {cwd: context.storageUri.fsPath});
+				console.log(execSync(command, {cwd: context.storageUri.fsPath}));
 			} else {
-				execSync(command);
+				console.log(execSync(command));
 			}
 			triggerRefreshOfJavaClasspath(context);
 		} catch(error) {
@@ -89,6 +90,7 @@ function triggerRefreshOfJavaClasspath(context: vscode.ExtensionContext) {
 
 export function updateReferenceLibraries(editor: vscode.TextEditor | undefined, destination:string) {
 	const documentEdited = editor?.document;
+	console.log(documentEdited);
 	if (documentEdited?.fileName.endsWith(".java")) {
 		const text = documentEdited.getText();
 		updateReferencedLibraries(text, destination);
@@ -96,6 +98,7 @@ export function updateReferenceLibraries(editor: vscode.TextEditor | undefined, 
 }
 
 function updateReferencedLibraries(text: string, destination: string) {
+	console.log('updateReferencedLibraries');
 	const camelKReferencedLibrariesPattern = destination + '/*.jar';
 	const configuration = vscode.workspace.getConfiguration();
 	const refLibrariesTopLevelConfig = configuration.get(PREFERENCE_KEY_JAVA_REFERENCED_LIBRARIES);
