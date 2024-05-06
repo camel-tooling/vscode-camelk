@@ -35,7 +35,8 @@ export async function checkExpectedCompletion(docUri: vscode.Uri, position: vsco
 				const actualCompletionList = value as vscode.CompletionList;
 				lastCompletionList = actualCompletionList;
 				const completionItemFound = actualCompletionList.items.find(completion => {
-					return completion.label.toString() === expectedCompletion.label.toString()
+					return (completion.label.toString() === expectedCompletion.label.toString()
+							|| completion.label.toString() === (expectedCompletion.label as vscode.CompletionItemLabel).label)
 						&& completion.documentation === expectedCompletion.documentation
 						&& (expectedCompletion.insertText === undefined || completion.insertText === expectedCompletion.insertText);
 				});
