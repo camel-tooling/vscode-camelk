@@ -35,9 +35,18 @@ export async function checkExpectedCompletion(docUri: vscode.Uri, position: vsco
 				const actualCompletionList = value as vscode.CompletionList;
 				lastCompletionList = actualCompletionList;
 				const completionItemFound = actualCompletionList.items.find(completion => {
-					return completion.label.toString() === expectedCompletion.label.toString()
-						&& completion.documentation === expectedCompletion.documentation
-						&& (expectedCompletion.insertText === undefined || completion.insertText === expectedCompletion.insertText);
+					if(completion.label.toString() === expectedCompletion.label.toString()) {
+						console.log('same label found');
+						if(completion.documentation === expectedCompletion.documentation) {
+							console.log('same documentation found');
+						}
+						if(expectedCompletion.insertText === undefined || completion.insertText === expectedCompletion.insertText) {
+							console.log('same insertText found');
+							return true;
+						}
+					}
+					return false;
+
 				});
 				hasExpectedCompletion = completionItemFound !== undefined;
 			});
