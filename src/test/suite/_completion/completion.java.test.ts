@@ -43,7 +43,7 @@ suite('Should do completion in Camel K standalone files', () => {
 		await testCompletion(docUriJava, new vscode.Position(5, 11), expectedCompletion, false);
 	}).timeout(TOTAL_TIMEOUT);
 	
-	const testAdditionalDependencies = test.only('Completes additional dependencies', async () => {
+	const testAdditionalDependencies = test('Completes additional dependencies', async () => {
 		const docUriJava = getDocUri('MyRouteBuilderWithAdditionalDependencies.java');
 		const expectedCompletion = { label: {
 			description: 'org.apache.commons.math3.util',
