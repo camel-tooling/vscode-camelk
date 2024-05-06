@@ -33,6 +33,8 @@ For more information about Camel K, be sure to check out its <a href="https://ca
 
 <p align="center"><img src="./docs/images/quickstart-console.jpg" alt="Running Camel K integration" width="100%"/></p>
 
+just to try build on CI
+
 ### Features
 
 - Start/Stop an Apache Camel K Integration
