@@ -396,7 +396,7 @@
 		"@types/tmp": "^0.2.6",
 		"child_process": "^1.0.2",
 		"cross-fetch": "^4.0.0",
-		"detect-port": "^1.5.1",
+		"detect-port": "^1.6.0",
 		"jsonc-parser": "^3.2.1",
 		"mkdirp": "^3.0.1",
 		"node-fetch": "^2.7.0",
