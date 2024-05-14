@@ -2,6 +2,8 @@
 
 All notable changes to the "vscode-camelk" extension will be documented in this file.
 
+## 0.0.41
+
 ## 0.0.40
 
 - Fix regression for command to create Secrets
