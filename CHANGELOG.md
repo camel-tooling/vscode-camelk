@@ -2,6 +2,8 @@
 
 All notable changes to the "vscode-camelk" extension will be documented in this file.
 
+## 0.0.42
+
 ## 0.0.41
 
 - Update Red Hat telemetry dependency to reduce number of event sent (startup information will be sent one time per day per user)
