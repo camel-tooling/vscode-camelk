@@ -364,7 +364,7 @@
 		"@types/vscode": "^1.77.0",
 		"@typescript-eslint/eslint-plugin": "^5.62.0",
 		"@typescript-eslint/parser": "^5.62.0",
-		"@vscode/test-electron": "^2.3.9",
+		"@vscode/test-electron": "^2.4.0",
 		"ansi-regex": "^5.0.1",
 		"async-wait-until": "^2.0.12",
 		"chai": "^4.4.1",
