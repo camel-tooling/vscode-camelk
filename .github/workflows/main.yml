@@ -69,7 +69,7 @@ jobs:
       - name: Configure Kamel (ubuntu)
         if: matrix.os == 'ubuntu-latest'
         run: |
-          curl -Lo kamel.tar.gz https://github.com/apache/camel-k/releases/download/v2.3.1/camel-k-client-2.3.1-linux-amd64.tar.gz
+          curl -Lo kamel.tar.gz https://github.com/apache/camel-k/releases/download/v2.3.2/camel-k-client-2.3.2-linux-amd64.tar.gz
           tar -zxvf kamel.tar.gz
           chmod +x kamel
           sudo mv kamel /usr/local/bin/
