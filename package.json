@@ -370,7 +370,7 @@
 		"chai": "^4.4.1",
 		"copyfiles": "^2.4.1",
 		"decache": "^4.6.2",
-		"eslint": "^8.57.0",
+		"eslint": "^9.5.0",
 		"eslint-plugin-import": "^2.29.1",
 		"glob": "^10.4.2",
 		"mocha": "^10.4.0",
