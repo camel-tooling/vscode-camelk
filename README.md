@@ -1,7 +1,7 @@
 <h1 align="center">
   <img width="125" height="125" src="https://raw.githubusercontent.com/camel-tooling/vscode-camelk/main/icons/icon128.png">
   <br>
-  Tooling for Apache Camel K
+  [Deprecated] Tooling for Apache Camel K
 </h1>
 
 <p align="center">
@@ -10,6 +10,12 @@
   <a href="https://github.com/camel-tooling/vscode-camelk/blob/main/LICENSE"><img src="https://img.shields.io/github/license/camel-tooling/vscode-camelk?color=blue&style=for-the-badge" alt="License"/></a>
   <a href="https://camel.zulipchat.com/#narrow/stream/258729-camel-tooling"><img src="https://img.shields.io/badge/zulip-join_chat-brightgreen?color=yellow&style=for-the-badge" alt="Zulip"/></a>
 </p><br/>
+
+> [!IMPORTANT]
+> Deprecation Notice:
+> 
+> This VS Code extension is now deprecated. Several features of Camel K are now in Camel core. The corresponding tooling support will be migrated in various extension of the [VS Code Extension pack for Apache Camel](https://marketplace.visualstudio.com/items?itemName=redhat.apache-camel-extension-pack).
+
 
 <h2 align="center">VS Code support for Apache Camel K functionality</h2>
 
